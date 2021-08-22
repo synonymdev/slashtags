@@ -13,3 +13,11 @@ export const recordID = (data) =>
           .update(JSON.stringify(data))
           .digest('base64'),
       );
+
+/**
+ * Create a slashtag uri from both a schemaID and a recordID
+ *  and an optional key in the resolved and parsed document.
+ * @type {(schemaID:string, recordID:string, key?:string )=> string}
+ */
+export const slashtagURI = (schemaID, recordID, key) =>
+  `did:slash:${schemaID}/${recordID}/` + (key ? '#' + key : '');
