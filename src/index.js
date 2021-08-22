@@ -1,5 +1,5 @@
 import * as Slashtag from './slashtag/index.js';
-import { createDB } from './DB/index.js';
+import { createDB } from './server/DB/index.js';
 
 const log = (x, y) =>
   y
@@ -10,13 +10,13 @@ const db = createDB('did:example:something');
 
 log(
   'Creating a record by its schema definition',
-  db.saveRecord(Slashtag.schema.defaults.Account, {
+  db.saveRecord(Slashtag.constants.schemas.Account, {
     'RBNvo1WzZ4oRRq0W9-hknpT7T8If536DEMBg9hyq_4o':
       'RBNvo1WzZ4oRRq0W9-hknpT7T8If536DEMBg9hyq_4o',
   }),
 );
 
-db.saveRecord(Slashtag.schema.defaults.Account, {
+db.saveRecord(Slashtag.constants.schemas.Account, {
   'RBNvo1WzZ4oRRq0W9-9kfpT7T8If536DEMBg9hyq_4o':
     'RBNvo1WzZ4oRRqdW9-hknpT7T8If536DEMBg9hyq_4o',
 });
@@ -25,20 +25,20 @@ log('All the slashtag sub document', db.all);
 
 log(
   'Getting a collection by its schema definition',
-  db.readSchemaRecords(Slashtag.schema.defaults.Account),
+  db.readSchemaRecords(Slashtag.constants.schemas.Account),
 );
 
 log('Getting a collection by its schemaID', {
-  schemaID: Slashtag.utils.recordID(Slashtag.schema.defaults.Account),
+  schemaID: Slashtag.utils.recordID(Slashtag.constants.schemas.Account),
   result: db.readSchemaRecords(
-    Slashtag.utils.recordID(Slashtag.schema.defaults.Account),
+    Slashtag.utils.recordID(Slashtag.constants.schemas.Account),
   ),
 });
 
 log('Creating a record using a schemaID', {
-  schemaID: Slashtag.utils.recordID(Slashtag.schema.defaults.Account),
+  schemaID: Slashtag.utils.recordID(Slashtag.constants.schemas.Account),
   result: db.saveRecord(
-    Slashtag.utils.recordID(Slashtag.schema.defaults.Account),
+    Slashtag.utils.recordID(Slashtag.constants.schemas.Account),
     {},
   ),
 });
