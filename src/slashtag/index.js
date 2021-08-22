@@ -1,1 +1,2 @@
-export * as uri from './uri';
+export * as schema from './schemas/index.js';
+export * as utils from './utils/index.js';

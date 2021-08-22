@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "description": "A minimal management system for subjective signed records interoperable in WOT",
   "main": "index.js",
-  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "type": "module",
   "keywords": [
     "hypercore",
     "slashtag",
@@ -19,6 +19,8 @@
     "@types/json-schema": "^7.0.9"
   },
   "dependencies": {
-    "base64url": "^3.0.1"
+    "ajv": "^8.6.2",
+    "base64url": "^3.0.1",
+    "object-hash": "^2.2.0"
   }
 }
