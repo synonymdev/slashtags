@@ -22,6 +22,9 @@
     "ajv": "^8.6.2",
     "ajv-formats": "^2.1.1",
     "base64url": "^3.0.1",
+    "hyperbee": "^1.6.2",
+    "hypercore": "^9.10.0",
+    "noise-handshake": "^1.2.2",
     "object-hash": "^2.2.0"
   }
 }
