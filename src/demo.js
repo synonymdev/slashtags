@@ -146,8 +146,10 @@ const rating = () => {
 
 const serialize$parseRecord = () => {
   log('==== Serializing a record using its schema ====');
-
-  const schema = {
+  /**
+   * @type {any}
+   */
+  let schema = {
     title: 'something',
     description: 'something else',
     type: 'object',
@@ -178,11 +180,16 @@ const serialize$parseRecord = () => {
             additionalItems: false,
           },
         },
+        additionalProperties: false,
       },
     },
+    additionalProperties: false,
   };
 
-  const data = {
+  /**
+   * @type {any}
+   */
+  let data = {
     first_name: 'foo',
     last_name: 42,
     registered: true,
@@ -205,6 +212,62 @@ const serialize$parseRecord = () => {
     'Parse a record with its schema',
     Slashtag.schema.parseRecord(schema, serializedRecord),
   );
+
+  log('==== Can not optimize because property name patterns ====');
+  schema = Slashtag.constants.schemas.Account;
+  data = {
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa:
+      'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+  };
+  let serialized = Slashtag.schema.serializeRecord(
+    Slashtag.constants.schemas.Account,
+    data,
+  );
+  log('Serialized Account', serialized);
+  log('stringified', base64url.decode(serialized));
+  log('parsed', Slashtag.schema.parseRecord(schema, serialized));
+
+  log('==== Can not optimize because additional properties allowed ====');
+  schema = {
+    $schema: '',
+    type: 'object',
+    properties: {
+      nested: {
+        type: 'object',
+        properties: { foo: { type: 'string' } },
+        additionalProperties: false,
+      },
+    },
+    additionalProperties: true,
+  };
+  serialized = Slashtag.schema.serializeRecord(schema, {
+    foo: 'b4r',
+    nested: { foo: 'nope' },
+  });
+  log('Serialized', serialized);
+  log('stringified', base64url.decode(serialized));
+  log('parsed', Slashtag.schema.parseRecord(schema, serialized));
+
+  log('==== Can optimize on top level but not nested ====');
+  schema = {
+    $schema: '',
+    type: 'object',
+    properties: {
+      foo: { type: 'string' },
+      nested: {
+        type: 'object',
+        properties: { foo: { type: 'string' } },
+      },
+    },
+    additionalProperties: false,
+  };
+  serialized = Slashtag.schema.serializeRecord(schema, {
+    foo: 'b4r',
+    nested: { foo: 'nope' },
+  });
+  log('Serialized', serialized);
+  log('stringified', base64url.decode(serialized));
+  log('stringified', Slashtag.schema.parseRecord(schema, serialized));
 };
 
 // createAndReadRecords();

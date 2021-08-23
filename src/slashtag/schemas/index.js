@@ -3,10 +3,15 @@ import addFormats from 'ajv-formats';
 import base64url from 'base64url';
 
 /**
- * @type {(schema: Serializable, data: Serializable)=> Serializable}
+ * @type {(schema: Serializable, data: Serializable, opts?: any)=> Serializable}
  */
-export const validateRecord = (schema, data) => {
-  const ajv = new Ajv({ allErrors: true, allowMatchingProperties: true });
+export const validateRecord = (schema, data, opts = {}) => {
+  const ajv = new Ajv({
+    allErrors: true,
+    allowMatchingProperties: true,
+    removeAdditional: true,
+    ...opts,
+  });
   addFormats(ajv);
 
   ajv.validate(schema, data);
@@ -35,40 +40,59 @@ export const validateSchema = (schema) => {
 };
 
 /**
- * Serialize a document into a base64url string using its schema.
- * @type {(schema: Serializable, record:Serializable)=>string}
+ * @type {(schema: Serializable)=> boolean}
  */
-export const serializeRecord = (schema, record) =>
-  base64url.encode(
+const canOptimize = (schema) =>
+  schema.properties &&
+  !(
+    schema.patternProperties ||
+    schema.propertyNames ||
+    schema.additionalProperties !== false
+  );
+
+/**
+ * Serialize a document into a base64url string using its schema.
+ * @type {(schema: Serializable, record:Serializable, validate?: boolean)=>string}
+ */
+export const serializeRecord = (schema, record) => {
+  const result = base64url.encode(
     JSON.stringify(
-      Object.keys(schema.properties)
-        .sort((a, b) => (a > b ? 1 : -1))
-        .map((key) =>
-          schema.properties[key].type === 'object'
-            ? serializeRecord(schema.properties[key], record[key])
-            : record[key],
-        ),
+      canOptimize(schema)
+        ? Object.keys(schema.properties)
+            .sort((a, b) => (a > b ? 1 : -1))
+            .map((key) =>
+              schema.properties[key].type === 'object'
+                ? serializeRecord(schema.properties[key], record[key])
+                : record[key],
+            )
+        : record,
     ),
   );
+
+  return result;
+};
 
 /**
  * Serialize a document into a base64url string using its schema.
  * @type {(schema: Serializable, serialized:string, validate?: boolean)=>Serializable}
  */
-export const parseRecord = (schema, serialized, validate = true) => {
+export const parseRecord = (schema, serialized, nested = false) => {
   const list = JSON.parse(base64url.decode(serialized));
 
   const data = Object.fromEntries(
-    Object.keys(schema.properties)
-      .sort((a, b) => (a > b ? 1 : -1))
-      .map((key, index) =>
-        schema.properties[key].type === 'object'
-          ? parseRecord(schema.properties[key], list[index], false)
-          : [key, list[index]],
-      ),
+    canOptimize(schema)
+      ? Object.keys(schema.properties)
+          .sort((a, b) => (a > b ? 1 : -1))
+          .map((key, index) =>
+            schema.properties[key].type === 'object'
+              ? [key, parseRecord(schema.properties[key], list[index], true)]
+              : [key, list[index]],
+          )
+      : Object.entries(list),
   );
 
-  if (validate) validateRecord(schema, data);
+  console.log(data);
+  if (!nested) validateRecord(schema, data);
 
   return data;
 };
