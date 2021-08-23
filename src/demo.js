@@ -1,9 +1,11 @@
 import * as Slashtag from './slashtag/index.js';
 import { createDB } from './server/DB/index.js';
+import base64url from 'base64url';
+import { serializeRecord } from './slashtag/schemas/index.js';
 
 const log = (x, y) =>
   y
-    ? console.log(x + ':', '\n', JSON.stringify(y, null, 2))
+    ? console.log(x + ':', '\r', JSON.stringify(y, null, 2))
     : console.log(JSON.stringify(x, null, 2));
 
 const db = createDB('');
@@ -142,8 +144,72 @@ const rating = () => {
   );
 };
 
+const serialize$parseRecord = () => {
+  log('==== Serializing a record using its schema ====');
+
+  const schema = {
+    title: 'something',
+    description: 'something else',
+    type: 'object',
+    properties: {
+      first_name: { type: 'string' },
+      last_name: { type: 'number' },
+      registered: { type: 'boolean' },
+      metadata: {
+        type: 'array',
+        items: [{ type: 'string' }, { type: 'number' }, { type: 'boolean' }],
+        minItems: 2,
+        additionalItems: false,
+      },
+      friend: {
+        type: 'object',
+        properties: {
+          first_name: { type: 'string' },
+          last_name: { type: 'number' },
+          registered: { type: 'boolean' },
+          metadata: {
+            type: 'array',
+            items: [
+              { type: 'string' },
+              { type: 'number' },
+              { type: 'boolean' },
+            ],
+            minItems: 2,
+            additionalItems: false,
+          },
+        },
+      },
+    },
+  };
+
+  const data = {
+    first_name: 'foo',
+    last_name: 42,
+    registered: true,
+    metadata: ['bar', 2, false],
+    friend: {
+      first_name: 'foo',
+      last_name: 42,
+      registered: false,
+      metadata: ['bar', 2, false],
+      ignored: true,
+    },
+    ignored: true,
+  };
+
+  const serializedRecord = Slashtag.schema.serializeRecord(schema, data);
+
+  log('JSON stringify', JSON.stringify(data));
+  log('Serialize a record with its schema', serializedRecord);
+  log(
+    'Parse a record with its schema',
+    Slashtag.schema.parseRecord(schema, serializedRecord),
+  );
+};
+
 // createAndReadRecords();
 // createAndReadSchemas();
 // account();
 // tagging();
 // rating();
+serialize$parseRecord();

@@ -20,4 +20,4 @@ export const recordID = (data) =>
  * @type {(schemaID:string, recordID:string, key?:string )=> string}
  */
 export const slashtagURI = (schemaID, recordID, key) =>
-  `did:slash:${schemaID}/${recordID}/` + (key ? '#' + key : '');
+  `slashtag://${schemaID}/${recordID}/` + (key ? '#' + key : '');
