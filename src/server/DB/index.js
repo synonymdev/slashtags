@@ -16,7 +16,6 @@ const addSlashtagDefaultSchemas = async (db) =>
 
 export const createDB = async () => {
   const db = await setupHyperBee();
-  console.log('Hyperbee setup, feed:', db.feed);
 
   await addSlashtagDefaultSchemas(db);
 

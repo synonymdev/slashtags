@@ -277,7 +277,7 @@ const main = async () => {
   // await createAndReadRecords();
   // await createAndReadSchemas();
   // await account();
-  // await tagging();
+  await tagging();
   // await rating();
   // await serialize$parseRecord();
 };

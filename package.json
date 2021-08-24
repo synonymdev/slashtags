@@ -16,15 +16,19 @@
   "author": "nazeh",
   "license": "ISC",
   "devDependencies": {
-    "@types/json-schema": "^7.0.9"
+    "@types/json-schema": "^7.0.9",
+    "jest": "^27.0.6"
   },
   "dependencies": {
+    "@hyperswarm/replicator": "^2.0.2",
     "ajv": "^8.6.2",
     "ajv-formats": "^2.1.1",
     "base64url": "^3.0.1",
     "hyperbee": "^1.6.2",
     "hypercore": "^9.10.0",
+    "hyperswarm": "^2.15.3",
     "noise-handshake": "^1.2.2",
-    "object-hash": "^2.2.0"
+    "object-hash": "^2.2.0",
+    "pump": "^3.0.0"
   }
 }
