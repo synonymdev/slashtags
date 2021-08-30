@@ -1,0 +1,21 @@
+{
+    "name": "@slashtags/auth",
+    "version": "0.0.1",
+    "description": "Thin wrapper around attest-auth",
+    "type": "module",
+    "keywords": [
+        "slashtags",
+        "authentication",
+        "attestation"
+    ],
+    "author": "Ar Nazeh <ar.nazeh@gmail.com>",
+    "main": "index.js",
+    "scripts": {
+        "test": "node --experimental-vm-modules ../../node_modules/jest/bin/jest.js --verbose "
+    },
+    "dependencies": {
+        "multiformats": "^9.4.6",
+        "noise-curve-secp": "^1.0.2",
+        "noise-handshake": "^1.2.2"
+    }
+}
