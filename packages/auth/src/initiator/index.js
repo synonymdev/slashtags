@@ -5,7 +5,7 @@ import secp256k1 from 'noise-curve-secp';
 const PROLOGUE = Buffer.alloc(0);
 
 /**
- *
+ * Create a new initiator that will respond to a challenge and confirm challenger's identity
  * @param {object} config
  * @param {KeyPair} config.keypair
  * @param {Buffer} config.challengerPublicKey
