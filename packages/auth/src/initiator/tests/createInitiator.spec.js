@@ -1,10 +1,10 @@
 import { createInitiatior } from '../index';
 import secp256k1 from 'noise-curve-secp';
 import { encodeChallenge } from '../../utils';
-import { generateChallenge, createChallenger } from '../../challenger';
+import { generateChallenge, createResponder } from '../../responder';
 import { base64url } from 'multiformats/bases/base64';
 
-describe('Slashtags Auth: Challenger: createInitiatior()', () => {
+describe('Slashtags Auth: Responder: createInitiatior()', () => {
   it('should throw an error if the curve is not available', () => {
     const challenge = generateChallenge();
     const encoded = encodeChallenge('not-available', challenge);
@@ -13,7 +13,7 @@ describe('Slashtags Auth: Challenger: createInitiatior()', () => {
     try {
       createInitiatior({
         keypair,
-        challengerPublicKey: Buffer.from(''),
+        responderPublicKey: Buffer.from(''),
         challenge: encoded,
       });
     } catch (error) {
@@ -23,25 +23,25 @@ describe('Slashtags Auth: Challenger: createInitiatior()', () => {
     }
   });
 
-  it('should create a response to the challenge', () => {
-    const challengerKeypair = secp256k1.generateKeyPair();
-    const challenger = createChallenger({ keypair: challengerKeypair });
-    const { challenge } = challenger.newChallenge(30);
+  it('should create an attestation to the challenge', () => {
+    const responderKeypair = secp256k1.generateKeyPair();
+    const responder = createResponder({ keypair: responderKeypair });
+    const { challenge } = responder.newChallenge(30);
 
     const initiatorKeypair = secp256k1.generateKeyPair();
     const initiator = createInitiatior({
       keypair: initiatorKeypair,
-      challengerPublicKey: challengerKeypair.publicKey,
+      responderPublicKey: responderKeypair.publicKey,
       challenge: challenge,
     });
 
-    expect(initiator.response).toBeInstanceOf(Buffer);
+    expect(initiator.attestation).toBeInstanceOf(Buffer);
 
-    const { challengerResponse } = challenger.verify(initiator.response);
+    const { responderAttestation } = responder.verify(initiator.attestation);
 
-    const challenegerData = initiator.verify(challengerResponse);
+    const challenegerData = initiator.verify(responderAttestation);
     expect(challenegerData).toEqual({
-      publicKey: base64url.encode(challengerKeypair.publicKey),
+      publicKey: base64url.encode(responderKeypair.publicKey),
     });
   });
 });

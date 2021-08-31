@@ -1,2 +1,2 @@
-export { createChallenger } from './src/challenger/index.js';
+export { createResponder } from './src/responder/index.js';
 export { createInitiatior } from './src/initiator/index.js';

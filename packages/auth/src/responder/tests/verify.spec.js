@@ -3,10 +3,10 @@ import secp256k1 from 'noise-curve-secp';
 import Noise from 'noise-handshake';
 import secp from 'noise-handshake/dh';
 
-const challengerKeyPair = secp256k1.generateKeyPair();
+const responderKeyPair = secp256k1.generateKeyPair();
 
-describe('Slashtags Auth: Challenger: Session: _verify()', () => {
-  it('should verify a response to a challenge', () => {
+describe('Slashtags Auth: Responder: Session: _verify()', () => {
+  it('should verify an attestation to a challenge', () => {
     const sessions = new Map();
     const challenge = generateChallenge();
 
@@ -16,50 +16,50 @@ describe('Slashtags Auth: Challenger: Session: _verify()', () => {
     const handshake = new Noise('IK', true, responderKeyPair, {
       curve: secp256k1,
     });
-    handshake.initialise(Buffer.alloc(0), challengerKeyPair.publicKey);
+    handshake.initialise(Buffer.alloc(0), responderKeyPair.publicKey);
 
     const initiatorMetadata = Buffer.from('initiator');
-    const response = Buffer.from(
+    const attestation = Buffer.from(
       handshake.send(Buffer.concat([challenge, initiatorMetadata])),
     );
 
     const result = _verify({
-      keypair: challengerKeyPair,
-      response,
+      keypair: responderKeyPair,
+      attestation,
       sessions,
       curve: secp256k1,
     });
 
-    expect(result.challengerResponse).toBeInstanceOf(Buffer);
+    expect(result.responderAttestation).toBeInstanceOf(Buffer);
     expect(result.initiatorMetadata).toEqual(initiatorMetadata);
   });
 
-  it('should verify a response with custom curve', () => {
+  it('should verify an attestation with custom curve', () => {
     const sessions = new Map();
     const challenge = generateChallenge();
 
     addSession({ sessions, timeout: 10, challenge: challenge });
 
+    const initiatorKeyPair = secp.generateKeyPair();
     const responderKeyPair = secp.generateKeyPair();
-    const challengerKeyPair = secp.generateKeyPair();
 
-    const handshake = new Noise('IK', true, responderKeyPair, { curve: secp });
-    handshake.initialise(Buffer.alloc(0), challengerKeyPair.publicKey);
+    const handshake = new Noise('IK', true, initiatorKeyPair, { curve: secp });
+    handshake.initialise(Buffer.alloc(0), responderKeyPair.publicKey);
 
     const initiatorMetadata = Buffer.from('initiator');
 
-    const response = Buffer.from(
+    const attestation = Buffer.from(
       handshake.send(Buffer.concat([challenge, initiatorMetadata])),
     );
 
     const result = _verify({
-      keypair: challengerKeyPair,
-      response,
+      keypair: responderKeyPair,
+      attestation,
       sessions,
       curve: secp,
     });
 
-    expect(result.challengerResponse).toBeInstanceOf(Buffer);
+    expect(result.responderAttestation).toBeInstanceOf(Buffer);
     expect(result.initiatorMetadata).toEqual(initiatorMetadata);
   });
 
@@ -71,23 +71,23 @@ describe('Slashtags Auth: Challenger: Session: _verify()', () => {
     const handshake = new Noise('IK', true, responderKeyPair, {
       curve: secp256k1,
     });
-    handshake.initialise(Buffer.alloc(0), challengerKeyPair.publicKey);
+    handshake.initialise(Buffer.alloc(0), responderKeyPair.publicKey);
 
     const initiatorMetadata = Buffer.from('initiator');
-    const response = Buffer.from(
+    const attestation = Buffer.from(
       handshake.send(Buffer.concat([challenge, initiatorMetadata])),
     );
 
     try {
       _verify({
-        keypair: challengerKeyPair,
-        response,
+        keypair: responderKeyPair,
+        attestation,
         sessions,
         curve: secp256k1,
       });
     } catch (error) {
       expect(error.message).toEqual(
-        `Session ${challenge.toString('hex')} not found`,
+        `Challenge ${challenge.toString('hex')} not found`,
       );
     }
   });

@@ -1,5 +1,5 @@
 import { decodeChallenge, encodeChallenge } from '../index.js';
-import { generateChallenge } from '../../challenger/index.js';
+import { generateChallenge } from '../../responder/index.js';
 import secp256k1 from 'noise-curve-secp';
 
 describe('Slashtags Auth: utils: encodeChallenge(), decodeChallenge()', () => {

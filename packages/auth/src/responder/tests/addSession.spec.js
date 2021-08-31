@@ -1,6 +1,6 @@
 import { addSession, generateChallenge } from '../index';
 
-describe('Slashtags Auth: Challenger: addSession()', () => {
+describe('Slashtags Auth: Responder: addSession()', () => {
   it('should create a new session and add it to the passed sessions map', () => {
     const sessions = new Map();
     const challenge = generateChallenge();

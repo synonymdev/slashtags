@@ -1,21 +1,21 @@
 import Noise from 'noise-handshake';
-import { decodeChallenge } from '../utils';
+import { decodeChallenge } from '../utils/index.js';
 import secp256k1 from 'noise-curve-secp';
 
 const PROLOGUE = Buffer.alloc(0);
 
 /**
- * Create a new initiator that will respond to a challenge and confirm challenger's identity
+ * Create a new initiator that will respond to a challenge and confirm responder's identity
  * @param {object} config
  * @param {KeyPair} config.keypair
- * @param {Buffer} config.challengerPublicKey
+ * @param {Buffer} config.responderPublicKey
  * @param {Buffer} config.challenge
  * @param {SlashtagsAuthCurve | SlashtagsAuthCurve[]} [config.curve]
  * @param {Buffer} [config.initiatorMetadata]
  */
 export const createInitiatior = ({
   keypair,
-  challengerPublicKey,
+  responderPublicKey,
   challenge,
   curve,
   initiatorMetadata = Buffer.alloc(0),
@@ -34,23 +34,23 @@ export const createInitiatior = ({
   }
 
   const handshake = new Noise('IK', true, keypair, { curve });
-  handshake.initialise(PROLOGUE, challengerPublicKey);
+  handshake.initialise(PROLOGUE, responderPublicKey);
 
-  const response = Buffer.from(
+  const attestation = Buffer.from(
     handshake.send(Buffer.concat([decoded.challenge, initiatorMetadata])),
   );
 
   /**
-   * @param {Buffer} challengerResponse
+   * @param {Buffer} responderAttestation
    * @returns {Serializable}
    */
-  const verify = (challengerResponse) =>
-    JSON.parse(handshake.recv(challengerResponse));
+  const verify = (responderAttestation) =>
+    JSON.parse(handshake.recv(responderAttestation));
 
   return {
-    /** Initiator's response to the challenge */
-    response,
-    /**  Verify challenger's response and get the payload including metdata */
+    /** Initiator's attestation to the challenge */
+    attestation,
+    /**  Verify responder's attestation and get the payload including metdata */
     verify,
   };
 };

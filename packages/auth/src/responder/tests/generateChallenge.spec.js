@@ -1,6 +1,6 @@
 import { generateChallenge } from '../index';
 
-describe('Slashtags Auth: Challenger: generateChallenge()', () => {
+describe('Slashtags Auth: Responder: generateChallenge()', () => {
   it('should create a challenge with a default length 32', () => {
     expect(generateChallenge().length).toEqual(32);
   });
