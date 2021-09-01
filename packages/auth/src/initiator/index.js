@@ -11,14 +11,14 @@ const PROLOGUE = Buffer.alloc(0);
  * @param {Buffer} config.responderPublicKey
  * @param {Buffer} config.challenge
  * @param {SlashtagsAuthCurve | SlashtagsAuthCurve[]} [config.curve]
- * @param {Buffer} [config.initiatorMetadata]
+ * @param {Record<string, Serializable>} [config.initiatorMetadata]
  */
 export const createInitiatior = ({
   keypair,
   responderPublicKey,
   challenge,
   curve,
-  initiatorMetadata = Buffer.alloc(0),
+  initiatorMetadata,
 }) => {
   const decoded = decodeChallenge(challenge);
 
@@ -37,15 +37,35 @@ export const createInitiatior = ({
   handshake.initialise(PROLOGUE, responderPublicKey);
 
   const attestation = Buffer.from(
-    handshake.send(Buffer.concat([decoded.challenge, initiatorMetadata])),
+    handshake.send(
+      Buffer.concat([
+        decoded.challenge,
+        initiatorMetadata
+          ? Buffer.from(JSON.stringify(initiatorMetadata))
+          : Buffer.alloc(0),
+      ]),
+    ),
   );
 
   /**
    * @param {Buffer} responderAttestation
-   * @returns {Serializable}
+   * @returns {{
+   *  responderPublicKey: string,
+   *  responderMetadata?: Record<string, Serializable>
+   * }}
    */
-  const verify = (responderAttestation) =>
-    JSON.parse(handshake.recv(responderAttestation));
+  const verify = (responderAttestation) => {
+    const result = JSON.parse(handshake.recv(responderAttestation));
+
+    return {
+      ...result,
+      responderMetadata: (() => {
+        try {
+          return JSON.parse(result.responderMetadata);
+        } catch (error) {}
+      })(),
+    };
+  };
 
   return {
     /** Initiator's attestation to the challenge */

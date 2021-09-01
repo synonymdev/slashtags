@@ -1,5 +1,4 @@
 import { createInitiatior, createResponder } from '../index.js';
-import { base64url } from 'multiformats/bases/base64';
 import secp256k1 from 'noise-curve-secp';
 
 describe('Slashtags Auth', () => {
@@ -8,10 +7,12 @@ describe('Slashtags Auth', () => {
     const responderKeypair = secp256k1.generateKeyPair();
     const responder = createResponder({
       keypair: responderKeypair,
-      metadata: Buffer.from(JSON.stringify({ description: 'responder' })),
+      metadata: { description: 'responder' },
     });
     // Create a new challenge with a timeout in miliseconds, and metadata (optional)
-    const { challenge, responderPublicKey } = responder.newChallenge(100);
+    const { challenge, responderPublicKey } = responder.newChallenge(100, {
+      description: 'challenge', // override the default description
+    });
 
     // Pass the challenge to the initiator somehow
     const initiatorKeypair = secp256k1.generateKeyPair();
@@ -19,7 +20,7 @@ describe('Slashtags Auth', () => {
       keypair: initiatorKeypair,
       responderPublicKey: responderPublicKey,
       challenge: challenge,
-      initiatorMetadata: Buffer.from(JSON.stringify({ name: 'foo' })),
+      initiatorMetadata: { name: 'foo' },
     });
 
     // Pass the attestation to the responder
@@ -30,21 +31,18 @@ describe('Slashtags Auth', () => {
       responderAttestation,
     } = responder.verify(initiator.attestation);
 
-    expect(initiatorMetadata).toEqual(
-      Buffer.from(JSON.stringify({ name: 'foo' })),
-    );
+    expect(initiatorMetadata).toEqual({ name: 'foo' });
 
     // Finally pass the responder attestation to the initiator
     const responderPayload = initiator.verify(responderAttestation);
 
     expect(responderPayload).toEqual({
-      responderMetadata: '{"description":"responder"}',
-      publicKey: base64url.encode(responderKeypair.publicKey),
+      responderMetadata: { description: 'challenge' },
+      responderPublicKey: responderKeypair.publicKey.toString('hex'),
     });
 
-    expect(
-      // @ts-ignore
-      Buffer.from(base64url.decode(responderPayload.publicKey)),
-    ).toEqual(responderKeypair.publicKey);
+    expect(responderPayload.responderPublicKey).toEqual(
+      responderKeypair.publicKey.toString('hex'),
+    );
   });
 });

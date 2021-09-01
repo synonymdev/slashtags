@@ -14,7 +14,6 @@
         "test": "node --experimental-vm-modules ../../node_modules/jest/bin/jest.js --verbose "
     },
     "dependencies": {
-        "multiformats": "^9.4.6",
         "noise-curve-secp": "^1.0.2",
         "noise-handshake": "^1.2.2"
     }

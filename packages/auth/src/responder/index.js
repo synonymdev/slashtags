@@ -2,7 +2,6 @@ import Noise from 'noise-handshake';
 import sodium from 'sodium-universal';
 import secp256k1 from 'noise-curve-secp';
 import { encodeChallenge } from '../utils/index.js';
-import { base64url } from 'multiformats/bases/base64';
 
 const PROLOGUE = Buffer.alloc(0);
 const CHALLENGE_LENGTH = 32;
@@ -54,7 +53,7 @@ export const _verify = ({
   sessions.delete(challenge);
 
   const msg = {
-    publicKey: base64url.encode(keypair.publicKey),
+    responderPublicKey: keypair.publicKey.toString('hex'),
     ...(session.responderMetdata && {
       responderMetadata: session.responderMetdata.toString(),
     }),
@@ -114,7 +113,7 @@ export const addSession = ({
  * @param {string} [config.attestationURL] - URL for the initiator to send attestations to
  * @param {number} [config.challengeLength=CHALLENGE_LENGTH] - Length of the challenge
  * @param {SlashtagsAuthCurve} [config.curve] - Curve to use for Noise handshake
- * @param {Buffer} [config.metadata] - Responder metadata
+ * @param {Record<string, Serializable>} [config.metadata] - Responder metadata
  */
 export const createResponder = ({
   keypair,
@@ -132,16 +131,20 @@ export const createResponder = ({
   /**
    * Create a new session and return the challenge object
    * @param {number} timeout - Timeout for the session in miliseconds
-   * @param {Buffer} [sessionMetadata] - Session specific metadata (overrides responder metadata)
+   * @param {Record<string, Serializable>} [sessionMetadata] - Session specific metadata (overrides responder metadata)
    */
   const newChallenge = (timeout, sessionMetadata) => {
     const challenge = generateChallenge(challengeLength);
+
+    metadata = sessionMetadata || metadata;
 
     addSession({
       timeout,
       sessions,
       challenge,
-      responderMetdata: metadata || sessionMetadata,
+      responderMetdata: metadata
+        ? Buffer.from(JSON.stringify(metadata))
+        : Buffer.alloc(0),
     });
 
     return {
@@ -154,9 +157,23 @@ export const createResponder = ({
   /**
    * Verify an intitiator's attestation to a challenge
    * @param {Buffer} attestation
+   * @returns {{
+   *  responderAttestation: Buffer,
+   *  initiatorMetadata?: Record<string, Serializable>,
+   * }}
    */
-  const verify = (attestation) =>
-    _verify({ keypair, attestation, sessions, curve });
+  const verify = (attestation) => {
+    const result = _verify({ keypair, attestation, sessions, curve });
+
+    return {
+      ...result,
+      initiatorMetadata: (() => {
+        try {
+          return JSON.parse(result.initiatorMetadata.toString());
+        } catch (error) {}
+      })(),
+    };
+  };
 
   return {
     config: { keypair, curve, challengeLength },

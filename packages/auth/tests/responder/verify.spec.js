@@ -1,9 +1,11 @@
-import { addSession, generateChallenge, _verify } from '../../src/responder/index';
+import {
+  addSession,
+  generateChallenge,
+  _verify,
+} from '../../src/responder/index';
 import secp256k1 from 'noise-curve-secp';
 import Noise from 'noise-handshake';
 import secp from 'noise-handshake/dh';
-
-const responderKeyPair = secp256k1.generateKeyPair();
 
 describe('Slashtags Auth: Responder: Session: _verify()', () => {
   it('should verify an attestation to a challenge', () => {

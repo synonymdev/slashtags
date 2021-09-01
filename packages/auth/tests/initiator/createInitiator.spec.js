@@ -2,7 +2,6 @@ import { createInitiatior } from '../../src/initiator/index';
 import secp256k1 from 'noise-curve-secp';
 import { encodeChallenge } from '../../src/utils';
 import { generateChallenge, createResponder } from '../../src/responder';
-import { base64url } from 'multiformats/bases/base64';
 
 describe('Slashtags Auth: Responder: createInitiatior()', () => {
   it('should throw an error if the curve is not available', () => {
@@ -41,7 +40,7 @@ describe('Slashtags Auth: Responder: createInitiatior()', () => {
 
     const responderData = initiator.verify(responderAttestation);
     expect(responderData).toEqual({
-      publicKey: base64url.encode(responderKeypair.publicKey),
+      responderPublicKey: responderKeypair.publicKey.toString('hex'),
     });
   });
 });
