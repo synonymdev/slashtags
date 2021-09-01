@@ -1,7 +1,7 @@
 {
     "name": "@slashtags/auth",
     "version": "0.0.1",
-    "description": "Thin wrapper around attest-auth",
+    "description": "Bidirectional authentication for keypair verification through attestation.",
     "type": "module",
     "keywords": [
         "slashtags",

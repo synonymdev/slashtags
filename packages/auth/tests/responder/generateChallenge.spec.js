@@ -1,4 +1,4 @@
-import { generateChallenge } from '../index';
+import { generateChallenge } from '../../src/responder/index';
 
 describe('Slashtags Auth: Responder: generateChallenge()', () => {
   it('should create a challenge with a default length 32', () => {

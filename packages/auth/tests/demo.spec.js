@@ -1,4 +1,4 @@
-import { createInitiatior, createResponder } from './index.js';
+import { createInitiatior, createResponder } from '../index.js';
 import { base64url } from 'multiformats/bases/base64';
 import secp256k1 from 'noise-curve-secp';
 

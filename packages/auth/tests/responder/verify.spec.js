@@ -1,4 +1,4 @@
-import { addSession, generateChallenge, _verify } from '../index';
+import { addSession, generateChallenge, _verify } from '../../src/responder/index';
 import secp256k1 from 'noise-curve-secp';
 import Noise from 'noise-handshake';
 import secp from 'noise-handshake/dh';

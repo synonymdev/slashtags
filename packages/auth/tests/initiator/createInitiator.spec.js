@@ -1,7 +1,7 @@
-import { createInitiatior } from '../index';
+import { createInitiatior } from '../../src/initiator/index';
 import secp256k1 from 'noise-curve-secp';
-import { encodeChallenge } from '../../utils';
-import { generateChallenge, createResponder } from '../../responder';
+import { encodeChallenge } from '../../src/utils';
+import { generateChallenge, createResponder } from '../../src/responder';
 import { base64url } from 'multiformats/bases/base64';
 
 describe('Slashtags Auth: Responder: createInitiatior()', () => {
@@ -39,8 +39,8 @@ describe('Slashtags Auth: Responder: createInitiatior()', () => {
 
     const { responderAttestation } = responder.verify(initiator.attestation);
 
-    const challenegerData = initiator.verify(responderAttestation);
-    expect(challenegerData).toEqual({
+    const responderData = initiator.verify(responderAttestation);
+    expect(responderData).toEqual({
       publicKey: base64url.encode(responderKeypair.publicKey),
     });
   });

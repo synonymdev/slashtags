@@ -1,4 +1,4 @@
-import { addSession, generateChallenge } from '../index';
+import { addSession, generateChallenge } from '../../src/responder/index';
 
 describe('Slashtags Auth: Responder: addSession()', () => {
   it('should create a new session and add it to the passed sessions map', () => {

@@ -1,4 +1,4 @@
-import { createResponder } from '../index';
+import { createResponder } from '../../src/responder/index';
 import secp256k1 from 'noise-curve-secp';
 import secp from 'noise-handshake/dh';
 
