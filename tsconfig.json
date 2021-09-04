@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "allowJs": true,
+    "checkJs": true,
+    "strict": false,
+    "declaration": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "types": ["node"],
+    "esModuleInterop": true,
+    "emitDeclarationOnly": true,
+    "out": "lib/index.d.ts",
+    "moduleResolution": "Node"
+  },
+  "include": ["**/lib/**/*.js"]
+}

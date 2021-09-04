@@ -9,9 +9,12 @@
         "attestation"
     ],
     "author": "Ar Nazeh <ar.nazeh@gmail.com>",
-    "main": "index.js",
+    "main": "lib/index.js",
+    "types": "lib/index.d.ts",
     "scripts": {
-        "test": "node --experimental-vm-modules ../../node_modules/jest/bin/jest.js --verbose "
+        "test": "ava",
+        "lint": "../../node_modules/.bin/eslint ./lib --fix",
+        "build:types": "../../node_modules/.bin/tsc -p ../../tsconfig.json"
     },
     "dependencies": {
         "noise-curve-secp": "^1.0.2",

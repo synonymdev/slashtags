@@ -1,0 +1,16 @@
+{
+  "name": "@slashtags/common",
+  "version": "0.0.1",
+  "description": "Common constants and functions for Slashtags protocol",
+  "type": "module",
+  "keywords": [
+    "slashtags",
+    "constants",
+    "common"
+  ],
+  "author": "Ar Nazeh <ar.nazeh@gmail.com>",
+  "main": "index.js",
+  "scripts": {
+    "test": "node --experimental-vm-modules ../../node_modules/jest/bin/jest.js --verbose "
+  }
+}
