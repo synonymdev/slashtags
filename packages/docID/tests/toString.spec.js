@@ -1,7 +1,7 @@
 import { DocID } from '../src/index.js';
 import assert from 'assert';
 
-describe('Slashtags DocID: CID: toString()', () => {
+describe('Slashtags DocID: toString()', () => {
   it('should convert it to a string with default base32', () => {
     const bytes = Uint8Array.from([
       210, 1, 0, 1, 128, 4, 18, 32, 147, 162, 57, 113, 169, 20, 229, 234, 203,

@@ -19,6 +19,7 @@
     "build:types": "../../node_modules/.bin/tsc -p tsconfig.json"
   },
   "dependencies": {
+    "multibase": "^4.0.6",
     "multiformats": "^9.4.6",
     "varint": "^5.0.2"
   },

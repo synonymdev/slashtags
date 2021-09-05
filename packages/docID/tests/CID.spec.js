@@ -6,7 +6,7 @@ import * as json from 'multiformats/codecs/json';
 import assert from 'assert';
 import { DocID, createCID } from '../src/index.js';
 
-describe('Slashtags DocID: CID: create()', () => {
+describe('Slashtags DocID: CID: createCID()', () => {
   it('should create CID document ID from content', () => {
     const bytes = json.encode({ hello: 'world' });
     const hashFn = () => crypto.createHash('sha256').update(bytes).digest();

@@ -10,3 +10,8 @@ export interface DocID {
   type: DocType;
   bytes: Uint8Array;
 }
+
+export interface ParsedDocID {
+  type: DocType;
+  identifyingBytes: Uint8Array;
+}
