@@ -3,12 +3,11 @@
   "scripts": {
     "postinstall": "lerna bootstrap --hoist --ci",
     "test": "lerna exec npm t",
-    "build": "lerna run build:types",
-    "publish:release-candidate": "lerna publish --allow-branch release-candidate --conventional-prerelease --dist-tag next --preid rc --no-verify-access --yes",
-    "publish:latest": "lerna publish --allow-branch master --conventional-graduate --create-release github --no-verify-access --yes",
     "lint": "lerna run lint",
-    "clean": "npm run clean:deps",
-    "clean:deps": "rm -rf ./node_modules && rm -rf ./packages/*/node_modules"
+    "build": "lerna run build:types",
+    "clean": "npm run clean:deps && npm run clean:deps",
+    "clean:deps": "rm -rf ./node_modules && rm -rf ./packages/*/node_modules && rm ./packages/*/package-lock.json",
+    "clean:build": "rm -rf ./packages/*/types"
   },
   "type": "module",
   "keywords": [
@@ -20,12 +19,14 @@
   "author": "nazeh",
   "devDependencies": {
     "@types/node": "^16.7.10",
+    "@typescript-eslint/eslint-plugin": "^4.30.0",
     "ava": "^3.15.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^4.0.0",
     "lerna": "^4.0.0",
     "prettier": "2.3.2",
+    "standard": "^16.0.3",
     "typescript": "^4.2.4"
   }
 }

@@ -1,5 +1,5 @@
 import Noise from 'noise-handshake';
-import { decodeChallenge } from '../utils/index.js';
+import { decodeChallenge } from '../utils/index.js.js';
 import secp256k1 from 'noise-curve-secp';
 
 const PROLOGUE = Buffer.alloc(0);

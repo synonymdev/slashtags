@@ -2,6 +2,8 @@
   "name": "@slashtags/common",
   "version": "0.0.1",
   "description": "Common constants and functions for Slashtags protocol",
+  "main": "./src/index.js",
+  "types": "./types/index.d.ts",
   "type": "module",
   "keywords": [
     "slashtags",
@@ -9,8 +11,9 @@
     "common"
   ],
   "author": "Ar Nazeh <ar.nazeh@gmail.com>",
-  "main": "index.js",
   "scripts": {
-    "test": "node --experimental-vm-modules ../../node_modules/jest/bin/jest.js --verbose "
+    "test": "ava",
+    "lint": "../../node_modules/.bin/eslint ./src --fix",
+    "build:types": "../../node_modules/.bin/tsc -p tsconfig.json"
   }
 }

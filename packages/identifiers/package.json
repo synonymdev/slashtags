@@ -2,6 +2,8 @@
   "name": "@slashtags/identifiers",
   "version": "0.0.1",
   "description": "Slashtags contentIDs and feedIDs",
+  "main": "./src/index.js",
+  "types": "./types/index.d.ts",
   "type": "module",
   "keywords": [
     "slashtags",
@@ -10,18 +12,18 @@
     "feed"
   ],
   "author": "Ar Nazeh <ar.nazeh@gmail.com>",
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
   "scripts": {
     "test": "ava",
-    "lint": "../../node_modules/.bin/eslint ./lib --fix",
-    "build:types": "../../node_modules/.bin/tsc -p ../../tsconfig.json"
+    "lint": "../../node_modules/.bin/eslint ./src --fix",
+    "build:types": "../../node_modules/.bin/tsc -p tsconfig.json"
   },
-  "exports": "./src/index.js",
   "dependencies": {
     "multibase": "^4.0.6",
     "multiformats": "^9.4.6",
     "multihashes": "^4.0.3",
     "varint": "^5.0.2"
+  },
+  "devDependencies": {
+    "@types/varint": "^6.0.0"
   }
 }

@@ -1,7 +1,7 @@
 import Noise from 'noise-handshake';
 import sodium from 'sodium-universal';
 import secp256k1 from 'noise-curve-secp';
-import { encodeChallenge } from '../utils/index.js';
+import { encodeChallenge } from '../utils/index.js.js';
 
 const PROLOGUE = Buffer.alloc(0);
 const CHALLENGE_LENGTH = 32;
