@@ -1,6 +1,6 @@
 {
   "extends": [
-    "standard",
+    "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
     "prettier"
   ],

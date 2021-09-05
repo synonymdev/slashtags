@@ -1,7 +1,7 @@
 {
-  "name": "@slashtags/identifiers",
+  "name": "@slashtags/docid",
   "version": "0.0.1",
-  "description": "Slashtags contentIDs and feedIDs",
+  "description": "Slashtags Dcoument IDs",
   "main": "./src/index.js",
   "types": "./types/index.d.ts",
   "type": "module",
@@ -13,14 +13,13 @@
   ],
   "author": "Ar Nazeh <ar.nazeh@gmail.com>",
   "scripts": {
-    "test": "ava",
     "lint": "../../node_modules/.bin/eslint ./src --fix",
+    "test": "npm run lint && npm run test:node",
+    "test:node": "../../node_modules/.bin/mocha tests/**/*.spec.js",
     "build:types": "../../node_modules/.bin/tsc -p tsconfig.json"
   },
   "dependencies": {
-    "multibase": "^4.0.6",
     "multiformats": "^9.4.6",
-    "multihashes": "^4.0.3",
     "varint": "^5.0.2"
   },
   "devDependencies": {
