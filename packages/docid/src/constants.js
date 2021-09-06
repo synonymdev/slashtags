@@ -40,4 +40,4 @@ export const DocTypes = [
   { byCode: {}, byName: {} }
 );
 
-/** @typedef {import("./types").DocType} DocType */
+/** @typedef {import("./interfaces").DocType} DocType */

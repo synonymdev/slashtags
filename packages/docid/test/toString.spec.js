@@ -1,4 +1,4 @@
-import * as DocID from '../src/index.js';
+import { DocID } from '../src/index.js';
 import assert from 'assert';
 
 describe('Slashtags DocID: toString()', () => {

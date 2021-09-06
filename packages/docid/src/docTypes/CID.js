@@ -21,4 +21,4 @@ export const fromJSON = (obj) => {
   return create(0, cid.bytes);
 };
 
-/** @typedef {import("../types").DocID} DocID */
+/** @typedef {import("../interfaces").DocID} DocID */

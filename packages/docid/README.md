@@ -72,14 +72,14 @@ Where
 Create a CID typed DocID from json
 
 ```js
-import * as DocID from '@slashtags/ids';
+import { DocID } from '@slashtags/ids';
 const docID = DocID.CID.fromJSON({ foo: 'bar' });
 ```
 
 Or create it by passing a CID bytes
 
 ```js
-import * as DocID from '@slashtags/ids';
+import { DocID } from '@slashtags/ids';
 import { CID } from 'multiformats/cid';
 import * as json from 'multiformats/codecs/json';
 import { sha256 } from 'multiformats/hashes/sha2';

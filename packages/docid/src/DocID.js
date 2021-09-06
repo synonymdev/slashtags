@@ -59,6 +59,6 @@ export const create = (type, index) => {
   };
 };
 
-/** @typedef {import("./types").DocID} DocID */
+/** @typedef {import("./interfaces").DocID} DocID */
 /** @typedef {import("multiformats/bases/interface").MultibaseEncoder<any>} MultibaseEncoder*/
 /** @typedef {import("multiformats/bases/interface").BaseCodec} BaseCode */

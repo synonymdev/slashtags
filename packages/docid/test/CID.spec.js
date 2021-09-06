@@ -4,7 +4,7 @@ import { digest } from 'multiformats';
 import crypto from 'crypto';
 import * as json from 'multiformats/codecs/json';
 import assert from 'assert';
-import * as DocID from '../src/index.js';
+import { DocID } from '../src/index.js';
 
 describe('Slashtags DocID: CID: createCID()', () => {
   it('should create CID document ID from content', () => {
