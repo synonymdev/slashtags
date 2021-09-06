@@ -13,9 +13,9 @@ export const wildDecode = (input) => {
 
   const enc = Object.entries(bases).filter(
     (base) => base[1].prefix === input[0]
-  )?.[0]?.[1];
+  );
 
-  if (!enc) throw new Error(`Unsupported encoding: ${input[0]}`);
+  if (enc.length === 0) throw new Error(`Unsupported encoding: ${input[0]}`);
 
-  return enc.decoder.decode(input);
+  return enc[0][1].decoder.decode(input);
 };

@@ -16,9 +16,9 @@
     "build:types": "tsc -p tsconfig.json && mv ./types dist/types",
     "build": "npm run build:js && npm run build:types",
     "test": "hundreds mocha test/**/*.spec.js",
-    "test:cjs:browser": "echo figure out polendina",
+    "test:cjs:browser": "cd ../../ && polendina packages/docid/dist/cjs/browser-test/*.spec.js",
     "test:cjs": "npm run build:js && mocha dist/cjs/node-test/*.spec.js && npm run test:cjs:browser",
-    "test:all": "npm run lint && npm run test && npm run test:cjs && npm run test:ts",
+    "test:all": "npm run lint && npm run test && npm run test:cjs",
     "prepublishOnly": "npm run test:all && rm -rf dist/**/*test"
   },
   "keywords": [

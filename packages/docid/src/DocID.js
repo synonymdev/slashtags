@@ -10,7 +10,7 @@ import { varint } from "multiformats";
  */
 export const toString = (docID, base) => {
   base = base || base32;
-  return base?.encode(docID.bytes);
+  return base.encode(docID.bytes);
 };
 
 /**
