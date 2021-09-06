@@ -1,7 +1,7 @@
 import { DocIDCodec, DocTypes } from "./constants.js";
 import { base32 } from "multiformats/bases/base32";
-import { bases } from "multiformats/basics";
-import { varint, bytes } from "multiformats";
+import { wildDecode } from "./util.js";
+import { varint } from "multiformats";
 
 /**
  * @param {DocID} docID
@@ -11,25 +11,6 @@ import { varint, bytes } from "multiformats";
 export const toString = (docID, base) => {
   base = base || base32;
   return base?.encode(docID.bytes);
-};
-
-/**
- * Takes a Uint8Array or string encoded with multibase header, decodes it and
- * returns the decoded buffer
- *
- * @param {string | Uint8Array} input
- * @returns {Uint8Array}
- */
-const wildDecode = (input) => {
-  if (input instanceof Uint8Array) input = bytes.toString(input);
-
-  const enc = Object.entries(bases).filter(
-    (base) => base[1].prefix === input[0]
-  )[0][1];
-
-  if (!enc) throw new Error(`Unsupported encoding: ${input[0]}`);
-
-  return enc.decoder.decode(input);
 };
 
 /**
