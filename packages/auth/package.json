@@ -1,5 +1,5 @@
 {
-    "name": "@slashtags/auth",
+    "name": "@synonymdev/slashtags-auth",
     "version": "0.0.1",
     "description": "Bidirectional authentication for keypair verification through attestation.",
     "main": "./src/index.js",
