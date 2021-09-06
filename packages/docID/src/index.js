@@ -1,2 +1,2 @@
-export * as DocID from "./DocID.js";
-export { createCID } from "./docTypes/CID.js";
+export * from "./DocID.js";
+export * as CID from "./docTypes/CID.js";

@@ -4,7 +4,7 @@ import { digest } from 'multiformats';
 import crypto from 'crypto';
 import * as json from 'multiformats/codecs/json';
 import assert from 'assert';
-import { DocID, createCID } from '../src/index.js';
+import * as DocID from '../src/index.js';
 
 describe('Slashtags DocID: CID: createCID()', () => {
   it('should create CID document ID from content', () => {
@@ -28,7 +28,7 @@ describe('Slashtags DocID: CID: createCID()', () => {
 
     assert.deepEqual(
       DocID.create('CID', cid.bytes),
-      createCID({ hello: 'world' }),
+      DocID.CID.fromJSON({ hello: 'world' }),
     );
   });
 });

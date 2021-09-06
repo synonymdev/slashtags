@@ -13,5 +13,5 @@ export interface DocID {
 
 export interface ParsedDocID {
   type: DocType;
-  identifyingBytes: Uint8Array;
+  index: Uint8Array;
 }

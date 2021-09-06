@@ -2,14 +2,6 @@
 
 > Contains Slashtags Document IDs ceration, serializing, and parsing
 
-## Usage
-
-```js
-import slashtagsID from '@slashtags/ids';
-
-const contentID = slashtagsID.create(0);
-```
-
 ## Abstract
 
 DocIDs are composed of a `multicodec-slashtags-docid`, and `type-code` varint, followed by identifying bytes.
@@ -21,9 +13,9 @@ A specific encoding for Slashtags' DocIDs allows us to distinguish them from oth
 ## Specification
 
 ```js
-<slashtags-docid> ::= <mb><mc-docid><type-code><idb>
+<slashtags-docid> ::= <mb><mc-docid><type-code><idx>
 // or, expanded:
-<slashtags-docid> ::= <multibase-prefix><multicodec-slashtags-docid><type-code><identifying-bytes>
+<slashtags-docid> ::= <multibase-prefix><multicodec-slashtags-docid><type-code><index-bytes>
 ```
 
 Where
@@ -32,7 +24,7 @@ Where
 
 - `<multicodec-slashtags-docid>`: `0xd2` indicates that this is a Slashtags identifier and representing.
 - `<type-code>` Distinguish types data (static / stream) and how to parse the indentfiying bytes.
-- `<identifying-bytes>` is a [multiformats](https://github.com/multiformats/) bytes specific to each `type-code`
+- `<index-bytes>` are used to index the document and address it according to its corrisponding `type-code`.
 
 ### SlashtagsID multicodec
 
@@ -43,7 +35,7 @@ Where
 Used to encode multiple attributes about the ID and the document it represents:
 
 - **Mutability**: Static content or updatable Streams.
-- **Identifying bytes format**: How to parse the identifying bytes.
+- **Index bytes format**: How to interpret the index bytes.
 - **More**: Any future special kinds of documents with their own rules for verification ..etc
 
 | name   | code | mutability | identifying bytes  |
@@ -75,6 +67,30 @@ Where
 - `<type-code>` is `0`
 - `<identifying-bytes>` is a [CID](https://github.com/multiformats/cid)
 
+#### Usage
+
+Create a CID typed DocID from json
+
+```js
+import * as DocID from '@slashtags/ids';
+const docID = DocID.CID.fromJSON({ foo: 'bar' });
+```
+
+Or create it by passing a CID bytes
+
+```js
+import * as DocID from '@slashtags/ids';
+import { CID } from 'multiformats/cid';
+import * as json from 'multiformats/codecs/json';
+import { sha256 } from 'multiformats/hashes/sha2';
+
+const bytes = json.encode({ hello: 'world' });
+const hash = await sha256.digest(bytes);
+const cid = CID.create(1, json.code, hash);
+
+const docID = DocID.create(0, cid.bytes);
+```
+
 ### FeedID
 
 A Slashtags DocID of type `FeedID` has four parts:
@@ -83,4 +99,15 @@ A Slashtags DocID of type `FeedID` has four parts:
 <docid> ::= <mb><mc-docid><type-code=0><feed-key>
 // or, expanded:
 <docid> ::= <multibase-prefix><multicodec-slashtags-docid><type-code=1><hypercore-feed-key>
+```
+
+#### Usage
+
+```js
+import hypercore from 'hypercore';
+
+var feed = new Hypercore('./my-first-dataset');
+
+// You can pass the type name instead of the type code
+const docID = DocID.create('FeedID', feed.key);
 ```

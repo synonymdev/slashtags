@@ -14,7 +14,7 @@ export const toString = (docID, base) => {
 };
 
 /**
- * Returns the first varint and the rest
+ * Returns a tuple of first varint and the rest
  * @param {Uint8Array} bytes
  * @returns {[number, Uint8Array]}
  */
@@ -27,18 +27,17 @@ const readVarint = (bytes) => {
 /**
  * Retrun DocID types and the identifying bytes
  * @param {string | Uint8Array} id
+ * @throws {Error} Will throw an error if the <multicodec-slashtags-docid> is invalid
  * @returns {ParsedDocID | undefined}
  */
 export const parse = (id) => {
   const decoded = decode(id);
-
   const [codec, bytes] = readVarint(decoded);
 
-  if (codec !== DocIDCodec) return;
+  if (codec !== DocIDCodec) throw new Error("Invalid Slashtags DocID");
 
-  const [type, identifyingBytes] = readVarint(bytes);
-
-  return { type: DocTypes.byCode[type], identifyingBytes };
+  const [type, index] = readVarint(bytes);
+  return { type: DocTypes.byCode[type], index };
 };
 
 /**
