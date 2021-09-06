@@ -26,7 +26,7 @@
     "emitDeclarationOnly": true,
     "baseUrl": "./packages",
     "paths": {
-      "@slashtags/*": ["./packages/*"]
+      "@synonymdev/*": ["./packages/*"]
     }
   },
   "exclude": ["node_modules"],
