@@ -1,6 +1,6 @@
 {
   "name": "@slashtags/docid",
-  "version": "0.0.0",
+  "version": "0.0.1-alpha.0",
   "description": "Slashtags Dcoument IDs",
   "author": "Ar Nazeh <ar.nazeh@gmail.com>",
   "main": "./src/index.js",
