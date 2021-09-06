@@ -19,6 +19,7 @@ describe('Slashtags DocID: CID: createCID()', () => {
         mutability: 'Static',
         name: 'CID',
       },
+      index: cid.bytes,
       bytes: Uint8Array.from([
         210, 1, 0, 1, 128, 4, 18, 32, 147, 162, 57, 113, 169, 20, 229, 234, 203,
         240, 168, 210, 81, 84, 205, 163, 9, 195, 193, 199, 47, 187, 153, 20,

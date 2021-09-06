@@ -28,8 +28,7 @@
     "feed"
   ],
   "dependencies": {
-    "multiformats": "^9.4.6",
-    "varint": "^5.0.2"
+    "multiformats": "^9.4.6"
   },
   "exports": {
     ".": {

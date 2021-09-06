@@ -9,9 +9,5 @@ export interface DocType {
 export interface DocID {
   type: DocType;
   bytes: Uint8Array;
-}
-
-export interface ParsedDocID {
-  type: DocType;
   index: Uint8Array;
 }
