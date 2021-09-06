@@ -4,10 +4,11 @@
     "postinstall": "lerna bootstrap --hoist --ci",
     "test": "lerna exec npm t",
     "lint": "lerna run lint",
-    "build:types": "lerna run build:types",
+    "build": "lerna run build",
     "clean": "npm run clean:deps && npm run clean:deps",
-    "clean:deps": "rm -rf ./node_modules && rm -rf ./packages/*/node_modules && rm ./packages/*/package-lock.json",
-    "clean:build": "rm -rf ./packages/*/types"
+    "clean:deps": "rm -rf ./node_modules && rm -rf ./packages/*/node_modules && rm -rf ./packages/*/package-lock.json",
+    "clean:build": "rm -rf ./packages/*/dist",
+    "clean:coverage": "rm -rf ./packages/*/coverage"
   },
   "type": "module",
   "keywords": [
@@ -20,14 +21,18 @@
   "devDependencies": {
     "@types/mocha": "^9.0.0",
     "@types/node": "^16.7.10",
+    "@types/varint": "^6.0.0",
     "@typescript-eslint/eslint-plugin": "^4.30.0",
     "@typescript-eslint/parser": "^4.30.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^4.0.0",
+    "hundreds": "^0.0.9",
     "ipjs": "^5.1.0",
     "lerna": "^4.0.0",
     "mocha": "^9.1.1",
+    "nyc": "^15.1.0",
+    "polendina": "^1.1.0",
     "prettier": "2.3.2",
     "typescript": "^4.2.4"
   }

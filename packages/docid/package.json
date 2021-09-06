@@ -1,29 +1,48 @@
 {
   "name": "@slashtags/docid",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "description": "Slashtags Dcoument IDs",
+  "author": "Ar Nazeh <ar.nazeh@gmail.com>",
   "main": "./src/index.js",
   "types": "./types/index.d.ts",
   "type": "module",
+  "files": [
+    "dist/**/*"
+  ],
+  "scripts": {
+    "lint": "eslint ./src --fix",
+    "build:copy": "cp -a src tsconfig.json dist/",
+    "build:js": "ipjs build --tests --main && npm run build:copy",
+    "build:types": "tsc -p tsconfig.json && mv ./types dist/types",
+    "build": "npm run build:js && npm run build:types",
+    "test": "hundreds mocha test/**/*.spec.js",
+    "test:cjs:browser": "echo figure out polendina",
+    "test:cjs": "npm run build:js && mocha dist/cjs/node-test/*.spec.js && npm run test:cjs:browser",
+    "test:all": "npm run lint && npm run test && npm run test:cjs && npm run test:ts",
+    "prepublishOnly": "npm run test:all && rm -rf dist/**/*test"
+  },
   "keywords": [
     "slashtags",
     "identifiers",
     "cid",
     "feed"
   ],
-  "author": "Ar Nazeh <ar.nazeh@gmail.com>",
-  "scripts": {
-    "lint": "../../node_modules/.bin/eslint ./src --fix",
-    "test": "npm run lint && npm run test:node",
-    "test:node": "../../node_modules/.bin/mocha tests/**/*.spec.js",
-    "build:types": "../../node_modules/.bin/tsc -p tsconfig.json"
-  },
   "dependencies": {
-    "multibase": "^4.0.6",
     "multiformats": "^9.4.6",
     "varint": "^5.0.2"
   },
-  "devDependencies": {
-    "@types/varint": "^6.0.0"
+  "exports": {
+    ".": {
+      "import": "./src/index.js"
+    },
+    "./DocID": {
+      "import": "./src/DocID.js"
+    },
+    "./constants": {
+      "import": "./src/constants.js"
+    },
+    "./docTypes/CID": {
+      "import": "./src/docTypes/CID.js"
+    }
   }
 }

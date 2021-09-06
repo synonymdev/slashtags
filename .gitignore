@@ -5,6 +5,7 @@ lerna-debug.log
 .vscode
 *.iml
 docs/
+build
 dist
 yarn.lock
 types
