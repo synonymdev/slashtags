@@ -1,26 +1,26 @@
-export const DocIDCodec = 0xd2;
+export const DocIDCodec = 0xd2
 
 /**
  * Enum DocMutability
  * @enum {string}
  */
 export const DocMutability = {
-  Static: "Static",
-  Stream: "Stream",
-};
+  Static: 'Static',
+  Stream: 'Stream'
+}
 
 /**
  * Enum DocTypeName
  * @enum {string}
  */
 export const DocTypeName = {
-  CID: "CID",
-  FeedID: "FeedID",
-};
+  CID: 'CID',
+  FeedID: 'FeedID'
+}
 
 export const DocTypes = [
   { code: 0, mutability: DocMutability.Static, name: DocTypeName.CID },
-  { code: 1, mutability: DocMutability.Stream, name: DocTypeName.FeedID },
+  { code: 1, mutability: DocMutability.Stream, name: DocTypeName.FeedID }
 ].reduce(
   (
     /**
@@ -32,12 +32,12 @@ export const DocTypes = [
     acc,
     type
   ) => {
-    acc.byCode[type.code] = type;
-    acc.byName[type.name] = type;
+    acc.byCode[type.code] = type
+    acc.byName[type.name] = type
 
-    return acc;
+    return acc
   },
   { byCode: {}, byName: {} }
-);
+)
 
 /** @typedef {import("./interfaces").DocType} DocType */

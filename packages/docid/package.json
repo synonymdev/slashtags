@@ -20,7 +20,7 @@
     }
   },
   "scripts": {
-    "lint": "eslint ./src --fix",
+    "lint": "standard  --fix ./src",
     "build:js": "ipjs build --tests --main",
     "build:types": "tsc -p tsconfig.json && mv ./types ./dist/types",
     "build": "npm run build:js && npm run build:types",

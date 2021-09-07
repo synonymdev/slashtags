@@ -1,12 +1,12 @@
-import { createHandshake, generateChallenge } from '../crypto.js';
+import { createHandshake, generateChallenge } from '../crypto.js'
 import {
   PROLOGUE,
   DEFAULT_CHALLENGE_LENGTH,
-  DEFAULT_CURVE,
-} from '../constants.js';
+  DEFAULT_CURVE
+} from '../constants.js'
 
 /** @type {(challenge:Buffer) => string} */
-const sessionID = (challenge) => challenge.toString('hex');
+const sessionID = (challenge) => challenge.toString('hex')
 
 /**
  * Verify an Initiator's attestation to a challenge of an active session
@@ -22,42 +22,42 @@ export const _verify = ({
   sessions,
   attestation,
   curve,
-  challengeLength = DEFAULT_CHALLENGE_LENGTH,
+  challengeLength = DEFAULT_CHALLENGE_LENGTH
 }) => {
-  const handshake = createHandshake('IK', false, keypair, { curve });
+  const handshake = createHandshake('IK', false, keypair, { curve })
 
-  handshake.initialise(PROLOGUE);
-  const res = handshake.recv(attestation);
+  handshake.initialise(PROLOGUE)
+  const res = handshake.recv(attestation)
 
-  const challenge = res.subarray(0, challengeLength);
-  const initiatorMetadata = res.subarray(challengeLength);
+  const challenge = res.subarray(0, challengeLength)
+  const initiatorMetadata = res.subarray(challengeLength)
 
-  const session = sessions.get(sessionID(challenge));
+  const session = sessions.get(sessionID(challenge))
 
   if (session == null) {
-    throw new Error(`Challenge ${sessionID(challenge)} not found`);
+    throw new Error(`Challenge ${sessionID(challenge)} not found`)
   }
 
-  sessions.delete(challenge.toString('hex'));
+  sessions.delete(challenge.toString('hex'))
 
   const msg = {
     responderPublicKey: keypair.publicKey.toString('hex'),
     responderMetadata:
       session.responderMetdata &&
-      Buffer.from(session.responderMetdata).toString(),
-  };
+      Buffer.from(session.responderMetdata).toString()
+  }
 
   const responderAttestation = Buffer.from(
-    handshake.send(Buffer.from(JSON.stringify(msg))),
-  );
+    handshake.send(Buffer.from(JSON.stringify(msg)))
+  )
 
   return {
     /** @type {Buffer} Responder's attestation for bidirectional authentication */
     responderAttestation,
     /** @type {Buffer} Initiator's metadata retrieved from the attestation */
-    initiatorMetadata,
-  };
-};
+    initiatorMetadata
+  }
+}
 
 /**
  * @typedef {{
@@ -76,23 +76,23 @@ export const addSession = ({
   sessions,
   timeout,
   challenge,
-  responderMetdata,
+  responderMetdata
 }) => {
-  const identifier = sessionID(challenge);
+  const identifier = sessionID(challenge)
 
   const timer = setTimeout(() => {
-    if (!sessions.has(identifier)) return;
-    sessions.delete(identifier);
-  }, timeout);
+    if (!sessions.has(identifier)) return
+    sessions.delete(identifier)
+  }, timeout)
 
   const session = {
     challenge,
     timer,
-    responderMetdata,
-  };
+    responderMetdata
+  }
 
-  sessions.set(identifier, session);
-};
+  sessions.set(identifier, session)
+}
 
 /**
  * Create a Responder that create and tracks sessions
@@ -108,13 +108,13 @@ export const createResponder = ({
   attestationURL,
   challengeLength = DEFAULT_CHALLENGE_LENGTH,
   curve = DEFAULT_CURVE,
-  metadata,
+  metadata
 }) => {
   /**
    * Active sessions tracked by the responder
    * @type {Map<string, Session>}
    */
-  const sessions = new Map();
+  const sessions = new Map()
 
   /**
    * Create a new session and return the challenge object
@@ -122,23 +122,23 @@ export const createResponder = ({
    * @param {Object} [sessionMetadata] - Session specific metadata (overrides responder metadata)
    */
   const newChallenge = (timeout, sessionMetadata) => {
-    const challenge = generateChallenge(challengeLength);
+    const challenge = generateChallenge(challengeLength)
 
-    metadata = sessionMetadata || metadata;
+    metadata = sessionMetadata || metadata
 
     addSession({
       timeout,
       sessions,
       challenge,
-      responderMetdata: metadata && Buffer.from(JSON.stringify(metadata)),
-    });
+      responderMetdata: metadata && Buffer.from(JSON.stringify(metadata))
+    })
 
     return {
       attestationURL,
       responderPublicKey: keypair.publicKey,
-      challenge: challenge,
-    };
-  };
+      challenge: challenge
+    }
+  }
 
   /**
    * Verify an intitiator's attestation to a challenge
@@ -149,22 +149,22 @@ export const createResponder = ({
    * }}
    */
   const verify = (attestation) => {
-    const result = _verify({ keypair, attestation, sessions, curve });
+    const result = _verify({ keypair, attestation, sessions, curve })
     try {
       result.initiatorMetadata = JSON.parse(
-        result.initiatorMetadata.toString(),
-      );
+        result.initiatorMetadata.toString()
+      )
     } catch (error) {}
-    return result;
-  };
+    return result
+  }
 
   return {
     config: { keypair, curve, challengeLength },
     sessions,
     newChallenge,
-    verify,
-  };
-};
+    verify
+  }
+}
 
 /** @typedef {import("../interfaces").KeyPair} KeyPair */
 /** @typedef {import("../interfaces").Curve} Curve */

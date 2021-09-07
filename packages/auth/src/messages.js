@@ -1,9 +1,9 @@
 import {
   AttestationSource,
   CURRENT_VERSION,
-  KNOWN_VERSIONS,
-} from './constants.js';
-import * as varint from './varint.js';
+  KNOWN_VERSIONS
+} from './constants.js'
+import * as varint from './varint.js'
 
 /**
  * Encode version code, challenge and responder's publickey
@@ -14,9 +14,9 @@ import * as varint from './varint.js';
 export const encodeChallenge = (challenge, publicKey) => {
   return varint.prepend(
     [CURRENT_VERSION, challenge.byteLength],
-    Uint8Array.from([...challenge, ...publicKey]),
-  );
-};
+    Uint8Array.from([...challenge, ...publicKey])
+  )
+}
 
 /**
  * Read challenge and publickey from a challenge message
@@ -27,17 +27,16 @@ export const encodeChallenge = (challenge, publicKey) => {
  * }}}
  */
 export const decodeChallenge = (message) => {
-  const [version, versionFree] = varint.split(message);
-  if (!KNOWN_VERSIONS.includes(version))
-    throw new Error('Unknown SlashtagsAuth version code');
+  const [version, versionFree] = varint.split(message)
+  if (!KNOWN_VERSIONS.includes(version)) { throw new Error('Unknown SlashtagsAuth version code') }
 
-  const [challengeLength, challengeLenFree] = varint.split(versionFree);
+  const [challengeLength, challengeLenFree] = varint.split(versionFree)
 
   return {
     challenge: challengeLenFree.slice(0, challengeLength),
-    remotePK: challengeLenFree.slice(challengeLength),
-  };
-};
+    remotePK: challengeLenFree.slice(challengeLength)
+  }
+}
 
 /**
  * Encode version code, attestation source, challenge and responder's publickey
@@ -49,9 +48,9 @@ export const decodeChallenge = (message) => {
 export const encodeAttestation = (attestationSource, challengeLen, signed) => {
   return varint.prepend(
     [CURRENT_VERSION, attestationSource, challengeLen],
-    signed,
-  );
-};
+    signed
+  )
+}
 
 /**
  * Read challenge, publickey, and source of attestation from a message
@@ -63,15 +62,14 @@ export const encodeAttestation = (attestationSource, challengeLen, signed) => {
  * }}}
  */
 export const decodeAttestation = (message) => {
-  const [version, versionFree] = varint.split(message);
-  if (!KNOWN_VERSIONS.includes(version))
-    throw new Error('Unknown SlashtagsAuth version code');
+  const [version, versionFree] = varint.split(message)
+  if (!KNOWN_VERSIONS.includes(version)) { throw new Error('Unknown SlashtagsAuth version code') }
 
-  const [attestationSource, soruceFree] = varint.split(versionFree);
-  const [challengeLength, signedMessage] = varint.split(soruceFree);
+  const [attestationSource, soruceFree] = varint.split(versionFree)
+  const [challengeLength, signedMessage] = varint.split(soruceFree)
 
-  return { attestationSource, challengeLength, signedMessage };
-};
+  return { attestationSource, challengeLength, signedMessage }
+}
 
 /** @typedef {import('./interfaces').KeyPair} KeyPair */
 /** @typedef {import('./interfaces').Serializable} Serializable */

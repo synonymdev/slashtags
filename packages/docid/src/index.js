@@ -1,4 +1,4 @@
-import { create, parse, toString } from "./DocID.js";
-import * as CID from "./docTypes/CID.js";
+import { create, parse, toString } from './DocID.js'
+import * as CID from './docTypes/CID.js'
 
-export const DocID = { create, parse, toString, CID };
+export const DocID = { create, parse, toString, CID }
