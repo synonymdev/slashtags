@@ -1,4 +1,4 @@
-import { createHandshake, decodeChallenge } from '../utils/index.js';
+import { createHandshake } from '../crypto.js';
 import { DEFAULT_CURVE, PROLOGUE } from '../constants.js';
 
 /**
@@ -7,7 +7,7 @@ import { DEFAULT_CURVE, PROLOGUE } from '../constants.js';
  * @param {KeyPair} config.keypair
  * @param {Buffer} config.responderPublicKey
  * @param {Buffer} config.challenge
- * @param {Curve | Curve[]} [config.curve]
+ * @param {Curve } [config.curve]
  * @param {object} [config.initiatorMetadata]
  */
 export const createInitiatior = ({
@@ -17,34 +17,29 @@ export const createInitiatior = ({
   curve,
   initiatorMetadata,
 }) => {
-  const decoded = decodeChallenge(challenge);
-
-  curve = curve || DEFAULT_CURVE;
-  if (Array.isArray(curve)) {
-    curve = curve.find((c) => c.ALG === decoded.curveName);
-  } else if (curve?.ALG) {
-    curve = curve.ALG === decoded.curveName ? curve : undefined;
-  }
-
-  if (!curve && decoded.curveName !== 'Ed25519') {
-    throw new Error('No suitable curve provided for: ' + decoded.curveName);
-  }
-
   const handshake = createHandshake('IK', true, keypair, {
     curve: curve || DEFAULT_CURVE,
   });
+
   handshake.initialise(PROLOGUE, responderPublicKey);
 
-  const attestation = Buffer.from(
-    handshake.send(
-      Buffer.concat([
-        decoded.challenge,
-        initiatorMetadata
-          ? Buffer.from(JSON.stringify(initiatorMetadata))
-          : Buffer.alloc(0),
-      ]),
-    ),
-  );
+  let attestation;
+  try {
+    attestation = Buffer.from(
+      handshake.send(
+        Buffer.concat([
+          challenge,
+          initiatorMetadata
+            ? Buffer.from(JSON.stringify(initiatorMetadata))
+            : Buffer.alloc(0),
+        ]),
+      ),
+    );
+  } catch (error) {
+    throw new Error(
+      "Responder's keypair were generated using a different curve",
+    );
+  }
 
   /**
    * @param {Buffer} responderAttestation

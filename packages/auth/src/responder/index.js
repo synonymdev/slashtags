@@ -1,17 +1,9 @@
-import sodium from 'sodium-universal';
-import { encodeChallenge, createHandshake } from '../utils/index.js';
-import { PROLOGUE, CHALLENGE_LENGTH, DEFAULT_CURVE } from '../constants.js';
-
-/**
- * Generate new random challenge
- * @param {number} challengeLength
- * @returns {Buffer}
- */
-export const generateChallenge = (challengeLength = CHALLENGE_LENGTH) => {
-  const challenge = Buffer.allocUnsafe(challengeLength);
-  sodium.randombytes_buf(challenge);
-  return challenge;
-};
+import { createHandshake, generateChallenge } from '../crypto.js';
+import {
+  PROLOGUE,
+  DEFAULT_CHALLENGE_LENGTH,
+  DEFAULT_CURVE,
+} from '../constants.js';
 
 /** @type {(challenge:Buffer) => string} */
 const sessionID = (challenge) => challenge.toString('hex');
@@ -23,14 +15,14 @@ const sessionID = (challenge) => challenge.toString('hex');
  * @param {Map<string, Session>} config.sessions
  * @param {Buffer} config.attestation
  * @param {Curve} config.curve
- * @param {number} [config.challengeLength=CHALLENGE_LENGTH]
+ * @param {number} [config.challengeLength=DEFAULT_CHALLENGE_LENGTH]
  */
 export const _verify = ({
   keypair,
   sessions,
   attestation,
   curve,
-  challengeLength = CHALLENGE_LENGTH,
+  challengeLength = DEFAULT_CHALLENGE_LENGTH,
 }) => {
   const handshake = createHandshake('IK', false, keypair, { curve });
 
@@ -107,14 +99,14 @@ export const addSession = ({
  * @param {object} config
  * @param {KeyPair} config.keypair - Responder keypair
  * @param {string} [config.attestationURL] - URL for the initiator to send attestations to
- * @param {number} [config.challengeLength=CHALLENGE_LENGTH] - Length of the challenge
+ * @param {number} [config.challengeLength=DEFAULT_CHALLENGE_LENGTH] - Length of the challenge
  * @param {Curve} [config.curve] - Curve to use for Noise handshake
  * @param {Object} [config.metadata] - Responder metadata
  */
 export const createResponder = ({
   keypair,
   attestationURL,
-  challengeLength = CHALLENGE_LENGTH,
+  challengeLength = DEFAULT_CHALLENGE_LENGTH,
   curve = DEFAULT_CURVE,
   metadata,
 }) => {
@@ -144,7 +136,7 @@ export const createResponder = ({
     return {
       attestationURL,
       responderPublicKey: keypair.publicKey,
-      challenge: encodeChallenge(curve.ALG, challenge),
+      challenge: challenge,
     };
   };
 

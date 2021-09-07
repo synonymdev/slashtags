@@ -24,7 +24,7 @@
     "build:js": "ipjs build --tests --main",
     "build:types": "tsc -p tsconfig.json && mv ./types ./dist/types",
     "build": "npm run build:js && npm run build:types",
-    "test": "hundreds mocha test/**/*.spec.js",
+    "test": "hundreds mocha test --recursive",
     "test:cjs:browser": "cd ../../ && polendina --page --worker --serviceworker --cleanup packages/docid/dist/cjs/browser-test/*.spec.js",
     "test:cjs": "npm run build && mocha dist/cjs/node-test/*.spec.js",
     "test:all": "npm run lint && npm run test && npm run test:cjs && npm run test:cjs:browser",

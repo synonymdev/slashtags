@@ -1,4 +1,4 @@
-import { generateChallenge } from '../../src/responder/index.js';
+import { generateChallenge } from '../../src/crypto.js';
 import assert from 'assert';
 
 describe('Slashtags Auth: Responder: generateChallenge()', () => {

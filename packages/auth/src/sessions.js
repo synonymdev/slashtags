@@ -1,0 +1,31 @@
+/**
+ * Provide a canonical way to create a string key from a challenge
+ * @param {Buffer | Uint8Array} challenge
+ * @returns {string}
+ */
+export const sessionID = (challenge) => new TextDecoder().decode(challenge);
+
+/**
+ * Add a session with a timeout to a sessions map
+ * @param {Object} config
+ * @param {number} config.timeout
+ * @param {Map<string, Session>} config.sessions
+ * @param {Buffer | Uint8Array} config.challenge
+ * @param {Uint8Array} [config.metadata]
+ */
+export const addSession = ({ sessions, timeout, challenge, metadata }) => {
+  const identifier = sessionID(challenge);
+
+  const timer = setTimeout(() => {
+    if (!sessions.get(identifier)) return;
+    sessions.delete(identifier);
+  }, timeout);
+
+  sessions.set(
+    identifier,
+    //@ts-ignore
+    { challenge, timer, metadata },
+  );
+};
+
+/** @typedef {import('./interfaces').Session} Session */

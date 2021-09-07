@@ -26,3 +26,9 @@ export interface Noise {
   recv: (buf: Buffer) => Buffer;
   send: (payload: Buffer) => Uint8Array;
 }
+
+export interface Session {
+  challenge: Uint8Array;
+  timer: NodeJS.Timeout;
+  metadata?: Uint8Array;
+}

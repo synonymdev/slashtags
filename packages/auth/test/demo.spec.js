@@ -1,5 +1,6 @@
 import { createInitiatior, createResponder } from '../src/index.js';
 import secp256k1 from 'noise-curve-secp';
+import assert from 'assert';
 
 describe('Slashtags Auth', () => {
   it('demo', () => {
@@ -31,17 +32,18 @@ describe('Slashtags Auth', () => {
       responderAttestation,
     } = responder.verify(initiator.attestation);
 
-    expect(initiatorMetadata).toEqual({ name: 'foo' });
+    assert.deepEqual(initiatorMetadata, { name: 'foo' });
 
     // Finally pass the responder attestation to the initiator
     const responderPayload = initiator.verify(responderAttestation);
 
-    expect(responderPayload).toEqual({
+    assert.deepEqual(responderPayload, {
       responderMetadata: { description: 'challenge' },
       responderPublicKey: responderKeypair.publicKey.toString('hex'),
     });
 
-    expect(responderPayload.responderPublicKey).toEqual(
+    assert.deepEqual(
+      responderPayload.responderPublicKey,
       responderKeypair.publicKey.toString('hex'),
     );
   });
