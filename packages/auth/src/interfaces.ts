@@ -1,4 +1,4 @@
-import EventEmitter from "events";
+import EventEmitter from 'events';
 
 export interface KeyPair {
   publicKey: Buffer | Uint8Array;
@@ -30,7 +30,7 @@ export interface Noise {
 export interface Session {
   challenge: Uint8Array;
   timer: NodeJS.Timeout;
-  metadata?: Uint8Array;
+  metadata: Uint8Array;
 }
 
 export type Serializable =

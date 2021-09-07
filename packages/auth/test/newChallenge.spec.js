@@ -6,7 +6,7 @@ import { decodeChallenge } from '../src/messages.js'
 
 const keypair = DEFAULT_CURVE.generateKeyPair()
 
-describe('Slashtags Auth: Responder: newChallenge()', () => {
+describe('Slashtags Auth: newChallenge()', () => {
   it('should create new encoded challenge message', () => {
     const authenticator = createAuth(keypair)
 

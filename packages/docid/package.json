@@ -22,7 +22,7 @@
   "scripts": {
     "lint": "standard  --fix ./src",
     "build:js": "ipjs build --tests --main",
-    "build:types": "tsc -p tsconfig.json && mv ./types ./dist/types",
+    "build:types": "tsc -p tsconfig.json",
     "build": "npm run build:js && npm run build:types",
     "test": "hundreds mocha test --recursive",
     "test:cjs:browser": "cd ../../ && polendina --page --worker --serviceworker --cleanup packages/docid/dist/cjs/browser-test/*.spec.js",
@@ -52,5 +52,13 @@
     "./docTypes/CID": {
       "import": "./src/docTypes/CID.js"
     }
+  },
+  "standard": {
+    "env": [
+      "mocha"
+    ],
+    "ignore": [
+      "dist/"
+    ]
   }
 }

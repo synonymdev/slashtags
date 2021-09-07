@@ -11,6 +11,7 @@ export const generateChallenge = (
   challengeLength = DEFAULT_CHALLENGE_LENGTH
 ) => {
   const challenge = Buffer.allocUnsafe(challengeLength)
+  // @ts-ignore
   sodium.randombytes_buf(challenge)
   return challenge
 }
@@ -37,9 +38,13 @@ export const createHandshake = (pattern, initiator, staticKeypair, opts) => {
  * @returns {boolean}
  */
 export const validateKeyForCurve = (curve, publicKey, secretKey) => {
-  if (publicKey && curve.PKLEN !== publicKey.byteLength) { throw new Error('Invalid publicKey size for curve: ' + curve.ALG) }
+  if (publicKey && curve.PKLEN !== publicKey.byteLength) {
+    throw new Error('Invalid publicKey size for curve: ' + curve.ALG)
+  }
 
-  if (secretKey && curve.SKLEN !== secretKey.byteLength) { throw new Error('Invalid secretKey size for curve: ' + curve.ALG) }
+  if (secretKey && curve.SKLEN !== secretKey.byteLength) {
+    throw new Error('Invalid secretKey size for curve: ' + curve.ALG)
+  }
 
   return true
 }

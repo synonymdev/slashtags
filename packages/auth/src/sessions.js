@@ -3,7 +3,7 @@
  * @param {Buffer | Uint8Array} challenge
  * @returns {string}
  */
-export const sessionID = (challenge) => new TextDecoder().decode(challenge)
+export const sessionID = (challenge) => Buffer.from(challenge).toString('hex')
 
 /**
  * Add a session with a timeout to a sessions map

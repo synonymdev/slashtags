@@ -56,7 +56,7 @@ describe('Slashtags Auth: signChallenge()', () => {
 
     const attestation = authenticator.signChallenge(msg)
 
-    const { attestationSource, challengeLength, signedMessage } =
+    const { attestationSource, splitAt, signedMessage } =
       decodeAttestation(attestation)
 
     assert.equal(attestationSource, AttestationSource.Initiator)
@@ -68,12 +68,12 @@ describe('Slashtags Auth: signChallenge()', () => {
     handshake.initialise(PROLOGUE)
     const res = handshake.recv(signedMessage)
 
-    const metadata = res.slice(challengeLength)
-    assert.deepEqual(res.slice(0, challengeLength), challenge)
-    assert.equal(metadata, undefined)
+    const metadata = res.slice(splitAt)
+    assert.deepEqual(res.slice(0, splitAt), challenge)
+    assert.deepEqual(new TextDecoder().decode(metadata), '')
   })
 
-  it('should correctly signt the challenge and return an encoded attestation with metdata', () => {
+  it('should correctly sign the challenge and return an encoded attestation with metdata', () => {
     const keypair = secp256k1.generateKeyPair()
     const authenticator = createAuth(keypair, { metadata: { foo: 'bar' } })
 
@@ -84,7 +84,7 @@ describe('Slashtags Auth: signChallenge()', () => {
 
     const attestation = authenticator.signChallenge(msg)
 
-    const { attestationSource, challengeLength, signedMessage } =
+    const { attestationSource, splitAt, signedMessage } =
       decodeAttestation(attestation)
 
     assert.equal(attestationSource, AttestationSource.Initiator)
@@ -96,8 +96,8 @@ describe('Slashtags Auth: signChallenge()', () => {
     handshake.initialise(PROLOGUE)
     const res = handshake.recv(signedMessage)
 
-    const metadata = res.slice(challengeLength)
-    assert.deepEqual(res.slice(0, challengeLength), challenge)
+    const metadata = res.slice(splitAt)
+    assert.deepEqual(res.slice(0, splitAt), challenge)
     assert.equal(
       new TextDecoder().decode(metadata),
       JSON.stringify({ foo: 'bar' })
@@ -115,7 +115,7 @@ describe('Slashtags Auth: signChallenge()', () => {
 
     const attestation = authenticator.signChallenge(msg, { foo: 'zar' })
 
-    const { attestationSource, challengeLength, signedMessage } =
+    const { attestationSource, splitAt, signedMessage } =
       decodeAttestation(attestation)
 
     assert.equal(attestationSource, AttestationSource.Initiator)
@@ -127,8 +127,8 @@ describe('Slashtags Auth: signChallenge()', () => {
     handshake.initialise(PROLOGUE)
     const res = handshake.recv(signedMessage)
 
-    const metadata = res.slice(challengeLength)
-    assert.deepEqual(res.slice(0, challengeLength), challenge)
+    const metadata = res.slice(splitAt)
+    assert.deepEqual(res.slice(0, splitAt), challenge)
     assert.equal(
       new TextDecoder().decode(metadata),
       JSON.stringify({ foo: 'zar' })

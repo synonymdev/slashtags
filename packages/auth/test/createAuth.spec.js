@@ -9,11 +9,14 @@ describe('Slashtags Auth: createAuth()', () => {
     const keypair = secp256k1.generateKeyPair()
     const authenticator = createAuth(keypair)
 
-    assert.deepEqual(authenticator.config, {
-      metadata: undefined,
-      challengeLength: DEFAULT_CHALLENGE_LENGTH,
-      curve: secp256k1
-    })
+    assert.deepEqual(
+      JSON.stringify(authenticator.config),
+      JSON.stringify({
+        metadata: undefined,
+        challengeLength: DEFAULT_CHALLENGE_LENGTH,
+        curve: secp256k1
+      })
+    )
   })
 
   it('should create authenticator with custom configurations', () => {

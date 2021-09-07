@@ -1,8 +1,4 @@
-import {
-  AttestationSource,
-  CURRENT_VERSION,
-  KNOWN_VERSIONS
-} from './constants.js'
+import { CURRENT_VERSION, KNOWN_VERSIONS } from './constants.js'
 import * as varint from './varint.js'
 
 /**
@@ -19,8 +15,19 @@ export const encodeChallenge = (challenge, publicKey) => {
 }
 
 /**
+ * Check the version of SlashtagsAuth
+ * @param {number} version
+ * @throws {Error}
+ */
+const validateVersion = (version) => {
+  if (!KNOWN_VERSIONS.includes(version)) {
+    throw new Error('Unknown SlashtagsAuth version code')
+  }
+}
+
+/**
  * Read challenge and publickey from a challenge message
- * @param {Uint8Array} message <version-code><challenge-len><challenge><pk>
+ * @param {Uint8Array} message <version-code><challenge-len><challenge><rest>
  * @returns {{
  *  challenge: Uint8Array,
  *  remotePK: KeyPair["publicKey"]
@@ -28,7 +35,7 @@ export const encodeChallenge = (challenge, publicKey) => {
  */
 export const decodeChallenge = (message) => {
   const [version, versionFree] = varint.split(message)
-  if (!KNOWN_VERSIONS.includes(version)) { throw new Error('Unknown SlashtagsAuth version code') }
+  validateVersion(version)
 
   const [challengeLength, challengeLenFree] = varint.split(versionFree)
 
@@ -41,35 +48,33 @@ export const decodeChallenge = (message) => {
 /**
  * Encode version code, attestation source, challenge and responder's publickey
  * @param {AttestationSource} attestationSource
- * @param {number} challengeLen
+ * @param {number} splitAt
  * @param {Uint8Array} signed
- * @returns {Uint8Array} <version-code><attestation-source><chlng-len><signed <challenge><metadata>>
+ * @returns {Uint8Array} <version-code><attestation-source><splitAt><signed <a><b>>
  */
-export const encodeAttestation = (attestationSource, challengeLen, signed) => {
-  return varint.prepend(
-    [CURRENT_VERSION, attestationSource, challengeLen],
-    signed
-  )
+export const encodeAttestation = (attestationSource, splitAt, signed) => {
+  return varint.prepend([CURRENT_VERSION, attestationSource, splitAt], signed)
 }
 
 /**
  * Read challenge, publickey, and source of attestation from a message
- * @param {Uint8Array} message <version-code><attestation-source><chlng-len><signed <challenge><metadata>>
+ * @param {Uint8Array} message <version-code><attestation-source><splitAt><signed <a><b>>
  * @returns {{
  *  attestationSource: number
- *  challengeLength: number,
+ *  splitAt: number,
  *  signedMessage: Uint8Array
  * }}}
  */
 export const decodeAttestation = (message) => {
   const [version, versionFree] = varint.split(message)
-  if (!KNOWN_VERSIONS.includes(version)) { throw new Error('Unknown SlashtagsAuth version code') }
+  validateVersion(version)
 
   const [attestationSource, soruceFree] = varint.split(versionFree)
-  const [challengeLength, signedMessage] = varint.split(soruceFree)
+  const [splitAt, signedMessage] = varint.split(soruceFree)
 
-  return { attestationSource, challengeLength, signedMessage }
+  return { attestationSource, splitAt, signedMessage }
 }
 
 /** @typedef {import('./interfaces').KeyPair} KeyPair */
 /** @typedef {import('./interfaces').Serializable} Serializable */
+/** @typedef {import('./constants').AttestationSource} AttestationSource */

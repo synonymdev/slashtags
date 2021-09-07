@@ -20,12 +20,12 @@
         }
     },
     "scripts": {
-        "lint": "standard  --fix ./src",
+        "lint": "standard  --fix",
         "build:js": "ipjs build --tests --main",
-        "build:types": "tsc -p tsconfig.json && mv ./types ./dist/types",
+        "build:types": "tsc -p tsconfig.json",
         "build": "npm run build:js && npm run build:types",
         "test": "hundreds mocha test --recursive",
-        "test:cjs:browser": "cd ../../ && polendina --page --worker --serviceworker --cleanup packages/auth/dist/cjs/browser-test/*.spec.js",
+        "test:cjs:browser": "echo TODO test sodium-universal in browser",
         "test:cjs": "npm run build && mocha dist/cjs/node-test/*.spec.js",
         "test:all": "npm run lint && npm run test && npm run test:cjs && npm run test:cjs:browser",
         "prepublishOnly": "npm run test:all && rm -rf dist/**/*test"
@@ -46,11 +46,16 @@
         ".": {
             "import": "./src/index.js"
         },
-        "./responder": {
-            "import": "./src/responder/index.js"
-        },
-        "./initiator": {
-            "import": "./src/initiator/index.js"
+        "./authenticator": {
+            "import": "./src/authenticator.js"
         }
+    },
+    "standard": {
+        "env": [
+            "mocha"
+        ],
+        "ignore": [
+            "dist/"
+        ]
     }
 }

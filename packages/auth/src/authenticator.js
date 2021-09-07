@@ -9,7 +9,7 @@ import {
   createHandshake,
   validateKeyForCurve
 } from './crypto.js'
-import { addSession } from './sessions.js'
+import { addSession, sessionID } from './sessions.js'
 import * as msgs from './messages.js'
 
 /**
@@ -51,6 +51,8 @@ export const createAuth = (keypair, config = {}) => {
     return msgs.encodeChallenge(challenge, keypair.publicKey)
   }
 
+  const intitiatorHandshake = createHandshake('IK', true, keypair, { curve })
+
   /**
    * Sign a challenge passed within an encoded message
    * Optionally: override metadata for this attestation
@@ -63,15 +65,14 @@ export const createAuth = (keypair, config = {}) => {
 
     validateKeyForCurve(curve, remotePK)
 
-    const handshake = createHandshake('IK', true, keypair, { curve })
-
-    handshake.initialise(PROLOGUE, remotePK)
-
     const metadata = new TextEncoder().encode(
       JSON.stringify(metdata || config.metadata)
     )
 
-    const signed = handshake.send(Uint8Array.from([...challenge, ...metadata]))
+    intitiatorHandshake.initialise(PROLOGUE, remotePK)
+    const signed = intitiatorHandshake.send(
+      Uint8Array.from([...challenge, ...metadata])
+    )
     return msgs.encodeAttestation(
       AttestationSource.Initiator,
       challengeLength,
@@ -81,10 +82,65 @@ export const createAuth = (keypair, config = {}) => {
 
   /**
    * Verifies a signed message according to its source (initiator / responder)
-   * @param {Uint8Array} signedMessage
-   * @returns {Uint8Array} Signed message
+   * @param {Uint8Array} attestation
+   * @returns {{
+   *  as: "Responder",
+   *  metadata: Serializable,
+   *  responderAttestation: Uint8Array,
+   * } | {
+   *  as: "Initiator",
+   *  metadata: Serializable,
+   *  responderPK: Uint8Array,
+   * }} Signed message
    */
-  const verify = (signedMessage, metdata) => {}
+  const verify = (attestation) => {
+    const { attestationSource, splitAt, signedMessage } =
+      msgs.decodeAttestation(attestation)
+
+    if (attestationSource === AttestationSource.Initiator) {
+      const handshake = createHandshake('IK', false, keypair, { curve })
+      handshake.initialise(PROLOGUE)
+
+      const res = handshake.recv(signedMessage)
+
+      const challenge = res.subarray(0, splitAt)
+      const initiatorMetadata = res.subarray(splitAt)
+
+      const id = sessionID(challenge)
+      const session = sessions.get(id)
+
+      if (!session) throw new Error(`Challenge ${id} not found`)
+
+      sessions.delete(id)
+
+      const msg = Uint8Array.from([...keypair.publicKey, ...session.metadata])
+
+      const metadata = JSON.parse(new TextDecoder().decode(initiatorMetadata))
+
+      return {
+        as: 'Responder',
+        metadata,
+        responderAttestation: msgs.encodeAttestation(
+          AttestationSource.Responder,
+          keypair.publicKey.byteLength,
+          handshake.send(msg)
+        )
+      }
+    } else if (attestationSource === AttestationSource.Responder) {
+      const msg = intitiatorHandshake.recv(signedMessage)
+      const responderPK = msg.slice(0, splitAt)
+
+      const metadata = JSON.parse(new TextDecoder().decode(msg.slice(splitAt)))
+
+      return {
+        as: 'Initiator',
+        responderPK,
+        metadata
+      }
+    } else {
+      throw new Error('Invalid Attestation source: ' + attestationSource)
+    }
+  }
 
   return {
     get config () {
@@ -98,7 +154,8 @@ export const createAuth = (keypair, config = {}) => {
       return sessions
     },
     newChallenge,
-    signChallenge
+    signChallenge,
+    verify
   }
 }
 
