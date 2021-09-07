@@ -4,29 +4,27 @@
 
 ## Overview
 
+Slashtags Auth follows few steps:
+
 - **Request**
 
-  An Initiator (client or a peer) sends a request to a server or another peer.
+  An **Initiator** (client or a peer) sends a request to a server or another peer.
 
-- **Challenge**
+- **Responder**
+  Sends back the following:
 
-  Responder sends back the following:
-
-  - Challenge: curve name + random bytes.
   - Public key: the responder's public key.
-  - attestationURL: which is where the responder expects to revieve the attestation and metadata.
+  - Challenge: curve name + random bytes.
+
+  encoded with a varint for the Slashtags Auth version.
 
 - **Route to key manager (optional)**
 
-  If the key manager (wallet) is separate from the initiator, then the initiator should pass the payload from above to the key manager using [Slashtags URI]() with the [Slashtags/Auth]() shcema or an equivilant QR code.
+  In case the (client or peer) doesn't manage the keypair, it should prepare a Slashtags Action's and send it to the wallet or key manager, see the Slashtags Actions's Integration below.
 
 - **Initiator Attestation**
 
-  The initiator (or the key manager) signs the challenge and send the attestation in a query param to the given attestationURL.
-
-  ```js
-  await fetch(`{attestationURL}/?attestation={inititor.attestation}`);
-  ```
+  The **Initiator** signs the challenge (or get the attestation from a key manager) and send it back encoded with the Version Code, and the source of the attestation, in this case (Initiator).
 
 - **Responder verification**
 
@@ -34,59 +32,56 @@
 
 - **Initiator verification**
 
-  Initiator verifies the responder's attestation.
+  Initiator verifies the responder's attestation to ensure bidirectional authentication.
 
 ## Usage
 
 ```js
-import { createResponder, createInitiatior } from './index.js';
+import { createAuth } from '@synonymdev/slashtags-auth';
 import secp256k1 from 'noise-curve-secp';
 
 // === Responder's Side ===
-// Create a responder to manage sessions
 const responderKeypair = secp256k1.generateKeyPair();
-const responder = createResponder({
-  keypair: responderKeypair,
-  metadata: Buffer.from(JSON.stringify({ description: 'responder' })),
+const responder = createAuth(responderKeyPair, {
+  metadata: { foo: 'responder' },
 });
+
+// Generate a new challenge and track session's timeout
 const { challenge, attestationURL, responderPublicKey } =
   responder.newChallenge(100);
 
 // === Initiator's Side ===
 const initiatorKeypair = secp256k1.generateKeyPair();
-const initiator = createInitiatior({
-  keypair: initiatorKeypair,
-  responderPublicKey: responderPublicKey,
-  challenge: challenge,
-  initiatorMetadata: Buffer.from(JSON.stringify({ name: 'foo' })),
+const initiator = createAuth(initiatorKeypair, responderKeyPair, {
+  metadata: { foo: 'intitiator' },
 });
-// Send the attestations to the responder and get the responder's attestation
-// const responderAttestation = await fetch(
-// `{attestationURL}/?attestation={initiator.attestation}`,
-// );
 
 // === Responder's Side ===
 // Pass the attestation to the responder
-const {
-  initiatorMetadata, //=> Buffer.from("{\"name\":\"foo\"}")
-  responderAttestation, // For bidirectional authentication (buffer)
-} = responder.verify(initiator.attestation);
+const resultResponder = responder.verify(initiator.attestation);
+// resultResponder => {
+//  as: 'Responder',
+//  metadata: { foo: 'initiator' },
+//  responderAttestation: Uint8Array[...]
+// }
 
 // === Initiator's Side ===
 // Finally pass the responder attestation to the initiator
-const responderPayload = initiator.verify(responderAttestation);
-/*=>
-{
-  // JSON stringified
-  responderMetadata: "{\"description\":\"responder\"}",
-  // Multibase encoded buffer
-  publicKey: "uIMrT1tFHtsvbPSImfEpRyr-SgLmi2cCvBOhYQwl2hBqzFY4IOZT0otX-BcutcNX83KmNyjBWuKgamQti3YBVNw",
-};
-*/
+const resultInitiator = responder.verify(resultResponder.responderAttestation);
+
+// resultInitiator => {
+//  as: 'Initiator',
+//  metadata: { foo: 'responder' },
+//  responderPK: Uint8Array[...]
+//}
 ```
 
 ## Eliptic Curves
 
-By defualt the library uses the `secp256k1` curve.
+By default the library uses the `secp256k1` curve.
 
-Currently both the initiator and the responder keypairs needs to use the same curve.
+Both the initiator and the responder keypairs needs to use the same curve.
+
+## Slashtags Actions integration
+
+TODO: explain how Slashtags Actions fit in Slashtags Auth's flow.
