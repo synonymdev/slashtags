@@ -6,9 +6,6 @@
   "main": "./src/index.js",
   "types": "./types/index.d.ts",
   "type": "module",
-  "files": [
-    "dist/**/*"
-  ],
   "typesVersions": {
     "*": {
       "*": [
