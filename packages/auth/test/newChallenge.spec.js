@@ -2,37 +2,28 @@ import { createAuth } from '../src/authenticator.js';
 import { DEFAULT_CHALLENGE_LENGTH, DEFAULT_CURVE } from '../src/constants.js';
 import assert from 'assert';
 import { sessionID } from '../src/sessions.js';
-import * as varint from '../src/varint.js';
+import { decodeChallenge } from '../src/messages.js';
 
 const keypair = DEFAULT_CURVE.generateKeyPair();
-
-// Remove the version prefix and slice with the public key length
-const getChallenge = (msg, auth) =>
-  varint.split(msg)[1].slice(auth.config.curve.PKLEN);
 
 describe('Slashtags Auth: Responder: newChallenge()', () => {
   it('should create new encoded challenge message', () => {
     const authenticator = createAuth(keypair);
 
     const message = authenticator.newChallenge(10);
-    const codeLen = varint.split(message)[2];
 
-    assert.deepEqual(
-      message.slice(codeLen, authenticator.config.curve.PKLEN + codeLen),
-      keypair.publicKey,
-    );
+    const { challenge, remotePK } = decodeChallenge(message);
 
-    assert.deepEqual(
-      getChallenge(message, authenticator).length,
-      DEFAULT_CHALLENGE_LENGTH,
-    );
+    assert.deepEqual(remotePK, keypair.publicKey);
+
+    assert.deepEqual(challenge.byteLength, DEFAULT_CHALLENGE_LENGTH);
   });
 
   it('should save the newly created challenge in the sessions map', () => {
     const authenticator = createAuth(keypair);
     const message = authenticator.newChallenge(10);
 
-    const challenge = getChallenge(message, authenticator);
+    const challenge = decodeChallenge(message).challenge;
 
     const id = sessionID(challenge);
     const session = authenticator.sessions.get(id);
@@ -51,7 +42,8 @@ describe('Slashtags Auth: Responder: newChallenge()', () => {
     const authenticator = createAuth(keypair, { metadata: { foo: 'bar' } });
     const message = authenticator.newChallenge(10);
 
-    const challenge = getChallenge(message, authenticator);
+    const challenge = decodeChallenge(message).challenge;
+
     const id = sessionID(challenge);
     const session = authenticator.sessions.get(id);
 
@@ -66,7 +58,8 @@ describe('Slashtags Auth: Responder: newChallenge()', () => {
     const authenticator = createAuth(keypair, { metadata: { foo: 'bar' } });
     const message = authenticator.newChallenge(10, { foo: 'zar' });
 
-    const challenge = getChallenge(message, authenticator);
+    const challenge = decodeChallenge(message).challenge;
+
     const id = sessionID(challenge);
     const session = authenticator.sessions.get(id);
 
@@ -81,7 +74,8 @@ describe('Slashtags Auth: Responder: newChallenge()', () => {
     const authenticator = createAuth(keypair);
     const message = authenticator.newChallenge(10);
 
-    const challenge = getChallenge(message, authenticator);
+    const challenge = decodeChallenge(message).challenge;
+
     const id = sessionID(challenge);
     const session = authenticator.sessions.get(id);
 

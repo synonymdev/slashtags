@@ -1,7 +1,7 @@
+import assert from 'assert';
 import * as secp256k1 from 'noise-curve-secp';
 import * as secp from 'noise-handshake/dh.js';
 import { createAuth } from '../src/index.js';
-import assert from 'assert';
 import { DEFAULT_CHALLENGE_LENGTH } from '../src/constants.js';
 
 describe('Slashtags Auth: createAuth()', () => {
@@ -35,7 +35,7 @@ describe('Slashtags Auth: createAuth()', () => {
     const keypair = secp.generateKeyPair();
     let err;
     try {
-      const authenticator = createAuth(keypair);
+      createAuth(keypair);
     } catch (error) {
       err = error;
     }

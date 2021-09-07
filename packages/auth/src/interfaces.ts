@@ -1,8 +1,8 @@
 import EventEmitter from 'events';
 
 export interface KeyPair {
-  publicKey: Buffer;
-  secretKey: Buffer;
+  publicKey: Buffer | Uint8Array;
+  secretKey: Buffer | Uint8Array;
 }
 
 export interface Session extends EventEmitter {
@@ -22,9 +22,9 @@ export interface Curve {
 }
 
 export interface Noise {
-  initialise: (prologue: Buffer, remoteStatic?: Buffer) => void;
-  recv: (buf: Buffer) => Buffer;
-  send: (payload: Buffer) => Uint8Array;
+  initialise: (prologue: Uint8Array, remoteStatic?: Uint8Array) => void;
+  recv: (buf: Uint8Array) => Uint8Array;
+  send: (payload: Uint8Array) => Uint8Array;
 }
 
 export interface Session {
@@ -32,3 +32,11 @@ export interface Session {
   timer: NodeJS.Timeout;
   metadata?: Uint8Array;
 }
+
+export type Serializable =
+  | string
+  | null
+  | boolean
+  | number
+  | Serializable[]
+  | { [key: string]: Serializable };

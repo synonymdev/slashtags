@@ -9,6 +9,7 @@ export const DEFAULT_CURVE = secp256k1;
 
 /** For upgradability and backward compatibility */
 export const CURRENT_VERSION = 0;
+export const KNOWN_VERSIONS = [0];
 
 /** A code to identify the source of attestation
  * @enum {number}
