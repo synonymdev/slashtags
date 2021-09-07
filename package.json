@@ -1,8 +1,15 @@
 {
   "name": "slashtags-js",
-  "version": "0.0.1",
   "scripts": {
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
+    "postinstall": "lerna bootstrap --hoist --ci",
+    "test": "lerna exec npm t",
+    "lint": "lerna run lint",
+    "build": "lerna run build",
+    "publish": "lerna publish",
+    "clean": "npm run clean:deps && npm run clean:deps",
+    "clean:deps": "rm -rf ./node_modules && rm -rf ./packages/*/node_modules && rm -rf ./packages/*/package-lock.json",
+    "clean:build": "rm -rf ./packages/*/dist",
+    "clean:coverage": "rm -rf ./packages/*/coverage"
   },
   "type": "module",
   "keywords": [
@@ -13,21 +20,21 @@
   ],
   "author": "nazeh",
   "devDependencies": {
-    "@hyperswarm/replicator": "^2.0.2",
-    "@types/jest": "^27.0.1",
-    "@types/json-schema": "^7.0.9",
-    "ajv": "^8.6.2",
-    "ajv-formats": "^2.1.1",
-    "base64url": "^3.0.1",
-    "hyperbee": "^1.6.2",
-    "hypercore": "^9.10.0",
-    "hyperswarm": "^2.15.3",
-    "jest": "^27.0.6",
-    "noise-handshake": "^1.2.2",
-    "object-hash": "^2.2.0",
-    "pump": "^3.0.0"
+    "@types/mocha": "^9.0.0",
+    "@types/node": "^16.7.10",
+    "@types/varint": "^6.0.0",
+    "@typescript-eslint/eslint-plugin": "^4.30.0",
+    "@typescript-eslint/parser": "^4.30.0",
+    "hundreds": "^0.0.9",
+    "ipjs": "^5.1.0",
+    "lerna": "^4.0.0",
+    "mocha": "^9.1.1",
+    "polendina": "^1.1.0",
+    "prettier": "2.3.2",
+    "standard": "^16.0.3",
+    "typescript": "^4.2.4"
   },
-  "workspaces": [
-    "./packages/*"
-  ]
+  "dependencies": {
+    "@types/sodium-native": "^2.3.5"
+  }
 }
