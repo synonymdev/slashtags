@@ -34,6 +34,7 @@
         "feed"
     ],
     "dependencies": {
+        "@synonymdev/slashtags-common": "^0.0.1-alpha.2",
         "noise-curve-secp": "^1.0.2",
         "noise-handshake": "^1.2.2",
         "sodium-universal": "^3.0.4",

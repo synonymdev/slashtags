@@ -1,5 +1,5 @@
-import { addSession, sessionID } from '../../src/sessions.js'
-import { generateChallenge } from '../../src/crypto.js'
+import { addSession, sessionID } from '../src/sessions.js'
+import { generateChallenge } from '../src/crypto.js'
 import assert from 'assert'
 
 describe('Slashtags Auth: Responder: addSession()', () => {

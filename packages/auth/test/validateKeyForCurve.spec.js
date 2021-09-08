@@ -1,4 +1,4 @@
-import { validateKeyForCurve } from '../../src/crypto.js'
+import { validateKeyForCurve } from '../src/crypto.js'
 import * as secp256k1 from 'noise-curve-secp'
 import * as secp from 'noise-handshake/dh.js'
 import assert from 'assert'

@@ -1,7 +1,7 @@
 import assert from 'assert'
 import secp256k1 from 'noise-curve-secp'
 import { createAuth } from '../src/authenticator.js'
-import * as varint from '../src/varint.js'
+import { varint } from '@synonymdev/slashtags-common'
 import { decodeAttestation } from '../src/messages.js'
 import { AttestationSource } from '../src/constants.js'
 
