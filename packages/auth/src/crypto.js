@@ -11,7 +11,6 @@ export const generateChallenge = (
   challengeLength = DEFAULT_CHALLENGE_LENGTH
 ) => {
   const challenge = Buffer.allocUnsafe(challengeLength)
-  // @ts-ignore
   sodium.randombytes_buf(challenge)
   return challenge
 }

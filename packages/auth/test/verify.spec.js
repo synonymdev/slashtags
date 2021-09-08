@@ -1,127 +1,113 @@
-import assert from 'assert'
+import test from 'ava'
 import secp256k1 from 'noise-curve-secp'
 import { createAuth } from '../src/authenticator.js'
 import { varint } from '@synonymdev/slashtags-common'
 import { decodeAttestation } from '../src/messages.js'
 import { AttestationSource } from '../src/constants.js'
 
-describe('Slashtags Auth: verify(): Biderictional verification', () => {
-  it('should create new encoded challenge message', () => {
-    const keypair = secp256k1.generateKeyPair()
-    const initiator = createAuth(keypair, { metadata: { foo: 'intitiator' } })
+test('should create new encoded challenge message', (t) => {
+  const keypair = secp256k1.generateKeyPair()
+  const initiator = createAuth(keypair, { metadata: { foo: 'intitiator' } })
 
-    const responderKP = secp256k1.generateKeyPair()
-    const responder = createAuth(responderKP, {
-      metadata: { foo: 'responder' }
+  const responderKP = secp256k1.generateKeyPair()
+  const responder = createAuth(responderKP, {
+    metadata: { foo: 'responder' }
+  })
+
+  const challengeMsg = responder.newChallenge(10)
+
+  const attestation = initiator.signChallenge(challengeMsg)
+
+  const result = responder.verify(attestation)
+
+  t.deepEqual(result.as, 'Responder')
+
+  if (result.as === 'Responder') {
+    t.deepEqual(result, {
+      as: 'Responder',
+      metadata: { foo: 'intitiator' },
+      responderAttestation: result.responderAttestation
     })
 
-    const challengeMsg = responder.newChallenge(10)
+    const { attestationSource, splitAt } = decodeAttestation(
+      result.responderAttestation
+    )
 
-    const attestation = initiator.signChallenge(challengeMsg)
+    t.deepEqual(attestationSource, AttestationSource.Responder)
+    t.deepEqual(splitAt, responderKP.publicKey.byteLength)
 
-    const result = responder.verify(attestation)
+    const finalResult = initiator.verify(result.responderAttestation)
 
-    assert.deepEqual(result.as, 'Responder')
-
-    if (result.as === 'Responder') {
-      assert.deepEqual(result, {
-        as: 'Responder',
-        metadata: { foo: 'intitiator' },
-        responderAttestation: result.responderAttestation
+    t.deepEqual(finalResult.as, 'Initiator')
+    if (finalResult.as === 'Initiator') {
+      t.deepEqual(finalResult, {
+        as: 'Initiator',
+        metadata: { foo: 'responder' },
+        responderPK: finalResult.responderPK
       })
-
-      const { attestationSource, splitAt } = decodeAttestation(
-        result.responderAttestation
-      )
-
-      assert.equal(attestationSource, AttestationSource.Responder)
-      assert.equal(splitAt, responderKP.publicKey.byteLength)
-
-      const finalResult = initiator.verify(result.responderAttestation)
-
-      assert.deepEqual(finalResult.as, 'Initiator')
-      if (finalResult.as === 'Initiator') {
-        assert.deepEqual(finalResult, {
-          as: 'Initiator',
-          metadata: { foo: 'responder' },
-          responderPK: finalResult.responderPK
-        })
-      }
     }
+  }
+})
+
+test('should throw an error for unknown AttestationSource', (t) => {
+  const keypair = secp256k1.generateKeyPair()
+  const initiator = createAuth(keypair, { metadata: { foo: 'intitiator' } })
+
+  const responderKP = secp256k1.generateKeyPair()
+  const responder = createAuth(responderKP, {
+    metadata: { foo: 'responder' }
   })
 
-  it('should throw an error for unknown AttestationSource', () => {
-    const keypair = secp256k1.generateKeyPair()
-    const initiator = createAuth(keypair, { metadata: { foo: 'intitiator' } })
+  const challengeMsg = responder.newChallenge(10)
 
-    const responderKP = secp256k1.generateKeyPair()
-    const responder = createAuth(responderKP, {
-      metadata: { foo: 'responder' }
-    })
+  const attestation = initiator.signChallenge(challengeMsg)
+  attestation.set(varint.prepend([4], new Uint8Array(0)), 1)
 
-    const challengeMsg = responder.newChallenge(10)
+  t.throws(() => responder.verify(attestation), {
+    message: 'Invalid Attestation source: 4',
+    instanceOf: Error
+  })
+})
 
-    const attestation = initiator.signChallenge(challengeMsg)
-    attestation.set(varint.prepend([4], new Uint8Array(0)), 1)
+test('should throw an error for sessions not found', async (t) => {
+  const keypair = secp256k1.generateKeyPair()
+  const initiator = createAuth(keypair, { metadata: { foo: 'intitiator' } })
 
-    let err
-    try {
-      responder.verify(attestation)
-    } catch (error) {
-      err = error
-    }
-
-    assert.equal(err.message, 'Invalid Attestation source: 4')
+  const responderKP = secp256k1.generateKeyPair()
+  const responder = createAuth(responderKP, {
+    metadata: { foo: 'responder' }
   })
 
-  it('should throw an error for sessions not found', async () => {
-    const keypair = secp256k1.generateKeyPair()
-    const initiator = createAuth(keypair, { metadata: { foo: 'intitiator' } })
+  const challengeMsg = responder.newChallenge(10)
 
-    const responderKP = secp256k1.generateKeyPair()
-    const responder = createAuth(responderKP, {
-      metadata: { foo: 'responder' }
-    })
+  const attestation = initiator.signChallenge(challengeMsg)
 
-    const challengeMsg = responder.newChallenge(10)
+  const sessionKey = Array.from(responder.sessions.keys())[0]
 
-    const attestation = initiator.signChallenge(challengeMsg)
+  await new Promise((resolve) => setTimeout(resolve, 11))
 
-    const sessionKey = Array.from(responder.sessions.keys())[0]
+  t.throws(() => responder.verify(attestation), {
+    message: `Challenge ${sessionKey} not found`,
+    instanceOf: Error
+  })
+})
 
-    await new Promise((resolve) => setTimeout(resolve, 11))
+test('should throw an error for unknown version code', async (t) => {
+  const keypair = secp256k1.generateKeyPair()
+  const initiator = createAuth(keypair, { metadata: { foo: 'intitiator' } })
 
-    let err
-    try {
-      responder.verify(attestation)
-    } catch (error) {
-      err = error
-    }
-
-    assert.equal(err.message, `Challenge ${sessionKey} not found`)
+  const responderKP = secp256k1.generateKeyPair()
+  const responder = createAuth(responderKP, {
+    metadata: { foo: 'responder' }
   })
 
-  it('should throw an error for unknown version code', async () => {
-    const keypair = secp256k1.generateKeyPair()
-    const initiator = createAuth(keypair, { metadata: { foo: 'intitiator' } })
+  const challengeMsg = responder.newChallenge(10)
 
-    const responderKP = secp256k1.generateKeyPair()
-    const responder = createAuth(responderKP, {
-      metadata: { foo: 'responder' }
-    })
+  const attestation = initiator.signChallenge(challengeMsg)
+  attestation.set(varint.prepend([4], new Uint8Array(0)), 0)
 
-    const challengeMsg = responder.newChallenge(10)
-
-    const attestation = initiator.signChallenge(challengeMsg)
-    attestation.set(varint.prepend([4], new Uint8Array(0)), 0)
-
-    let err
-    try {
-      responder.verify(attestation)
-    } catch (error) {
-      err = error
-    }
-
-    assert.equal(err.message, 'Unknown SlashtagsAuth version code')
+  t.throws(() => responder.verify(attestation), {
+    message: 'Unknown SlashtagsAuth version code',
+    instanceOf: Error
   })
 })

@@ -3,53 +3,21 @@
     "version": "0.0.1-alpha.2",
     "description": "A collection of common constants and functions for slashtags",
     "author": "Ar Nazeh <ar.nazeh@gmail.com>",
-    "main": "./src/index.js",
-    "types": "./types/index.d.ts",
+    "main": "dist/index.js",
     "type": "module",
-    "typesVersions": {
-        "*": {
-            "*": [
-                "types/*"
-            ],
-            "types/*": [
-                "types/*"
-            ]
-        }
-    },
-    "scripts": {
-        "lint": "standard  --fix",
-        "build:js": "ipjs build --tests --main",
-        "build:types": "tsc -p tsconfig.json",
-        "build": "npm run build:js && npm run build:types",
-        "test": "hundreds mocha test --recursive",
-        "test:cjs:browser": "cd ../../ && polendina --page --worker --serviceworker --cleanup packages/common/dist/cjs/browser-test/*.spec.js",
-        "test:cjs": "npm run build && mocha dist/cjs/node-test/*.spec.js",
-        "test:all": "npm run lint && npm run test && npm run test:cjs && npm run test:cjs:browser",
-        "prepublishOnly": "npm run test:all && rm -rf dist/**/*test"
-    },
+    "files": ["dist"],
     "keywords": [
         "slashtags",
         "common",
         "varint"
     ],
-    "dependencies": {
-        "varint": "^6.0.0"
+    "scripts": {
+        "lint": "standard  --fix",
+        "build": "tsc -p tsconfig.json",
+        "test": "hundreds ava ./test/**/*.js",
+        "prepublishOnly": "npm run lint && npm run build && npm run test"
     },
-    "exports": {
-        ".": {
-            "import": "./src/index.js"
-        },
-        "./functions/varint": {
-            "import": "./src/functions/varint.js"
-        }
-    },
-    "standard": {
-        "env": [
-            "mocha"
-        ],
-        "ignore": [
-            "dist/"
-        ]
-    },
-    "gitHead": "fc8923030b39f7b60825781b5c6ddab68ebcf47d"
+    "devDependencies": {
+        "@types/varint": "^6.0.0"
+    }
 }

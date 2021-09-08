@@ -1,7 +1,7 @@
 import { DocIDCodec, DocTypes } from './constants.js'
 import { base32 } from 'multiformats/bases/base32'
 import { wildDecode } from './util.js'
-import { varint } from 'multiformats'
+import { varint } from '@synonymdev/slashtags-common'
 
 /**
  * @param {DocID} docID
@@ -21,15 +21,15 @@ export const toString = (docID, base) => {
  */
 export const parse = (id) => {
   const bytes = wildDecode(id)
-  const [codec, codecOffset] = varint.decode(bytes)
+  const [codec, codecFree] = varint.split(bytes)
 
   if (codec !== DocIDCodec) throw new Error('Invalid Slashtags DocID')
 
-  const [type, indexOffset] = varint.decode(bytes.slice(codecOffset))
+  const [type, index] = varint.split(codecFree)
 
   return {
     type: DocTypes.byCode[type],
-    index: bytes.slice(codecOffset + indexOffset),
+    index,
     bytes
   }
 }
@@ -44,13 +44,7 @@ export const create = (type, index) => {
   const docType =
     typeof type === 'string' ? DocTypes.byName[type] : DocTypes.byCode[type]
 
-  const typeCodeOffset = varint.encodingLength(DocIDCodec)
-  const indexOffset = typeCodeOffset + varint.encodingLength(docType.code)
-  const bytes = new Uint8Array(indexOffset + index.byteLength)
-
-  varint.encodeTo(DocIDCodec, bytes, 0)
-  varint.encodeTo(docType.code, bytes, typeCodeOffset)
-  bytes.set(index, indexOffset)
+  const bytes = varint.prepend([DocIDCodec, docType.code], index)
 
   return {
     type: docType,

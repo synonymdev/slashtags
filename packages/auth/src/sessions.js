@@ -21,11 +21,11 @@ export const addSession = ({ sessions, timeout, challenge, metadata }) => {
     sessions.delete(identifier)
   }, timeout)
 
-  sessions.set(
-    identifier,
-    // @ts-ignore
-    { challenge, timer, metadata }
-  )
+  sessions.set(identifier, {
+    challenge,
+    timer,
+    metadata: metadata || new Uint8Array(0)
+  })
 }
 
 /** @typedef {import('./interfaces').Session} Session */
