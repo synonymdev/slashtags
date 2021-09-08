@@ -1,12 +1,10 @@
 import { generateChallenge } from '../src/crypto.js'
-import assert from 'assert'
+import test from 'ava'
 
-describe('Slashtags Auth: Responder: generateChallenge()', () => {
-  it('should create a challenge with a default length 32', () => {
-    assert.equal(generateChallenge().length, 32)
-  })
+test('should create a challenge with a default length 32', (t) => {
+  t.deepEqual(generateChallenge().length, 32)
+})
 
-  it('should create a challenge as a Buffer', () => {
-    assert.equal(generateChallenge() instanceof Buffer, true)
-  })
+test('should create a challenge as a Buffer', (t) => {
+  t.deepEqual(generateChallenge() instanceof Buffer, true)
 })

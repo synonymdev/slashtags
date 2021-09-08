@@ -1,4 +1,4 @@
-import assert from 'assert'
+import test from 'ava'
 import secp from 'noise-handshake/dh.js'
 import secp256k1 from 'noise-curve-secp'
 import { createHandshake, generateChallenge } from '../src/crypto.js'
@@ -6,132 +6,119 @@ import { createAuth } from '../src/authenticator.js'
 import { encodeChallenge, decodeAttestation } from '../src/messages.js'
 import { AttestationSource, PROLOGUE } from '../src/constants.js'
 
-describe('Slashtags Auth: signChallenge()', () => {
-  it('should throw an error if the remotePK length does not match the handshake curve', () => {
-    const keypair = secp256k1.generateKeyPair()
-    const authenticator = createAuth(keypair)
+test('should throw an error if the remotePK length does not match the handshake curve', (t) => {
+  const keypair = secp256k1.generateKeyPair()
+  const authenticator = createAuth(keypair)
 
-    const remotePK = secp.generateKeyPair().publicKey
-    const challenge = generateChallenge()
+  const remotePK = secp.generateKeyPair().publicKey
+  const challenge = generateChallenge()
 
-    const msg = encodeChallenge(challenge, remotePK)
+  const msg = encodeChallenge(challenge, remotePK)
 
-    let error
-    try {
-      authenticator.signChallenge(msg)
-    } catch (err) {
-      error = err
-    }
+  t.throws(() => authenticator.signChallenge(msg), {
+    message: 'Invalid publicKey size for curve: secp256k1',
+    instanceOf: Error
+  })
+})
 
-    assert.equal(error.message, 'Invalid publicKey size for curve: secp256k1')
+test('should not throw an error for valid remote public key', (t) => {
+  const keypair = secp256k1.generateKeyPair()
+  const authenticator = createAuth(keypair)
+
+  const remotePK = secp256k1.generateKeyPair().publicKey
+  const challenge = generateChallenge()
+
+  const msg = encodeChallenge(challenge, remotePK)
+
+  t.notThrows(() => authenticator.signChallenge(msg))
+})
+
+test('should correctly signt the challenge and return an encoded attestation', (t) => {
+  const keypair = secp256k1.generateKeyPair()
+  const authenticator = createAuth(keypair)
+
+  const remoteKeypair = secp256k1.generateKeyPair()
+  const challenge = generateChallenge()
+
+  const msg = encodeChallenge(challenge, remoteKeypair.publicKey)
+
+  const attestation = authenticator.signChallenge(msg)
+
+  const { attestationSource, splitAt, signedMessage } =
+    decodeAttestation(attestation)
+
+  t.deepEqual(attestationSource, AttestationSource.Initiator)
+
+  const handshake = createHandshake('IK', false, remoteKeypair, {
+    curve: secp256k1
   })
 
-  it('should not throw an error for valid remote public key', () => {
-    const keypair = secp256k1.generateKeyPair()
-    const authenticator = createAuth(keypair)
+  handshake.initialise(PROLOGUE)
+  const res = handshake.recv(signedMessage)
 
-    const remotePK = secp256k1.generateKeyPair().publicKey
-    const challenge = generateChallenge()
+  const metadata = res.slice(splitAt)
+  t.deepEqual(res.slice(0, splitAt), challenge)
+  t.deepEqual(new TextDecoder().decode(metadata), '')
+})
 
-    const msg = encodeChallenge(challenge, remotePK)
+test('should correctly sign the challenge and return an encoded attestation with metdata', (t) => {
+  const keypair = secp256k1.generateKeyPair()
+  const authenticator = createAuth(keypair, { metadata: { foo: 'bar' } })
 
-    let error
-    try {
-      authenticator.signChallenge(msg)
-    } catch (err) {
-      error = err
-    }
+  const remoteKeypair = secp256k1.generateKeyPair()
+  const challenge = generateChallenge()
 
-    assert.equal(error, undefined)
+  const msg = encodeChallenge(challenge, remoteKeypair.publicKey)
+
+  const attestation = authenticator.signChallenge(msg)
+
+  const { attestationSource, splitAt, signedMessage } =
+    decodeAttestation(attestation)
+
+  t.deepEqual(attestationSource, AttestationSource.Initiator)
+
+  const handshake = createHandshake('IK', false, remoteKeypair, {
+    curve: secp256k1
   })
 
-  it('should correctly signt the challenge and return an encoded attestation', () => {
-    const keypair = secp256k1.generateKeyPair()
-    const authenticator = createAuth(keypair)
+  handshake.initialise(PROLOGUE)
+  const res = handshake.recv(signedMessage)
 
-    const remoteKeypair = secp256k1.generateKeyPair()
-    const challenge = generateChallenge()
+  const metadata = res.slice(splitAt)
+  t.deepEqual(res.slice(0, splitAt), challenge)
+  t.deepEqual(
+    new TextDecoder().decode(metadata),
+    JSON.stringify({ foo: 'bar' })
+  )
+})
 
-    const msg = encodeChallenge(challenge, remoteKeypair.publicKey)
+test('should override global metadata for one time attestation', (t) => {
+  const keypair = secp256k1.generateKeyPair()
+  const authenticator = createAuth(keypair, { metadata: { foo: 'bar' } })
 
-    const attestation = authenticator.signChallenge(msg)
+  const remoteKeypair = secp256k1.generateKeyPair()
+  const challenge = generateChallenge()
 
-    const { attestationSource, splitAt, signedMessage } =
-      decodeAttestation(attestation)
+  const msg = encodeChallenge(challenge, remoteKeypair.publicKey)
 
-    assert.equal(attestationSource, AttestationSource.Initiator)
+  const attestation = authenticator.signChallenge(msg, { foo: 'zar' })
 
-    const handshake = createHandshake('IK', false, remoteKeypair, {
-      curve: secp256k1
-    })
+  const { attestationSource, splitAt, signedMessage } =
+    decodeAttestation(attestation)
 
-    handshake.initialise(PROLOGUE)
-    const res = handshake.recv(signedMessage)
+  t.deepEqual(attestationSource, AttestationSource.Initiator)
 
-    const metadata = res.slice(splitAt)
-    assert.deepEqual(res.slice(0, splitAt), challenge)
-    assert.deepEqual(new TextDecoder().decode(metadata), '')
+  const handshake = createHandshake('IK', false, remoteKeypair, {
+    curve: secp256k1
   })
 
-  it('should correctly sign the challenge and return an encoded attestation with metdata', () => {
-    const keypair = secp256k1.generateKeyPair()
-    const authenticator = createAuth(keypair, { metadata: { foo: 'bar' } })
+  handshake.initialise(PROLOGUE)
+  const res = handshake.recv(signedMessage)
 
-    const remoteKeypair = secp256k1.generateKeyPair()
-    const challenge = generateChallenge()
-
-    const msg = encodeChallenge(challenge, remoteKeypair.publicKey)
-
-    const attestation = authenticator.signChallenge(msg)
-
-    const { attestationSource, splitAt, signedMessage } =
-      decodeAttestation(attestation)
-
-    assert.equal(attestationSource, AttestationSource.Initiator)
-
-    const handshake = createHandshake('IK', false, remoteKeypair, {
-      curve: secp256k1
-    })
-
-    handshake.initialise(PROLOGUE)
-    const res = handshake.recv(signedMessage)
-
-    const metadata = res.slice(splitAt)
-    assert.deepEqual(res.slice(0, splitAt), challenge)
-    assert.equal(
-      new TextDecoder().decode(metadata),
-      JSON.stringify({ foo: 'bar' })
-    )
-  })
-
-  it('should override global metadata for one time attestation', () => {
-    const keypair = secp256k1.generateKeyPair()
-    const authenticator = createAuth(keypair, { metadata: { foo: 'bar' } })
-
-    const remoteKeypair = secp256k1.generateKeyPair()
-    const challenge = generateChallenge()
-
-    const msg = encodeChallenge(challenge, remoteKeypair.publicKey)
-
-    const attestation = authenticator.signChallenge(msg, { foo: 'zar' })
-
-    const { attestationSource, splitAt, signedMessage } =
-      decodeAttestation(attestation)
-
-    assert.equal(attestationSource, AttestationSource.Initiator)
-
-    const handshake = createHandshake('IK', false, remoteKeypair, {
-      curve: secp256k1
-    })
-
-    handshake.initialise(PROLOGUE)
-    const res = handshake.recv(signedMessage)
-
-    const metadata = res.slice(splitAt)
-    assert.deepEqual(res.slice(0, splitAt), challenge)
-    assert.equal(
-      new TextDecoder().decode(metadata),
-      JSON.stringify({ foo: 'zar' })
-    )
-  })
+  const metadata = res.slice(splitAt)
+  t.deepEqual(res.slice(0, splitAt), challenge)
+  t.deepEqual(
+    new TextDecoder().decode(metadata),
+    JSON.stringify({ foo: 'zar' })
+  )
 })
