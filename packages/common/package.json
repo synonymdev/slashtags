@@ -1,6 +1,6 @@
 {
     "name": "@synonymdev/slashtags-common",
-    "version": "0.0.1-alpha.2",
+    "version": "0.0.1-alpha.3",
     "description": "A collection of common constants and functions for slashtags",
     "author": "Ar Nazeh <ar.nazeh@gmail.com>",
     "main": "dist/index.js",
