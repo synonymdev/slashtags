@@ -1,6 +1,6 @@
 import assert from 'assert'
 import originalVarint from 'varint'
-import * as varint from '../../src/functions/varint.js'
+import * as varint from '../src/functions/varint.js'
 
 describe('Slashtags Auth: varint.prepend()', () => {
   it('should prepend one integer as varint to a Uint8Array', () => {
