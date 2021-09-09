@@ -1,6 +1,6 @@
 {
   "name": "@synonymdev/slashtags-docid",
-  "version": "0.0.0",
+  "version": "0.0.3",
   "description": "Slashtags Dcoument IDs",
   "author": "Nazeh <ar.nazeh@gmail.com>",
   "main": "lib/index.js",
