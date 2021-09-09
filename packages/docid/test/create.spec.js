@@ -1,4 +1,4 @@
-import { DocID } from '../src/index.js'
+import * as DocID from '../src/index.js'
 import test from 'ava'
 
 test('should create document ID with type code', (t) => {

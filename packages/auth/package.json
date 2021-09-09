@@ -1,32 +1,40 @@
 {
-    "name": "@synonymdev/slashtags-auth",
-    "version": "0.0.0",
-    "description": "Bidirectional authentication for keypair verification through attestation.",
-    "author": "Ar Nazeh <ar.nazeh@gmail.com>",
-    "main": "dist/index.js",
-    "type": "module",
-    "files": [
-        "dist"
-    ],
-    "keywords": [
-        "slashtags",
-        "common",
-        "varint"
-    ],
-    "scripts": {
-        "lint": "standard  --fix",
-        "build": "tsc -p tsconfig.json",
-        "test": "hundreds ava ./test/**/*.js",
-        "prepublishOnly": "npm run lint && npm run build && npm run test"
-    },
-    "devDependencies": {
-        "@types/sodium-native": "^2.3.5"
-    },
-    "dependencies": {
-        "@synonymdev/slashtags-common": "^0.0.2-alpha.0",
-        "noise-curve-secp": "^1.0.2",
-        "noise-handshake": "^1.2.2",
-        "sodium-universal": "^3.0.4",
-        "varint": "^6.0.0"
-    }
+  "name": "@synonymdev/slashtags-auth",
+  "version": "0.0.2-alpha.0+6352726",
+  "description": "Bidirectional authentication for keypair verification through attestation.",
+  "author": "Nazeh <ar.nazeh@gmail.com>",
+  "main": "lib/index.js",
+  "type": "module",
+  "files": [
+    "lib"
+  ],
+  "keywords": [
+    "slashtags",
+    "authentication",
+    "attestation",
+    "handshake"
+  ],
+  "scripts": {
+    "lint": "standard  --fix",
+    "build": "rm -rf ./lib && tsc -p tsconfig.json",
+    "test": "hundreds ava ./test/**/*.js",
+    "prepublishOnly": "npm run lint && npm run build && npm run test"
+  },
+  "homepage": "https://github.com/synonymdev/slashtags/tree/master/packages/auth/#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/synonymdev/slashtags.git"
+  },
+  "bugs": {
+    "url": "https://github.com/synonymdev/slashtags/issues"
+  },
+  "devDependencies": {
+    "@types/sodium-native": "^2.3.5"
+  },
+  "dependencies": {
+    "@synonymdev/slashtags-common": "^0.0.2-alpha.0",
+    "noise-curve-secp": "^1.0.2",
+    "noise-handshake": "^1.2.2",
+    "sodium-universal": "^3.0.4"
+  }
 }

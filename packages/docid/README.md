@@ -2,6 +2,46 @@
 
 > Contains Slashtags Document IDs ceration, serializing, and parsing
 
+## Usage
+
+### FeedID
+
+Create a FeedID typed DocID from hypercore feed key
+
+```js
+import * as DocID from '@slashtags/ids';
+import hypercore from 'hypercore';
+
+var feed = new Hypercore('./my-first-dataset');
+
+// You can pass the type name instead of the type code
+const docID = DocID.create('FeedID', feed.key);
+```
+
+### CID
+
+Create a CID typed DocID from json with sha256
+
+```js
+import * as DocID from '@slashtags/ids';
+const docID = DocID.CID.fromJSON({ foo: 'bar' });
+```
+
+Or by passing CID bytes
+
+```js
+import * as DocID from '@slashtags/ids';
+import { CID } from 'multiformats/cid';
+import * as json from 'multiformats/codecs/json';
+import { sha256 } from 'multiformats/hashes/sha2';
+
+const bytes = json.encode({ hello: 'world' });
+const hash = await sha256.digest(bytes);
+const cid = CID.create(1, json.code, hash);
+
+const docID = DocID.create(0, cid.bytes);
+```
+
 ## Abstract
 
 DocIDs are composed of a `multicodec-slashtags-docid`, and `type-code` varint, followed by identifying bytes.
@@ -67,30 +107,6 @@ Where
 - `<type-code>` is `0`
 - `<identifying-bytes>` is a [CID](https://github.com/multiformats/cid)
 
-#### Usage
-
-Create a CID typed DocID from json
-
-```js
-import { DocID } from '@slashtags/ids';
-const docID = DocID.CID.fromJSON({ foo: 'bar' });
-```
-
-Or create it by passing a CID bytes
-
-```js
-import { DocID } from '@slashtags/ids';
-import { CID } from 'multiformats/cid';
-import * as json from 'multiformats/codecs/json';
-import { sha256 } from 'multiformats/hashes/sha2';
-
-const bytes = json.encode({ hello: 'world' });
-const hash = await sha256.digest(bytes);
-const cid = CID.create(1, json.code, hash);
-
-const docID = DocID.create(0, cid.bytes);
-```
-
 ### FeedID
 
 A Slashtags DocID of type `FeedID` has four parts:
@@ -99,15 +115,4 @@ A Slashtags DocID of type `FeedID` has four parts:
 <docid> ::= <mb><mc-docid><type-code=0><feed-key>
 // or, expanded:
 <docid> ::= <multibase-prefix><multicodec-slashtags-docid><type-code=1><hypercore-feed-key>
-```
-
-#### Usage
-
-```js
-import hypercore from 'hypercore';
-
-var feed = new Hypercore('./my-first-dataset');
-
-// You can pass the type name instead of the type code
-const docID = DocID.create('FeedID', feed.key);
 ```

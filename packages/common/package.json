@@ -1,25 +1,36 @@
 {
-    "name": "@synonymdev/slashtags-common",
-    "version": "0.0.0",
-    "description": "A collection of common constants and functions for slashtags",
-    "author": "Ar Nazeh <ar.nazeh@gmail.com>",
-    "main": "dist/index.js",
-    "type": "module",
-    "files": [
-        "dist"
-    ],
-    "keywords": [
-        "slashtags",
-        "common",
-        "varint"
-    ],
-    "scripts": {
-        "lint": "standard  --fix",
-        "build": "tsc -p tsconfig.json",
-        "test": "hundreds ava ./test/**/*.js",
-        "prepublishOnly": "npm run lint && npm run build && npm run test"
-    },
-    "devDependencies": {
-        "@types/varint": "^6.0.0"
-    }
+  "name": "@synonymdev/slashtags-common",
+  "version": "0.0.0",
+  "description": "A collection of common constants and functions for slashtags",
+  "author": "Nazeh <ar.nazeh@gmail.com>",
+  "main": "lib/index.js",
+  "type": "module",
+  "files": [
+    "lib"
+  ],
+  "keywords": [
+    "slashtags",
+    "common",
+    "varint"
+  ],
+  "scripts": {
+    "lint": "standard  --fix",
+    "build": "rm -rf ./lib && tsc -p tsconfig.json",
+    "test": "hundreds ava ./test/**/*.js",
+    "prepublishOnly": "npm run lint && npm run build && npm run test"
+  },
+  "homepage": "https://github.com/synonymdev/slashtags/tree/master/packages/common/#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/synonymdev/slashtags.git"
+  },
+  "bugs": {
+    "url": "https://github.com/synonymdev/slashtags/issues"
+  },
+  "dependencies": {
+    "varint": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/varint": "^6.0.0"
+  }
 }

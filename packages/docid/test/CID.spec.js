@@ -3,7 +3,7 @@ import { sha256 } from 'multiformats/hashes/sha2'
 import { digest } from 'multiformats'
 import crypto from 'crypto'
 import * as json from 'multiformats/codecs/json'
-import { DocID } from '../src/index.js'
+import * as DocID from '../src/index.js'
 import test from 'ava'
 
 test('should create DocID type CID from content', (t) => {

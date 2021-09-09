@@ -7,9 +7,9 @@
     "build": "lerna run build",
     "publish": "lerna publish",
     "clean": "npm run clean:deps && npm run clean:build && npm run clean:coverage",
-    "clean:deps": "rm -rf ./node_modules && rm -rf ./packages/*/node_modules && rm -rf ./packages/*/package-lock.json",
-    "clean:build": "rm -rf ./packages/*/dist",
-    "clean:coverage": "rm -rf ./packages/*/coverage"
+    "clean:build": "rm -rf ./packages/*/lib",
+    "clean:coverage": "rm -rf ./packages/*/coverage",
+    "clean:deps": "rm -rf node_modules && rm -rf packages/*/node_modules && rm -rf packages/*/package-lock.json"
   },
   "type": "module",
   "keywords": [

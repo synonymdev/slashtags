@@ -1,4 +1,4 @@
-import { DocID } from '../src/index.js'
+import { create, toString } from '../src/index.js'
 import test from 'ava'
 
 test('should convert it to a string with default base32', (t) => {
@@ -8,10 +8,10 @@ test('should convert it to a string with default base32', (t) => {
     124, 96, 243, 203, 104, 21, 136
   ])
 
-  const docID = DocID.create('CID', bytes)
+  const docID = create('CID', bytes)
 
   t.deepEqual(
-    DocID.toString(docID),
+    toString(docID),
     'b2iaqbuqbaaayabasecj2eolrvekol2wl6cuneukuzwrqtq6by4x3xgiu2r6gb46lnakyq'
   )
 })

@@ -1,4 +1,4 @@
-import { DocID } from '../src/index.js'
+import * as DocID from '../src/index.js'
 import { base32 } from 'multiformats/bases/base32'
 import * as multiformats from 'multiformats'
 import { wildDecode } from '../src/util.js'

@@ -2,11 +2,11 @@
   "name": "@synonymdev/slashtags-docid",
   "version": "0.0.0",
   "description": "Slashtags Dcoument IDs",
-  "author": "Ar Nazeh <ar.nazeh@gmail.com>",
-  "main": "dist/index.js",
+  "author": "Nazeh <ar.nazeh@gmail.com>",
+  "main": "lib/index.js",
   "type": "module",
   "files": [
-    "dist"
+    "lib"
   ],
   "keywords": [
     "slashtags",
@@ -16,9 +16,17 @@
   ],
   "scripts": {
     "lint": "standard  --fix",
-    "build": "tsc -p tsconfig.json",
+    "build": "rm -rf ./lib && tsc -p tsconfig.json",
     "test": "hundreds ava ./test/**/*.js",
     "prepublishOnly": "npm run lint && npm run build && npm run test"
+  },
+  "homepage": "https://github.com/synonymdev/slashtags/tree/master/packages/docid/#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/synonymdev/slashtags.git"
+  },
+  "bugs": {
+    "url": "https://github.com/synonymdev/slashtags/issues"
   },
   "dependencies": {
     "@synonymdev/slashtags-common": "^0.0.2-alpha.0",
