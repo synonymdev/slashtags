@@ -1,6 +1,6 @@
 {
   "name": "@synonymdev/slashtags-docid",
-  "version": "0.0.0",
+  "version": "0.0.2",
   "description": "Slashtags Dcoument IDs",
   "author": "Nazeh <ar.nazeh@gmail.com>",
   "main": "lib/index.js",
@@ -29,7 +29,7 @@
     "url": "https://github.com/synonymdev/slashtags/issues"
   },
   "dependencies": {
-    "@synonymdev/slashtags-common": "^0.0.2-alpha.0",
+    "@synonymdev/slashtags-common": "^0.0.1-alpha.2",
     "multiformats": "^9.4.6"
   }
 }
