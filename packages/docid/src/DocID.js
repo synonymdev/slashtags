@@ -25,11 +25,11 @@ export const parse = (id) => {
 
   if (codec !== DocIDCodec) throw new Error('Invalid Slashtags DocID')
 
-  const [type, index] = varint.split(codecFree)
+  const [type, key] = varint.split(codecFree)
 
   return {
     type: DocTypes.byCode[type],
-    index,
+    key,
     bytes
   }
 }
@@ -37,18 +37,18 @@ export const parse = (id) => {
 /**
  * Create a document id from its type and identifying bytes
  * @param {string | number} type
- * @param {Uint8Array} index
+ * @param {Uint8Array} key
  * @returns {DocID}
  */
-export const create = (type, index) => {
+export const create = (type, key) => {
   const docType =
     typeof type === 'string' ? DocTypes.byName[type] : DocTypes.byCode[type]
 
-  const bytes = varint.prepend([DocIDCodec, docType.code], index)
+  const bytes = varint.prepend([DocIDCodec, docType.code], key)
 
   return {
     type: docType,
-    index,
+    key,
     bytes
   }
 }

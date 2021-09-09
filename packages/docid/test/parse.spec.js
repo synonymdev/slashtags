@@ -12,7 +12,7 @@ test('should create DocID from a valid string', (t) => {
       name: 'CID'
     },
     bytes: docID.bytes,
-    index: Uint8Array.from([
+    key: Uint8Array.from([
       1, 128, 4, 18, 32, 147, 162, 57, 113, 169, 20, 229, 234, 203, 240, 168,
       210, 81, 84, 205, 163, 9, 195, 193, 199, 47, 187, 153, 20, 212, 124, 96,
       243, 203, 104, 21, 136
@@ -30,7 +30,7 @@ test('should create DocID from a valid bytes', (t) => {
       name: 'FeedID'
     },
     bytes,
-    index: Uint8Array.from([0])
+    key: Uint8Array.from([0])
   })
 })
 
