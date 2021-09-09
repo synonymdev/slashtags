@@ -5,7 +5,7 @@
     "test": "lerna exec npm t",
     "lint": "lerna run lint",
     "build": "lerna run build",
-    "publish": "lerna publish",
+    "publish": "lerna publish --no-git-reset --canary",
     "clean": "npm run clean:deps && npm run clean:build && npm run clean:coverage",
     "clean:build": "rm -rf ./packages/*/lib",
     "clean:coverage": "rm -rf ./packages/*/coverage",
