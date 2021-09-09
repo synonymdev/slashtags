@@ -1,14 +1,6 @@
-import EventEmitter from 'events';
-
 export interface KeyPair {
   publicKey: Buffer | Uint8Array;
   secretKey: Buffer | Uint8Array;
-}
-
-export interface Session extends EventEmitter {
-  publicKey: Buffer;
-  getChallenge: () => Buffer;
-  identifier: string;
 }
 
 /** Read more https://github.com/chm-diederichs/noise-handshake/blob/main/dh.js#L13 */

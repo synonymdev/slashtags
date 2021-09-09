@@ -7,9 +7,24 @@ import varint from 'varint'
  */
 export const prepend = (integers, bytes) => {
   if (!Array.isArray(integers)) integers = [integers]
-  const varints = integers.flatMap((int) => varint.encode(int))
 
-  return Uint8Array.from([...varints, ...bytes])
+  const totalOffset = integers.reduce(
+    (acc, int) => acc + varint.encodingLength(int),
+    0
+  )
+
+  const out = new Uint8Array(totalOffset + bytes.byteLength)
+
+  let offset = 0
+
+  integers.forEach((int) => {
+    out.set(varint.encode(int), offset)
+    offset += varint.encode.bytes
+  })
+
+  out.set(bytes, totalOffset)
+
+  return out
 }
 
 /**

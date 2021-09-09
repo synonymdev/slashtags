@@ -6,7 +6,7 @@ lerna-debug.log
 *.iml
 docs/
 build
-dist
+lib
 yarn.lock
 types
 packages/*/node_modules/

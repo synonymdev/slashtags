@@ -67,7 +67,7 @@ const resultResponder = responder.verify(initiator.attestation);
 
 // === Initiator's Side ===
 // Finally pass the responder attestation to the initiator
-const resultInitiator = responder.verify(resultResponder.responderAttestation);
+const resultInitiator = initiator.verify(resultResponder.responderAttestation);
 
 // resultInitiator => {
 //  as: 'Initiator',

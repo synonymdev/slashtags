@@ -1,5 +1,5 @@
 import { CURRENT_VERSION, KNOWN_VERSIONS } from './constants.js'
-import * as varint from './varint.js'
+import { varint } from '@synonymdev/slashtags-common'
 
 /**
  * Encode version code, challenge and responder's publickey

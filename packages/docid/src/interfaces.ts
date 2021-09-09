@@ -1,4 +1,4 @@
-import { DocTypeName, DocMutability } from "./constants";
+import { DocTypeName, DocMutability } from './constants';
 
 export interface DocType {
   code: number;
@@ -9,5 +9,5 @@ export interface DocType {
 export interface DocID {
   type: DocType;
   bytes: Uint8Array;
-  index: Uint8Array;
+  key: Uint8Array;
 }

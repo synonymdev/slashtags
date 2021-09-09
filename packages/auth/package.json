@@ -1,61 +1,40 @@
 {
-    "name": "@synonymdev/slashtags-auth",
-    "version": "0.0.1-alpha.0",
-    "description": "Bidirectional authentication for keypair verification through attestation.",
-    "author": "Ar Nazeh <ar.nazeh@gmail.com>",
-    "main": "./src/index.js",
-    "types": "./types/index.d.ts",
-    "type": "module",
-    "files": [
-        "dist/**/*"
-    ],
-    "typesVersions": {
-        "*": {
-            "*": [
-                "types/*"
-            ],
-            "types/*": [
-                "types/*"
-            ]
-        }
-    },
-    "scripts": {
-        "lint": "standard  --fix",
-        "build:js": "ipjs build --tests --main",
-        "build:types": "tsc -p tsconfig.json",
-        "build": "npm run build:js && npm run build:types",
-        "test": "hundreds mocha test --recursive",
-        "test:cjs:browser": "echo TODO test sodium-universal in browser",
-        "test:cjs": "npm run build && mocha dist/cjs/node-test/*.spec.js",
-        "test:all": "npm run lint && npm run test && npm run test:cjs && npm run test:cjs:browser",
-        "prepublishOnly": "npm run test:all && rm -rf dist/**/*test"
-    },
-    "keywords": [
-        "slashtags",
-        "identifiers",
-        "cid",
-        "feed"
-    ],
-    "dependencies": {
-        "noise-curve-secp": "^1.0.2",
-        "noise-handshake": "^1.2.2",
-        "sodium-universal": "^3.0.4",
-        "varint": "^6.0.0"
-    },
-    "exports": {
-        ".": {
-            "import": "./src/index.js"
-        },
-        "./authenticator": {
-            "import": "./src/authenticator.js"
-        }
-    },
-    "standard": {
-        "env": [
-            "mocha"
-        ],
-        "ignore": [
-            "dist/"
-        ]
-    }
+  "name": "@synonymdev/slashtags-auth",
+  "version": "0.0.3-alpha.0",
+  "description": "Bidirectional authentication for keypair verification through attestation.",
+  "author": "Nazeh <ar.nazeh@gmail.com>",
+  "main": "lib/index.js",
+  "type": "module",
+  "files": [
+    "lib"
+  ],
+  "keywords": [
+    "slashtags",
+    "authentication",
+    "attestation",
+    "handshake"
+  ],
+  "scripts": {
+    "lint": "standard  --fix",
+    "build": "rm -rf ./lib && tsc -p tsconfig.json",
+    "test": "hundreds ava ./test/**/*.js",
+    "prepublishOnly": "npm run lint && npm run build && npm run test"
+  },
+  "homepage": "https://github.com/synonymdev/slashtags/tree/master/packages/auth/#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/synonymdev/slashtags.git"
+  },
+  "bugs": {
+    "url": "https://github.com/synonymdev/slashtags/issues"
+  },
+  "devDependencies": {
+    "@types/sodium-native": "^2.3.5"
+  },
+  "dependencies": {
+    "@synonymdev/slashtags-common": "^0.0.3-alpha.0",
+    "noise-curve-secp": "^1.0.2",
+    "noise-handshake": "^1.2.2",
+    "sodium-universal": "^3.0.4"
+  }
 }

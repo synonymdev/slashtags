@@ -1,34 +1,19 @@
 {
   "compilerOptions": {
-    "allowJs": true,
-    "checkJs": true,
-    "forceConsistentCasingInFileNames": true,
-    "noImplicitReturns": false,
-    "noImplicitAny": true,
-    "noImplicitThis": true,
-    "noFallthroughCasesInSwitch": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "strictFunctionTypes": false,
-    "strictNullChecks": true,
-    "strictPropertyInitialization": true,
-    "strictBindCallApply": true,
-    "strict": true,
-    "alwaysStrict": true,
-    "esModuleInterop": true,
-    "target": "ES2018",
+    "typeRoots": ["../../types", "./node_modules/@types"],
+    "module": "esnext",
+    "target": "esnext",
     "moduleResolution": "node",
     "declaration": true,
-    "declarationMap": true,
+    "checkJs": true,
+    "strict": true,
+    "esModuleInterop": true,
     "skipLibCheck": true,
-    "stripInternal": true,
-    "resolveJsonModule": true,
-    "emitDeclarationOnly": true,
-    "baseUrl": "./packages",
+    "forceConsistentCasingInFileNames": true,
+    "types": ["node"],
+    "baseUrl": ".",
     "paths": {
-      "@synonymdev/*": ["./packages/*"]
+      "@synonymdev/slashtags-*": ["./packages/*"]
     }
-  },
-  "exclude": ["node_modules"],
-  "compileOnSave": false
+  }
 }
