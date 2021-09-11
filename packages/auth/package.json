@@ -1,6 +1,6 @@
 {
   "name": "@synonymdev/slashtags-auth",
-  "version": "0.0.3-alpha.0",
+  "version": "0.0.3-alpha.1",
   "description": "Bidirectional authentication for keypair verification through attestation.",
   "author": "Nazeh <ar.nazeh@gmail.com>",
   "main": "lib/index.js",
