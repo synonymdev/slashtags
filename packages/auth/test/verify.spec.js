@@ -111,3 +111,51 @@ test('should throw an error for unknown version code', async (t) => {
     instanceOf: Error
   })
 })
+
+test('should handle custom challengeLength', async (t) => {
+  const keypair = secp256k1.generateKeyPair()
+  const initiator = createAuth(keypair, {
+    metadata: { foo: 'intitiator' },
+    challengeLength: 16
+  })
+
+  const responderKP = secp256k1.generateKeyPair()
+  const responder = createAuth(responderKP, {
+    metadata: { foo: 'responder' },
+    challengeLength: 128
+  })
+
+  const challengeMsg = responder.newChallenge(10)
+
+  const attestation = initiator.signChallenge(challengeMsg)
+
+  const result = responder.verify(attestation)
+
+  t.deepEqual(result.as, 'Responder')
+
+  if (result.as === 'Responder') {
+    t.deepEqual(result, {
+      as: 'Responder',
+      metadata: { foo: 'intitiator' },
+      responderAttestation: result.responderAttestation
+    })
+
+    const { attestationSource, splitAt } = decodeAttestation(
+      result.responderAttestation
+    )
+
+    t.deepEqual(attestationSource, AttestationSource.Responder)
+    t.deepEqual(splitAt, responderKP.publicKey.byteLength)
+
+    const finalResult = initiator.verify(result.responderAttestation)
+
+    t.deepEqual(finalResult.as, 'Initiator')
+    if (finalResult.as === 'Initiator') {
+      t.deepEqual(finalResult, {
+        as: 'Initiator',
+        metadata: { foo: 'responder' },
+        responderPK: finalResult.responderPK
+      })
+    }
+  }
+})

@@ -75,7 +75,7 @@ export const createAuth = (keypair, config = {}) => {
     )
     return msgs.encodeAttestation(
       AttestationSource.Initiator,
-      challengeLength,
+      challenge.byteLength,
       signed
     )
   }
