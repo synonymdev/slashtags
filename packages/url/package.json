@@ -1,0 +1,39 @@
+{
+  "name": "@synonymdev/slashtags-url",
+  "version": "0.0.3-alpha.0",
+  "description": "Slashtags parser and fromatter for documents and actions uris",
+  "author": "Nazeh <ar.nazeh@gmail.com>",
+  "main": "lib/index.js",
+  "type": "module",
+  "files": [
+    "lib"
+  ],
+  "keywords": [
+    "slashtags",
+    "identifiers",
+    "cid",
+    "feed"
+  ],
+  "scripts": {
+    "lint": "standard  --fix",
+    "build": "rm -rf ./lib && tsc -p tsconfig.json",
+    "test": "hundreds ava ./test/**/*.js",
+    "validate-action-schemas": "node scripts/validateActionSchemas.js",
+    "prepublishOnly": "npm run lint && npm run build && npm run test && npm run validate-action-schemas"
+  },
+  "homepage": "https://github.com/synonymdev/slashtags/tree/master/packages/url/#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/synonymdev/slashtags.git"
+  },
+  "bugs": {
+    "url": "https://github.com/synonymdev/slashtags/issues"
+  },
+  "dependencies": {
+    "@synonymdev/slashtags-common": "^0.0.3-alpha.0",
+    "@synonymdev/slashtags-docid": "^0.0.3-alpha.0",
+    "ajv": "^8.6.2",
+    "ajv-formats": "^2.1.1",
+    "multiformats": "^9.4.7"
+  }
+}
