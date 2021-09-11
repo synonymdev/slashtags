@@ -10,6 +10,7 @@ addFormats(ajv)
  * Add an action's schema to use at formatting and paring action urls
  * @param {Schema} schema
  * @throws {Error} On invalid schema according to Slashtag's actions meta-schema
+ * @returns {string} actionID string
  */
 export const addAction = (schema) => {
   ajv.validate(metaschema, schema)
@@ -24,6 +25,7 @@ export const addAction = (schema) => {
 
   schemas[actionID] = schema
   schemasByTitle[schema.title] = schema
+  return actionID
 }
 
 /** @typedef {import('ajv').SchemaObject} Schema */
