@@ -2,14 +2,16 @@
   "name": "slashtags-js",
   "scripts": {
     "postinstall": "lerna bootstrap --hoist --ci",
+    "install": "lerna exec npm i && rm -rf packages/*/package-lock.json",
     "test": "lerna exec npm t",
     "lint": "lerna run lint",
     "build": "lerna run build",
+    "prepublish": "lerna run prepublishOnly",
     "publish": "lerna publish",
     "clean": "npm run clean:deps && npm run clean:build && npm run clean:coverage",
     "clean:build": "rm -rf ./packages/*/lib",
     "clean:coverage": "rm -rf ./packages/*/coverage",
-    "clean:deps": "rm -rf node_modules && rm -rf packages/*/node_modules && rm -rf packages/*/package-lock.json"
+    "clean:deps": "rm -rf node_modules && rm -rf packages/*/node_modules"
   },
   "type": "module",
   "keywords": [
