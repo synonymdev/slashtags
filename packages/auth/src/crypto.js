@@ -24,7 +24,6 @@ export const generateChallenge = (
  * @returns {Noise}
  */
 export const createHandshake = (pattern, initiator, staticKeypair, opts) => {
-  // @ts-ignore
   return new Noise(pattern, initiator, staticKeypair, opts)
 }
 
@@ -50,4 +49,3 @@ export const validateKeyForCurve = (curve, publicKey, secretKey) => {
 
 /** @typedef {import('./interfaces').KeyPair} KeyPair */
 /** @typedef {import('./interfaces').Curve} Curve */
-/** @typedef {import('./interfaces').Noise} Noise */

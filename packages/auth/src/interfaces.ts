@@ -13,12 +13,6 @@ export interface Curve {
   dh: (pk: Buffer, lsk: Buffer) => Buffer;
 }
 
-export interface Noise {
-  initialise: (prologue: Uint8Array, remoteStatic?: Uint8Array) => void;
-  recv: (buf: Uint8Array) => Uint8Array;
-  send: (payload: Uint8Array) => Uint8Array;
-}
-
 export interface Session {
   challenge: Uint8Array;
   timer: NodeJS.Timeout;

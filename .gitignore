@@ -8,7 +8,6 @@ docs/
 build
 lib
 yarn.lock
-types
 packages/*/node_modules/
 packages/*/coverage/
 packages/*/logs/

@@ -23,8 +23,9 @@ test('Add a new valid schema to actions', (t) => {
 
   const actionID = DocID.toString(DocID.CID.fromJSON(schema))
 
-  addAction(schema)
+  const result = addAction(schema)
 
+  t.deepEqual(result, actionID)
   t.deepEqual(schemas[actionID], schema)
   t.deepEqual(schemasByTitle[schema.title], schema)
 })

@@ -42,25 +42,27 @@ import secp256k1 from 'noise-curve-secp';
 
 // === Responder's Side ===
 const responderKeypair = secp256k1.generateKeyPair();
-const responder = createAuth(responderKeyPair, {
+const responder = createAuth(responderKeypair, {
   metadata: { foo: 'responder' },
 });
 
 // Generate a new challenge and track session's timeout
-const { challenge, attestationURL, responderPublicKey } =
-  responder.newChallenge(100);
+const challenge = responder.newChallenge(100);
 
 // === Initiator's Side ===
+// Pass the challenge to the initiator
 const initiatorKeypair = secp256k1.generateKeyPair();
-const initiator = createAuth(initiatorKeypair, responderKeyPair, {
+const initiator = createAuth(initiatorKeypair, {
   metadata: { foo: 'intitiator' },
 });
+const initiatorAttestation = initiator.signChallenge(challenge);
 
 // === Responder's Side ===
 // Pass the attestation to the responder
-const resultResponder = responder.verify(initiator.attestation);
+const resultResponder = responder.verify(initiatorAttestation);
 // resultResponder => {
 //  as: 'Responder',
+//  intitiatorPK: Uint8Array[...],
 //  metadata: { foo: 'initiator' },
 //  responderAttestation: Uint8Array[...]
 // }
@@ -68,7 +70,6 @@ const resultResponder = responder.verify(initiator.attestation);
 // === Initiator's Side ===
 // Finally pass the responder attestation to the initiator
 const resultInitiator = initiator.verify(resultResponder.responderAttestation);
-
 // resultInitiator => {
 //  as: 'Initiator',
 //  metadata: { foo: 'responder' },

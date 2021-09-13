@@ -1,4 +1,4 @@
-import { format } from '../src/index.js'
+import { addAction, format } from '../src/index.js'
 import * as DocID from '@synonymdev/slashtags-docid'
 import { schemasByTitle } from '../src/constants/index.js'
 import test from 'ava'
@@ -108,5 +108,27 @@ test('should remove additional fields from the actionPayload', (t) => {
   t.deepEqual(
     url,
     'slashtags:b2iaqaamaaqjcaqv6g7ndzg7umksak37wip66r7nqoyuutg5re2y3hoc7cv3ytoby/#ugAR7ImNoYWxsZW5nZSI6ImZvbyIsImNiVVJMIjoiaHR0cHM6d3d3LmV4YW1wbGUuY29tIn0'
+  )
+})
+
+test('should throw an error for too big of a payload', (t) => {
+  const actionID = addAction({
+    title: 'empty',
+    description: 'does nothing',
+    properties: { foo: { type: 'string' } },
+    additionalProperties: false
+  })
+
+  t.throws(
+    () =>
+      format(actionID, {
+        foo: 'foo'.repeat(1000000)
+      }),
+    {
+      instanceOf: Error,
+      message:
+        'Payload is too big, url max length should be 2000 character, got: ' +
+        4000094
+    }
   )
 })

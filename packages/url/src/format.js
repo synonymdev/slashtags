@@ -22,7 +22,16 @@ export const format = (docID, actionPayload, throwInvalid = false) => {
 
     const jsonEncoded = json.encode(actionPayload)
     const payload = base64url.encode(varint.prepend([json.code], jsonEncoded))
-    return PROTOCOL_NAME + `:${docID}/#${payload}`
+    const url = PROTOCOL_NAME + `:${docID}/#${payload}`
+
+    if (url.length > 2000) {
+      throw new Error(
+        'Payload is too big, url max length should be 2000 character, got: ' +
+          url.length
+      )
+    }
+
+    return url
   }
 
   return PROTOCOL_NAME + `://${docID}/`
