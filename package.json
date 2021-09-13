@@ -5,7 +5,6 @@
     "test": "lerna exec npm t",
     "lint": "lerna run lint",
     "build": "lerna run build",
-    "prepublish": "lerna run prepublishOnly",
     "publish": "lerna publish",
     "clean": "npm run clean:deps && npm run clean:build && npm run clean:coverage",
     "clean:build": "rm -rf ./packages/*/lib",
