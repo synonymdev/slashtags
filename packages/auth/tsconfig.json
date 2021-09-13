@@ -3,5 +3,5 @@
   "compilerOptions": {
     "outDir": "lib"
   },
-  "include": ["src/**/*", "index.d.ts", "../../interfaces.js"]
+  "include": ["src/**/*", "types"]
 }

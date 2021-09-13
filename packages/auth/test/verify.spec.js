@@ -26,6 +26,7 @@ test('should create new encoded challenge message', (t) => {
     t.deepEqual(result, {
       as: 'Responder',
       metadata: { foo: 'intitiator' },
+      initiatorPK: Uint8Array.from(keypair.publicKey),
       responderAttestation: result.responderAttestation
     })
 
@@ -136,6 +137,7 @@ test('should handle custom challengeLength', async (t) => {
   if (result.as === 'Responder') {
     t.deepEqual(result, {
       as: 'Responder',
+      initiatorPK: Uint8Array.from(keypair.publicKey),
       metadata: { foo: 'intitiator' },
       responderAttestation: result.responderAttestation
     })

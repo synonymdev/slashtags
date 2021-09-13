@@ -86,6 +86,7 @@ export const createAuth = (keypair, config = {}) => {
    * @returns {{
    *  as: "Responder",
    *  metadata: Serializable,
+   *  initiatorPK: Uint8Array,
    *  responderAttestation: Uint8Array,
    * } | {
    *  as: "Initiator",
@@ -120,6 +121,7 @@ export const createAuth = (keypair, config = {}) => {
       return {
         as: 'Responder',
         metadata,
+        initiatorPK: Uint8Array.from(handshake.rs),
         responderAttestation: msgs.encodeAttestation(
           AttestationSource.Responder,
           keypair.publicKey.byteLength,
