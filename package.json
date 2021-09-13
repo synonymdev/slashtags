@@ -1,7 +1,6 @@
 {
   "name": "slashtags-js",
   "scripts": {
-    "postinstall": "lerna bootstrap --hoist --ci",
     "install": "lerna exec npm i && rm -rf packages/*/package-lock.json",
     "test": "lerna exec npm t",
     "lint": "lerna run lint",
