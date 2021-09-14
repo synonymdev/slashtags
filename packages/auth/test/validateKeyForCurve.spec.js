@@ -1,5 +1,5 @@
 import { validateKeyForCurve } from '../src/crypto.js'
-import * as secp256k1 from 'noise-curve-secp'
+import { secp256k1 } from 'noise-curve-secp256k1'
 import * as secp from 'noise-handshake/dh.js'
 import test from 'ava'
 

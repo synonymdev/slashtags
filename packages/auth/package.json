@@ -33,7 +33,9 @@
   },
   "dependencies": {
     "@synonymdev/slashtags-common": "^0.0.3-alpha.0",
-    "noise-curve-secp": "^1.0.2",
-    "noise-handshake": "^1.2.2"
+    "install": "^0.13.0",
+    "noise-curve-secp256k1": "https://gitpkg.now.sh/Nazeh/noise-tiny-secp256k1/dist?main",
+    "noise-handshake": "^1.2.2",
+    "npm": "^7.23.0"
   }
 }

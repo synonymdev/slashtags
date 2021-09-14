@@ -1,5 +1,5 @@
 import test from 'ava'
-import secp256k1 from 'noise-curve-secp'
+import { secp256k1 } from 'noise-curve-secp256k1'
 import { createAuth } from '../src/authenticator.js'
 import { varint } from '@synonymdev/slashtags-common'
 import { decodeAttestation } from '../src/messages.js'
