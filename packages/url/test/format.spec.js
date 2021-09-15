@@ -45,7 +45,7 @@ test('should format slashtags action url correctly from DocID', (t) => {
 
   t.deepEqual(
     url,
-    'slashtags:b2iaqaamaaqjcaqv6g7ndzg7umksak37wip66r7nqoyuutg5re2y3hoc7cv3ytoby/#ugAR7ImNoYWxsZW5nZSI6ImZvbyIsImNiVVJMIjoiaHR0cHM6d3d3LmV4YW1wbGUuY29tIn0'
+    'slashtags:b2iaqaamaaqjcbw5htiftuksya3xkgxzzhrqwz4qtk6oxn7u74l23t2fthlnx3ked/#ugAR7ImNoYWxsZW5nZSI6ImZvbyIsImNiVVJMIjoiaHR0cHM6d3d3LmV4YW1wbGUuY29tIn0'
   )
 })
 
@@ -57,7 +57,7 @@ test('should not throw an error for invalid payload by default', (t) => {
       challenge: 'foo',
       cbURL: 'noturl'
     }),
-    'slashtags:b2iaqaamaaqjcaqv6g7ndzg7umksak37wip66r7nqoyuutg5re2y3hoc7cv3ytoby/#ugAR7ImNoYWxsZW5nZSI6ImZvbyIsImNiVVJMIjoibm90dXJsIn0'
+    'slashtags:b2iaqaamaaqjcbw5htiftuksya3xkgxzzhrqwz4qtk6oxn7u74l23t2fthlnx3ked/#ugAR7ImNoYWxsZW5nZSI6ImZvbyIsImNiVVJMIjoibm90dXJsIn0'
   )
 })
 
@@ -70,6 +70,7 @@ test('should throw an error for invalid payload', (t) => {
         docID,
         {
           challenge: 'foo',
+          remotePK: 'bar',
           cbURL: 'noturl'
         },
         true
@@ -107,7 +108,7 @@ test('should remove additional fields from the actionPayload', (t) => {
 
   t.deepEqual(
     url,
-    'slashtags:b2iaqaamaaqjcaqv6g7ndzg7umksak37wip66r7nqoyuutg5re2y3hoc7cv3ytoby/#ugAR7ImNoYWxsZW5nZSI6ImZvbyIsImNiVVJMIjoiaHR0cHM6d3d3LmV4YW1wbGUuY29tIn0'
+    'slashtags:b2iaqaamaaqjcbw5htiftuksya3xkgxzzhrqwz4qtk6oxn7u74l23t2fthlnx3ked/#ugAR7ImNoYWxsZW5nZSI6ImZvbyIsImNiVVJMIjoiaHR0cHM6d3d3LmV4YW1wbGUuY29tIn0'
   )
 })
 

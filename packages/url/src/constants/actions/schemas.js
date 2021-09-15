@@ -8,8 +8,13 @@ export const schemasList = [
     description: "Action's Payload for SlashtagAuth enabled wallets",
     type: 'object',
     properties: {
+      remotePK: {
+        type: 'string',
+        contentEncoding: 'base16'
+      },
       challenge: {
-        type: 'string'
+        type: 'string',
+        contentEncoding: 'base16'
       },
       cbURL: {
         type: 'string',
@@ -17,7 +22,7 @@ export const schemasList = [
       }
     },
     additionalProperties: false,
-    required: ['challenge', 'cbURL']
+    required: ['remotePK', 'challenge', 'cbURL']
   }
 ]
 

@@ -1,4 +1,4 @@
-import secp256k1 from 'noise-curve-secp'
+import { secp256k1 } from 'noise-curve-secp256k1'
 
 export const PROLOGUE = Buffer.alloc(0)
 export const DEFAULT_CHALLENGE_LENGTH = 32

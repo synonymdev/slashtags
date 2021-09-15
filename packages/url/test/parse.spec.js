@@ -34,7 +34,7 @@ test('should parse normal slashtags url correctly', (t) => {
 
 test('should parse slashtags actions correctly', (t) => {
   const url =
-    'slashtags:b2iaqaamaaqjcaqv6g7ndzg7umksak37wip66r7nqoyuutg5re2y3hoc7cv3ytoby/path/just/to/be/sure/#ugAR7ImNoYWxsZW5nZSI6ImZvbyIsImNiVVJMIjoiaHR0cHM6d3d3LmV4YW1wbGUuY29tIn0'
+    'slashtags:b2iaqaamaaqjcbw5htiftuksya3xkgxzzhrqwz4qtk6oxn7u74l23t2fthlnx3ked/path/just/to/be/sure/#ugAR7ImNoYWxsZW5nZSI6ImZvbyIsImNiVVJMIjoiaHR0cHM6d3d3LmV4YW1wbGUuY29tIn0'
 
   const parsed = parse(url)
 
@@ -42,7 +42,7 @@ test('should parse slashtags actions correctly', (t) => {
     url,
     protocol: PROTOCOL_NAME,
     actionID:
-      'b2iaqaamaaqjcaqv6g7ndzg7umksak37wip66r7nqoyuutg5re2y3hoc7cv3ytoby',
+      'b2iaqaamaaqjcbw5htiftuksya3xkgxzzhrqwz4qtk6oxn7u74l23t2fthlnx3ked',
     payload: {
       challenge: 'foo',
       cbURL: 'https:www.example.com'
@@ -64,7 +64,7 @@ test('should remove any additional fields', (t) => {
   )
 
   const url =
-    'slashtags:b2iaqaamaaqjcaqv6g7ndzg7umksak37wip66r7nqoyuutg5re2y3hoc7cv3ytoby/path/just/to/be/sure/#' +
+    'slashtags:b2iaqaamaaqjcbw5htiftuksya3xkgxzzhrqwz4qtk6oxn7u74l23t2fthlnx3ked/path/just/to/be/sure/#' +
     payload
 
   const parsed = parse(url)
@@ -73,7 +73,7 @@ test('should remove any additional fields', (t) => {
     url,
     protocol: PROTOCOL_NAME,
     actionID:
-      'b2iaqaamaaqjcaqv6g7ndzg7umksak37wip66r7nqoyuutg5re2y3hoc7cv3ytoby',
+      'b2iaqaamaaqjcbw5htiftuksya3xkgxzzhrqwz4qtk6oxn7u74l23t2fthlnx3ked',
     payload: {
       challenge: 'foo',
       cbURL: 'https:www.example.com'
@@ -87,13 +87,14 @@ test('should throw validation errors if the user chooses so', (t) => {
       [json.code],
       json.encode({
         challenge: 'foo',
+        remotePK: 'bar',
         cbURL: 'invalid'
       })
     )
   )
 
   const url =
-    'slashtags:b2iaqaamaaqjcaqv6g7ndzg7umksak37wip66r7nqoyuutg5re2y3hoc7cv3ytoby/path/just/to/be/sure/#' +
+    'slashtags:b2iaqaamaaqjcbw5htiftuksya3xkgxzzhrqwz4qtk6oxn7u74l23t2fthlnx3ked/path/just/to/be/sure/#' +
     payload
 
   t.throws(() => parse(url, true), {

@@ -1,5 +1,5 @@
 import Noise from 'noise-handshake'
-import sodium from 'sodium-universal'
+import { randomBytes } from 'crypto'
 import { DEFAULT_CHALLENGE_LENGTH } from './constants.js'
 
 /**
@@ -7,13 +7,8 @@ import { DEFAULT_CHALLENGE_LENGTH } from './constants.js'
  * @param {number} challengeLength
  * @returns {Buffer}
  */
-export const generateChallenge = (
-  challengeLength = DEFAULT_CHALLENGE_LENGTH
-) => {
-  const challenge = Buffer.allocUnsafe(challengeLength)
-  sodium.randombytes_buf(challenge)
-  return challenge
-}
+export const generateChallenge = (challengeLength = DEFAULT_CHALLENGE_LENGTH) =>
+  randomBytes(challengeLength)
 
 /**
  * A wrapper around noise-handshake
