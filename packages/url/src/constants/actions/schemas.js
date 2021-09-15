@@ -1,4 +1,4 @@
-import * as DocID from '@synonymdev/slashtags-docid'
+import * as DocID from '@synonymdev/slashtags-docid';
 
 /** @type {Schema[]} */
 export const schemasList = [
@@ -9,30 +9,32 @@ export const schemasList = [
     type: 'object',
     properties: {
       remotePK: {
-        type: 'string'
+        type: 'string',
+        contentEncoding: 'base16',
       },
       challenge: {
-        type: 'string'
+        type: 'string',
+        contentEncoding: 'base16',
       },
       cbURL: {
         type: 'string',
-        format: 'uri'
-      }
+        format: 'uri',
+      },
     },
     additionalProperties: false,
-    required: ['remotePK', 'challenge', 'cbURL']
-  }
-]
+    required: ['remotePK', 'challenge', 'cbURL'],
+  },
+];
 
 export const schemas = Object.fromEntries(
   schemasList.map((schema) => [
     DocID.toString(DocID.CID.fromJSON(schema)),
-    schema
-  ])
-)
+    schema,
+  ]),
+);
 
 export const schemasByTitle = Object.fromEntries(
-  schemasList.map((schema) => [schema.title, schema])
-)
+  schemasList.map((schema) => [schema.title, schema]),
+);
 
 /** @typedef {import('ajv').SchemaObject} Schema */
