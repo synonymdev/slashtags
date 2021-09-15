@@ -6,7 +6,7 @@
   "dependencies": {
     "@synonymdev/slashtags-auth": "file:../../../packages/auth",
     "@synonymdev/slashtags-url": "file:../../../packages/url",
-    "noise-curve-secp256k1": "https://gitpkg.now.sh/Nazeh/noise-tiny-secp256k1/dist?main",
+    "noise-curve-tiny-secp": "^0.0.1",
     "ws": "^8.2.2"
   }
 }

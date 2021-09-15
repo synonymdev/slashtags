@@ -1,6 +1,6 @@
 import test from 'ava'
 import secp from 'noise-handshake/dh.js'
-import { secp256k1 } from 'noise-curve-secp256k1'
+import { secp256k1 } from 'noise-curve-tiny-secp'
 import { createHandshake, generateChallenge } from '../src/crypto.js'
 import { createAuth } from '../src/authenticator.js'
 import { encodeChallenge, decodeAttestation } from '../src/messages.js'

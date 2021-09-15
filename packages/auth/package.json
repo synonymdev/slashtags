@@ -34,7 +34,7 @@
   "dependencies": {
     "@synonymdev/slashtags-common": "^0.0.3-alpha.1",
     "install": "^0.13.0",
-    "noise-curve-secp256k1": "file:../../../noise-curve-secp256k1/dist",
+    "noise-curve-tiny-secp": "^0.0.1",
     "noise-handshake": "^1.2.2",
     "npm": "^7.23.0"
   }

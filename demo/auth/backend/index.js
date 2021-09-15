@@ -1,6 +1,6 @@
 // Server side code
 import { createAuth } from '@synonymdev/slashtags-auth';
-import { secp256k1 } from 'noise-curve-secp256k1';
+import { secp256k1 } from 'noise-curve-tiny-secp';
 import http from 'http';
 import url from 'url';
 import * as WebSocket from 'ws';

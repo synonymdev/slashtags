@@ -38,7 +38,7 @@ Slashtags Auth follows few steps:
 
 ```js
 import { createAuth } from '@synonymdev/slashtags-auth';
-import { secp256k1 } from 'noise-curve-secp256k1';
+import { secp256k1 } from 'noise-curve-tiny-secp';
 
 // === Responder's Side ===
 const responderKeypair = secp256k1.generateKeyPair();

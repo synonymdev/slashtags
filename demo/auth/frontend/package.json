@@ -36,7 +36,7 @@
     "hyperswarm-web": "^2.1.1",
     "init": "^0.1.2",
     "node-polyfill-webpack-plugin": "^1.1.4",
-    "noise-curve-secp256k1": "https://gitpkg.now.sh/Nazeh/noise-tiny-secp256k1/dist?main",
+    "noise-curve-tiny-secp": "^0.0.1",
     "qrcode": "^1.4.4",
     "random-access-idb": "^1.2.1",
     "react": "^17.0.2",

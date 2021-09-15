@@ -1,6 +1,6 @@
 // Separate from the client side, provides key management and attestation.
 import { createAuth } from '@synonymdev/slashtags-auth';
-import { secp256k1 as curve } from 'noise-curve-secp256k1';
+import { secp256k1 as curve } from 'noise-curve-tiny-secp';
 import * as SlashtagsURL from '@synonymdev/slashtags-url';
 
 // Alreayd in the wallet
