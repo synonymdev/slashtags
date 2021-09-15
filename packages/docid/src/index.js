@@ -1,2 +1,4 @@
-export * from './DocID.js'
-export * as CID from './docTypes/CID.js'
+import { parse, create, toString } from './DocID.js'
+import * as CID from './docTypes/CID.js'
+
+export { parse, create, toString, CID }
