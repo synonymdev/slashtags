@@ -59,4 +59,4 @@ export const parse = (url, throwInvalid = false) => {
   }
 }
 
-/** @typedef {import('@synonymdev/slashtags-docid').DocID} DocID */
+/** @typedef {import('@synonymdev/slashtags-docid').CID.DocID} DocID */

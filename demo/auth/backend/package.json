@@ -4,7 +4,6 @@
   },
   "dependencies": {
     "@synonymdev/slashtags-auth": "^0.0.3-alpha.5",
-    "@synonymdev/slashtags-url": "^0.0.3-alpha.5",
     "noise-curve-tiny-secp": "^0.0.1",
     "ws": "^8.2.2"
   },

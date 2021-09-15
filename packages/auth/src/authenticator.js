@@ -69,9 +69,9 @@ export const createAuth = (keypair, config = {}) => {
       JSON.stringify(metdata || config.metadata)
     )
 
-    intitiatorHandshake.initialise(PROLOGUE, remotePK)
+    intitiatorHandshake.initialise(PROLOGUE, Buffer.from(remotePK))
     const signed = intitiatorHandshake.send(
-      Uint8Array.from([...challenge, ...metadata])
+      Buffer.from([...challenge, ...metadata])
     )
     return msgs.encodeAttestation(
       AttestationSource.Initiator,
@@ -102,7 +102,7 @@ export const createAuth = (keypair, config = {}) => {
       const handshake = createHandshake('IK', false, keypair, { curve })
       handshake.initialise(PROLOGUE)
 
-      const res = handshake.recv(signedMessage)
+      const res = handshake.recv(Buffer.from(signedMessage))
 
       const challenge = res.subarray(0, splitAt)
       const initiatorMetadata = res.subarray(splitAt)
@@ -125,11 +125,11 @@ export const createAuth = (keypair, config = {}) => {
         responderAttestation: msgs.encodeAttestation(
           AttestationSource.Responder,
           keypair.publicKey.byteLength,
-          handshake.send(msg)
+          handshake.send(Buffer.from(msg))
         )
       }
     } else if (attestationSource === AttestationSource.Responder) {
-      const msg = intitiatorHandshake.recv(signedMessage)
+      const msg = intitiatorHandshake.recv(Buffer.from(signedMessage))
       const responderPK = msg.slice(0, splitAt)
 
       const metadata = JSON.parse(new TextDecoder().decode(msg.slice(splitAt)))

@@ -39,6 +39,7 @@ wss.on('connection', (socket) => {
     msg = JSON.parse(msg);
 
     if (msg.type === 'login') {
+      console.log('login request');
       socket.send(
         JSON.stringify({
           type: 'challenge',
