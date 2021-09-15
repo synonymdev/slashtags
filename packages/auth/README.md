@@ -85,4 +85,55 @@ Both the initiator and the responder keypairs needs to use the same curve.
 
 ## Slashtags Actions integration
 
-TODO: explain how Slashtags Actions fit in Slashtags Auth's flow.
+In the case of a client-server app, it is very likely that the private keys are managed by an external wallet, that is where Slashtags Actions comes in, to format the challenge and a callback url to which the wallet should submit the attestation.
+
+```js
+// In wallet
+const auth = createAuth(userKeyPair, {
+  metadata: { preferred_name: 'foo' },
+});
+
+const handleIncomingActions = async (url) => {
+  const { actionID, payload } = SlashtagsURL.parse(slashtagsAction);
+
+  switch (url) {
+    // Slashtags Auth action
+    case 'b2iaqaamaaqjcbw5htiftuksya3xkgxzzhrqwz4qtk6oxn7u74l23t2fthlnx3ked':
+      const { remotePK, challenge, cbURL } = payload;
+
+      logOnScreen('Sign in to server: ' + remotePK);
+
+      const initiatorAttestation = auth.signChallenge(
+        Buffer.from(challenge, 'hex'),
+      );
+
+      const { responderAttestation } = await (
+        await fetch(
+          cbURL +
+            '?&attestation=' +
+            Buffer.from(initiatorAttestation).toString('hex'),
+        )
+      ).json();
+
+      const final = auth.verify(
+        Buffer.from(response.responderAttestation, 'hex'),
+      );
+
+      if (final.as === 'Initiator') {
+        logOnScreen(
+          'Authed to: ',
+          Buffer.from(final.responderPK).toString('hex'),
+        );
+
+        logOnScreen('metadata: ', final.metadata);
+      }
+
+      break;
+    case 'b2...xyz':
+      // Other action
+      // doSomethingElse();
+      break;
+    default:
+  }
+};
+```
