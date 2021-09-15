@@ -4,6 +4,7 @@ import * as client from './client';
 import * as wallet from './wallet';
 import * as SlashtagsURL from '@synonymdev/slashtags-url';
 import QRCode from 'qrcode';
+import * as DocID from '@synonymdev/slashtags-docid';
 
 const walletDiv = document.getElementById('wallet');
 const clientDiv = document.getElementById('client');
@@ -177,3 +178,9 @@ const main = async () => {
 };
 
 main();
+
+// testing DocID while we are at it
+console.log(
+  'DocID works: ',
+  DocID.toString(DocID.CID.fromJSON({ foo: 'bar' })),
+);
