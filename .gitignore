@@ -12,3 +12,5 @@ packages/*/node_modules/
 packages/*/coverage/
 packages/*/logs/
 packages/*/package-lock.json
+packages/*/types
+packages/*/dist

@@ -1,3 +1,5 @@
-export { schemas, schemasByTitle } from './actions/schemas.js'
-export { metaschema } from './actions/metaschema.js'
-export const PROTOCOL_NAME = 'slashtags'
+import { schemas, schemasByTitle } from './actions/schemas.js'
+import { metaschema } from './actions/metaschema.js'
+const PROTOCOL_NAME = 'slashtags'
+
+export { schemas, schemasByTitle, metaschema, PROTOCOL_NAME }

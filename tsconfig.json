@@ -1,17 +1,29 @@
 {
   "compilerOptions": {
-    "typeRoots": ["../../types", "./node_modules/@types"],
-    "module": "esnext",
-    "target": "esnext",
-    "moduleResolution": "node",
-    "declaration": true,
-    "checkJs": true,
     "strict": true,
+    // project options
+    "allowJs": true,
+    "checkJs": true,
+    "target": "ESNEXT",
+    "noEmitOnError": true,
+    "emitDeclarationOnly": true,
+    "incremental": true,
+    "composite": true,
+    "isolatedModules": true,
+    // module resolution
     "esModuleInterop": true,
-    "skipLibCheck": true,
+    "moduleResolution": "node",
+    // linter checks
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": false,
+    // advanced
+    "importsNotUsedAsValues": "error",
     "forceConsistentCasingInFileNames": true,
-    "types": ["node"],
-    "baseUrl": ".",
+    "skipLibCheck": true,
+    "stripInternal": true,
+    "resolveJsonModule": true,
+    // paths
     "paths": {
       "@synonymdev/slashtags-*": ["./packages/*"]
     }

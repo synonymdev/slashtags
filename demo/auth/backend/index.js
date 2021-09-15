@@ -1,9 +1,9 @@
 // Server side code
-import { createAuth } from '@synonymdev/slashtags-auth';
-import { secp256k1 } from 'noise-curve-tiny-secp';
-import http from 'http';
-import url from 'url';
-import * as WebSocket from 'ws';
+const { createAuth } = require('@synonymdev/slashtags-auth');
+const { secp256k1 } = require('noise-curve-tiny-secp');
+const http = require('http');
+const url = require('url');
+const WebSocket = require('ws');
 
 // Just configuring the server
 const seed = Buffer.alloc(32);

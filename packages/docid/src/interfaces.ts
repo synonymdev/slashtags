@@ -1,4 +1,4 @@
-import { DocTypeName, DocMutability } from './constants';
+import type { DocTypeName, DocMutability } from './constants';
 
 export interface DocType {
   code: number;
