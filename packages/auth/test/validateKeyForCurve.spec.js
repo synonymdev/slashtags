@@ -1,5 +1,5 @@
 import { validateKeyForCurve } from '../src/crypto.js'
-import { secp256k1 } from 'noise-curve-secp256k1'
+import { secp256k1 } from 'noise-curve-tiny-secp'
 import * as secp from 'noise-handshake/dh.js'
 import test from 'ava'
 
@@ -14,7 +14,7 @@ test('should create throw an error for invalid publickey', (t) => {
 
 test('should create throw an error for invalid secretKey', (t) => {
   const publicKey = secp256k1.generateKeyPair().publicKey
-  const secretKey = Buffer.alloc(secp256k1.SKLEN + 10)
+  const secretKey = new Uint8Array(secp256k1.SKLEN + 10)
 
   t.throws(() => validateKeyForCurve(secp256k1, publicKey, secretKey), {
     message: 'Invalid secretKey size for curve: ' + secp256k1.ALG,

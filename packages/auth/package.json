@@ -1,41 +1,40 @@
 {
   "name": "@synonymdev/slashtags-auth",
-  "version": "0.0.3-alpha.3",
+  "version": "0.0.3-alpha.7",
   "description": "Bidirectional authentication for keypair verification through attestation.",
-  "author": "Nazeh <ar.nazeh@gmail.com>",
-  "main": "lib/index.js",
   "type": "module",
-  "files": [
-    "lib"
-  ],
   "keywords": [
     "slashtags",
     "authentication",
     "attestation",
     "handshake"
   ],
-  "scripts": {
-    "lint": "standard  --fix",
-    "build": "rm -rf ./lib && tsc -p tsconfig.json",
-    "test": "hundreds ava ./test/**/*.js",
-    "prepublishOnly": "npm run lint && npm run build && npm run test"
-  },
   "homepage": "https://github.com/synonymdev/slashtags/tree/master/packages/auth/#readme",
+  "bugs": {
+    "url": "https://github.com/synonymdev/slashtags/issues"
+  },
+  "author": "Nazeh <ar.nazeh@gmail.com>",
+  "types": "./types/index.d.ts",
+  "main": "src/index.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/synonymdev/slashtags.git"
   },
-  "bugs": {
-    "url": "https://github.com/synonymdev/slashtags/issues"
+  "scripts": {
+    "lint": "rm -rf dist && standard --fix",
+    "build": "rm -rf dist types && ipjs build && tsc && mv types/src dist/types",
+    "test": "hundreds ava ./test/**/*.js",
+    "prepublishOnly": "npm run lint && npm run build && npm run test"
+  },
+  "dependencies": {
+    "@synonymdev/slashtags-common": "^0.0.3-alpha.3",
+    "bint8array": "^1.1.3",
+    "install": "^0.13.0",
+    "noise-curve-tiny-secp": "^1.2.0",
+    "noise-handshake": "^2.1.0",
+    "npm": "^7.23.0"
   },
   "devDependencies": {
     "@types/sodium-native": "^2.3.5"
-  },
-  "dependencies": {
-    "@synonymdev/slashtags-common": "^0.0.3-alpha.1",
-    "install": "^0.13.0",
-    "noise-curve-secp256k1": "file:../../../noise-curve-secp256k1/dist",
-    "noise-handshake": "^1.2.2",
-    "npm": "^7.23.0"
   }
 }

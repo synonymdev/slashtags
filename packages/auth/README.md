@@ -38,7 +38,7 @@ Slashtags Auth follows few steps:
 
 ```js
 import { createAuth } from '@synonymdev/slashtags-auth';
-import { secp256k1 } from 'noise-curve-secp256k1';
+import { secp256k1 } from 'noise-curve-tiny-secp';
 
 // === Responder's Side ===
 const responderKeypair = secp256k1.generateKeyPair();
@@ -89,6 +89,8 @@ In the case of a client-server app, it is very likely that the private keys are 
 
 ```js
 // In wallet
+import bint from 'bint8array';
+
 const auth = createAuth(userKeyPair, {
   metadata: { preferred_name: 'foo' },
 });
@@ -104,26 +106,23 @@ const handleIncomingActions = async (url) => {
       logOnScreen('Sign in to server: ' + remotePK);
 
       const initiatorAttestation = auth.signChallenge(
-        Buffer.from(challenge, 'hex'),
+        bint.fromString(challenge, 'hex'),
       );
 
       const { responderAttestation } = await (
         await fetch(
           cbURL +
             '?&attestation=' +
-            Buffer.from(initiatorAttestation).toString('hex'),
+            bint.fromString(initiatorAttestation, 'hex'),
         )
       ).json();
 
       const final = auth.verify(
-        Buffer.from(response.responderAttestation, 'hex'),
+        bint.fromString(response.responderAttestation, 'hex'),
       );
 
       if (final.as === 'Initiator') {
-        logOnScreen(
-          'Authed to: ',
-          Buffer.from(final.responderPK).toString('hex'),
-        );
+        logOnScreen('Authed to: ', bint.toString(final.responderPK, 'hex'));
 
         logOnScreen('metadata: ', final.metadata);
       }

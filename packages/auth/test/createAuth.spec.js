@@ -1,5 +1,5 @@
 import test from 'ava'
-import { secp256k1 } from 'noise-curve-secp256k1'
+import { secp256k1 } from 'noise-curve-tiny-secp'
 import * as secp from 'noise-handshake/dh.js'
 import { createAuth } from '../src/index.js'
 import { DEFAULT_CHALLENGE_LENGTH } from '../src/constants.js'

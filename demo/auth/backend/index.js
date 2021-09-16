@@ -1,9 +1,10 @@
+// @ts-nocheck
 // Server side code
-import { createAuth } from '@synonymdev/slashtags-auth';
-import { secp256k1 } from 'noise-curve-secp256k1';
-import http from 'http';
-import url from 'url';
-import * as WebSocket from 'ws';
+const { createAuth } = require('@synonymdev/slashtags-auth');
+const { secp256k1 } = require('noise-curve-tiny-secp');
+const http = require('http');
+const url = require('url');
+const WebSocket = require('ws');
 
 // Just configuring the server
 const seed = Buffer.alloc(32);
@@ -39,6 +40,7 @@ wss.on('connection', (socket) => {
     msg = JSON.parse(msg);
 
     if (msg.type === 'login') {
+      console.log('login request');
       socket.send(
         JSON.stringify({
           type: 'challenge',
@@ -80,14 +82,14 @@ http
 
         if (blockedUsers.includes(publicKey)) {
           res.writeHead(401, { 'Access-Control-Allow-Origin': '*' });
-          socketSend(JSON.stringify({ type: 'Begone!', token: { publicKey } }));
+          socketSend(JSON.stringify({ type: 'Begone!', user: { publicKey } }));
           res.end();
         } else {
           socketSend(
             JSON.stringify({
               type: 'authed',
-              token: {
-                user: trustedUsers[publicKey],
+              user: {
+                name: trustedUsers[publicKey],
                 publicKey: publicKey,
               },
             }),

@@ -11,6 +11,7 @@ import {
 } from './crypto.js'
 import { addSession, sessionID } from './sessions.js'
 import * as msgs from './messages.js'
+import bint from 'bint8array'
 
 /**
  * @param {KeyPair} keypair - Authenticator's static keypair
@@ -70,9 +71,7 @@ export const createAuth = (keypair, config = {}) => {
     )
 
     intitiatorHandshake.initialise(PROLOGUE, remotePK)
-    const signed = intitiatorHandshake.send(
-      Uint8Array.from([...challenge, ...metadata])
-    )
+    const signed = intitiatorHandshake.send(bint.concat([challenge, metadata]))
     return msgs.encodeAttestation(
       AttestationSource.Initiator,
       challenge.byteLength,
@@ -103,7 +102,6 @@ export const createAuth = (keypair, config = {}) => {
       handshake.initialise(PROLOGUE)
 
       const res = handshake.recv(signedMessage)
-
       const challenge = res.subarray(0, splitAt)
       const initiatorMetadata = res.subarray(splitAt)
 
@@ -114,14 +112,14 @@ export const createAuth = (keypair, config = {}) => {
 
       sessions.delete(id)
 
-      const msg = Uint8Array.from([...keypair.publicKey, ...session.metadata])
+      const msg = bint.concat([keypair.publicKey, session.metadata])
 
       const metadata = JSON.parse(new TextDecoder().decode(initiatorMetadata))
 
       return {
         as: 'Responder',
         metadata,
-        initiatorPK: Uint8Array.from(handshake.rs),
+        initiatorPK: bint.concat([handshake.rs]),
         responderAttestation: msgs.encodeAttestation(
           AttestationSource.Responder,
           keypair.publicKey.byteLength,

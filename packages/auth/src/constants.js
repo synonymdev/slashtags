@@ -1,6 +1,6 @@
-import { secp256k1 } from 'noise-curve-secp256k1'
+import { secp256k1 } from 'noise-curve-tiny-secp'
 
-export const PROLOGUE = Buffer.alloc(0)
+export const PROLOGUE = new Uint8Array(0)
 export const DEFAULT_CHALLENGE_LENGTH = 32
 
 /** @type {import('./interfaces').Curve} */

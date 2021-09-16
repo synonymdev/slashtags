@@ -1,1 +1,3 @@
-export * as varint from './functions/varint.js'
+import * as varint from './functions/varint.js'
+
+export { varint }

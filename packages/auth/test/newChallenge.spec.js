@@ -13,7 +13,7 @@ test('should create new encoded challenge message', (t) => {
 
   const { challenge, remotePK } = decodeChallenge(message)
 
-  t.deepEqual(Buffer.from(remotePK), keypair.publicKey)
+  t.notDeepEqual(remotePK, keypair.publicKey)
 
   t.deepEqual(challenge.byteLength, DEFAULT_CHALLENGE_LENGTH)
 })

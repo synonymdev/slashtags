@@ -1,10 +1,11 @@
 import test from 'ava'
 import secp from 'noise-handshake/dh.js'
-import { secp256k1 } from 'noise-curve-secp256k1'
+import { secp256k1 } from 'noise-curve-tiny-secp'
 import { createHandshake, generateChallenge } from '../src/crypto.js'
 import { createAuth } from '../src/authenticator.js'
 import { encodeChallenge, decodeAttestation } from '../src/messages.js'
 import { AttestationSource, PROLOGUE } from '../src/constants.js'
+import bint from 'bint8array'
 
 test('should throw an error if the remotePK length does not match the handshake curve', (t) => {
   const keypair = secp256k1.generateKeyPair()
@@ -57,7 +58,10 @@ test('should correctly signt the challenge and return an encoded attestation', (
   const res = handshake.recv(signedMessage)
 
   const metadata = res.slice(splitAt)
-  t.deepEqual(res.slice(0, splitAt), challenge)
+  t.deepEqual(
+    bint.toString(res.slice(0, splitAt), 'hex'),
+    bint.toString(challenge, 'hex')
+  )
   t.deepEqual(new TextDecoder().decode(metadata), '')
 })
 
@@ -85,7 +89,10 @@ test('should correctly sign the challenge and return an encoded attestation with
   const res = handshake.recv(signedMessage)
 
   const metadata = res.slice(splitAt)
-  t.deepEqual(res.slice(0, splitAt), challenge)
+  t.deepEqual(
+    bint.toString(res.slice(0, splitAt), 'hex'),
+    bint.toString(challenge, 'hex')
+  )
   t.deepEqual(
     new TextDecoder().decode(metadata),
     JSON.stringify({ foo: 'bar' })
@@ -116,7 +123,10 @@ test('should override global metadata for one time attestation', (t) => {
   const res = handshake.recv(signedMessage)
 
   const metadata = res.slice(splitAt)
-  t.deepEqual(res.slice(0, splitAt), challenge)
+  t.deepEqual(
+    bint.toString(res.slice(0, splitAt), 'hex'),
+    bint.toString(challenge, 'hex')
+  )
   t.deepEqual(
     new TextDecoder().decode(metadata),
     JSON.stringify({ foo: 'zar' })

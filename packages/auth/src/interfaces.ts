@@ -1,6 +1,6 @@
 export interface KeyPair {
-  publicKey: Buffer | Uint8Array;
-  secretKey: Buffer | Uint8Array;
+  publicKey: Buffer;
+  secretKey: Buffer;
 }
 
 /** Read more https://github.com/chm-diederichs/noise-handshake/blob/main/dh.js#L13 */

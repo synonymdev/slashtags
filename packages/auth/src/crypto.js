@@ -25,8 +25,8 @@ export const createHandshake = (pattern, initiator, staticKeypair, opts) => {
 /**
  * Checks if a publicKey (and secretKey if available) is valid for a given elliptic curve
  * @param {Curve} curve
- * @param {KeyPair["publicKey"]} publicKey
- * @param {KeyPair["secretKey"]} [secretKey]
+ * @param {Uint8Array} publicKey
+ * @param {Uint8Array} [secretKey]
  * @throws {Error}
  * @returns {boolean}
  */

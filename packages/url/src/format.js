@@ -37,4 +37,4 @@ export const format = (docID, actionPayload, throwInvalid = false) => {
   return PROTOCOL_NAME + `://${docID}/`
 }
 
-/** @typedef {import('@synonymdev/slashtags-docid').DocID} DocID */
+/** @typedef {import('@synonymdev/slashtags-docid').CID.DocID} DocID */

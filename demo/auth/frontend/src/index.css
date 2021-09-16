@@ -1,3 +1,17 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -11,7 +25,7 @@ body {
   justify-content: center;
 }
 
-#app {
+#root {
   display: flex;
   column-gap: 1em;
   height: 90%;
@@ -36,7 +50,7 @@ body {
 
 #wallet,
 #client {
-  max-width: 100%;
+  width: 100%;
 }
 
 #wallet *,
@@ -70,7 +84,6 @@ pre {
 }
 
 .go-to-wallet {
-  position: relative;
   display: block;
   background: transparent;
   padding: 0;
