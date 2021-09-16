@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Server side code
 const { createAuth } = require('@synonymdev/slashtags-auth');
 const { secp256k1 } = require('noise-curve-tiny-secp');
@@ -81,14 +82,14 @@ http
 
         if (blockedUsers.includes(publicKey)) {
           res.writeHead(401, { 'Access-Control-Allow-Origin': '*' });
-          socketSend(JSON.stringify({ type: 'Begone!', token: { publicKey } }));
+          socketSend(JSON.stringify({ type: 'Begone!', user: { publicKey } }));
           res.end();
         } else {
           socketSend(
             JSON.stringify({
               type: 'authed',
-              token: {
-                user: trustedUsers[publicKey],
+              user: {
+                name: trustedUsers[publicKey],
                 publicKey: publicKey,
               },
             }),

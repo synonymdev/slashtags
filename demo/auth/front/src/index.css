@@ -50,7 +50,7 @@ body {
 
 #wallet,
 #client {
-  max-width: 100%;
+  width: 100%;
 }
 
 #wallet *,

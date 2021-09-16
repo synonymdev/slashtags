@@ -1,7 +1,7 @@
 // @ts-nocheck
 // Client side code starts here
 import * as SlashtagsURL from '@synonymdev/slashtags-url';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import QRCode from 'qrcode';
 
 const ws = new WebSocket('ws://localhost:9000');
@@ -23,10 +23,7 @@ export const sendInitialRequest = async (handleAuthed, setQR) => {
       );
 
       setQR(slashtagsAction);
-    } else if (msg.type === 'authed') {
-      // Store an actual JWT and send it along next requests.
-      handleAuthed(msg.token);
-    } else if (msg.type === 'Begone!') {
+    } else {
       handleAuthed(msg);
     }
   };
@@ -37,8 +34,24 @@ export const Client = ({ setWallet, sendAction }) => {
   const [action, setAction] = useState();
   const canvasRef = useRef();
 
-  const handleAuthed = (token) => {
-    console.log('got token ', token);
+  useEffect(() => {
+    try {
+      const user = localStorage.getItem('user');
+      if (user) setUser(JSON.parse(user));
+    } catch (error) {}
+  }, []);
+
+  const handleAuthed = (msg) => {
+    if (msg.type === 'authed') {
+      const user = msg.user;
+
+      if (!user) return;
+      setUser(user);
+      setAction(null);
+      localStorage.setItem('user', JSON.stringify(user));
+    } else if (msg.type === 'Begone!') {
+      setUser({ blocked: true, ...user });
+    }
   };
 
   const setQR = (url) => {
@@ -46,11 +59,46 @@ export const Client = ({ setWallet, sendAction }) => {
     QRCode.toCanvas(canvasRef.current, url);
   };
 
+  const signOut = () => {
+    setUser(null);
+    setAction(null);
+    localStorage.removeItem('user');
+  };
+
   return (
     <div className="container">
       <h1>Client</h1>
       <div id="client">
-        {action ? (
+        {user ? (
+          <>
+            {user.blocked ? (
+              <>
+                <p>YOU ARE BLOCKED</p>
+                <br />
+                <p>Begone!</p>
+                <p>{user.publickey}</p>
+                <br />{' '}
+                <button className="btn" onClick={signOut}>
+                  Back
+                </button>
+              </>
+            ) : (
+              <>
+                <p>
+                  Welcome{' '}
+                  <b>{user?.name ? user.name : 'nameless person yet'}</b>
+                </p>
+                <br />
+                <p>you are signed in with public key: </p>
+                <pre>{user?.publicKey}</pre>
+                <br />{' '}
+                <button className="btn" onClick={signOut}>
+                  Sign out
+                </button>
+              </>
+            )}
+          </>
+        ) : action ? (
           <>
             <canvas
               className="btn"

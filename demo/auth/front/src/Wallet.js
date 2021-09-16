@@ -6,85 +6,95 @@ import * as SlashtagsURL from '@synonymdev/slashtags-url';
 import { useState, useEffect } from 'react';
 
 // Alreayd in the wallet
-let userKeyPair = curve.generateSeedKeyPair('');
+let username;
+let userKeyPair;
 
 export const setUser = (seed) => {
+  username = seed;
   userKeyPair = curve.generateSeedKeyPair(seed);
 };
 
-const handleStActions = async (url) => {
-  const { actionID, payload } = SlashtagsURL.parse(url);
+export const Wallet = ({ actionURL }) => {
+  const [authPayload, setAuthPayload] = useState();
+  const [success, setSuccess] = useState(false);
 
-  switch (actionID) {
-    case 'b2iaqaamaaqjcbw5htiftuksya3xkgxzzhrqwz4qtk6oxn7u74l23t2fthlnx3ked':
-      const { challenge, cbURL } = payload;
+  const signIn = async () => {
+    const auth = createAuth(userKeyPair, {
+      metadata: { preferred_name: username },
+    });
 
-      const auth = createAuth(userKeyPair, {
-        metadata: 'Client Wallet Server configuration',
-      });
+    const attestation = auth.signChallenge(
+      Buffer.from(authPayload.challenge, 'hex'),
+    );
 
-      const initiatorAttestation = auth.signChallenge(
-        Buffer.from(challenge, 'hex'),
-      );
+    const url = new URL(authPayload.cbURL);
+    url.searchParams.set(
+      'attestation',
+      Buffer.from(attestation).toString('hex'),
+    );
+    const res = await fetch(url.toString());
+    const { responderAttestation } = await res.json();
 
-      const response = await fetch(
-        cbURL +
-          '?&attestation=' +
-          Buffer.from(initiatorAttestation).toString('hex'),
-      );
-
-      const { responderAttestation } = await response.json();
-
-      console.log({
-        responderAttestation: Buffer.from(responderAttestation, 'hex'),
-      });
-
-      const final = auth.verify(Buffer.from(responderAttestation, 'hex'));
-
-      if (final.as === 'Initiator')
-        console.log({
-          publickey: Buffer.from(final.responderPK).toString('hex'),
-          metadata: final.metadata,
-        });
-
-      return;
-
-    default:
-      return;
-  }
-};
-
-export const Wallet = ({ userKeyPair, stAction }) => {
-  const [state, setState] = useState();
-
-  useEffect(() => {
-    try {
-      setState(SlashtagsURL.parse(stAction));
-    } catch (error) {
-      console.log('invlaid stAction url');
+    console.log(responderAttestation);
+    if (responderAttestation) {
+      setAuthPayload(null);
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 2000);
     }
-  }, [stAction]);
+  };
 
   useEffect(() => {
+    // Handle incoming action urls
     (async () => {
-      if (!stAction) return;
+      if (!actionURL) return;
 
       try {
-        const response = await handleStActions(stAction);
-        console.log(response);
+        const { actionID, payload } = SlashtagsURL.parse(actionURL);
+
+        switch (actionID) {
+          case 'b2iaqaamaaqjcbw5htiftuksya3xkgxzzhrqwz4qtk6oxn7u74l23t2fthlnx3ked':
+            setAuthPayload(payload);
+            break;
+
+          default:
+            setAuthPayload(null);
+            return;
+        }
       } catch (error) {
-        console.log(error);
+        console.warn('invlaid actionURL url');
       }
     })();
-  }, [state, stAction, userKeyPair]);
+  }, [actionURL]);
 
   return (
     <div className="container">
       <h1>Wallet</h1>
       <div id="wallet">
-        <h4>Wallet owner: {userKeyPair?.publicKey.toString('hex')}</h4>
+        <h4>Wallet owner:</h4>
+        <p>Name: {username} </p>
+        <br />
+        <p>Public key:</p>
+        <pre>{userKeyPair?.publicKey.toString('hex')}</pre>
+        <br />
+        <br />
+        {authPayload && (
+          <>
+            <h3>Login request</h3>
+            <p>Do you want to login to:</p>
+            <pre>{authPayload.remotePK}</pre>
+            <p>by signing their challenge</p>
+            <pre>{authPayload.challenge}</pre>
+            <button className="btn signin" onClick={signIn}>
+              Sign in
+            </button>
+          </>
+        )}
+        {success && (
+          <button className="btn" onClick={() => setSuccess(false)}>
+            Successfully signed in{' '}
+          </button>
+        )}
       </div>
-      {state && <div>{JSON.stringify(state)}</div>}
     </div>
   );
 };

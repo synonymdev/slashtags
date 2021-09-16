@@ -3,7 +3,8 @@
     "server": "node index.js"
   },
   "dependencies": {
-    "@synonymdev/slashtags-auth": "^0.0.3-alpha.5",
+    "@synonymdev/slashtags-auth": "^0.0.3-alpha.6",
+    "@synonymdev/slashtags-url": "^0.0.3-alpha.6",
     "noise-curve-tiny-secp": "^0.0.1",
     "ws": "^8.2.2"
   },
