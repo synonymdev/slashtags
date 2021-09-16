@@ -42,7 +42,14 @@ export const Wallet = ({ actionURL }) => {
     });
 
     const final = auth.verify(Buffer.from(responderAttestation, 'hex'));
-    console.log({ final });
+
+    const serverPK = Buffer.from(final.responderPK).toString('hex');
+
+    // TODO: show that on screen and alert if pubkey doesn't match!
+    console.log({
+      ...final,
+      serverPK,
+    });
 
     if (responderAttestation) {
       setAuthPayload(null);

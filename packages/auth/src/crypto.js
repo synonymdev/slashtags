@@ -1,15 +1,14 @@
 import Noise from 'noise-handshake'
 import { randomBytes } from 'crypto'
 import { DEFAULT_CHALLENGE_LENGTH } from './constants.js'
-import bint from 'bint8array'
 
 /**
  * Generate new random challenge
  * @param {number} challengeLength
- * @returns {Uint8Array}
+ * @returns {Buffer}
  */
 export const generateChallenge = (challengeLength = DEFAULT_CHALLENGE_LENGTH) =>
-  bint.concat([randomBytes(challengeLength)])
+  randomBytes(challengeLength)
 
 /**
  * A wrapper around noise-handshake
@@ -26,8 +25,8 @@ export const createHandshake = (pattern, initiator, staticKeypair, opts) => {
 /**
  * Checks if a publicKey (and secretKey if available) is valid for a given elliptic curve
  * @param {Curve} curve
- * @param {KeyPair["publicKey"]} publicKey
- * @param {KeyPair["secretKey"]} [secretKey]
+ * @param {Uint8Array} publicKey
+ * @param {Uint8Array} [secretKey]
  * @throws {Error}
  * @returns {boolean}
  */

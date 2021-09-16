@@ -31,7 +31,7 @@ const validateVersion = (version) => {
  * @param {Uint8Array} message <version-code><challenge-len><challenge><rest>
  * @returns {{
  *  challenge: Uint8Array,
- *  remotePK: KeyPair["publicKey"]
+ *  remotePK: Uint8Array
  * }}}
  */
 export const decodeChallenge = (message) => {

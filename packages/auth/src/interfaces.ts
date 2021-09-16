@@ -1,6 +1,6 @@
 export interface KeyPair {
-  publicKey: Uint8Array;
-  secretKey: Uint8Array;
+  publicKey: Buffer;
+  secretKey: Buffer;
 }
 
 /** Read more https://github.com/chm-diederichs/noise-handshake/blob/main/dh.js#L13 */
@@ -9,8 +9,8 @@ export interface Curve {
   PKLEN: number;
   SKLEN: number;
   ALG: string;
-  generateKeyPair: (privKey?: Uint8Array) => KeyPair;
-  dh: (pk: Uint8Array, lsk: Uint8Array) => Uint8Array;
+  generateKeyPair: (privKey?: Buffer) => KeyPair;
+  dh: (pk: Buffer, lsk: Buffer) => Buffer;
 }
 
 export interface Session {
