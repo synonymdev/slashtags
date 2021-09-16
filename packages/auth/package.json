@@ -28,8 +28,9 @@
   },
   "dependencies": {
     "@synonymdev/slashtags-common": "^0.0.3-alpha.3",
+    "bint8array": "^1.1.3",
     "install": "^0.13.0",
-    "noise-curve-tiny-secp": "^0.0.1",
+    "noise-curve-tiny-secp": "^1.0.0",
     "noise-handshake": "^2.1.0",
     "npm": "^7.23.0"
   },

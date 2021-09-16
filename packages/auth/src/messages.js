@@ -1,5 +1,6 @@
 import { CURRENT_VERSION, KNOWN_VERSIONS } from './constants.js'
 import { varint } from '@synonymdev/slashtags-common'
+import bint from 'bint8array'
 
 /**
  * Encode version code, challenge and responder's publickey
@@ -10,7 +11,7 @@ import { varint } from '@synonymdev/slashtags-common'
 export const encodeChallenge = (challenge, publicKey) => {
   return varint.prepend(
     [CURRENT_VERSION, challenge.byteLength],
-    Uint8Array.from([...challenge, ...publicKey])
+    bint.concat([challenge, publicKey])
   )
 }
 

@@ -1,14 +1,15 @@
 import Noise from 'noise-handshake'
 import { randomBytes } from 'crypto'
 import { DEFAULT_CHALLENGE_LENGTH } from './constants.js'
+import bint from 'bint8array'
 
 /**
  * Generate new random challenge
  * @param {number} challengeLength
- * @returns {Buffer}
+ * @returns {Uint8Array}
  */
 export const generateChallenge = (challengeLength = DEFAULT_CHALLENGE_LENGTH) =>
-  randomBytes(challengeLength)
+  bint.concat([randomBytes(challengeLength)])
 
 /**
  * A wrapper around noise-handshake

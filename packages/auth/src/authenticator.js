@@ -11,6 +11,7 @@ import {
 } from './crypto.js'
 import { addSession, sessionID } from './sessions.js'
 import * as msgs from './messages.js'
+import bint from 'bint8array'
 
 /**
  * @param {KeyPair} keypair - Authenticator's static keypair
@@ -69,10 +70,8 @@ export const createAuth = (keypair, config = {}) => {
       JSON.stringify(metdata || config.metadata)
     )
 
-    intitiatorHandshake.initialise(PROLOGUE, Buffer.from(remotePK))
-    const signed = intitiatorHandshake.send(
-      Buffer.from([...challenge, ...metadata])
-    )
+    intitiatorHandshake.initialise(PROLOGUE, remotePK)
+    const signed = intitiatorHandshake.send(bint.concat([challenge, metadata]))
     return msgs.encodeAttestation(
       AttestationSource.Initiator,
       challenge.byteLength,
@@ -102,8 +101,7 @@ export const createAuth = (keypair, config = {}) => {
       const handshake = createHandshake('IK', false, keypair, { curve })
       handshake.initialise(PROLOGUE)
 
-      const res = handshake.recv(Buffer.from(signedMessage))
-
+      const res = handshake.recv(signedMessage)
       const challenge = res.subarray(0, splitAt)
       const initiatorMetadata = res.subarray(splitAt)
 
@@ -114,22 +112,22 @@ export const createAuth = (keypair, config = {}) => {
 
       sessions.delete(id)
 
-      const msg = Uint8Array.from([...keypair.publicKey, ...session.metadata])
+      const msg = bint.concat([keypair.publicKey, session.metadata])
 
       const metadata = JSON.parse(new TextDecoder().decode(initiatorMetadata))
 
       return {
         as: 'Responder',
         metadata,
-        initiatorPK: Uint8Array.from(handshake.rs),
+        initiatorPK: bint.concat([handshake.rs]),
         responderAttestation: msgs.encodeAttestation(
           AttestationSource.Responder,
           keypair.publicKey.byteLength,
-          handshake.send(Buffer.from(msg))
+          handshake.send(msg)
         )
       }
     } else if (attestationSource === AttestationSource.Responder) {
-      const msg = intitiatorHandshake.recv(Buffer.from(signedMessage))
+      const msg = intitiatorHandshake.recv(signedMessage)
       const responderPK = msg.slice(0, splitAt)
 
       const metadata = JSON.parse(new TextDecoder().decode(msg.slice(splitAt)))
