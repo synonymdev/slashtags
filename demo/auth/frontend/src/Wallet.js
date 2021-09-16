@@ -35,7 +35,15 @@ export const Wallet = ({ actionURL }) => {
     const res = await fetch(url.toString());
     const { responderAttestation } = await res.json();
 
-    console.log(responderAttestation);
+    console.log({
+      Buffer,
+      attestation: responderAttestation,
+      isBuffer: Buffer.isBuffer(Buffer.from(responderAttestation, 'hex')),
+    });
+
+    const final = auth.verify(Buffer.from(responderAttestation, 'hex'));
+    console.log({ final });
+
     if (responderAttestation) {
       setAuthPayload(null);
       setSuccess(true);

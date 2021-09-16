@@ -30,7 +30,7 @@
     "@synonymdev/slashtags-common": "^0.0.3-alpha.3",
     "install": "^0.13.0",
     "noise-curve-tiny-secp": "^0.0.1",
-    "noise-handshake": "^1.2.2",
+    "noise-handshake": "^2.1.0",
     "npm": "^7.23.0"
   },
   "devDependencies": {
