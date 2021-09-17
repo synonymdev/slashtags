@@ -24,7 +24,7 @@ Slashtags Auth follows few steps:
 
 - **Initiator Attestation**
 
-  The **Initiator** signs the challenge (or get the attestation from a key manager) and send it back encoded with the Version Code, and the source of the attestation, in this case (Initiator).
+  The **Initiator** signs the challenge (or get the attestation from a key manager) and send it back encoded with the Version code.
 
 - **Responder verification**
 
@@ -42,37 +42,43 @@ import { secp256k1 } from 'noise-curve-tiny-secp';
 
 // === Responder's Side ===
 const responderKeypair = secp256k1.generateKeyPair();
-const responder = createAuth(responderKeypair, {
+const { responder } = createAuth(responderKeypair, {
   metadata: { foo: 'responder' },
 });
 
 // Generate a new challenge and track session's timeout
-const challenge = responder.newChallenge(100);
+const challenge = responder.newChallenge(
+  100,
+  // optional metdata per session
+  { foo: 'responder-override' },
+);
 
 // === Initiator's Side ===
 // Pass the challenge to the initiator
 const initiatorKeypair = secp256k1.generateKeyPair();
-const initiator = createAuth(initiatorKeypair, {
+const { initiator } = createAuth(initiatorKeypair, {
   metadata: { foo: 'intitiator' },
 });
-const initiatorAttestation = initiator.signChallenge(challenge);
+const { attestation, verifyResponder } = initiator.signChallenge(
+  challenge,
+  // optional metdata per session
+  { foo: 'initiator-override' },
+);
 
 // === Responder's Side ===
 // Pass the attestation to the responder
-const resultResponder = responder.verify(initiatorAttestation);
+const resultResponder = responder.verifyInitiator(attestation);
 // resultResponder => {
-//  as: 'Responder',
 //  intitiatorPK: Uint8Array[...],
-//  metadata: { foo: 'initiator' },
+//  metadata: { foo: 'initiator-override' },
 //  responderAttestation: Uint8Array[...]
 // }
 
 // === Initiator's Side ===
 // Finally pass the responder attestation to the initiator
-const resultInitiator = initiator.verify(resultResponder.responderAttestation);
+const resultInitiator = verifyResponder(resultResponder.responderAttestation);
 // resultInitiator => {
-//  as: 'Initiator',
-//  metadata: { foo: 'responder' },
+//  metadata: { foo: 'responder-override' },
 //  responderPK: Uint8Array[...]
 //}
 ```
@@ -89,43 +95,39 @@ In the case of a client-server app, it is very likely that the private keys are 
 
 ```js
 // In wallet
-import bint from 'bint8array';
-
-const auth = createAuth(userKeyPair, {
+const { initiator } = createAuth(userKeyPair, {
   metadata: { preferred_name: 'foo' },
 });
 
 const handleIncomingActions = async (url) => {
-  const { actionID, payload } = SlashtagsURL.parse(slashtagsAction);
+  const { actionID, payload } = SlashtagsURL.parse(url);
 
-  switch (url) {
+  switch (actionID) {
     // Slashtags Auth action
     case 'b2iaqaamaaqjcbw5htiftuksya3xkgxzzhrqwz4qtk6oxn7u74l23t2fthlnx3ked':
-      const { remotePK, challenge, cbURL } = payload;
+      logOnScreen('Sign in to server: ' + payload.remotePK);
 
-      logOnScreen('Sign in to server: ' + remotePK);
-
-      const initiatorAttestation = auth.signChallenge(
-        bint.fromString(challenge, 'hex'),
+      // Sing the challenge to generate the attestation
+      const { attestation, verifyResponder } = initiator.signChallenge(
+        Buffer.from(payload.challenge, 'hex'),
       );
 
-      const { responderAttestation } = await (
-        await fetch(
-          cbURL +
-            '?&attestation=' +
-            bint.fromString(initiatorAttestation, 'hex'),
-        )
-      ).json();
+      // Send attestation to cbURL
+      const url = new URL(payload.cbURL);
+      url.searchParams.set(
+        'attestation',
+        Buffer.from(attestation).toString('hex'),
+      );
+      const res = await fetch(url.toString());
+      const { responderAttestation } = await res.json();
 
-      const final = auth.verify(
-        bint.fromString(response.responderAttestation, 'hex'),
+      // Verify
+      const { responderPK, metadata } = verifyResponder(
+        Buffer.from(responderAttestation, 'hex'),
       );
 
-      if (final.as === 'Initiator') {
-        logOnScreen('Authed to: ', bint.toString(final.responderPK, 'hex'));
-
-        logOnScreen('metadata: ', final.metadata);
-      }
+      logOnScreen('Authed to: ', Buffer.from(responderPK).toString('hex'));
+      logOnScreen('metadata: ', metadata);
 
       break;
     case 'b2...xyz':
@@ -133,6 +135,9 @@ const handleIncomingActions = async (url) => {
       // doSomethingElse();
       break;
     default:
+      // If it reached here without throwing an "Unknown slashtags action: .." error
+      console.log('Not an action');
+      return;
   }
 };
 ```

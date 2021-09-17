@@ -1,6 +1,6 @@
 {
   "name": "@synonymdev/slashtags-url",
-  "version": "0.0.3-alpha.6",
+  "version": "0.1.1",
   "description": "Slashtags parser and fromatter for documents and actions uris",
   "type": "module",
   "keywords": [
@@ -27,8 +27,8 @@
     "prepublishOnly": "npm run lint && npm run build && npm run test"
   },
   "dependencies": {
-    "@synonymdev/slashtags-common": "^0.0.3-alpha.3",
-    "@synonymdev/slashtags-docid": "^0.0.3-alpha.4",
+    "@synonymdev/slashtags-common": "^0.1.0",
+    "@synonymdev/slashtags-docid": "^0.1.0",
     "ajv": "^8.6.2",
     "ajv-formats": "^2.1.1",
     "multiformats": "^9.4.7"

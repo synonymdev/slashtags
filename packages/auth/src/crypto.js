@@ -12,14 +12,13 @@ export const generateChallenge = (challengeLength = DEFAULT_CHALLENGE_LENGTH) =>
 
 /**
  * A wrapper around noise-handshake
- * @param {string} pattern
  * @param {boolean} initiator
  * @param {KeyPair} staticKeypair
  * @param {{curve: Curve}} opts
  * @returns {Noise}
  */
-export const createHandshake = (pattern, initiator, staticKeypair, opts) => {
-  return new Noise(pattern, initiator, staticKeypair, opts)
+export const createHandshake = (initiator, staticKeypair, opts) => {
+  return new Noise('IK', initiator, staticKeypair, opts)
 }
 
 /**

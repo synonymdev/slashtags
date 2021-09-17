@@ -8,7 +8,7 @@ import { validate } from './validate.js'
 /**
  * Create Document base URLs or Action URL
  * @param {string | DocID} docID DocumentID
- * @param {object} actionPayload Payload for slashtags actions
+ * @param {object} [actionPayload] Payload for slashtags actions
  * @param {boolean} [throwInvalid=false] Throw error on invalid payload
  * @throws {Error} Throws erros for invalid payload
  * @returns {string}
@@ -37,4 +37,4 @@ export const format = (docID, actionPayload, throwInvalid = false) => {
   return PROTOCOL_NAME + `://${docID}/`
 }
 
-/** @typedef {import('@synonymdev/slashtags-docid').CID.DocID} DocID */
+/** @typedef {import('./interfaces').DocID} DocID */

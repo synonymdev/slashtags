@@ -1,6 +1,6 @@
 {
   "name": "@synonymdev/slashtags-common",
-  "version": "0.0.3-alpha.3",
+  "version": "0.1.0",
   "description": "A collection of common constants and functions for slashtags",
   "type": "module",
   "keywords": [

@@ -21,12 +21,9 @@ test('should parse normal slashtags url correctly', (t) => {
   const parsed = parse(url)
 
   t.deepEqual(parsed, {
-    url,
+    ...new URL(url),
     protocol: PROTOCOL_NAME,
-    docID: docID,
-    path: '/foo/',
-    query: { q: 'bar' },
-    hash: '#hash'
+    docID: docID
   })
 })
 
@@ -39,7 +36,8 @@ test('should parse slashtags actions correctly', (t) => {
   const parsed = parse(url)
 
   t.deepEqual(parsed, {
-    url,
+    ...new URL(url),
+    docID: DocID.parse(parsed.actionID),
     protocol: PROTOCOL_NAME,
     actionID:
       'b2iaqaamaaqjcbw5htiftuksya3xkgxzzhrqwz4qtk6oxn7u74l23t2fthlnx3ked',
@@ -70,7 +68,8 @@ test('should remove any additional fields', (t) => {
   const parsed = parse(url)
 
   t.deepEqual(parsed, {
-    url,
+    ...new URL(url),
+    docID: DocID.parse(parsed.actionID),
     protocol: PROTOCOL_NAME,
     actionID:
       'b2iaqaamaaqjcbw5htiftuksya3xkgxzzhrqwz4qtk6oxn7u74l23t2fthlnx3ked',

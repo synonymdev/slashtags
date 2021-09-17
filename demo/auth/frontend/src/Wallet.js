@@ -4,27 +4,43 @@ import { createAuth } from '@synonymdev/slashtags-auth';
 import { secp256k1 as curve } from 'noise-curve-tiny-secp';
 import * as SlashtagsURL from '@synonymdev/slashtags-url';
 import { useState, useEffect } from 'react';
+import bint from 'bint8array';
 
 // Alreayd in the wallet
+/** @type {string} */
 let username;
+/** @type {import('@synonymdev/slashtags-auth/dist/types/interfaces').KeyPair} */
 let userKeyPair;
+/** @type {import('@synonymdev/slashtags-auth/dist/types/interfaces').Initiator} */
+let initiator;
 
+/**
+ * @param {string} seed
+ */
 export const setUser = (seed) => {
   username = seed;
   userKeyPair = curve.generateSeedKeyPair(seed);
+
+  const { initiator: init } = createAuth(userKeyPair, {
+    metadata: { preferred_name: username },
+  });
+
+  initiator = init;
 };
 
+/**
+ *
+ * @param {object} param
+ * @param {string} param.actionURL
+ * @returns
+ */
 export const Wallet = ({ actionURL }) => {
   const [authPayload, setAuthPayload] = useState();
-  const [success, setSuccess] = useState(false);
+  const [server, setServer] = useState(false);
 
   const signIn = async () => {
-    const auth = createAuth(userKeyPair, {
-      metadata: { preferred_name: username },
-    });
-
-    const attestation = auth.signChallenge(
-      Buffer.from(authPayload.challenge, 'hex'),
+    const { attestation, verifyResponder } = initiator.signChallenge(
+      bint.fromString(authPayload.challenge, 'hex'),
     );
 
     const url = new URL(authPayload.cbURL);
@@ -35,27 +51,16 @@ export const Wallet = ({ actionURL }) => {
     const res = await fetch(url.toString());
     const { responderAttestation } = await res.json();
 
-    console.log({
-      Buffer,
-      attestation: responderAttestation,
-      isBuffer: Buffer.isBuffer(Buffer.from(responderAttestation, 'hex')),
+    const { responderPK, metadata } = verifyResponder(
+      Buffer.from(responderAttestation, 'hex'),
+    );
+
+    setAuthPayload(null);
+    setServer({
+      verified: true,
+      metadata,
+      responderPK: Buffer.from(responderPK).toString('hex'),
     });
-
-    const final = auth.verify(Buffer.from(responderAttestation, 'hex'));
-
-    const serverPK = Buffer.from(final.responderPK).toString('hex');
-
-    // TODO: show that on screen and alert if pubkey doesn't match!
-    console.log({
-      ...final,
-      serverPK,
-    });
-
-    if (responderAttestation) {
-      setAuthPayload(null);
-      setSuccess(true);
-      setTimeout(() => setSuccess(false), 2000);
-    }
   };
 
   useEffect(() => {
@@ -104,10 +109,15 @@ export const Wallet = ({ actionURL }) => {
             </button>
           </>
         )}
-        {success && (
-          <button className="btn" onClick={() => setSuccess(false)}>
-            Successfully signed in{' '}
-          </button>
+        {server?.verified && (
+          <>
+            <h3>Successfully logged in to</h3>
+            <pre>{server.responderPK}</pre>
+            <pre>{JSON.stringify(server.metadata)}</pre>
+            <button className="btn" onClick={() => setServer(false)}>
+              {'< Back'}
+            </button>
+          </>
         )}
       </div>
     </div>

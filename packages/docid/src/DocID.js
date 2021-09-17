@@ -54,5 +54,4 @@ export const create = (type, key) => {
 }
 
 /** @typedef {import("./interfaces").DocID} DocID */
-/** @typedef {import("multiformats/bases/interface").MultibaseEncoder<any>} MultibaseEncoder */
-/** @typedef {import("multiformats/bases/interface").BaseCodec} BaseCode */
+/** @typedef {import("./interfaces").MultibaseEncoder} MultibaseEncoder */

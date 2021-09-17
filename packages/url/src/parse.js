@@ -10,19 +10,7 @@ import { validate } from './validate.js'
  * @param {string} url
  * @param {boolean} [throwInvalid=false] Throw error on invalid payload
  * @throws {Error} Throws erros for invalid payload
- * @returns {{
- *   url: string;
- *   protocol: string;
- *   actionID: string;
- *   payload: Object;
- *  } | {
- *   url: string;
- *   protocol: string;
- *   docID: DocID;
- *   path: string;
- *   hash: string;
- *   query: Record<string, string>
- * }}
+ * @returns {SlashtagsURL}
  */
 export const parse = (url, throwInvalid = false) => {
   const parsed = new URL(url)
@@ -32,31 +20,26 @@ export const parse = (url, throwInvalid = false) => {
     throw new Error('Protocol should be ' + PROTOCOL_NAME)
   }
 
-  const docIDStr = parsed.hostname || parsed.pathname.split('/')[0]
+  const isAction = !parsed.hostname
+
+  const docIDStr = isAction ? parsed.pathname.split('/')[0] : parsed.hostname
   const docID = DocID.parse(docIDStr)
 
-  if (!parsed.hostname) {
+  /** @type {SlashtagsURL} */
+  const slashtagsURL = { ...parsed, docID, protocol }
+
+  if (isAction) {
     const baseFree = base64url.decode(parsed.hash.substring(1))
     const payload = json.decode(varint.split(baseFree)[1])
 
     const validated = validate(docIDStr, payload, throwInvalid)
 
-    return {
-      url,
-      protocol,
-      actionID: DocID.toString(docID),
-      payload: validated
-    }
+    slashtagsURL.actionID = DocID.toString(docID)
+    slashtagsURL.payload = validated
   }
 
-  return {
-    url,
-    protocol,
-    docID,
-    path: parsed.pathname,
-    hash: parsed.hash,
-    query: Object.fromEntries(parsed.searchParams)
-  }
+  return slashtagsURL
 }
 
-/** @typedef {import('@synonymdev/slashtags-docid').CID.DocID} DocID */
+/** @typedef {import('./interfaces').DocID} DocID */
+/** @typedef {import('./interfaces').SlashtagsURL} SlashtagsURL */
