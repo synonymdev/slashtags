@@ -4,6 +4,7 @@ import { createAuth } from '@synonymdev/slashtags-auth';
 import { secp256k1 as curve } from 'noise-curve-tiny-secp';
 import * as SlashtagsURL from '@synonymdev/slashtags-url';
 import { useState, useEffect } from 'react';
+import bint from 'bint8array';
 
 // Alreayd in the wallet
 /** @type {string} */
@@ -39,7 +40,7 @@ export const Wallet = ({ actionURL }) => {
 
   const signIn = async () => {
     const { attestation, verifyResponder } = initiator.signChallenge(
-      Buffer.from(authPayload.challenge, 'hex'),
+      bint.fromString(authPayload.challenge, 'hex'),
     );
 
     const url = new URL(authPayload.cbURL);
@@ -50,15 +51,15 @@ export const Wallet = ({ actionURL }) => {
     const res = await fetch(url.toString());
     const { responderAttestation } = await res.json();
 
-    const final = verifyResponder(Buffer.from(responderAttestation, 'hex'));
-
-    const responderPK = Buffer.from(final.responderPK).toString('hex');
+    const { responderPK, metadata } = verifyResponder(
+      Buffer.from(responderAttestation, 'hex'),
+    );
 
     setAuthPayload(null);
     setServer({
       verified: true,
-      ...final,
-      responderPK,
+      metadata,
+      responderPK: Buffer.from(responderPK).toString('hex'),
     });
   };
 

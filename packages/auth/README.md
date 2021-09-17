@@ -95,43 +95,39 @@ In the case of a client-server app, it is very likely that the private keys are 
 
 ```js
 // In wallet
-import bint from 'bint8array';
-
 const { initiator } = createAuth(userKeyPair, {
   metadata: { preferred_name: 'foo' },
 });
 
 const handleIncomingActions = async (url) => {
-  const { actionID, payload } = SlashtagsURL.parse(slashtagsAction);
+  const { actionID, payload } = SlashtagsURL.parse(url);
 
-  switch (url) {
+  switch (actionID) {
     // Slashtags Auth action
     case 'b2iaqaamaaqjcbw5htiftuksya3xkgxzzhrqwz4qtk6oxn7u74l23t2fthlnx3ked':
-      const { remotePK, challenge, cbURL } = payload;
+      logOnScreen('Sign in to server: ' + payload.remotePK);
 
-      logOnScreen('Sign in to server: ' + remotePK);
-
-      const initiatorAttestation = auth.signChallenge(
-        bint.fromString(challenge, 'hex'),
+      // Sing the challenge to generate the attestation
+      const { attestation, verifyResponder } = initiator.signChallenge(
+        Buffer.from(payload.challenge, 'hex'),
       );
 
-      const { responderAttestation } = await (
-        await fetch(
-          cbURL +
-            '?&attestation=' +
-            bint.fromString(initiatorAttestation, 'hex'),
-        )
-      ).json();
+      // Send attestation to cbURL
+      const url = new URL(payload.cbURL);
+      url.searchParams.set(
+        'attestation',
+        Buffer.from(attestation).toString('hex'),
+      );
+      const res = await fetch(url.toString());
+      const { responderAttestation } = await res.json();
 
-      const final = auth.verify(
-        bint.fromString(response.responderAttestation, 'hex'),
+      // Verify
+      const { responderPK, metadata } = verifyResponder(
+        Buffer.from(responderAttestation, 'hex'),
       );
 
-      if (final.as === 'Initiator') {
-        logOnScreen('Authed to: ', bint.toString(final.responderPK, 'hex'));
-
-        logOnScreen('metadata: ', final.metadata);
-      }
+      logOnScreen('Authed to: ', Buffer.from(responderPK).toString('hex'));
+      logOnScreen('metadata: ', metadata);
 
       break;
     case 'b2...xyz':
@@ -139,6 +135,9 @@ const handleIncomingActions = async (url) => {
       // doSomethingElse();
       break;
     default:
+      // If it reached here without throwing an "Unknown slashtags action: .." error
+      console.log('Not an action');
+      return;
   }
 };
 ```
