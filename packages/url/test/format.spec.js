@@ -1,6 +1,5 @@
-import { addAction, format } from '../src/index.js'
+import { addAction, format, schemasByTitle } from '../src/index.js'
 import * as DocID from '@synonymdev/slashtags-docid'
-import { schemasByTitle } from '../src/constants/index.js'
 import test from 'ava'
 
 test('should format slashtags base document url correctly from DocID', (t) => {

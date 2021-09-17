@@ -46,7 +46,7 @@ test('should validate keypair against the handshake curve', (t) => {
 
 test('should expose readonly sessions Map for debugging', (t) => {
   const keypair = secp256k1.generateKeyPair()
-  const authenticator = createAuth(keypair)
+  const { responder } = createAuth(keypair)
 
-  t.deepEqual(authenticator.sessions instanceof Map, true)
+  t.deepEqual(responder.sessions instanceof Map, true)
 })

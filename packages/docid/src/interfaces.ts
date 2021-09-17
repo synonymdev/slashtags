@@ -1,4 +1,7 @@
 import type { DocTypeName, DocMutability } from './constants';
+import type { MultibaseEncoder as _MultibaseEncoder } from 'multiformats/bases/interface';
+
+export type MultibaseEncoder = _MultibaseEncoder<any>;
 
 export interface DocType {
   code: number;

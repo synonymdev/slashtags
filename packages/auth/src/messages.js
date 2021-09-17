@@ -3,19 +3,6 @@ import { varint } from '@synonymdev/slashtags-common'
 import bint from 'bint8array'
 
 /**
- * Encode version code, challenge and responder's publickey
- * @param {Uint8Array} challenge
- * @param {KeyPair["publicKey"]} publicKey
- * @returns {Uint8Array} <version-code><challenge-len><challenge><pk>
- */
-export const encodeChallenge = (challenge, publicKey) => {
-  return varint.prepend(
-    [CURRENT_VERSION, challenge.byteLength],
-    bint.concat([challenge, publicKey])
-  )
-}
-
-/**
  * Check the version of SlashtagsAuth
  * @param {number} version
  * @throws {Error}
@@ -24,6 +11,19 @@ const validateVersion = (version) => {
   if (!KNOWN_VERSIONS.includes(version)) {
     throw new Error('Unknown SlashtagsAuth version code')
   }
+}
+
+/**
+ * Encode version code, challenge and responder's publickey
+ * @param {Uint8Array} challenge
+ * @param {Uint8Array} publicKey
+ * @returns {Uint8Array} <version-code><pkOffset><challenge><pk>
+ */
+export const encodeChallenge = (challenge, publicKey) => {
+  return varint.prepend(
+    [CURRENT_VERSION, challenge.byteLength],
+    bint.concat([challenge, publicKey])
+  )
 }
 
 /**
@@ -48,21 +48,19 @@ export const decodeChallenge = (message) => {
 
 /**
  * Encode version code, attestation source, challenge and responder's publickey
- * @param {AttestationSource} attestationSource
- * @param {number} splitAt
  * @param {Uint8Array} signed
- * @returns {Uint8Array} <version-code><attestation-source><splitAt><signed <a><b>>
+ * @param {number} metadataOffset
+ * @returns {Uint8Array} <version><metadata-offset><signed <challenge/pk><metadata>>
  */
-export const encodeAttestation = (attestationSource, splitAt, signed) => {
-  return varint.prepend([CURRENT_VERSION, attestationSource, splitAt], signed)
+export const encodeAttestation = (signed, metadataOffset) => {
+  return varint.prepend([CURRENT_VERSION, metadataOffset], signed)
 }
 
 /**
  * Read challenge, publickey, and source of attestation from a message
- * @param {Uint8Array} message <version-code><attestation-source><splitAt><signed <a><b>>
+ * @param {Uint8Array} message <version><metadataOffset><signed <challenge/pk><metadata>>
  * @returns {{
- *  attestationSource: number
- *  splitAt: number,
+ *  metadataOffset: number,
  *  signedMessage: Uint8Array
  * }}}
  */
@@ -70,12 +68,7 @@ export const decodeAttestation = (message) => {
   const [version, versionFree] = varint.split(message)
   validateVersion(version)
 
-  const [attestationSource, soruceFree] = varint.split(versionFree)
-  const [splitAt, signedMessage] = varint.split(soruceFree)
+  const [metadataOffset, signedMessage] = varint.split(versionFree)
 
-  return { attestationSource, splitAt, signedMessage }
+  return { signedMessage, metadataOffset }
 }
-
-/** @typedef {import('./interfaces').KeyPair} KeyPair */
-/** @typedef {import('./interfaces').Serializable} Serializable */
-/** @typedef {import('./constants').AttestationSource} AttestationSource */

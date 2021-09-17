@@ -13,7 +13,9 @@ const serverKeys = secp256k1.generateSeedKeyPair('backend');
 
 console.log('Server public key:', serverKeys.publicKey.toString('hex'));
 
-const auth = createAuth(serverKeys, { metadata: { server: 'bitfinex' } });
+const { responder } = createAuth(serverKeys, {
+  metadata: { server: 'bitfinex' },
+});
 
 // Users who signed in before
 const trustedUsers = {
@@ -45,9 +47,9 @@ wss.on('connection', (socket) => {
         JSON.stringify({
           type: 'challenge',
           publicKey: Buffer.from(serverKeys.publicKey).toString('hex'),
-          challenge: Buffer.from(auth.newChallenge(2 * 60 * 1000)).toString(
-            'hex',
-          ),
+          challenge: Buffer.from(
+            responder.newChallenge(2 * 60 * 1000),
+          ).toString('hex'),
         }),
       );
     }
@@ -65,7 +67,7 @@ http
     if (req.url.slice(0, 8) === '/answer/') {
       let result;
       try {
-        result = auth.verify(
+        result = responder.verifyInitiator(
           Uint8Array.from(Buffer.from(query.attestation, 'hex')),
         );
       } catch (error) {
@@ -73,36 +75,34 @@ http
         return;
       }
 
-      if (result.as === 'Responder') {
-        const publicKey = Buffer.from(result.initiatorPK).toString('hex');
-        console.log({
-          initiator: publicKey,
-          metadata: result.metadata,
-        });
+      const publicKey = Buffer.from(result.initiatorPK).toString('hex');
+      console.log({
+        initiator: publicKey,
+        metadata: result.metadata,
+      });
 
-        if (blockedUsers.includes(publicKey)) {
-          res.writeHead(401, { 'Access-Control-Allow-Origin': '*' });
-          socketSend(JSON.stringify({ type: 'Begone!', user: { publicKey } }));
-          res.end();
-        } else {
-          socketSend(
-            JSON.stringify({
-              type: 'authed',
-              user: {
-                name: trustedUsers[publicKey],
-                publicKey: publicKey,
-              },
-            }),
-          );
-          res.writeHead(200, { 'Access-Control-Allow-Origin': '*' });
-          res.end(
-            JSON.stringify({
-              responderAttestation: Buffer.from(
-                result.responderAttestation,
-              ).toString('hex'),
-            }),
-          );
-        }
+      if (blockedUsers.includes(publicKey)) {
+        res.writeHead(401, { 'Access-Control-Allow-Origin': '*' });
+        socketSend(JSON.stringify({ type: 'Begone!', user: { publicKey } }));
+        res.end();
+      } else {
+        socketSend(
+          JSON.stringify({
+            type: 'authed',
+            user: {
+              name: trustedUsers[publicKey],
+              publicKey: publicKey,
+            },
+          }),
+        );
+        res.writeHead(200, { 'Access-Control-Allow-Origin': '*' });
+        res.end(
+          JSON.stringify({
+            responderAttestation: Buffer.from(
+              result.responderAttestation,
+            ).toString('hex'),
+          }),
+        );
       }
     } else {
       // /home

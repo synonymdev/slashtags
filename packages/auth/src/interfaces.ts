@@ -19,10 +19,33 @@ export interface Session {
   metadata: Uint8Array;
 }
 
-export type Serializable =
+export type JSON =
   | string
   | null
   | boolean
   | number
-  | Serializable[]
-  | { [key: string]: Serializable };
+  | JSON[]
+  | { [key: string]: JSON };
+
+export interface Initiator {
+  signChallenge: (
+    challengeMessage: Uint8Array,
+    metdata?: JSON,
+  ) => {
+    attestation: Uint8Array;
+    verifyResponder: (responderAttestation: Uint8Array) => {
+      metadata: JSON;
+      responderPK: Uint8Array;
+    };
+  };
+}
+
+export interface Responder {
+  sessions: Map<string, Session>;
+  newChallenge: (timeout: number, metdata?: JSON | undefined) => Uint8Array;
+  verifyInitiator: (attestation: Uint8Array) => {
+    metadata: JSON;
+    initiatorPK: Uint8Array;
+    responderAttestation: Uint8Array;
+  };
+}

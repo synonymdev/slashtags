@@ -31,4 +31,4 @@ export const validate = (actionID, data, throwInvalid = false) => {
   return data
 }
 
-/** @typedef {import('@synonymdev/slashtags-docid').CID.DocID} DocID */
+/** @typedef {import('./interfaces').DocID} DocID */

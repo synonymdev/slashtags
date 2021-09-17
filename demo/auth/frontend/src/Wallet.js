@@ -6,24 +6,39 @@ import * as SlashtagsURL from '@synonymdev/slashtags-url';
 import { useState, useEffect } from 'react';
 
 // Alreayd in the wallet
+/** @type {string} */
 let username;
+/** @type {import('@synonymdev/slashtags-auth/dist/types/interfaces').KeyPair} */
 let userKeyPair;
+/** @type {import('@synonymdev/slashtags-auth/dist/types/interfaces').Initiator} */
+let initiator;
 
+/**
+ * @param {string} seed
+ */
 export const setUser = (seed) => {
   username = seed;
   userKeyPair = curve.generateSeedKeyPair(seed);
+
+  const { initiator: init } = createAuth(userKeyPair, {
+    metadata: { preferred_name: username },
+  });
+
+  initiator = init;
 };
 
+/**
+ *
+ * @param {object} param
+ * @param {string} param.actionURL
+ * @returns
+ */
 export const Wallet = ({ actionURL }) => {
   const [authPayload, setAuthPayload] = useState();
-  const [success, setSuccess] = useState(false);
+  const [server, setServer] = useState(false);
 
   const signIn = async () => {
-    const auth = createAuth(userKeyPair, {
-      metadata: { preferred_name: username },
-    });
-
-    const attestation = auth.signChallenge(
+    const { attestation, verifyResponder } = initiator.signChallenge(
       Buffer.from(authPayload.challenge, 'hex'),
     );
 
@@ -35,27 +50,16 @@ export const Wallet = ({ actionURL }) => {
     const res = await fetch(url.toString());
     const { responderAttestation } = await res.json();
 
-    console.log({
-      Buffer,
-      attestation: responderAttestation,
-      isBuffer: Buffer.isBuffer(Buffer.from(responderAttestation, 'hex')),
-    });
+    const final = verifyResponder(Buffer.from(responderAttestation, 'hex'));
 
-    const final = auth.verify(Buffer.from(responderAttestation, 'hex'));
+    const responderPK = Buffer.from(final.responderPK).toString('hex');
 
-    const serverPK = Buffer.from(final.responderPK).toString('hex');
-
-    // TODO: show that on screen and alert if pubkey doesn't match!
-    console.log({
+    setAuthPayload(null);
+    setServer({
+      verified: true,
       ...final,
-      serverPK,
+      responderPK,
     });
-
-    if (responderAttestation) {
-      setAuthPayload(null);
-      setSuccess(true);
-      setTimeout(() => setSuccess(false), 2000);
-    }
   };
 
   useEffect(() => {
@@ -104,10 +108,15 @@ export const Wallet = ({ actionURL }) => {
             </button>
           </>
         )}
-        {success && (
-          <button className="btn" onClick={() => setSuccess(false)}>
-            Successfully signed in{' '}
-          </button>
+        {server?.verified && (
+          <>
+            <h3>Successfully logged in to</h3>
+            <pre>{server.responderPK}</pre>
+            <pre>{JSON.stringify(server.metadata)}</pre>
+            <button className="btn" onClick={() => setServer(false)}>
+              {'< Back'}
+            </button>
+          </>
         )}
       </div>
     </div>

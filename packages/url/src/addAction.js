@@ -28,4 +28,4 @@ export const addAction = (schema) => {
   return actionID
 }
 
-/** @typedef {import('ajv').SchemaObject} Schema */
+/** @typedef {import('./interfaces').Schema} Schema */
