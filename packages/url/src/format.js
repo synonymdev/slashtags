@@ -14,7 +14,6 @@ import { validate } from './validate.js'
  * @returns {string}
  */
 export const format = (docID, actionPayload, throwInvalid = false) => {
-  console.log(docID)
   docID = typeof docID === 'string' ? docID : DocID.toString(docID)
 
   if (actionPayload) {
