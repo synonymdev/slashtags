@@ -40,6 +40,7 @@ export const Wallet = ({ actionURL }) => {
 
   const signIn = async () => {
     const { attestation, verifyResponder } = initiator.signChallenge(
+      bint.fromString(authPayload.remotePK, 'hex'),
       bint.fromString(authPayload.challenge, 'hex'),
     );
 

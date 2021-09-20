@@ -29,7 +29,8 @@ export type JSON =
 
 export interface Initiator {
   signChallenge: (
-    challengeMessage: Uint8Array,
+    remotePK: Uint8Array,
+    challenge: Uint8Array,
     metdata?: JSON,
   ) => {
     attestation: Uint8Array;

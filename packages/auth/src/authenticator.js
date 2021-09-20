@@ -66,12 +66,11 @@ export const createAuth = (keypair, config = {}) => {
   /**
    * Sign a challenge passed within an encoded message
    * Optionally: override metadata for this attestation
-   * @param {Uint8Array} challengeMessage
+   * @param {Uint8Array} remotePK
+   * @param {Uint8Array} challenge
    * @param {JSON} [metdata] - Custom metadata (overrides responder metadata)
    */
-  const signChallenge = (challengeMessage, metdata) => {
-    const { remotePK, challenge } = msgs.decodeChallenge(challengeMessage)
-
+  const signChallenge = (remotePK, challenge, metdata) => {
     validateKeyForCurve(curve, remotePK)
 
     const metadata = new TextEncoder().encode(
@@ -102,7 +101,7 @@ export const createAuth = (keypair, config = {}) => {
    * Create a new session and return an encoded tuple (challenge, responderPK)
    * @param {number} timeout - Timeout for the session in miliseconds
    * @param {JSON} [metdata] - Custom metadata (overrides responder metadata)
-   * @returns {Uint8Array} Encoded message with <version-code><pkOffset><challenge><PK>
+   * @returns {Uint8Array} challenge
    */
   const newChallenge = (timeout, metdata) => {
     const challenge = generateChallenge(challengeLength)
@@ -113,7 +112,7 @@ export const createAuth = (keypair, config = {}) => {
 
     addSession({ timeout, sessions, challenge, metadata })
 
-    return msgs.encodeChallenge(challenge, keypair.publicKey)
+    return challenge
   }
 
   /**

@@ -2,37 +2,7 @@
 
 > Bidirectional authentication for keypair verification through attestation.
 
-## Overview
-
-Slashtags Auth follows few steps:
-
-- **Request**
-
-  An **Initiator** (client or a peer) sends a request to a server or another peer.
-
-- **Responder**
-  Sends back the following:
-
-  - Public key: the responder's public key.
-  - Challenge: curve name + random bytes.
-
-  encoded with a varint for the Slashtags Auth version.
-
-- **Route to key manager (optional)**
-
-  In case the (client or peer) doesn't manage the keypair, it should prepare a Slashtags Action's and send it to the wallet or key manager, see the Slashtags Actions's Integration below.
-
-- **Initiator Attestation**
-
-  The **Initiator** signs the challenge (or get the attestation from a key manager) and send it back encoded with the Version code.
-
-- **Responder verification**
-
-  Responder verifies the initiator's attestation, and sends back its own attestation along with optional metadata.
-
-- **Initiator verification**
-
-  Initiator verifies the responder's attestation to ensure bidirectional authentication.
+JS implementation of Slashtags Auth.
 
 ## Usage
 
@@ -60,6 +30,7 @@ const { initiator } = createAuth(initiatorKeypair, {
   metadata: { foo: 'intitiator' },
 });
 const { attestation, verifyResponder } = initiator.signChallenge(
+  responderKeypair.publickey,
   challenge,
   // optional metdata per session
   { foo: 'initiator-override' },
@@ -109,6 +80,7 @@ const handleIncomingActions = async (url) => {
 
       // Sing the challenge to generate the attestation
       const { attestation, verifyResponder } = initiator.signChallenge(
+        Buffer.from(payload.remotePK, 'hex'),
         Buffer.from(payload.challenge, 'hex'),
       );
 

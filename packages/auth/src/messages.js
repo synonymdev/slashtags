@@ -1,6 +1,5 @@
 import { CURRENT_VERSION, KNOWN_VERSIONS } from './constants.js'
 import { varint } from '@synonymdev/slashtags-common'
-import bint from 'bint8array'
 
 /**
  * Check the version of SlashtagsAuth
@@ -10,39 +9,6 @@ import bint from 'bint8array'
 const validateVersion = (version) => {
   if (!KNOWN_VERSIONS.includes(version)) {
     throw new Error('Unknown SlashtagsAuth version code')
-  }
-}
-
-/**
- * Encode version code, challenge and responder's publickey
- * @param {Uint8Array} challenge
- * @param {Uint8Array} publicKey
- * @returns {Uint8Array} <version-code><pkOffset><challenge><pk>
- */
-export const encodeChallenge = (challenge, publicKey) => {
-  return varint.prepend(
-    [CURRENT_VERSION, challenge.byteLength],
-    bint.concat([challenge, publicKey])
-  )
-}
-
-/**
- * Read challenge and publickey from a challenge message
- * @param {Uint8Array} message <version-code><challenge-len><challenge><rest>
- * @returns {{
- *  challenge: Uint8Array,
- *  remotePK: Uint8Array
- * }}}
- */
-export const decodeChallenge = (message) => {
-  const [version, versionFree] = varint.split(message)
-  validateVersion(version)
-
-  const [challengeLength, challengeLenFree] = varint.split(versionFree)
-
-  return {
-    challenge: challengeLenFree.slice(0, challengeLength),
-    remotePK: challengeLenFree.slice(challengeLength)
   }
 }
 

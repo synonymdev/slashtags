@@ -29,12 +29,8 @@
   "dependencies": {
     "@synonymdev/slashtags-common": "^0.1.0",
     "bint8array": "^1.1.3",
-    "install": "^0.13.0",
     "noise-curve-tiny-secp": "file:../../../noise-curve-secp256k1/dist",
     "noise-handshake": "^2.1.0",
     "npm": "^7.23.0"
-  },
-  "devDependencies": {
-    "@types/sodium-native": "^2.3.5"
   }
 }

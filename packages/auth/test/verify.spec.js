@@ -15,10 +15,12 @@ test('should create new encoded challenge message', (t) => {
     metadata: { foo: 'responder' }
   })
 
-  const challengeMsg = responder.newChallenge(10)
+  const challenge = responder.newChallenge(10)
 
-  const { attestation, verifyResponder } =
-    initiator.signChallenge(challengeMsg)
+  const { attestation, verifyResponder } = initiator.signChallenge(
+    responderKP.publicKey,
+    challenge
+  )
 
   const result = responder.verifyInitiator(attestation)
 
@@ -50,9 +52,12 @@ test('should throw an error for sessions not found', async (t) => {
     metadata: { foo: 'responder' }
   })
 
-  const challengeMsg = responder.newChallenge(10)
+  const challenge = responder.newChallenge(10)
 
-  const { attestation } = initiator.signChallenge(challengeMsg)
+  const { attestation } = initiator.signChallenge(
+    responderKP.publicKey,
+    challenge
+  )
 
   const sessionKey = Array.from(responder.sessions.keys())[0]
 
@@ -70,14 +75,17 @@ test('should throw an error for unknown version code', async (t) => {
     metadata: { foo: 'intitiator' }
   })
 
-  const responderKP = secp256k1.generateKeyPair()
-  const { responder } = createAuth(responderKP, {
+  const responderPK = secp256k1.generateKeyPair()
+  const { responder } = createAuth(responderPK, {
     metadata: { foo: 'responder' }
   })
 
-  const challengeMsg = responder.newChallenge(10)
+  const challenge = responder.newChallenge(10)
 
-  const { attestation } = initiator.signChallenge(challengeMsg)
+  const { attestation } = initiator.signChallenge(
+    responderPK.publicKey,
+    challenge
+  )
   attestation.set(varint.prepend([4], new Uint8Array(0)), 0)
 
   t.throws(() => responder.verifyInitiator(attestation), {
@@ -93,16 +101,18 @@ test('should handle custom challengeLength', async (t) => {
     challengeLength: 16
   })
 
-  const responderKP = secp256k1.generateKeyPair()
-  const { responder } = createAuth(responderKP, {
+  const responderPK = secp256k1.generateKeyPair()
+  const { responder } = createAuth(responderPK, {
     metadata: { foo: 'responder' },
     challengeLength: 128
   })
 
-  const challengeMsg = responder.newChallenge(10)
+  const challenge = responder.newChallenge(10)
 
-  const { attestation, verifyResponder } =
-    initiator.signChallenge(challengeMsg)
+  const { attestation, verifyResponder } = initiator.signChallenge(
+    responderPK.publicKey,
+    challenge
+  )
 
   const result = responder.verifyInitiator(attestation)
 
@@ -114,7 +124,7 @@ test('should handle custom challengeLength', async (t) => {
 
   const { metadataOffset } = decodeAttestation(result.responderAttestation)
 
-  t.deepEqual(metadataOffset, responderKP.publicKey.byteLength)
+  t.deepEqual(metadataOffset, responderPK.publicKey.byteLength)
 
   const finalResult = verifyResponder(result.responderAttestation)
 
@@ -137,14 +147,17 @@ test('should throw an error for invalid initiator attestation', async (t) => {
     }
   )
 
-  const responderKP = secp256k1.generateKeyPair()
-  const { responder } = createAuth(responderKP, {
+  const responderPK = secp256k1.generateKeyPair()
+  const { responder } = createAuth(responderPK, {
     metadata: { foo: 'responder' }
   })
 
-  const challengeMsg = responder.newChallenge(10)
+  const challenge = responder.newChallenge(10)
 
-  const { attestation } = initiator.signChallenge(challengeMsg)
+  const { attestation } = initiator.signChallenge(
+    responderPK.publicKey,
+    challenge
+  )
 
   t.throws(() => responder.verifyInitiator(attestation), {
     instanceOf: Error,
@@ -158,15 +171,17 @@ test('should throw an error for invalid responder attestation', async (t) => {
     metadata: { foo: 'intitiator' }
   })
 
-  const responderKP = secp256k1.generateKeyPair()
-  const { responder } = createAuth(responderKP, {
+  const responderPK = secp256k1.generateKeyPair()
+  const { responder } = createAuth(responderPK, {
     metadata: { foo: 'responder' }
   })
 
-  const challengeMsg = responder.newChallenge(100)
+  const challenge = responder.newChallenge(100)
 
-  const { attestation, verifyResponder } =
-    initiator.signChallenge(challengeMsg)
+  const { attestation, verifyResponder } = initiator.signChallenge(
+    responderPK.publicKey,
+    challenge
+  )
 
   const { responderAttestation } = responder.verifyInitiator(attestation)
 
@@ -180,8 +195,10 @@ test('should throw an error for invalid responder attestation', async (t) => {
   })
 
   const wrongChallenge = invalidResponder.newChallenge(100)
-  const { attestation: wrongAttestation } =
-    initiator.signChallenge(wrongChallenge)
+  const { attestation: wrongAttestation } = initiator.signChallenge(
+    invalidResponderPK.publicKey,
+    wrongChallenge
+  )
 
   const { responderAttestation: invlidResponderAttestation } =
     invalidResponder.verifyInitiator(wrongAttestation)
