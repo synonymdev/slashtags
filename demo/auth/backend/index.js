@@ -14,7 +14,13 @@ const serverKeys = secp256k1.generateSeedKeyPair('backend');
 console.log('Server public key:', serverKeys.publicKey.toString('hex'));
 
 const { responder } = createAuth(serverKeys, {
-  metadata: { server: 'bitfinex' },
+  metadata: {
+    service: {
+      name: 'Bitfinex',
+      account: 'http://localhost:9090/account',
+      logo: 'https://pbs.twimg.com/profile_images/1365263904948051968/Zln4ecyb_400x400.png',
+    },
+  },
 });
 
 // Users who signed in before
@@ -104,6 +110,42 @@ http
           }),
         );
       }
+    } else if (req.url === '/account') {
+      res.writeHead(200, { 'Access-Control-Allow-Origin': '*' });
+      res.end(
+        JSON.stringify({
+          schema: {
+            title: 'An account form',
+            description: 'A simple form example.',
+            type: 'object',
+            properties: {
+              accountName: {
+                type: 'string',
+                title: 'Account Name',
+              },
+              balance: {
+                type: 'number',
+                title: 'Account Balance',
+              },
+              userName: {
+                type: 'string',
+                title: 'Username',
+              },
+              connected: {
+                type: 'string',
+                title: 'Connected',
+                format: 'date-time',
+              },
+            },
+          },
+          data: {
+            accountName: 'Ralph Edwards',
+            userName: 'redwards',
+            connected: '2021-09-23T09:45:08.368Z',
+            balance: 1456853,
+          },
+        }),
+      );
     } else {
       // /home
       let token;

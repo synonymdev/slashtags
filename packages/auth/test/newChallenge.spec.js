@@ -2,27 +2,20 @@ import { createAuth } from '../src/authenticator.js'
 import { DEFAULT_CHALLENGE_LENGTH, DEFAULT_CURVE } from '../src/constants.js'
 import test from 'ava'
 import { sessionID } from '../src/sessions.js'
-import { decodeChallenge } from '../src/messages.js'
 
 const keypair = DEFAULT_CURVE.generateKeyPair()
 
 test('should create new encoded challenge message', (t) => {
   const { responder } = createAuth(keypair)
 
-  const message = responder.newChallenge(10)
-
-  const { challenge, remotePK } = decodeChallenge(message)
-
-  t.notDeepEqual(remotePK, keypair.publicKey)
+  const challenge = responder.newChallenge(10)
 
   t.deepEqual(challenge.byteLength, DEFAULT_CHALLENGE_LENGTH)
 })
 
 test('should save the newly created challenge in the sessions map', (t) => {
   const { responder } = createAuth(keypair)
-  const message = responder.newChallenge(10)
-
-  const challenge = decodeChallenge(message).challenge
+  const challenge = responder.newChallenge(10)
 
   const id = sessionID(challenge)
   const session = responder.sessions.get(id)
@@ -34,9 +27,7 @@ test('should save the newly created challenge in the sessions map', (t) => {
 
 test('should save the global metdata in the session', (t) => {
   const { responder } = createAuth(keypair, { metadata: { foo: 'bar' } })
-  const message = responder.newChallenge(10)
-
-  const challenge = decodeChallenge(message).challenge
+  const challenge = responder.newChallenge(10)
 
   const id = sessionID(challenge)
   const session = responder.sessions.get(id)
@@ -49,9 +40,7 @@ test('should save the global metdata in the session', (t) => {
 
 test('should save the overriding session metadata in the session', (t) => {
   const { responder } = createAuth(keypair, { metadata: { foo: 'bar' } })
-  const message = responder.newChallenge(10, { foo: 'zar' })
-
-  const challenge = decodeChallenge(message).challenge
+  const challenge = responder.newChallenge(10, { foo: 'zar' })
 
   const id = sessionID(challenge)
   const session = responder.sessions.get(id)
@@ -64,9 +53,7 @@ test('should save the overriding session metadata in the session', (t) => {
 
 test('should remove the challenge from sessions after timeout', async (t) => {
   const { responder } = createAuth(keypair)
-  const message = responder.newChallenge(10)
-
-  const challenge = decodeChallenge(message).challenge
+  const challenge = responder.newChallenge(10)
 
   const id = sessionID(challenge)
   const session = responder.sessions.get(id)
