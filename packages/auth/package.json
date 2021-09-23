@@ -1,6 +1,6 @@
 {
   "name": "@synonymdev/slashtags-auth",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Bidirectional authentication for keypair verification through attestation.",
   "type": "module",
   "keywords": [
@@ -29,7 +29,7 @@
   "dependencies": {
     "@synonymdev/slashtags-common": "^0.1.0",
     "bint8array": "^1.1.3",
-    "noise-curve-tiny-secp": "file:../../../noise-curve-secp256k1/dist",
+    "noise-curve-tiny-secp": "^2.0.0",
     "noise-handshake": "^2.1.0",
     "npm": "^7.23.0"
   }
