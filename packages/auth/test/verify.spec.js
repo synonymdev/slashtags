@@ -1,8 +1,6 @@
 import test from 'ava'
 import { secp256k1 } from 'noise-curve-tiny-secp'
 import { createAuth } from '../src/authenticator.js'
-import { varint } from '@synonymdev/slashtags-common'
-import { decodeAttestation } from '../src/messages.js'
 
 test('should create new encoded challenge message', (t) => {
   const keypair = secp256k1.generateKeyPair()
@@ -17,7 +15,7 @@ test('should create new encoded challenge message', (t) => {
 
   const challenge = responder.newChallenge(10)
 
-  const { attestation, verifyResponder } = initiator.signChallenge(
+  const { attestation, verifyResponder } = initiator.respond(
     responderKP.publicKey,
     challenge
   )
@@ -29,9 +27,6 @@ test('should create new encoded challenge message', (t) => {
     initiatorPK: Uint8Array.from(keypair.publicKey),
     responderAttestation: result.responderAttestation
   })
-  const { metadataOffset } = decodeAttestation(result.responderAttestation)
-
-  t.deepEqual(metadataOffset, responderKP.publicKey.byteLength)
 
   const finalResult = verifyResponder(result.responderAttestation)
 
@@ -54,10 +49,7 @@ test('should throw an error for sessions not found', async (t) => {
 
   const challenge = responder.newChallenge(10)
 
-  const { attestation } = initiator.signChallenge(
-    responderKP.publicKey,
-    challenge
-  )
+  const { attestation } = initiator.respond(responderKP.publicKey, challenge)
 
   const sessionKey = Array.from(responder.sessions.keys())[0]
 
@@ -65,31 +57,6 @@ test('should throw an error for sessions not found', async (t) => {
 
   t.throws(() => responder.verifyInitiator(attestation), {
     message: `Challenge ${sessionKey} not found`,
-    instanceOf: Error
-  })
-})
-
-test('should throw an error for unknown version code', async (t) => {
-  const keypair = secp256k1.generateKeyPair()
-  const { initiator } = createAuth(keypair, {
-    metadata: { foo: 'intitiator' }
-  })
-
-  const responderPK = secp256k1.generateKeyPair()
-  const { responder } = createAuth(responderPK, {
-    metadata: { foo: 'responder' }
-  })
-
-  const challenge = responder.newChallenge(10)
-
-  const { attestation } = initiator.signChallenge(
-    responderPK.publicKey,
-    challenge
-  )
-  attestation.set(varint.prepend([4], new Uint8Array(0)), 0)
-
-  t.throws(() => responder.verifyInitiator(attestation), {
-    message: 'Unknown SlashtagsAuth version code',
     instanceOf: Error
   })
 })
@@ -109,7 +76,7 @@ test('should handle custom challengeLength', async (t) => {
 
   const challenge = responder.newChallenge(10)
 
-  const { attestation, verifyResponder } = initiator.signChallenge(
+  const { attestation, verifyResponder } = initiator.respond(
     responderPK.publicKey,
     challenge
   )
@@ -121,10 +88,6 @@ test('should handle custom challengeLength', async (t) => {
     metadata: { foo: 'intitiator' },
     responderAttestation: result.responderAttestation
   })
-
-  const { metadataOffset } = decodeAttestation(result.responderAttestation)
-
-  t.deepEqual(metadataOffset, responderPK.publicKey.byteLength)
 
   const finalResult = verifyResponder(result.responderAttestation)
 
@@ -154,10 +117,7 @@ test('should throw an error for invalid initiator attestation', async (t) => {
 
   const challenge = responder.newChallenge(10)
 
-  const { attestation } = initiator.signChallenge(
-    responderPK.publicKey,
-    challenge
-  )
+  const { attestation } = initiator.respond(responderPK.publicKey, challenge)
 
   t.throws(() => responder.verifyInitiator(attestation), {
     instanceOf: Error,
@@ -178,7 +138,7 @@ test('should throw an error for invalid responder attestation', async (t) => {
 
   const challenge = responder.newChallenge(100)
 
-  const { attestation, verifyResponder } = initiator.signChallenge(
+  const { attestation, verifyResponder } = initiator.respond(
     responderPK.publicKey,
     challenge
   )
@@ -195,7 +155,7 @@ test('should throw an error for invalid responder attestation', async (t) => {
   })
 
   const wrongChallenge = invalidResponder.newChallenge(100)
-  const { attestation: wrongAttestation } = initiator.signChallenge(
+  const { attestation: wrongAttestation } = initiator.respond(
     invalidResponderPK.publicKey,
     wrongChallenge
   )

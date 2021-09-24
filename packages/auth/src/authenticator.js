@@ -47,15 +47,12 @@ export const createAuth = (keypair, config = {}) => {
    * }}
    */
   const _verifyResponder = (handshake, remotePK, attestation) => {
-    const { signedMessage, metadataOffset } =
-      msgs.decodeAttestation(attestation)
+    const payload = handshake.recv(attestation)
 
-    const msg = handshake.recv(signedMessage)
-    const responderPK = msg.slice(0, metadataOffset)
+    const { metadata: ResponderMetadata, rest: responderPK } =
+      msgs.decodePayload(payload)
 
-    const metadata = JSON.parse(
-      new TextDecoder().decode(msg.slice(metadataOffset))
-    )
+    const metadata = JSON.parse(new TextDecoder().decode(ResponderMetadata))
 
     return {
       metadata,
@@ -64,13 +61,13 @@ export const createAuth = (keypair, config = {}) => {
   }
 
   /**
-   * Sign a challenge passed within an encoded message
+   * Respond to the Responder's challenge.
    * Optionally: override metadata for this attestation
    * @param {Uint8Array} remotePK
    * @param {Uint8Array} challenge
    * @param {JSON} [metdata] - Custom metadata (overrides responder metadata)
    */
-  const signChallenge = (remotePK, challenge, metdata) => {
+  const respond = (remotePK, challenge, metdata) => {
     validateKeyForCurve(curve, remotePK)
 
     const metadata = new TextEncoder().encode(
@@ -78,12 +75,13 @@ export const createAuth = (keypair, config = {}) => {
     )
 
     const handshake = createHandshake(true, keypair, { curve })
-
     handshake.initialise(PROLOGUE, remotePK)
-    const signed = handshake.send(bint.concat([challenge, metadata]))
+
+    const payload = msgs.encodePayload(metadata, challenge)
+    const attestation = handshake.send(payload)
 
     return {
-      attestation: msgs.encodeAttestation(signed, challenge.byteLength),
+      attestation,
       verifyResponder: (/** @type {Uint8Array} */ responderAttestation) =>
         _verifyResponder(handshake, remotePK, responderAttestation)
     }
@@ -116,7 +114,7 @@ export const createAuth = (keypair, config = {}) => {
   }
 
   /**
-   * Verifies a signed challenge from the initiator.
+   * Verifies the noise payload from the initiator.
    * @param {Uint8Array} attestation
    * @throws {Error} If challenge wasn't found
    * @returns {{
@@ -126,15 +124,13 @@ export const createAuth = (keypair, config = {}) => {
    * }}
    */
   const verifyInitiator = (attestation) => {
-    const { signedMessage, metadataOffset } =
-      msgs.decodeAttestation(attestation)
-
     const handshake = createHandshake(false, keypair, { curve })
     handshake.initialise(PROLOGUE)
 
-    const res = handshake.recv(signedMessage)
-    const challenge = res.subarray(0, metadataOffset)
-    const initiatorMetadata = res.subarray(metadataOffset)
+    const payload = handshake.recv(attestation)
+
+    const { metadata: initiatorMetadata, rest: challenge } =
+      msgs.decodePayload(payload)
 
     const id = sessionID(challenge)
     const session = sessions.get(id)
@@ -144,7 +140,7 @@ export const createAuth = (keypair, config = {}) => {
     sessions.delete(id)
 
     const responderAttestation = handshake.send(
-      bint.concat([keypair.publicKey, session.metadata])
+      msgs.encodePayload(session.metadata, keypair.publicKey)
     )
 
     const metadata = JSON.parse(new TextDecoder().decode(initiatorMetadata))
@@ -152,10 +148,7 @@ export const createAuth = (keypair, config = {}) => {
     return {
       metadata,
       initiatorPK: bint.concat([handshake.rs]),
-      responderAttestation: msgs.encodeAttestation(
-        responderAttestation,
-        keypair.publicKey.byteLength
-      )
+      responderAttestation
     }
   }
 
@@ -163,7 +156,7 @@ export const createAuth = (keypair, config = {}) => {
     get config () {
       return _config
     },
-    initiator: { signChallenge },
+    initiator: { respond },
     responder: {
       newChallenge,
       verifyInitiator,

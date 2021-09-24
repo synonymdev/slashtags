@@ -98,8 +98,9 @@ canvas.btn {
 }
 
 .service {
-  display: flex;
+  display: grid;
   column-gap: 1em;
+  grid-template-columns: 32px auto;
   align-items: center;
   padding: 16px;
 
@@ -124,6 +125,15 @@ canvas.btn {
 
 .service * {
   font-family: sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+.service pre {
+  font-size: 0.8em;
+  grid-column-start: 2;
+  max-width: 70%;
+  white-space: pre-wrap;
 }
 
 .rjsf #root {
