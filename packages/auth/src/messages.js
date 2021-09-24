@@ -1,5 +1,6 @@
 import { CURRENT_VERSION, KNOWN_VERSIONS } from './constants.js'
 import { varint } from '@synonymdev/slashtags-common'
+import bint from 'bint8array'
 
 /**
  * Check the version of SlashtagsAuth
@@ -13,28 +14,34 @@ const validateVersion = (version) => {
 }
 
 /**
- * Encode version code, attestation source, challenge and responder's publickey
- * @param {Uint8Array} signed
- * @param {number} metadataOffset
- * @returns {Uint8Array} <version><metadata-offset><signed <challenge/pk><metadata>>
+ * Encode version code, metdata-length, and challenge or responder's publickey
+ * @param {Uint8Array} metadata
+ * @param {Uint8Array} rest challenge or the responder's public key
+ * @returns {Uint8Array} <version><count><metadata><challenge/pk>
  */
-export const encodeAttestation = (signed, metadataOffset) => {
-  return varint.prepend([CURRENT_VERSION, metadataOffset], signed)
+export const encodePayload = (metadata, rest) => {
+  return varint.prepend(
+    [CURRENT_VERSION, metadata.byteLength],
+    bint.concat([metadata, rest])
+  )
 }
 
 /**
- * Read challenge, publickey, and source of attestation from a message
- * @param {Uint8Array} message <version><metadataOffset><signed <challenge/pk><metadata>>
+ * Extract the metadata, and challenge/responderPK from noise payload
+ * @param {Uint8Array} message <version><count><metadata><rest:challenge/pk>
  * @returns {{
- *  metadataOffset: number,
- *  signedMessage: Uint8Array
+ *  metadata: Uint8Array
+ *  rest: Uint8Array
  * }}}
  */
-export const decodeAttestation = (message) => {
+export const decodePayload = (message) => {
   const [version, versionFree] = varint.split(message)
   validateVersion(version)
 
-  const [metadataOffset, signedMessage] = varint.split(versionFree)
+  const [count, concatenated] = varint.split(versionFree)
 
-  return { signedMessage, metadataOffset }
+  return {
+    metadata: concatenated.subarray(0, count),
+    rest: concatenated.subarray(count)
+  }
 }

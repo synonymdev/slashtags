@@ -29,11 +29,12 @@ export const setUser = (seed) => {
   initiator = init;
 };
 
-const Service = ({ service, toAccount }) => {
+const Service = ({ service, pk, toAccount }) => {
   return (
     <div className="service" onClick={toAccount}>
       <img src={service.logo}></img>
       <h2>{service.name}</h2>
+      <pre>{pk}</pre>
     </div>
   );
 };
@@ -50,7 +51,7 @@ export const Wallet = ({ actionURL }) => {
   const [account, setAccount] = useState(false);
 
   const signIn = async () => {
-    const { attestation, verifyResponder } = initiator.signChallenge(
+    const { attestation, verifyResponder } = initiator.respond(
       bint.fromString(authPayload.remotePK, 'hex'),
       bint.fromString(authPayload.challenge, 'hex'),
     );
@@ -147,6 +148,7 @@ export const Wallet = ({ actionURL }) => {
                 <pre>{server.responderPK}</pre>
                 <Service
                   service={server.metadata.service}
+                  pk={server.responderPK}
                   toAccount={() => getAccount(server.metadata.service)}
                 />
                 <button className="btn" onClick={() => setServer(false)}>

@@ -29,7 +29,7 @@ const initiatorKeypair = secp256k1.generateKeyPair();
 const { initiator } = createAuth(initiatorKeypair, {
   metadata: { foo: 'intitiator' },
 });
-const { attestation, verifyResponder } = initiator.signChallenge(
+const { attestation, verifyResponder } = initiator.respond(
   responderKeypair.publickey,
   challenge,
   // optional metdata per session
@@ -79,7 +79,7 @@ const handleIncomingActions = async (url) => {
       logOnScreen('Sign in to server: ' + payload.remotePK);
 
       // Sing the challenge to generate the attestation
-      const { attestation, verifyResponder } = initiator.signChallenge(
+      const { attestation, verifyResponder } = initiator.respond(
         Buffer.from(payload.remotePK, 'hex'),
         Buffer.from(payload.challenge, 'hex'),
       );
