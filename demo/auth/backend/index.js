@@ -78,6 +78,8 @@ http
         );
       } catch (error) {
         console.log({ error: error.message });
+        res.writeHead(401, { 'Access-Control-Allow-Origin': '*' });
+        res.end(error.message);
         return;
       }
 
