@@ -55,7 +55,7 @@ const actionID = 'b2..xyz';
 const payload = { foo: 'bar' };
 
 SlashtagsURL.format(actionID, payload);
-// slashtags:b2iaqaamaaqjcbw5htiftuksya3xkgxzzhrqwz4qtk6oxn7u74l23t2fthlnx3ked/#ugAR7ImNoYWxsZW5nZSI6ImZvbyIsImNiVVJMIjoiaHR0cHM6d3d3LmV4YW1wbGUuY29tIn0
+// slashtags:b2iaqaamaaqjcaxryobe4ygqqs3cksu74j4rhzpr7kk3lndqg7gim72edpiagor3z/#ugAR7ImNoYWxsZW5nZSI6ImZvbyIsImNiVVJMIjoiaHR0cHM6d3d3LmV4YW1wbGUuY29tIn0
 ```
 
 If you need to add more actions that are not available out of the box
@@ -68,5 +68,5 @@ Formatting a document url
 
 ```js
 SlashtagsURL.format(docID);
-// slashtags://b2iaqaamaaqjcbw5htiftuksya3xkgxzzhrqwz4qtk6oxn7u74l23t2fthlnx3ked/
+// slashtags://b2iaqaamaaqjcaxryobe4ygqqs3cksu74j4rhzpr7kk3lndqg7gim72edpiagor3z/
 ```

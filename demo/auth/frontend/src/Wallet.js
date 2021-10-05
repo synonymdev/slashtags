@@ -15,20 +15,6 @@ let userKeyPair;
 /** @type {import('@synonymdev/slashtags-auth/dist/types/interfaces').Initiator} */
 let initiator;
 
-/**
- * @param {string} seed
- */
-export const setUser = (seed) => {
-  username = seed;
-  userKeyPair = curve.generateSeedKeyPair(seed);
-
-  const { initiator: init } = createAuth(userKeyPair, {
-    metadata: { preferred_name: username },
-  });
-
-  initiator = init;
-};
-
 const Service = ({ service, pk, toAccount }) => {
   return (
     <div className="service" onClick={toAccount}>
@@ -45,23 +31,34 @@ const Service = ({ service, pk, toAccount }) => {
  * @param {string} param.actionURL
  * @returns
  */
-export const Wallet = ({ actionURL }) => {
+export const Wallet = ({ actionURL, username }) => {
   const [authPayload, setAuthPayload] = useState();
   const [server, setServer] = useState(false);
   const [account, setAccount] = useState(false);
 
+  userKeyPair = curve.generateSeedKeyPair(username);
+
+  const { initiator } = createAuth(userKeyPair, {
+    metadata: {
+      name: username,
+      image: 'www.example.com/image.png',
+    },
+  });
+
   const signIn = async () => {
     const { attestation, verifyResponder } = initiator.respond(
-      bint.fromString(authPayload.remotePK, 'hex'),
+      bint.fromString(authPayload.pubKey, 'hex'),
       bint.fromString(authPayload.challenge, 'hex'),
     );
 
     const url = new URL(authPayload.cbURL);
-    url.searchParams.set(
-      'attestation',
-      Buffer.from(attestation).toString('hex'),
-    );
-    const res = await fetch(url.toString());
+    const res = await fetch(url.toString(), {
+      method: 'POST',
+      body: JSON.stringify({
+        attestation: Buffer.from(attestation).toString('hex'),
+      }),
+      headers: { 'Content-type': 'application/json; charset=UTF-8' },
+    });
     const { responderAttestation } = await res.json();
 
     const { responderPK, metadata } = verifyResponder(
@@ -85,7 +82,7 @@ export const Wallet = ({ actionURL }) => {
         const { actionID, payload } = SlashtagsURL.parse(actionURL);
 
         switch (actionID) {
-          case 'b2iaqaamaaqjcbw5htiftuksya3xkgxzzhrqwz4qtk6oxn7u74l23t2fthlnx3ked':
+          case 'b2iaqaamaaqjcaxryobe4ygqqs3cksu74j4rhzpr7kk3lndqg7gim72edpiagor3z':
             setAuthPayload(payload);
             break;
 
@@ -134,7 +131,7 @@ export const Wallet = ({ actionURL }) => {
               <>
                 <h3>Login request</h3>
                 <p>Do you want to login to:</p>
-                <pre>{authPayload.remotePK}</pre>
+                <pre>{authPayload.pubKey}</pre>
                 <p>by signing their challenge</p>
                 <pre>{authPayload.challenge}</pre>
                 <button className="btn signin" onClick={signIn}>

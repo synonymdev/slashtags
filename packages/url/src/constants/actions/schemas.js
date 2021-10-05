@@ -4,11 +4,18 @@ import * as DocID from '@synonymdev/slashtags-docid'
 export const schemasList = [
   {
     $schema: 'http://json-schema.org/draft-07/schema#',
-    title: 'Slashtag Auth Action',
-    description: "Action's Payload for SlashtagAuth enabled wallets",
+    title: 'Slashtag Accounts Payload',
+    description: "Action's Payload for Slashtag accounts enabled wallets",
     type: 'object',
     properties: {
-      remotePK: {
+      title: {
+        type: 'string'
+      },
+      image: {
+        type: 'string',
+        format: 'uri'
+      },
+      pubKey: {
         type: 'string',
         contentEncoding: 'base16'
       },
@@ -22,7 +29,7 @@ export const schemasList = [
       }
     },
     additionalProperties: false,
-    required: ['remotePK', 'challenge', 'cbURL']
+    required: ['title', 'image', 'pubKey', 'challenge', 'cbURL']
   }
 ]
 
