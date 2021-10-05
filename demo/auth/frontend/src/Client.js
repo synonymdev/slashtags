@@ -14,11 +14,14 @@ export const sendInitialRequest = async (handleAuthed, setQR) => {
 
     if (msg.type === 'challenge') {
       const slashtagsAction = SlashtagsURL.format(
-        'b2iaqaamaaqjcbw5htiftuksya3xkgxzzhrqwz4qtk6oxn7u74l23t2fthlnx3ked',
+        'b2iaqaamaaqjcaxryobe4ygqqs3cksu74j4rhzpr7kk3lndqg7gim72edpiagor3z',
         {
-          remotePK: msg.publicKey,
+          title: 'Bitfinex',
+          image:
+            'https://pbs.twimg.com/profile_images/1365263904948051968/Zln4ecyb_400x400.png',
+          pubKey: msg.publicKey,
           challenge: msg.challenge,
-          cbURL: 'http://localhost:9090/answer/',
+          cbURL: 'http://localhost:9090/response/',
         },
       );
 
@@ -129,7 +132,7 @@ export const Client = ({ setWallet, sendAction }) => {
             <button
               className="btn signin"
               onClick={() => {
-                setWallet('Rip Hal!');
+                setWallet('Hal Finney');
                 sendInitialRequest(handleAuthed, setQR);
               }}
             >
@@ -138,7 +141,7 @@ export const Client = ({ setWallet, sendAction }) => {
             <button
               className="btn signin"
               onClick={() => {
-                setWallet('new user');
+                setWallet('John Carvalho');
                 sendInitialRequest(handleAuthed, setQR);
               }}
             >

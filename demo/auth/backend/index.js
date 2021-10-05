@@ -2,8 +2,6 @@
 // Server side code
 const { createAuth } = require('@synonymdev/slashtags-auth');
 const { secp256k1 } = require('noise-curve-tiny-secp');
-const http = require('http');
-const url = require('url');
 const WebSocket = require('ws');
 
 // Just configuring the server
@@ -25,7 +23,8 @@ const { responder } = createAuth(serverKeys, {
 
 // Users who signed in before
 const trustedUsers = {
-  '036940ca31bd4346da7774314932be7185c1cd832b0a0bd84e6798dc5cdb168590': 'Hal',
+  '036940ca31bd4346da7774314932be7185c1cd832b0a0bd84e6798dc5cdb168590':
+    'Hal Finney',
 };
 
 const blockedUsers = [
@@ -62,107 +61,90 @@ wss.on('connection', (socket) => {
   });
 });
 
-// HTTP Server
-//  At least one GET endpoint for Slashtag URL to work with.
-http
-  .createServer((req, res) => {
-    const query = { ...url.parse(req.url, true).query };
+const express = require('express');
+const app = express();
+const port = 9090;
 
-    console.log('request:', req.url);
+app.use(require('cors')());
+app.use(express.json());
 
-    if (req.url.slice(0, 8) === '/answer/') {
-      let result;
-      try {
-        result = responder.verifyInitiator(
-          Uint8Array.from(Buffer.from(query.attestation, 'hex')),
-        );
-      } catch (error) {
-        console.log({ error: error.message });
-        res.writeHead(401, { 'Access-Control-Allow-Origin': '*' });
-        res.end(error.message);
-        return;
-      }
+app.post('/response', (req, res) => {
+  let result;
+  try {
+    result = responder.verifyInitiator(
+      Uint8Array.from(Buffer.from(req.body.attestation, 'hex')),
+    );
+  } catch (error) {
+    console.log({ error: error.message });
+    return;
+  }
 
-      const publicKey = Buffer.from(result.initiatorPK).toString('hex');
-      console.log({
-        initiator: publicKey,
-        metadata: result.metadata,
-      });
+  const publicKey = Buffer.from(result.initiatorPK).toString('hex');
+  console.log({
+    initiator: publicKey,
+    metadata: result.metadata,
+  });
 
-      if (blockedUsers.includes(publicKey)) {
-        res.writeHead(401, { 'Access-Control-Allow-Origin': '*' });
-        socketSend(JSON.stringify({ type: 'Begone!', user: { publicKey } }));
-        res.end();
-      } else {
-        socketSend(
-          JSON.stringify({
-            type: 'authed',
-            user: {
-              name: trustedUsers[publicKey],
-              publicKey: publicKey,
-            },
-          }),
-        );
-        res.writeHead(200, { 'Access-Control-Allow-Origin': '*' });
-        res.end(
-          JSON.stringify({
-            responderAttestation: Buffer.from(
-              result.responderAttestation,
-            ).toString('hex'),
-          }),
-        );
-      }
-    } else if (req.url === '/account') {
-      res.writeHead(200, { 'Access-Control-Allow-Origin': '*' });
-      res.end(
-        JSON.stringify({
-          schema: {
-            title: 'An account form',
-            description: 'A simple form example.',
-            type: 'object',
-            properties: {
-              accountName: {
-                type: 'string',
-                title: 'Account Name',
-              },
-              balance: {
-                type: 'number',
-                title: 'Account Balance',
-              },
-              userName: {
-                type: 'string',
-                title: 'Username',
-              },
-              connected: {
-                type: 'string',
-                title: 'Connected',
-                format: 'date-time',
-              },
-            },
+  if (blockedUsers.includes(publicKey)) {
+    res.writeHead(401, { 'Access-Control-Allow-Origin': '*' });
+    socketSend(JSON.stringify({ type: 'Begone!', user: { publicKey } }));
+    res.end();
+  } else {
+    socketSend(
+      JSON.stringify({
+        type: 'authed',
+        user: {
+          name: trustedUsers[publicKey] || result.metadata.name,
+          publicKey: publicKey,
+        },
+      }),
+    );
+
+    res.send({
+      responderAttestation: Buffer.from(result.responderAttestation).toString(
+        'hex',
+      ),
+    });
+  }
+});
+
+app.get('/account', (req, res) => {
+  res.send(
+    JSON.stringify({
+      schema: {
+        title: 'An account form',
+        description: 'A simple form example.',
+        type: 'object',
+        properties: {
+          accountName: {
+            type: 'string',
+            title: 'Account Name',
           },
-          data: {
-            accountName: 'Ralph Edwards',
-            userName: 'redwards',
-            connected: '2021-09-23T09:45:08.368Z',
-            balance: 1456853,
+          balance: {
+            type: 'number',
+            title: 'Account Balance',
           },
-        }),
-      );
-    } else {
-      // /home
-      let token;
+          userName: {
+            type: 'string',
+            title: 'Username',
+          },
+          connected: {
+            type: 'string',
+            title: 'Connected',
+            format: 'date-time',
+          },
+        },
+      },
+      data: {
+        accountName: 'Ralph Edwards',
+        userName: 'redwards',
+        connected: '2021-09-23T09:45:08.368Z',
+        balance: 1456853,
+      },
+    }),
+  );
+});
 
-      try {
-        token = JSON.parse(query.token);
-      } catch (error) {}
-
-      if (!token) {
-        res.writeHead(401, { 'Access-Control-Allow-Origin': '*' });
-        res.end();
-      } else {
-        res.writeHead(200, { 'Access-Control-Allow-Origin': '*' });
-        res.end('RIP');
-      }
-    }
-  })
-  .listen(9090);
+app.listen(port, () => {
+  console.log(`Example app listening at http://localhost:${port}`);
+});

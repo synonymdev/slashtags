@@ -35,41 +35,49 @@ test('should throw an error for unknown actions', (t) => {
 })
 
 test('should format slashtags action url correctly from DocID', (t) => {
-  const docID = DocID.CID.fromJSON(schemasByTitle['Slashtag Auth Action'])
+  const docID = DocID.CID.fromJSON(schemasByTitle['Slashtag Accounts Payload'])
 
   const url = format(docID, {
-    challenge: 'foo',
-    cbURL: 'https:www.example.com'
+    title: 'Bitrefill',
+    image: 'https://www.bitrefill.com/content/assets/Logo_Aavatar.png',
+    pubKey:
+      '03fc888ae931411ff9fc1217fe67612ef6185eb199fb0cbd19a5ef05a2f0aabd3b',
+    challenge:
+      '67612ef6185eb199fb0cbd19a5ef05a2f0aabd3b03fc888ae931411ff9fc1217fe',
+    cbURL: 'https://www.bitrefill.com/slashtags/accounts/response'
   })
 
   t.deepEqual(
     url,
-    'slashtags:b2iaqaamaaqjcbw5htiftuksya3xkgxzzhrqwz4qtk6oxn7u74l23t2fthlnx3ked/#ugAR7ImNoYWxsZW5nZSI6ImZvbyIsImNiVVJMIjoiaHR0cHM6d3d3LmV4YW1wbGUuY29tIn0'
+    'slashtags:b2iaqaamaaqjcaxryobe4ygqqs3cksu74j4rhzpr7kk3lndqg7gim72edpiagor3z/#ugAR7InRpdGxlIjoiQml0cmVmaWxsIiwiaW1hZ2UiOiJodHRwczovL3d3dy5iaXRyZWZpbGwuY29tL2NvbnRlbnQvYXNzZXRzL0xvZ29fQWF2YXRhci5wbmciLCJwdWJLZXkiOiIwM2ZjODg4YWU5MzE0MTFmZjlmYzEyMTdmZTY3NjEyZWY2MTg1ZWIxOTlmYjBjYmQxOWE1ZWYwNWEyZjBhYWJkM2IiLCJjaGFsbGVuZ2UiOiI2NzYxMmVmNjE4NWViMTk5ZmIwY2JkMTlhNWVmMDVhMmYwYWFiZDNiMDNmYzg4OGFlOTMxNDExZmY5ZmMxMjE3ZmUiLCJjYlVSTCI6Imh0dHBzOi8vd3d3LmJpdHJlZmlsbC5jb20vc2xhc2h0YWdzL2FjY291bnRzL3Jlc3BvbnNlIn0'
   )
 })
 
 test('should not throw an error for invalid payload by default', (t) => {
-  const docID = DocID.CID.fromJSON(schemasByTitle['Slashtag Auth Action'])
+  const docID = DocID.CID.fromJSON(schemasByTitle['Slashtag Accounts Payload'])
 
   t.deepEqual(
     format(docID, {
       challenge: 'foo',
       cbURL: 'noturl'
     }),
-    'slashtags:b2iaqaamaaqjcbw5htiftuksya3xkgxzzhrqwz4qtk6oxn7u74l23t2fthlnx3ked/#ugAR7ImNoYWxsZW5nZSI6ImZvbyIsImNiVVJMIjoibm90dXJsIn0'
+    'slashtags:b2iaqaamaaqjcaxryobe4ygqqs3cksu74j4rhzpr7kk3lndqg7gim72edpiagor3z/#ugAR7ImNoYWxsZW5nZSI6ImZvbyIsImNiVVJMIjoibm90dXJsIn0'
   )
 })
 
 test('should throw an error for invalid payload', (t) => {
-  const docID = DocID.CID.fromJSON(schemasByTitle['Slashtag Auth Action'])
+  const docID = DocID.CID.fromJSON(schemasByTitle['Slashtag Accounts Payload'])
 
   t.throws(
     () =>
       format(
         docID,
         {
+          title: 'Bitrefill',
+          image:
+            'https://www.bitrefill.com/content/cn/raw/upload/v1618914260/assets/Logo_Aavatar.png',
           challenge: 'foo',
-          remotePK: 'bar',
+          pubKey: 'bar',
           cbURL: 'noturl'
         },
         true
@@ -77,7 +85,7 @@ test('should throw an error for invalid payload', (t) => {
     {
       instanceOf: Error,
       message:
-        'Invalid payload for schema: Slashtag Auth Action\n' +
+        'Invalid payload for schema: Slashtag Accounts Payload\n' +
         JSON.stringify(
           [
             {
@@ -96,7 +104,7 @@ test('should throw an error for invalid payload', (t) => {
 })
 
 test('should remove additional fields from the actionPayload', (t) => {
-  const docID = DocID.CID.fromJSON(schemasByTitle['Slashtag Auth Action'])
+  const docID = DocID.CID.fromJSON(schemasByTitle['Slashtag Accounts Payload'])
 
   const url = format(docID, {
     challenge: 'foo',
@@ -107,7 +115,7 @@ test('should remove additional fields from the actionPayload', (t) => {
 
   t.deepEqual(
     url,
-    'slashtags:b2iaqaamaaqjcbw5htiftuksya3xkgxzzhrqwz4qtk6oxn7u74l23t2fthlnx3ked/#ugAR7ImNoYWxsZW5nZSI6ImZvbyIsImNiVVJMIjoiaHR0cHM6d3d3LmV4YW1wbGUuY29tIn0'
+    'slashtags:b2iaqaamaaqjcaxryobe4ygqqs3cksu74j4rhzpr7kk3lndqg7gim72edpiagor3z/#ugAR7ImNoYWxsZW5nZSI6ImZvbyIsImNiVVJMIjoiaHR0cHM6d3d3LmV4YW1wbGUuY29tIn0'
   )
 })
 
