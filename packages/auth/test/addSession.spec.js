@@ -1,4 +1,4 @@
-import { addSession, sessionID } from '../src/sessions.js'
+import { addSession, hex } from '../src/sessions.js'
 import { generateChallenge } from '../src/crypto.js'
 import test from 'ava'
 
@@ -7,7 +7,7 @@ test('should create a new session and add it to the passed sessions map', (t) =>
   const challenge = generateChallenge()
   addSession({ sessions, timeout: 10, challenge: challenge })
 
-  const session = sessions.get(sessionID(challenge))
+  const session = sessions.get(hex(challenge))
 
   t.deepEqual(session, {
     challenge: challenge,
@@ -22,7 +22,7 @@ test('should be automatically removed from the passed sessions after timeout', a
   const challenge = generateChallenge()
   addSession({ sessions, timeout: 10, challenge: challenge })
 
-  const session = sessions.get(sessionID(challenge))
+  const session = sessions.get(hex(challenge))
 
   t.deepEqual(session.timer._destroyed, false)
 

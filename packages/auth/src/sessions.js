@@ -2,10 +2,10 @@ import bint from 'bint8array'
 
 /**
  * Provide a canonical way to create a string key from a challenge
- * @param {Uint8Array} challenge
+ * @param {Uint8Array} bytes
  * @returns {string}
  */
-export const sessionID = (challenge) => bint.toString(challenge, 'hex')
+export const hex = (bytes) => bint.toString(bytes, 'hex')
 
 /**
  * Add a session with a timeout to a sessions map
@@ -16,7 +16,7 @@ export const sessionID = (challenge) => bint.toString(challenge, 'hex')
  * @param {Uint8Array} [config.metadata]
  */
 export const addSession = ({ sessions, timeout, challenge, metadata }) => {
-  const identifier = sessionID(challenge)
+  const identifier = hex(challenge)
 
   const timer = setTimeout(() => {
     if (!sessions.get(identifier)) return

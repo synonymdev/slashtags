@@ -1,5 +1,5 @@
 import test from 'ava'
-import { encodePayload, decodePayload } from '../src/messages.js'
+import { encodePayload, decodePayload, safeParse } from '../src/messages.js'
 import { varint } from '@synonymdev/slashtags-common'
 
 test('should throw an error for unknown version code', async (t) => {
@@ -11,4 +11,11 @@ test('should throw an error for unknown version code', async (t) => {
     message: 'Unknown SlashtagsAuth version code',
     instanceOf: Error
   })
+})
+
+test('should return null for empty bytes', (t) => {
+  t.deepEqual(safeParse(null), null)
+  t.deepEqual(safeParse(undefined), null)
+  t.deepEqual(safeParse(new Uint8Array(0)), null)
+  t.deepEqual(safeParse(Buffer.from([])), null)
 })
