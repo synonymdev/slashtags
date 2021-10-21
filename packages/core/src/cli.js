@@ -9,7 +9,7 @@ const main = async () => {
 
     setInterval(() => {
       node.request({
-        dest: 'e7b1490d469a78fe72d3c14a011d9a9a67edf6db2b7ed18690c5aa67a8435f63',
+        dest: 'a1b6c0581994f2e2dacc98a721622d32a97b5d2ae0ccd6f69786507e8a22f064',
         message: 'ping' + Math.random(),
       });
     }, 1000);
@@ -18,11 +18,11 @@ const main = async () => {
       keyPair: secp256k1.generateSeedKeyPair('server'),
     });
 
-    const feed = node.listen();
-    node.listen();
-    node.listen();
+    const feed = await node.listen();
 
-    await feed.ready();
+    setTimeout(() => {
+      feed.close();
+    }, 10000);
   }
 };
 

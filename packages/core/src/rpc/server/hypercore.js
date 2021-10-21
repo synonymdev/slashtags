@@ -1,29 +1,28 @@
 import _debug from 'debug';
 import SDK from 'hyper-sdk';
-import { utils } from 'jayson';
-import { hexString } from '../../utils';
+import jayson from 'jayson';
+import { hexString } from '../../utils.js';
 
 const debug = _debug('hyper');
 
 /**
  * Get a Hypercore instance
  * @param {object} opts
- * @param {Buffer} opts.key
+ * @param {KeyPair} opts.keyPair
  * @param {boolean} opts.announce
  * @param {boolean} opts.lookup
  * @returns
  */
-const getFeed = async ({ key, announce, lookup }) => {
-  debug('getFeed', key, announce, lookup);
-
+const getFeed = async ({ keyPair, announce, lookup }) => {
   /** @type {SDKInstance} */
   const sdk = await SDK({
     persist: false,
     // Keep the default Feed static between sessions
-    corestoreOpts: { masterKey: key },
+    corestoreOpts: { masterKey: keyPair.secretKey },
   });
 
-  return sdk.Hypercore(hexString(key), {
+  // Hypercore key will different from the keyPair.publicKey (secp256k1)
+  return sdk.Hypercore(hexString(keyPair.publicKey), {
     announce,
     lookup,
   });
@@ -34,13 +33,12 @@ const getFeed = async ({ key, announce, lookup }) => {
  *  @name ServerHypercore
  *  @param {Server} server Server instance
  *  @param {Object} options Options for this instance
- *  @param {SDKInstance} [options.sdk]
  *  @param {KeyPair} options.keyPair
  *  @return {Promise<Hypercore>}
  */
 export const ServerHypercore = async function (server, options) {
   const feed = await getFeed({
-    key: options.keyPair.publicKey,
+    keyPair: options.keyPair,
     announce: true,
     lookup: true,
   });
@@ -54,6 +52,8 @@ export const ServerHypercore = async function (server, options) {
   feed.on('peer-open', (peer) => {
     debug('peer-open', hexString(peer.remotePublicKey));
   });
+
+  feed.on('close', () => debug('Closing feed', hexString(feed.key)));
 
   /**
    * @param {JSON} message
@@ -77,12 +77,13 @@ export const ServerHypercore = async function (server, options) {
    */
   function respondError(err, peer) {
     const error = server.error(-32700, err.message);
-    const response = utils.response(error, undefined, undefined, 2);
+    const response = jayson.utils.response(error, undefined, undefined, 2);
 
     //@ts-ignore
     extension.send(response, peer);
   }
 
+  debug('Listening on feed', hexString(feed.key));
   return feed;
 };
 
