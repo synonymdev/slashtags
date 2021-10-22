@@ -79,12 +79,12 @@ export const HyperWrapper = ({ keyPair, metadata, sdk }) => {
    */
   const request = async ({ dest, message }) => {
     const connection = await connect({ key: dest });
+    //@ts-ignore
     connection.send({ dest, message });
   };
 
   return {
     request,
-    listen,
   };
 };
 

@@ -1,30 +1,28 @@
-import { hexString } from '../../utils.js';
 import SDK from 'hyper-sdk';
+import { hexString } from '../../utils.js';
 
 export const EXTENSION = 'slashtags';
 
 /**
  * Get a Hypercore instance
  * @param {object} opts
- * @param {KeyPair} opts.keyPair
- * @param {boolean} opts.announce
- * @param {boolean} opts.lookup
- * @returns
+ * @param {keyOrName} opts.key
+ * @param {boolean} opts.server
+ * @param {boolean} opts.client
+ * @returns {Promise<Hypercore>}
  */
-export const getFeed = async ({ keyPair, announce, lookup }) => {
+export const getFeed = async ({ key, server, client }) => {
   /** @type {SDKInstance} */
-  const sdk = await SDK({
-    persist: false,
-    // Keep the default Feed static between sessions
-    corestoreOpts: { masterKey: keyPair.secretKey },
-  });
+  const sdk = await SDK({ persist: false });
 
   // Hypercore key will different from the keyPair.publicKey (secp256k1)
-  return sdk.Hypercore(hexString(keyPair.publicKey), {
-    announce,
-    lookup,
+  return sdk.Hypercore(hexString(key), {
+    announce: server,
+    lookup: client,
   });
 };
 
 /** @typedef {import ('../../interfaces').KeyPair} KeyPair */
+/** @typedef {import ('../../interfaces').keyOrName} keyOrName */
+/** @typedef {import ('../../interfaces').Hypercore} Hypercore */
 /** @typedef {import('../../interfaces').SDKInstance} SDKInstance */

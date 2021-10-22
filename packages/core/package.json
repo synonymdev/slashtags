@@ -27,8 +27,13 @@
   },
   "dependencies": {
     "hyper-sdk": "^3.0.9",
+    "hypercore": "^9.12.0",
+    "hyperswarm": "^2.15.3",
     "jayson": "^3.6.5",
-    "lru-memoizer": "^2.1.4"
+    "lru": "^3.1.0",
+    "lru-memoizer": "^2.1.4",
+    "random-access-memory": "^3.1.2",
+    "random-access-storage": "^1.4.1"
   },
   "devDependencies": {
     "@types/debug": "^4.1.7",
