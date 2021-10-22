@@ -1,28 +1,26 @@
-import * as rpc from './rpc/index.js';
+import * as rpc from './rpc/hyper/index.js';
 
 /**
  * Create a new instance of Slashtags node.
  * @param {object} opts
  * @param {KeyPair} opts.keyPair - secp256k1 keypair (not the feed keypair)
- * @param {object} [opts.metadata]
- * @returns {Promise<{listen: (opts?: any) => Promise<Hypercore>, request: () => void}>}
+ * @param {{[key:string]:MethodLike}} [opts.methods] - server methods
+ * @param {ServerOptions} [opts.serverOptions] - server options
  */
 export const Core = async (opts) => {
-  const server = await new rpc.Server(
-    {
-      foo: function (args, context, callback) {
-        callback(null, context.headers);
-      },
-    },
-    {
-      useContext: true,
-    },
-  );
+  const server = new rpc.Server(opts?.methods, opts?.serverOptions);
+
+  const client = rpc.Client();
 
   return {
-    listen: async (override) =>
-      await server.hypercore({ ...opts, ...override }),
-    request: () => {},
+    /**
+     * Listen for incoming requests.
+     * @returns {Promise<Hypercore>}
+     */
+    // @ts-ignore
+    listen: async () => server.hypercore(opts),
+    request: async (destination, methodName, params) =>
+      client.request(method, params),
   };
 };
 
@@ -31,3 +29,5 @@ export const Core = async (opts) => {
 /** @typedef {import ('./interfaces').Extension<any> } Extension */
 /** @typedef {import ('./interfaces').KeyPair} KeyPair */
 /** @typedef {import('./interfaces').Hypercore<Buffer>} Hypercore */
+/** @typedef {import('jayson').MethodLike} MethodLike */
+/** @typedef {import('jayson').ServerOptions} ServerOptions */

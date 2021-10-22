@@ -1,12 +1,15 @@
 export type { Hypercore, Extension, Peer } from 'hyper-sdk';
 export type { KeyPair } from 'noise-curve-tiny-secp';
 
+import type { KeyPair } from 'noise-curve-tiny-secp';
 import type {
   Peer,
   Hypercore,
   HypercoreOptions as _HypercoreOptions,
   SDKInstance as _SDKInstance,
 } from 'hyper-sdk';
+
+import { Server } from 'jayson';
 
 export type keyOrName = string | Buffer;
 
@@ -35,3 +38,16 @@ export type JSON =
   | number
   | JSON[]
   | { [key: string]: JSON };
+
+export type ServerHypercore = (
+  server: Server,
+  options: { keyPair: KeyPair },
+) => {};
+export class RPCServer extends Server {
+  hypercore?: ServerHypercore;
+}
+
+export interface Core {
+  server: RPCServer;
+  request: () => void;
+}

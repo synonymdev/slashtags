@@ -1,32 +1,9 @@
 import _debug from 'debug';
-import SDK from 'hyper-sdk';
 import jayson from 'jayson';
 import { hexString } from '../../utils.js';
+import { EXTENSION, getFeed } from './shared.js';
 
 const debug = _debug('hyper');
-
-/**
- * Get a Hypercore instance
- * @param {object} opts
- * @param {KeyPair} opts.keyPair
- * @param {boolean} opts.announce
- * @param {boolean} opts.lookup
- * @returns
- */
-const getFeed = async ({ keyPair, announce, lookup }) => {
-  /** @type {SDKInstance} */
-  const sdk = await SDK({
-    persist: false,
-    // Keep the default Feed static between sessions
-    corestoreOpts: { masterKey: keyPair.secretKey },
-  });
-
-  // Hypercore key will different from the keyPair.publicKey (secp256k1)
-  return sdk.Hypercore(hexString(keyPair.publicKey), {
-    announce,
-    lookup,
-  });
-};
 
 /**
  *  Constructor for a Jayson Hypercore Server
@@ -40,10 +17,10 @@ export const ServerHypercore = async function (server, options) {
   const feed = await getFeed({
     keyPair: options.keyPair,
     announce: true,
-    lookup: true,
+    lookup: false,
   });
 
-  const extension = feed.registerExtension('slashtags', {
+  const extension = feed.registerExtension(EXTENSION, {
     encoding: 'json',
     onmessage: onMessage,
     onerror: (err) => debug('error', err),
@@ -88,7 +65,6 @@ export const ServerHypercore = async function (server, options) {
 };
 
 /** @typedef {import('jayson').Server} Server */
-/** @typedef {import('../../interfaces').SDKInstance} SDKInstance */
 /** @typedef {import('../../interfaces').Hypercore<Buffer>} Hypercore */
 /** @typedef {import ('../../interfaces').KeyPair} KeyPair */
 /** @typedef {import ('../../interfaces').PeerConnection} PeerConnection */
