@@ -1,6 +1,6 @@
 import _debug from 'debug';
 import jayson from 'jayson';
-import { hexString, feedKey } from '../../utils.js';
+import { hexString } from '../../utils.js';
 import { EXTENSION, getFeed } from './shared.js';
 
 const debug = _debug('hyper');
@@ -17,7 +17,7 @@ const debug = _debug('hyper');
 export const ServerHypercore = async function (server, options) {
   // Make sure to use a valid ed25519 publickey
   const feed = await getFeed({
-    key: options.key || feedKey(options.keyPair.publicKey),
+    keyPair: options.keyPair,
     server: true,
     client: false,
   });
