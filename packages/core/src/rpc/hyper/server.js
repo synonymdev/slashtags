@@ -1,5 +1,4 @@
 import _debug from 'debug';
-import jayson from 'jayson';
 import { hexString } from '../../utils.js';
 import { EXTENSION, getFeed } from './shared.js';
 
@@ -8,15 +7,16 @@ const debug = _debug('hyper');
 /**
  *  Constructor for a Jayson Hypercore Server
  *  @name ServerHypercore
- *  @param {Server} server Server instance
+ *  @param {JsonRpcEngine} engine Options for this instance
  *  @param {Object} options Options for this instance
  *  @param {Buffer | string} [options.key]
  *  @param {KeyPair} options.keyPair
  *  @return {Promise<Hypercore>}
  */
-export const ServerHypercore = async function (server, options) {
+export const ServerHypercore = async function (engine, options) {
   // Make sure to use a valid ed25519 publickey
   const feed = await getFeed({
+    key: options.key,
     keyPair: options.keyPair,
     server: true,
     client: false,
@@ -35,39 +35,28 @@ export const ServerHypercore = async function (server, options) {
   feed.on('close', () => debug('Closing feed', hexString(feed.key)));
 
   /**
-   * @param {JSON} message
+   * @param {JsonRpcRequest} message
    * @param {PeerConnection} peer
    */
   function onMessage(message, peer) {
-    // every message received on a connection socket is handled as a JSON-RPC message
     debug('got', message, hexString(peer.remotePublicKey));
 
-    //@ts-ignore
-    server.call(message, function (error, success) {
-      if (error) return respondError(error, peer);
-      if (success) extension.send(success, peer);
+    engine.handle(message, (error, response) => {
+      if (error) throw error;
+      // @ts-ignore
+      if (message.method) extension.send(response, peer);
     });
   }
 
-  // writes an error message to the client
-  /**
-   * @param {Error} err
-   * @param {PeerConnection} peer
-   */
-  function respondError(err, peer) {
-    const error = server.error(-32700, err.message);
-    const response = jayson.utils.response(error, undefined, undefined, 2);
-
-    //@ts-ignore
-    extension.send(response, peer);
-  }
-
   debug('Listening on feed', hexString(feed.key));
+
+  await feed.ready();
   return feed;
 };
 
-/** @typedef {import('jayson').Server} Server */
 /** @typedef {import('../../interfaces').Hypercore<Buffer>} Hypercore */
 /** @typedef {import ('../../interfaces').KeyPair} KeyPair */
 /** @typedef {import ('../../interfaces').PeerConnection} PeerConnection */
-/** @typedef {import ('jayson').JSONRPCRequestLike} JSONRPCRequestLike*/
+/** @typedef {import ('json-rpc-engine').JsonRpcEngine} JsonRpcEngine */
+/** @typedef {import ('json-rpc-engine').JsonRpcRequest<JSON>} JsonRpcRequest */
+/** @typedef {import ('json-rpc-engine').JsonRpcResponse<JSON>} JsonRpcResponse */

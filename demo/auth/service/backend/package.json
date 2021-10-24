@@ -3,11 +3,11 @@
     "server": "node src/index.js"
   },
   "dependencies": {
-    "@rjsf/core": "^3.2.0",
     "fastify": "^3.22.1",
+    "isomorphic-ws": "^4.0.1",
     "noise-curve-tiny-secp": "^2.0.0",
-    "qrcode": "^1.4.4",
     "react": "^17.0.2",
-    "simple-jsonrpc-js": "^1.2.0"
+    "simple-jsonrpc-js": "^1.2.0",
+    "ws": "^8.2.3"
   }
 }

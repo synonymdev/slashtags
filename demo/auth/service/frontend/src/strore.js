@@ -1,5 +1,3 @@
-import { createAuth } from '@synonymdev/slashtags-auth';
-import { secp256k1 } from 'noise-curve-tiny-secp';
 import { createContext } from 'react';
 import { RPC } from './websocket';
 
@@ -9,17 +7,6 @@ export const getTiceket = async (dispatch) => {
   const url = await jrpc.call('ACT_1/GET_TICKET', []);
   dispatch({ type: types.SET_TICKET, url });
 };
-
-// const serverKeypair = secp256k1.generateSeedKeyPair('server');
-// const { responder } = createAuth(serverKeypair, {
-//   metadata: {
-//     v: 1,
-//     title: 'Bitrefill',
-//     image:
-//       'https://pbs.twimg.com/profile_images/1250468793031278594/vNVKrBp-_400x400.jpg',
-//     accountURL: 'www.bitrefill.com/slashtags/account',
-//   },
-// });
 
 // const createServerPayload = () => {
 //   const challenge = responder.newChallenge(3600000).toString('hex');

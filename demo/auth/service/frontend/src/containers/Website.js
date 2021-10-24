@@ -19,11 +19,7 @@ export const Website = () => {
 
   useEffect(() => {
     if (!qrURL) setQRURL(store.loginURL);
-  }, [store.loginURL]);
-
-  const sendToWallet = () => {
-    dispatch({ type: types.SET_WALLET_VIEW, walletView: 'Login' });
-  };
+  }, [store.loginURL, qrURL]);
 
   const account = Object.values(store.accounts || {})[0];
 
@@ -40,8 +36,6 @@ export const Website = () => {
               xmlns="http://www.w3.org/2000/svg"
             >
               <path
-                fill-rule="evenodd"
-                clip-rule="evenodd"
                 d="M5.49996 0.888367H11.2099L6.2716 19.1008H0.561646L5.49996 0.888367ZM19.6205 0.888367L14.6822 19.1008H8.97223L13.9106 0.888367H19.6205Z"
                 fill="#f7931a"
               />

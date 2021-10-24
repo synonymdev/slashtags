@@ -22,7 +22,14 @@ export const LoginForm = ({ qrURL }) => {
   return (
     <div className="options">
       <p>Don't have a Slashtags compatible wallet?</p>
-      <a className="get-it">Get Demo wallet</a>
+      <a
+        className="get-it"
+        href="https://slashtags-contacts-demo.netlify.app/"
+        target="_blank"
+        rel="noreferrer"
+      >
+        Get Demo wallet
+      </a>
       <div className="or">
         <div className="line" />
         <p>OR</p>
