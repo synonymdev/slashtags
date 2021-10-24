@@ -1,0 +1,591 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+@import './normalize.css';
+
+* {
+  box-sizing: border-box;
+  list-style: none;
+}
+
+body {
+  margin: 0;
+  font-family: Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto',
+    'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  font-size: 10px;
+}
+
+#root {
+  background: #e2e2e2;
+}
+
+/* App */
+
+.App {
+  text-align: center;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  column-gap: 2em;
+  padding: 2em;
+
+  background-size: cover;
+  background-position: center;
+}
+
+/* Browser */
+
+.browser {
+  overflow: hidden;
+  width: 100rem;
+  height: 80rem;
+  display: flex;
+  flex-direction: column;
+
+  background: #f8f8f8;
+  box-shadow: 0px 100px 80px rgba(0, 0, 0, 0.07),
+    0px 41.7776px 33.4221px rgba(0, 0, 0, 0.0503198),
+    0px 22.3363px 17.869px rgba(0, 0, 0, 0.0417275),
+    0px 12.5216px 10.0172px rgba(0, 0, 0, 0.035),
+    0px 6.6501px 5.32008px rgba(0, 0, 0, 0.0282725),
+    0px 2.76726px 2.21381px rgba(0, 0, 0, 0.0196802);
+  border-radius: 8px;
+}
+
+.browser-header {
+  background: #3d3d3d;
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  padding-left: 1em;
+}
+
+.browser-button {
+  width: 1rem;
+  height: 1rem;
+  margin: auto 0.4em;
+  border-radius: 99999px;
+}
+
+.browser-container {
+  width: 100%;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Phone */
+
+.phone {
+  width: 30rem;
+  height: 60rem;
+  border-radius: 28px;
+  position: relative;
+
+  padding: 0 0.7rem;
+}
+
+.phone .frame {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.phone .frame path {
+  fill: #3d3d3d;
+}
+
+.phone-container {
+  height: 100%;
+  overflow: hidden;
+  border-radius: 4.2rem;
+  z-index: 0;
+
+  background-color: #f8f8f8;
+
+  box-shadow: 0px 100px 80px rgba(0, 0, 0, 0.07),
+    0px 41.7776px 33.4221px rgba(0, 0, 0, 0.0503198),
+    0px 22.3363px 17.869px rgba(0, 0, 0, 0.0417275),
+    0px 12.5216px 10.0172px rgba(0, 0, 0, 0.035),
+    0px 6.6501px 5.32008px rgba(0, 0, 0, 0.0282725),
+    0px 2.76726px 2.21381px rgba(0, 0, 0, 0.0196802);
+}
+
+@media (max-width: 1400px) {
+  .phone {
+    position: absolute;
+    left: 10%;
+    bottom: 10%;
+  }
+}
+
+/* Website */
+
+.website {
+  width: 100%;
+  height: 100%;
+
+  background-color: #151718;
+
+  background: radial-gradient(
+      circle,
+      transparent 20%,
+      #151718 20%,
+      #151718 80%,
+      transparent 80%,
+      transparent
+    ),
+    radial-gradient(
+        circle,
+        transparent 20%,
+        #151718 20%,
+        #151718 80%,
+        transparent 80%,
+        transparent
+      )
+      25px 25px,
+    linear-gradient(#202020 1px, transparent 2px) 0 -1px,
+    linear-gradient(90deg, #202020 1px, #151718 2px) -1px 0;
+  background-size: 50px 50px, 50px 50px, 25px 25px, 25px 25px;
+}
+
+.website .header {
+  display: flex;
+  justify-content: space-between;
+
+  padding: 4rem;
+  height: 12.4rem;
+}
+
+.website .header .logo {
+  height: 100%;
+  fill: #fff;
+  cursor: pointer;
+}
+
+.website .login {
+  position: relative;
+}
+
+.website .login > button {
+  cursor: pointer;
+  height: 100%;
+
+  font-weight: bold;
+  font-size: 1.6rem;
+  color: #f2f2f2;
+
+  background: none;
+  border: 1px solid;
+  box-sizing: border-box;
+  border-radius: 8px;
+  padding: 0 1rem;
+
+  background-color: #151718;
+}
+
+.website .options {
+  position: absolute;
+  right: 0;
+  top: 130%;
+
+  overflow: hidden;
+  width: 33rem;
+
+  background: #2b2b2b;
+  border: 1px solid #3c3c3c;
+  box-shadow: 0px 10px 34px -10px rgba(236, 243, 222, 0.05);
+  border-radius: 8px;
+
+  padding: 1.6rem;
+}
+
+.website .options > * {
+  width: 100%;
+}
+
+.website .options .card {
+  position: relative;
+  background: #3b3b3b;
+  border-radius: 5px;
+  padding: 1rem;
+  margin-top: 1.6rem;
+  display: flex;
+  justify-content: space-between;
+}
+
+.website .options .card canvas {
+  width: 100% !important;
+  height: auto !important;
+  object-fit: contain;
+}
+
+.website .options .card.url {
+  display: block;
+  font-size: 1.4rem;
+  color: #cfcfcf;
+  text-align: left;
+}
+
+.website .options a.get-it {
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  background: #f7931a;
+  border-radius: 4px;
+  border: none;
+
+  color: #fff;
+  font-weight: bold;
+  font-size: 1.6rem;
+
+  width: 100%;
+  height: 3.7rem;
+
+  margin-top: 1.6rem;
+}
+
+.website .options p {
+  font-size: 1.4rem;
+  line-height: 1.6rem;
+  text-align: center;
+
+  color: #fff;
+  opacity: 0.3;
+}
+
+.website .options .or {
+  height: 4rem;
+  display: flex;
+  align-items: center;
+}
+
+.website .options .or p {
+  width: 50px;
+}
+
+.website .options .or .line {
+  height: 1px;
+  background-color: #3b3b3b;
+  flex: 1;
+}
+
+.website .user img {
+  cursor: pointer;
+  width: 44px;
+  height: 44px;
+  border-radius: 9999px;
+  border: 2px solid #7d7d7d;
+}
+
+.website .main {
+  color: #fff;
+  text-align: left;
+  padding: 5em;
+}
+
+.website .main h1 {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.website .main h2 {
+  font-size: 1.5rem;
+}
+
+.website .tags {
+  display: flex;
+  padding: 1em 0;
+  font-size: 1.3rem;
+}
+
+.website .tags li {
+  padding: 0.5em 1em;
+  background-color: rgb(75, 75, 75);
+  border-radius: 9999px;
+  margin-right: 1em;
+}
+
+.website .podcast {
+  width: 500px;
+  height: 100px;
+  background-color: rgb(75, 75, 75);
+  margin: 2em 0;
+  border-radius: 8px;
+}
+
+/* Wallet */
+
+.wallet {
+  width: 100%;
+  height: 100%;
+
+  background-color: #151718;
+  color: #fff;
+
+  padding: 4em 2em;
+  text-align: left;
+}
+
+.wallet .title {
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 6rem;
+  letter-spacing: 0.4px;
+
+  /* Base/White */
+  color: #ffffff;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.wallet .title svg {
+  cursor: pointer;
+}
+
+.wallet .notice {
+  color: #fff;
+  opacity: 0.4;
+  font-size: 1.4rem;
+}
+
+.wallet .login > h2 {
+  font-size: 1.4rem;
+  padding-bottom: 1em;
+}
+
+.pre {
+  padding: 0.2rem;
+  background: #22222242;
+  border-radius: 4px;
+  font-size: 1.4em;
+  grid-column-start: 2;
+  width: 100%;
+  white-space: pre-wrap;
+}
+
+.modal {
+  align-items: center;
+  padding: 16px;
+
+  height: 88px;
+  left: 66px;
+  top: 784px;
+
+  background: #2b2b2b;
+  border-radius: 16px;
+
+  font-size: 1.6rem;
+  line-height: 1.6;
+}
+.modal b {
+  font-weight: bold;
+}
+
+.service {
+  display: grid;
+  column-gap: 1em;
+  grid-template-columns: 40px auto;
+  align-items: center;
+  padding: 20px 16px;
+
+  left: 66px;
+  top: 784px;
+
+  background: #2b2b2b;
+  border-radius: 16px;
+}
+
+.service .logo {
+  border-radius: 9999px;
+  width: 32px;
+  height: 32px;
+  display: block;
+}
+
+.service * {
+  font-family: sans-serif;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
+
+.service h2 {
+  font-size: 1.6rem;
+  font-weight: bold;
+  padding-bottom: 0.5rem;
+}
+
+.service .pre {
+  font-size: 1.4rem;
+  grid-column-start: 2;
+  max-width: 70%;
+  white-space: pre-wrap;
+}
+
+.wallet .footer {
+  position: absolute;
+  bottom: 3rem;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  column-gap: 2rem;
+}
+
+.wallet button.login,
+.rjsf button.btn[type='submit'] {
+  border: none;
+
+  padding: 18px 28px;
+
+  background: rgba(37, 39, 43, 0.92);
+  box-shadow: 0px 20px 48px rgba(0, 0, 0, 0.3), 0px 8px 40px rgba(0, 0, 0, 0.1);
+
+  border-radius: 44px;
+
+  color: #fff;
+  cursor: pointer;
+  margin: auto;
+}
+
+.btn {
+  cursor: pointer;
+}
+
+/* Form */
+
+.rjsf #root {
+  display: grid !important;
+  max-width: 246px !important;
+  background: none;
+  font-size: 1.5rem;
+}
+
+.rjsf > .form-group.field {
+  border: none !important;
+}
+
+.rjsf .form-group.field {
+  display: grid;
+  grid-template-columns: 50% 50%;
+  padding: 0.5em 0;
+  border-bottom: 1px solid #333;
+  width: 100%;
+}
+
+.rjsf #root__title,
+.rjsf #root__description {
+  display: none;
+}
+
+.rjsf fieldset {
+  border: none;
+  padding: 0;
+}
+
+.rjsf .form-group.field label,
+.rjsf .form-group.field input {
+  background-color: transparent;
+  border: none;
+  color: #fff;
+}
+
+.rjsf .form-group.field label {
+  color: #868686;
+}
+
+.rjsf button.btn {
+  display: none !important;
+}
+
+.rjsf button.btn[type='submit'] {
+  display: block !important;
+}
+
+.rjsf .array-item button {
+  background-color: #fff;
+  color: #000;
+  padding: auto;
+}
+
+.rjsf .form-group.field.field-array {
+  display: block;
+}
+.rjsf .form-group.field.field-array legend {
+  color: #868686;
+}
+
+.rjsf .field.field-array.field-array-of-string {
+  width: 100% !important;
+  display: grid;
+  grid-template-columns: 50% 1fr;
+}
+
+.rjsf .row.array-item-list {
+  min-width: 0;
+}
+
+.rjsf .row.array-item-list .form-group.field.field-string {
+  display: block;
+}
+
+.rjsf .row.array-item-list input {
+  width: 100%;
+}
+
+/* QR */
+.qr {
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.qrcopy {
+  opacity: 0.5;
+
+  padding: 0.5em;
+  display: flex;
+  color: #fff;
+
+  align-items: center;
+  column-gap: 1rem;
+
+  font-size: 1.2rem;
+
+  position: absolute;
+  right: 10px;
+}
+
+.logo {
+  display: flex;
+  color: #fff;
+  align-items: center;
+  column-gap: 0.5rem;
+  font-size: 1.4rem;
+}
+
+.logo h1 {
+  margin: 0;
+}
