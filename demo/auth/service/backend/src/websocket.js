@@ -1,8 +1,8 @@
 const websocket = require('isomorphic-ws');
 var JsonRPC = require('simple-jsonrpc-js');
 
-exports.RPC = () => {
-  const ws = new websocket.Server({ port: 8080 });
+module.exports = (server) => {
+  const ws = new websocket.Server({ server });
 
   const jrpc = new JsonRPC();
 

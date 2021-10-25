@@ -1,7 +1,9 @@
 import simple_jsonrpc from 'simple-jsonrpc-js';
 
 export const RPC = () => {
-  const socket = new WebSocket('ws://localhost:8080/');
+  const socket = new WebSocket(
+    'https://slashtags-demo-backend.herokuapp.com'.replace(/^http/, 'ws'),
+  );
 
   var jrpc = new simple_jsonrpc();
 
