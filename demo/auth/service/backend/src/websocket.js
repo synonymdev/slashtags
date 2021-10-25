@@ -33,6 +33,8 @@ module.exports = (server) => {
 
   ws.on('connection', function (socket) {
     socket.on('message', function (message) {
+      console.log('got message', JSON.parse(message.toString()));
+
       try {
         engine.handle(JSON.parse(message.toString()), (err, res) => {
           socket.send(JSON.stringify(res));
@@ -83,7 +85,7 @@ module.exports = (server) => {
 
     engine.push((req, res, next, end) => {
       if (req.method === 'ACT_1/RESPOND') {
-        const { attestation } = req.params;
+        const { attestation, ticket } = req.params;
         console.log('got attestation', attestation);
 
         try {
@@ -94,11 +96,11 @@ module.exports = (server) => {
             attestation: Buffer.from(responderAttestation).toString('hex'),
           };
 
-          const socket = sockets.get(metadata?.ticket);
+          const socket = sockets.get(ticket);
 
           socket.send(JSON.stringify({ authed: initiatorPK.toString('hex') }));
 
-          sockets.delete(metadata?.ticket);
+          sockets.delete(ticket);
         } catch (error) {
           res.error = error.message;
         }

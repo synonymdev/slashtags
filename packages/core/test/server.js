@@ -7,11 +7,11 @@ const main = async () => {
     console.log(req)
     if (req.method !== 'foo') next()
 
-    res.result = 42
+    res.result = req.params[0]
     end()
   })
 
-  const wss = await node.listen({ port: 9090 })
+  const wss = await node.listen({ port: 9999 })
 
   setTimeout(async () => {
     await wss.close()
