@@ -1,13 +1,20 @@
 {
   "scripts": {
-    "server": "node src/index.js"
+    "start": "node src/index.js"
   },
   "dependencies": {
+    "@synonymdev/slashtags-auth": "^0.2.0",
+    "@synonymdev/slashtags-common": "^0.1.0",
     "fastify": "^3.22.1",
     "isomorphic-ws": "^4.0.1",
+    "json-rpc-engine": "^6.1.0",
+    "multiformats": "^9.4.9",
     "noise-curve-tiny-secp": "^2.0.0",
     "react": "^17.0.2",
     "simple-jsonrpc-js": "^1.2.0",
     "ws": "^8.2.3"
+  },
+  "engines": {
+    "node": "14.x"
   }
 }

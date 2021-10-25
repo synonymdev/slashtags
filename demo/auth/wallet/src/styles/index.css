@@ -1,0 +1,261 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+@import './reset.css';
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  font-size: 10px;
+}
+
+* {
+  font-family: 'Roboto', sans-serif;
+  box-sizing: border-box;
+}
+
+#root {
+  background: #e2e2e2;
+}
+
+/* App */
+
+.App {
+  text-align: center;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2em;
+
+  background-size: cover;
+  background-position: center;
+}
+
+/* Phone */
+
+.phone {
+  width: 30rem;
+  height: 60rem;
+  border-radius: 28px;
+  position: relative;
+
+  padding: 0 0.7rem;
+}
+
+.phone .frame {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.phone .frame path {
+  fill: #3d3d3d;
+}
+
+.phone-container {
+  height: 100%;
+  overflow: hidden;
+  border-radius: 4.2rem;
+  z-index: 0;
+
+  background-color: #f8f8f8;
+
+  box-shadow: 0px 100px 80px rgba(0, 0, 0, 0.07),
+    0px 41.7776px 33.4221px rgba(0, 0, 0, 0.0503198),
+    0px 22.3363px 17.869px rgba(0, 0, 0, 0.0417275),
+    0px 12.5216px 10.0172px rgba(0, 0, 0, 0.035),
+    0px 6.6501px 5.32008px rgba(0, 0, 0, 0.0282725),
+    0px 2.76726px 2.21381px rgba(0, 0, 0, 0.0196802);
+}
+
+/* Wallet */
+
+.wallet {
+  width: 100%;
+  height: 100%;
+
+  background-color: #151718;
+  color: #fff;
+
+  padding: 4em 2em;
+  text-align: left;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header .title {
+  font-size: 2.2rem;
+}
+
+.header .profile,
+.pp {
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+
+  border: 2px solid #555;
+  overflow: hidden;
+
+  cursor: pointer;
+}
+
+.header .profile img,
+.pp img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Home */
+.home {
+  padding-top: 7rem;
+}
+
+/* Cards */
+.card {
+  background-color: #232325;
+  border-radius: 1.4rem;
+  padding: 1.6rem;
+  margin: 2em 0;
+
+  width: 100%;
+
+  border: none;
+  display: flex;
+  align-items: center;
+  column-gap: 1.5rem;
+
+  cursor: pointer;
+
+  color: #fff;
+  transition: all 0.1s ease-in-out;
+}
+
+.card .right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.card:hover,
+.card:focus-within {
+  background-color: #2e2e2e;
+}
+
+.card pre {
+  margin: 0.5em 0 0 0;
+}
+
+/* HOME */
+
+/* Footer */
+
+footer {
+  position: absolute;
+  left: 0;
+  bottom: 1rem;
+  padding: 2rem;
+
+  display: flex;
+
+  width: 100%;
+  justify-content: center;
+}
+
+pre {
+  padding: 0.5em 1em;
+  background: #22222242;
+  border-radius: 4px;
+  white-space: pre-wrap;
+  word-break: break-all;
+  width: 100%;
+}
+
+footer .btn {
+  border: none;
+  background-color: #252525;
+  border-radius: 99999px;
+  padding: 1em;
+  margin: 0.5em;
+  cursor: pointer;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.btn svg {
+  height: 20px;
+  width: 20px;
+  fill: #636366;
+}
+
+.flip-h {
+  transform: scaleX(-1);
+}
+
+.qr-code {
+  cursor: pointer;
+}
+
+.qr-code h3 {
+  margin-bottom: 0.5rem;
+}
+
+.qr-code canvas {
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 10px;
+  border: 1px solid rgb(112, 112, 112);
+}
+
+.qr-code pre {
+  margin: 0;
+}
+
+div[aria-label='Countdown timer'] {
+  position: absolute !important;
+  background-color: #fff;
+  border-radius: 99999px;
+  padding: 5px;
+  width: 60px !important;
+  height: 60px !important;
+  top: 35%;
+  left: 38%;
+}
+
+div[aria-label='Countdown timer'] svg {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.form-scan {
+  width: 100%;
+  flex: 0.9;
+}
+
+.form-scan div {
+  width: 200px;
+  height: 200px;
+  display: block;
+  margin: auto;
+  background: none;
+  border: 2px solid rgb(138, 138, 138);
+  border-radius: 20px;
+
+  cursor: pointer;
+}

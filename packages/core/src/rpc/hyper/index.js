@@ -1,3 +1,3 @@
-import { ServerHypercore } from './server.js';
+import { ServerHypercore } from './server.js'
 
-export const Server = ServerHypercore;
+export const Server = ServerHypercore

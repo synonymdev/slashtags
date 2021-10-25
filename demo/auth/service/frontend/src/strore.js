@@ -4,7 +4,8 @@ import { RPC } from './websocket';
 const jrpc = RPC();
 
 export const getTiceket = async (dispatch) => {
-  const url = await jrpc.call('ACT_1/GET_TICKET', []);
+  const url = await jrpc.call('ACT_1/REQUEST_TICKET', []);
+
   dispatch({ type: types.SET_TICKET, url });
 };
 

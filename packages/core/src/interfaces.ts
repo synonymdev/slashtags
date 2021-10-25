@@ -1,12 +1,8 @@
 export type { Hypercore, Extension, Peer } from 'hyper-sdk';
-import type { ServerOptions, Server as WebsocketServer } from 'ws';
+import type { ServerOptions as WsServerOptions, Server as WsServer } from 'ws';
 export type { KeyPair } from 'noise-curve-tiny-secp';
 
-import type {
-  JsonRpcEngine,
-  JsonRpcMiddleware,
-  JsonRpcRequest,
-} from 'json-rpc-engine';
+import type { JsonRpcMiddleware, JsonRpcRequest } from 'json-rpc-engine';
 
 import type { KeyPair } from 'noise-curve-tiny-secp';
 import type {
@@ -49,13 +45,13 @@ export type ServerHypercore = (
   options: { keyPair: KeyPair },
 ) => {};
 
-export type SocketOptions = ServerOptions;
+export type ServerOptions = WsServerOptions;
 
-export type Server = WebsocketServer;
+export type Server = WsServer;
 
 export interface SlashtagsAPI {
   use: (middleware: JsonRpcMiddleware<any, any>) => void;
-  listen: (opts?: SocketOptions) => Promise<Server>;
+  listen: (server: ServerOptions | Server) => Promise<Server>;
   request: (
     address: string,
     method: JsonRpcRequest<any>['method'],

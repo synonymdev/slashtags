@@ -1,6 +1,5 @@
 const WS = require('./websocket');
 const PORT = process.env.PORT || 9000;
-
 run();
 
 function run() {
@@ -8,13 +7,13 @@ function run() {
     logger: true,
   });
 
-  WS(fastify.server);
+  const ws = WS(fastify.server);
 
   fastify.get('/', (req, res) => {
     res.send('Alive');
   });
 
-  fastify.listen(PORT, function (err, address) {
+  fastify.listen(PORT, '0.0.0.0', function (err, address) {
     if (err) {
       fastify.log.error(err);
       process.exit(1);

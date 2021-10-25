@@ -1,15 +1,15 @@
-import { WebsocketTransport } from './transports/websocket.js';
+import { WebsocketTransport } from './transports/websocket.js'
 
 /**
  *
  * @param {JsonRpcEngine} engine
- * @param {SocketOptions} [opts]
+ * @param {Server | ServerOptions} server
  * @returns {Promise<Server>}
  */
-export const listen = (engine, opts) => {
-  return WebsocketTransport(engine, opts);
-};
+export const listen = (engine, server) => {
+  return WebsocketTransport(engine, server)
+}
 
-/** @typedef {import('../../interfaces').SocketOptions} SocketOptions */
+/** @typedef {import('../../interfaces').ServerOptions} ServerOptions */
 /** @typedef {import('../../interfaces').Server} Server */
 /** @typedef {import ('json-rpc-engine').JsonRpcEngine} JsonRpcEngine */

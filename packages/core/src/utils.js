@@ -4,4 +4,4 @@
  * @returns {string}
  */
 export const hexString = (pubKey) =>
-  typeof pubKey === 'string' ? pubKey : pubKey?.toString('hex');
+  typeof pubKey === 'string' ? pubKey : pubKey?.toString('hex')

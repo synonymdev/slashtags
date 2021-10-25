@@ -1,8 +1,8 @@
-import _debug from 'debug';
-import { hexString } from '../../utils.js';
-import { EXTENSION, getFeed } from './shared.js';
+import _debug from 'debug'
+import { hexString } from '../../utils.js'
+import { EXTENSION, getFeed } from './shared.js'
 
-const debug = _debug('hyper');
+const debug = _debug('hyper')
 
 /**
  *  Constructor for a Jayson Hypercore Server
@@ -19,40 +19,40 @@ export const ServerHypercore = async function (engine, options) {
     key: options.key,
     keyPair: options.keyPair,
     server: true,
-    client: false,
-  });
+    client: false
+  })
 
   const extension = feed.registerExtension(EXTENSION, {
     encoding: 'json',
     onmessage: onMessage,
-    onerror: (err) => debug('error', err),
-  });
+    onerror: (err) => debug('error', err)
+  })
 
   feed.on('peer-open', (peer) => {
-    debug('peer-open', hexString(peer.remotePublicKey));
-  });
+    debug('peer-open', hexString(peer.remotePublicKey))
+  })
 
-  feed.on('close', () => debug('Closing feed', hexString(feed.key)));
+  feed.on('close', () => debug('Closing feed', hexString(feed.key)))
 
   /**
    * @param {JsonRpcRequest} message
    * @param {PeerConnection} peer
    */
-  function onMessage(message, peer) {
-    debug('got', message, hexString(peer.remotePublicKey));
+  function onMessage (message, peer) {
+    debug('got', message, hexString(peer.remotePublicKey))
 
     engine.handle(message, (error, response) => {
-      if (error) throw error;
+      if (error) throw error
       // @ts-ignore
-      if (message.method) extension.send(response, peer);
-    });
+      if (message.method) extension.send(response, peer)
+    })
   }
 
-  debug('Listening on feed', hexString(feed.key));
+  debug('Listening on feed', hexString(feed.key))
 
-  await feed.ready();
-  return feed;
-};
+  await feed.ready()
+  return feed
+}
 
 /** @typedef {import('../../interfaces').Hypercore<Buffer>} Hypercore */
 /** @typedef {import ('../../interfaces').KeyPair} KeyPair */

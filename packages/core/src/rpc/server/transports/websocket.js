@@ -1,13 +1,16 @@
-import WebSocket from 'isomorphic-ws';
+import WebSocket from 'isomorphic-ws'
 
 /**
  *
  * @param {JsonRpcEngine} engine
- * @param {ServerOptions} [opts]
+ * @param {ServerOptions | Server} server
  * @returns {Promise<Server>}
  */
-export const WebsocketTransport = async (engine, opts) => {
-  const wss = new WebSocket.Server(opts);
+export const WebsocketTransport = async (engine, server) => {
+  const wss =
+      server instanceof WebSocket.Server
+        ? server
+        : new WebSocket.Server(server)
 
   wss.on('connection', function (socket) {
     socket.on(
@@ -15,27 +18,28 @@ export const WebsocketTransport = async (engine, opts) => {
       /** @param {string} message */
       (message) => {
         try {
-          const parsed = JSON.parse(message);
+          const parsed = JSON.parse(message)
 
           engine.handle(parsed, (error, response) => {
-            if (response) socket.send(JSON.stringify(response));
-          });
+            if (response) socket.send(JSON.stringify(response))
+            console.warn(error)
+          })
         } catch (error) {
           socket.send(
             JSON.stringify({
               id: undefined,
               jsonrpc: '2.0',
-              error,
-            }),
-          );
+              error
+            })
+          )
         }
-      },
-    );
-  });
+      }
+    )
+  })
 
-  return wss;
-};
+  return wss
+}
 
 /** @typedef {import ('json-rpc-engine').JsonRpcEngine} JsonRpcEngine */
 /** @typedef {import ('ws').ServerOptions} ServerOptions */
-/** @typedef {import ('../../../interfaces').Server} Server */
+/** @typedef {import ('isomorphic-ws').Server} Server */

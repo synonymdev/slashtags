@@ -22,7 +22,7 @@
   "scripts": {
     "lint": "rm -rf dist && standard --fix",
     "build": "rm -rf dist types && ipjs build && tsc && mv types/src dist/types",
-    "test": "hundreds ava ./test/**/*.js",
+    "test": "echo ADD TEST FILES",
     "prepublishOnly": "npm run lint && npm run build && npm run test"
   },
   "dependencies": {
@@ -37,6 +37,7 @@
   },
   "devDependencies": {
     "@types/debug": "^4.1.7",
+    "@types/ws": "^8.2.0",
     "debug": "^4.3.2",
     "lru": "^3.1.0",
     "noise-curve-tiny-secp": "^2.0.0"
