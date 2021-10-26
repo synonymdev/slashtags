@@ -1,6 +1,6 @@
 {
   "name": "@synonymdev/slashtags-actions",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Packaged handlers for Slashtag actions",
   "type": "module",
   "keywords": [
