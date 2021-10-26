@@ -1,10 +1,15 @@
 import background from './Wallpaper.jpg';
-import { useReducer } from 'react';
+import { useEffect, useReducer } from 'react';
 import { initialValue, reducer, StoreContext } from '../strore';
 import { Website } from './Website';
+import { setupRPC } from '../strore';
 
 export const App = () => {
   const [store, dispatch] = useReducer(reducer, initialValue);
+
+  useEffect(() => {
+    setupRPC(dispatch);
+  }, []);
 
   return (
     <div className="App" style={{ backgroundImage: `url(${background})` }}>

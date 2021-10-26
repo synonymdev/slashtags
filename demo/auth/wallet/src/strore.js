@@ -1,5 +1,4 @@
 import { createContext } from 'react';
-// import { createAuth } from '@synonymdev/slashtags-auth';
 
 export const initialValue = {
   // veiw: 'home',

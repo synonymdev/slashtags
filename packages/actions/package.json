@@ -1,0 +1,42 @@
+{
+  "name": "@synonymdev/slashtags-actions",
+  "version": "0.0.0",
+  "description": "Packaged handlers for Slashtag actions",
+  "type": "module",
+  "keywords": [
+    "slashtags",
+    "action",
+    "auth",
+    "url"
+  ],
+  "homepage": "https://github.com/synonymdev/slashtags/tree/master/packages/actions/#readme",
+  "bugs": {
+    "url": "https://github.com/synonymdev/slashtags/issues"
+  },
+  "author": "Nazeh <ar.nazeh@gmail.com>",
+  "types": "./types/index.d.ts",
+  "main": "src/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/synonymdev/slashtags.git"
+  },
+  "scripts": {
+    "lint": "rm -rf dist && standard --fix",
+    "build": "rm -rf dist types && ipjs build && tsc && mv types/src dist/types",
+    "test": "echo ADD TEST FILES",
+    "prepublishOnly": "npm run lint && npm run build && npm run test"
+  },
+  "dependencies": {
+    "@synonymdev/slashtags-auth": "^0.2.1",
+    "@synonymdev/slashtags-common": "^0.1.0",
+    "@synonymdev/slashtags-core": "^0.0.3",
+    "multiformats": "^9.4.9",
+    "urijs": "^1.19.7"
+  },
+  "devDependencies": {
+    "@types/debug": "^4.1.7",
+    "@types/urijs": "^1.19.17",
+    "@types/ws": "^8.2.0",
+    "noise-curve-tiny-secp": "^2.0.0"
+  }
+}

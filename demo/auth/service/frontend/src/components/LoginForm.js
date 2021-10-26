@@ -73,7 +73,7 @@ export const LoginForm = ({ qrURL }) => {
       </div>
 
       <a className="card url" href={qrURL}>
-        {qrURL.slice(0, 18) + '...' + qrURL.slice(52, -27) + '...'}
+        {qrURL.slice(0, 18) + '...' + qrURL.slice(-32, -13) + '...'}
       </a>
     </div>
   );

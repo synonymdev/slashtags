@@ -18,25 +18,31 @@ const auth = createAuth(keypair, {
   metadata: basicProfile,
 });
 
-const sockets = new Map();
-
 module.exports = (server) => {
   const ws = new websocket.Server({ server });
 
   const engine = new JsonRpcEngine();
 
   const url = process.env.PORT
-    ? 'wss://slashtags-demo-backend.herokuapp.com'
+    ? 'wss://slashtags.herokuapp.com'
     : 'ws://localhost:9000';
 
   const url32 = base32.encode(varint.prepend([210, 0, 0], Buffer.from(url)));
 
-  ws.on('connection', function (socket) {
-    socket.on('message', function (message) {
-      console.log('got message', JSON.parse(message.toString()));
+  const sockets = new Map();
 
+  ws.on('connection', function (socket) {
+    const socketID = base58btc.encode(randomBytes(8));
+    sockets.set(socketID, socket);
+
+    socket.on('message', function (message) {
       try {
-        engine.handle(JSON.parse(message.toString()), (err, res) => {
+        const json = JSON.parse(message.toString());
+        json.socketID = socketID;
+
+        console.log('message', json);
+
+        engine.handle(json, (err, res) => {
           socket.send(JSON.stringify(res));
         });
       } catch (error) {
@@ -45,72 +51,81 @@ module.exports = (server) => {
         );
       }
     });
+  });
 
-    // Slsashtags
-    engine.push((req, res, next, end) => {
-      if (req.method === 'ACT_1/REQUEST_TICKET') {
-        const ticket = base58btc.encode(randomBytes(8));
+  engine.push((req, res, next, end) => {
+    if (req.method === 'ping') {
+      res.result = 'pong';
+      end();
+    }
+    next();
+  });
 
-        sockets.set(ticket, socket);
+  // Slsashtags
+  engine.push((req, res, next, end) => {
+    if (req.method === 'ACT_1/REQUEST_TICKET') {
+      res.result = 'slash://' + url32 + '/?act=1&tkt=' + req.socketID;
+      end();
+    }
+    next();
+  });
 
-        res.result = 'slash://' + url32 + '/?act=1&tkt=' + ticket;
-        end();
-      }
-      next();
-    });
+  engine.push((req, res, next, end) => {
+    if (req.method === 'ACT_1/GET_CHALLENGE') {
+      const challenge = auth.responder.newChallenge(60 * 1000 * 5);
 
-    engine.push((req, res, next, end) => {
-      if (req.method === 'ping') {
-        res.result = 'pong';
-        end();
-      }
-      next();
-    });
+      res.result = {
+        publicKey: keypair.publicKey.toString('hex'),
+        challenge: Buffer.from(challenge).toString('hex'),
+        title: basicProfile.title,
+        image: basicProfile.image,
+      };
 
-    engine.push((req, res, next, end) => {
-      if (req.method === 'ACT_1/GET_CHALLENGE') {
-        const challenge = auth.responder.newChallenge(60 * 1000 * 5);
+      end();
+    }
+    next();
+  });
+
+  engine.push((req, res, next, end) => {
+    if (req.method === 'ACT_1/RESPOND') {
+      const { attestation, ticket } = req.params;
+
+      try {
+        const { metadata, initiatorPK, responderAttestation } =
+          auth.responder.verifyInitiator(Buffer.from(attestation, 'hex'));
 
         res.result = {
-          publicKey: keypair.publicKey.toString('hex'),
-          challenge: Buffer.from(challenge).toString('hex'),
-          title: basicProfile.title,
-          image: basicProfile.image,
+          attestation: Buffer.from(responderAttestation).toString('hex'),
         };
 
-        end();
-      }
-      next();
-    });
+        const socket = sockets.get(ticket);
 
-    engine.push((req, res, next, end) => {
-      if (req.method === 'ACT_1/RESPOND') {
-        const { attestation, ticket } = req.params;
-        console.log('got attestation', attestation);
-
-        try {
-          const { metadata, initiatorPK, responderAttestation } =
-            auth.responder.verifyInitiator(Buffer.from(attestation, 'hex'));
-
-          res.result = {
-            attestation: Buffer.from(responderAttestation).toString('hex'),
-          };
-
-          const socket = sockets.get(ticket);
-
-          socket.send(JSON.stringify({ authed: initiatorPK.toString('hex') }));
-
-          sockets.delete(ticket);
-        } catch (error) {
-          res.error = error.message;
+        if (!socket) {
+          end(new Error('Expired ticket'));
         }
-        end();
-      }
-      next();
-    });
 
-    engine.push((req, res, next, end) => end());
+        socket.send(
+          JSON.stringify({
+            jsonrpc: '2.0',
+            method: 'UserAuthenticated',
+            params: {
+              publicKey: Buffer.from(initiatorPK).toString('hex'),
+              metadata,
+            },
+          }),
+        );
+        console.log('User authenticated');
+
+        sockets.delete(ticket);
+      } catch (error) {
+        res.error = error.message;
+      }
+      end();
+    }
+    next();
   });
+
+  engine.push((req, res, next, end) => end());
 
   return ws;
 };

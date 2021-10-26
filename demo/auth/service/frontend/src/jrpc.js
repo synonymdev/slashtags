@@ -3,14 +3,19 @@ import simple_jsonrpc from 'simple-jsonrpc-js';
 const socketURL =
   window.location.hostname === 'localhost'
     ? 'ws://localhost:9000'
-    : 'wss://slashtags-demo-backend.herokuapp.com';
+    : 'wss://slashtags.herokuapp.com';
+
+let rpc;
 
 export const RPC = () => {
+  if (rpc) return rpc;
+
   const socket = new WebSocket(socketURL);
 
   var jrpc = new simple_jsonrpc();
 
   socket.onmessage = function (event) {
+    console.log('got data', event.data);
     jrpc.messageHandler(event.data);
   };
 
@@ -33,12 +38,10 @@ export const RPC = () => {
 
   //usage
   //after connect
-  socket.onopen = function () {
-    //calls
-    jrpc.call('ping').then(function (result) {
-      console.log('ping: ' + result);
-    });
-  };
-
-  return jrpc;
+  return new Promise((resolve, reject) => {
+    socket.onopen = () => {
+      rpc = jrpc;
+      resolve(jrpc);
+    };
+  });
 };
