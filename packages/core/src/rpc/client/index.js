@@ -2,9 +2,11 @@ import SimpleJsonrpc from 'simple-jsonrpc-js'
 import Websocket from 'isomorphic-ws'
 import LRU from 'lru'
 
-// Close websockets if are not used for more than 60 seconds
-const websocketCache = new LRU({ maxAge: 10 * 60 })
+const websocketCache = new LRU(3)
 websocketCache.on('evict', (data) => data.value.ws.close())
+
+// Close websockets if they are not used for 6 seconds
+const TIMEOUT = 6000
 
 /**
  *
@@ -15,7 +17,9 @@ websocketCache.on('evict', (data) => data.value.ws.close())
  */
 export const request = (address, method, params) => {
   /** @type {import('isomorphic-ws')} */
-  if (websocketCache.peek(address)) {
+  const ws = websocketCache.get(address)?.ws
+
+  if (ws && ws.readyState === 1) {
     const { jrpc } = websocketCache.get(address)
     return new Promise((resolve, reject) => {
       jrpc
@@ -32,17 +36,23 @@ export const request = (address, method, params) => {
     /** @param {string} _msg */
     jrpc.toStream = (_msg) => ws.send(_msg)
 
-    ws.onmessage = (event) => jrpc.messageHandler(event.data)
-
     return new Promise((resolve, reject) => {
       ws.onopen = ({ target }) => {
         websocketCache.set(address, { ws: target, jrpc })
 
+        let timeout = setTimeout(() => target.close(), TIMEOUT)
+
+        ws.onmessage = ({ data, target }) => {
+          clearTimeout(timeout)
+
+          timeout = setTimeout(() => target.close(), TIMEOUT)
+
+          jrpc.messageHandler(data)
+        }
+
         jrpc
           .call(method, params)
-          // @ts-ignore
           .then((result) => resolve(result))
-          // @ts-ignore
           .catch((error) => resolve(error))
       }
     })

@@ -1,6 +1,6 @@
 declare module 'lru' {
   export = class LRU {
-    constructor(options?: { maxAge: number });
+    constructor(options?: { maxAge: number } | number);
 
     peek(key: string): any;
     length: number;

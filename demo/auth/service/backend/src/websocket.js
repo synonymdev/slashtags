@@ -9,7 +9,7 @@ const { createAuth } = require('@synonymdev/slashtags-auth');
 const { secp256k1: curve } = require('noise-curve-tiny-secp');
 
 const basicProfile = {
-  title: 'Slashtags Demo',
+  name: 'Slashtags Demo',
   image: 'https://i.ibb.co/BTLdR17/Screenshot-from-2021-10-25-06-15-09.png',
 };
 
@@ -77,7 +77,7 @@ module.exports = (server) => {
       res.result = {
         publicKey: keypair.publicKey.toString('hex'),
         challenge: Buffer.from(challenge).toString('hex'),
-        title: basicProfile.title,
+        name: basicProfile.name,
         image: basicProfile.image,
       };
 
@@ -89,20 +89,20 @@ module.exports = (server) => {
   engine.push((req, res, next, end) => {
     if (req.method === 'ACT_1/RESPOND') {
       const { attestation, ticket } = req.params;
+      const socket = sockets.get(ticket);
 
       try {
+        if (!socket) {
+          end(new Error('Expired ticket'));
+          return;
+        }
+
         const { metadata, initiatorPK, responderAttestation } =
           auth.responder.verifyInitiator(Buffer.from(attestation, 'hex'));
 
         res.result = {
           attestation: Buffer.from(responderAttestation).toString('hex'),
         };
-
-        const socket = sockets.get(ticket);
-
-        if (!socket) {
-          end(new Error('Expired ticket'));
-        }
 
         socket.send(
           JSON.stringify({

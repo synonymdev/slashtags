@@ -30,6 +30,7 @@
     "hyper-sdk": "^3.0.9",
     "isomorphic-ws": "^4.0.1",
     "json-rpc-engine": "^6.1.0",
+    "lru": "^3.1.0",
     "lru-memoizer": "^2.1.4",
     "multiformats": "^9.4.9",
     "simple-jsonrpc-js": "^1.2.0",
@@ -39,7 +40,6 @@
     "@types/debug": "^4.1.7",
     "@types/ws": "^8.2.0",
     "debug": "^4.3.2",
-    "lru": "^3.1.0",
     "noise-curve-tiny-secp": "^2.0.0"
   }
 }

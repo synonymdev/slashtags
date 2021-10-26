@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@synonymdev/slashtags-actions": "^0.0.1",
     "@synonymdev/slashtags-auth": "^0.2.0",
     "@synonymdev/slashtags-common": "^0.1.0",
     "@synonymdev/slashtags-core": "^0.0.3",

@@ -5,12 +5,8 @@ const main = async () => {
 
   const result = await node.request('ws://localhost:9999', 'foo', [1, 2, 3])
   console.log('first', result)
-
-  let count = 0
-  setInterval(async () => {
-    const result = await node.request('ws://localhost:9999', 'foo', [count++])
-    console.log('result', result)
-  })
+  const second = await node.request('ws://localhost:9999', 'foo', [1, 2, 3])
+  console.log('second', second)
 }
 
 main()

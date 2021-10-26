@@ -2,21 +2,21 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './styles/index.css';
 import { App } from './containers/App';
-import { SlashActions } from '@synonymdev/slashtags-actions';
+import { SlashtagsActions } from '@synonymdev/slashtags-actions';
 import { Core } from '@synonymdev/slashtags-core';
 import { secp256k1 } from 'noise-curve-tiny-secp';
 
 const keyPair = secp256k1.generateSeedKeyPair('seed');
-const metadata = { foo: 'bar' };
+const metadata = { name: 'bar', image: 'bar' };
 
 window.run = async (url) => {
-  const node = await Core();
+  const node = Core();
 
-  const slashActs = SlashActions({ node });
+  const slashActs = SlashtagsActions({ node });
 
   return await slashActs.handle(url, {
     ACT_1: {
-      onChallenge: ({}) => {
+      onChallenge: () => {
         return { metadata, keyPair };
       },
       onSuccess: (stuff) => {
