@@ -1,6 +1,6 @@
 {
   "name": "@synonymdev/slashtags-actions",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Packaged handlers for Slashtag actions",
   "type": "module",
   "keywords": [
@@ -29,7 +29,7 @@
   "dependencies": {
     "@synonymdev/slashtags-auth": "^0.2.1",
     "@synonymdev/slashtags-common": "^0.1.0",
-    "@synonymdev/slashtags-core": "^0.0.3",
+    "@synonymdev/slashtags-core": "^0.0.4",
     "multiformats": "^9.4.9",
     "urijs": "^1.19.7"
   },
