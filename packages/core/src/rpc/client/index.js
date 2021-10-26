@@ -1,9 +1,5 @@
 import SimpleJsonrpc from 'simple-jsonrpc-js'
 import Websocket from 'isomorphic-ws'
-import LRU from 'lru'
-
-const websocketCache = new LRU(3)
-websocketCache.on('evict', (data) => data.value.ws.close())
 
 // Close websockets if they are not used for 6 seconds
 const TIMEOUT = 6000
@@ -13,14 +9,15 @@ const TIMEOUT = 6000
  * @param {string} address
  * @param {string} method
  * @param {JSON} params
+ * @param {Map<string, {ws: Socket, jrpc: JRPC}>} openWebSockets
  * @returns
  */
-export const request = (address, method, params) => {
-  /** @type {import('isomorphic-ws')} */
-  const ws = websocketCache.get(address)?.ws
+export const request = (address, method, params, openWebSockets) => {
+  const entry = openWebSockets.get(address)
 
-  if (ws && ws.readyState === 1) {
-    const { jrpc } = websocketCache.get(address)
+  if (entry && entry?.ws.readyState === 1) {
+    console.log('reusing exsiting websocket')
+    const { jrpc } = entry
     return new Promise((resolve, reject) => {
       jrpc
         .call(method, params)
@@ -30,6 +27,7 @@ export const request = (address, method, params) => {
         .catch((error) => resolve(error))
     })
   } else {
+    console.log('requesting from new websocket')
     const ws = new Websocket(address)
     const jrpc = new SimpleJsonrpc()
 
@@ -38,7 +36,9 @@ export const request = (address, method, params) => {
 
     return new Promise((resolve, reject) => {
       ws.onopen = ({ target }) => {
-        websocketCache.set(address, { ws: target, jrpc })
+        target.onclose = () => openWebSockets.delete(address)
+
+        openWebSockets.set(address, { ws: target, jrpc })
 
         let timeout = setTimeout(() => target.close(), TIMEOUT)
 
@@ -60,4 +60,6 @@ export const request = (address, method, params) => {
 }
 
 /** @typedef {import ('json-rpc-engine').JsonRpcRequest<JSON>} JsonRpcRequest */
+/** @typedef {import ('simple-jsonrpc-js')} JRPC */
 /** @typedef {import('../../interfaces').JSON} JSON */
+/** @typedef {import('ws').WebSocket} Socket */

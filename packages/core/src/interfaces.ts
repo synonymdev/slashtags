@@ -1,6 +1,11 @@
 export type { Hypercore, Extension, Peer } from 'hyper-sdk';
-import type { ServerOptions as WsServerOptions, Server as WsServer } from 'ws';
+import type {
+  WebSocket as Socket,
+  ServerOptions as WsServerOptions,
+  Server as WsServer,
+} from 'ws';
 export type { KeyPair } from 'noise-curve-tiny-secp';
+import type JRPC from 'simple-jsonrpc-js';
 
 import type { JsonRpcMiddleware, JsonRpcRequest } from 'json-rpc-engine';
 
@@ -57,4 +62,5 @@ export interface SlashtagsAPI {
     method: JsonRpcRequest<any>['method'],
     params: JSON,
   ) => Promise<JSON>;
+  _openWebSockets: Map<string, { ws: Socket; jrpc: JRPC }>;
 }

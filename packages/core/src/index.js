@@ -10,11 +10,13 @@ import { request as _request } from './rpc/client/index.js'
  */
 export const Core = () => {
   const engine = new JsonRpcEngine()
+  const openWebSockets = new Map()
 
   return {
     use: (middleware) => engine.push(middleware),
     listen: (server) => _listen(engine, server),
-    request: (address, method, params) => _request(address, method, params)
+    request: (address, method, params) => _request(address, method, params, openWebSockets),
+    _openWebSockets: openWebSockets
   }
 }
 
