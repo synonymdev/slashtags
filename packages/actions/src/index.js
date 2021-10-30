@@ -1,7 +1,7 @@
 import URI from 'urijs'
 import { base32 } from 'multiformats/bases/base32'
 import { varint } from '@synonymdev/slashtags-common'
-import { createAuth } from '@synonymdev/slashtags-auth'
+import { ACT_1 } from './actions/act_1.js'
 
 /**
  *
@@ -25,25 +25,6 @@ const processAddress = (address) => {
   result = varint.split(result[1])
 
   return new URL(Buffer.from(result[1]).toString()).toString()
-}
-
-/** @type {Map<string, {initiator: Initiator}>} */
-const auths = new Map()
-
-/**
- * @param {KeyPair} keyPair
- * @param {JSON} metadata
- * @returns {{initiator: Initiator}}
- */
-const memoizedCreateAuth = (keyPair, metadata) => {
-  const pk = keyPair.publicKey.toString('hex')
-
-  let auth = auths.get(pk)
-  if (auth) return auth
-
-  auth = createAuth(keyPair, { metadata })
-  auths.set(pk, auth)
-  return auth
 }
 
 /**
@@ -109,71 +90,7 @@ export const SlashtagsActions = ({ node }) => {
 
     switch (act) {
       case 'ACT_1':
-        try {
-          /** @type {{[key:string]: string}} */
-          // @ts-ignore
-          const {
-            challenge,
-            publicKey,
-            name,
-            image,
-            description,
-            background,
-            url
-          } = await node.request(address, 'ACT_1/GET_CHALLENGE', {})
-
-          const promptResponse = await callbacks?.[act]?.onChallenge({
-            publicKey,
-            name,
-            image,
-            description,
-            background,
-            url
-          })
-
-          // User rejected authentication prompt
-          if (!promptResponse) {
-            return {
-              status: 'SKIP',
-              reason: 'User rejected prompt',
-              act,
-              tkt,
-              address
-            }
-          }
-
-          const { keyPair, metadata } = promptResponse
-
-          const auth = memoizedCreateAuth(keyPair, metadata)
-
-          const { attestation, verifyResponder } = auth.initiator.respond(
-            Buffer.from(publicKey, 'hex'),
-            Buffer.from(challenge, 'hex')
-          )
-
-          const answer = await node.request(address, 'ACT_1/RESPOND', {
-            attestation: Buffer.from(attestation).toString('hex'),
-            ticket: tkt
-          })
-
-          // @ts-ignore
-          if (answer.code < 0) return { status: 'Error', ...answer }
-
-          /** @type {{attestation: string}} */
-          // @ts-ignore
-          const { attestation: responderAttestation } = answer
-
-          const verifiedResponderMetadataAndPK = verifyResponder(
-            Buffer.from(responderAttestation, 'hex')
-          )
-
-          callbacks?.[act]?.onSuccess?.(verifiedResponderMetadataAndPK)
-
-          return { status: 'OK', act, tkt, address }
-        } catch (error) {
-          callbacks?.[act]?.onError?.(error)
-          return { status: 'ERROR', error, address, act, tkt }
-        }
+        return await ACT_1({ node, address, act, tkt, callbacks })
 
       default:
         return {
@@ -190,8 +107,5 @@ export const SlashtagsActions = ({ node }) => {
 }
 
 /** @typedef {import ('@synonymdev/slashtags-core').SlashtagsAPI} SlashtagsAPI */
-/** @typedef {import ('@synonymdev/slashtags-auth/types/authenticator').Initiator } Initiator */
-/** @typedef {import ('./interfaces').KeyPair} KeyPair */
-/** @typedef {import ('./interfaces').JSON} JSON */
 /** @typedef {import ('./interfaces').CallBacks} CallBacks */
 /** @typedef {import ('./interfaces').HandleResponse} HandleResponse */

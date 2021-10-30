@@ -29,11 +29,11 @@
   "dependencies": {
     "@synonymdev/slashtags-auth": "^0.2.1",
     "@synonymdev/slashtags-common": "^0.1.0",
-    "@synonymdev/slashtags-core": "^0.0.6",
     "multiformats": "^9.4.9",
     "urijs": "^1.19.7"
   },
   "devDependencies": {
+    "@synonymdev/slashtags-core": "^0.0.6",
     "@types/debug": "^4.1.7",
     "@types/urijs": "^1.19.17",
     "@types/ws": "^8.2.0",

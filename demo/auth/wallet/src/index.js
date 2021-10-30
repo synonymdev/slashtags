@@ -7,7 +7,7 @@ import { Core } from '@synonymdev/slashtags-core';
 import { secp256k1 } from 'noise-curve-tiny-secp';
 
 const keyPair = secp256k1.generateSeedKeyPair('seed');
-const metadata = { name: 'bar', image: 'bar' };
+const localMetadata = { name: 'bar', image: 'bar' };
 
 window.run = async (url) => {
   const node = Core();
@@ -16,8 +16,9 @@ window.run = async (url) => {
 
   return await slashActs.handle(url, {
     ACT_1: {
-      onChallenge: () => {
-        return { metadata, keyPair };
+      onChallenge: async ({ publicKey, metadata }) => {
+        console.log({ publicKey, metadata });
+        return { metadata: localMetadata, keyPair };
       },
       onSuccess: (stuff) => {
         console.log('success', stuff);

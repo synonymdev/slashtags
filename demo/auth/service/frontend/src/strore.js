@@ -23,7 +23,7 @@ export const setupRPC = async (dispatch) => {
 export const getTiceket = async (dispatch) => {
   const jrpc = await RPC();
 
-  const url = await jrpc.call('ACT_1/REQUEST_TICKET', []);
+  const url = await jrpc.call('REQUEST_TICKET', { act: 'ACT_1' });
 
   dispatch({ type: types.SET_TICKET, url });
 };

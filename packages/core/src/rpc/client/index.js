@@ -1,8 +1,8 @@
 import SimpleJsonrpc from 'simple-jsonrpc-js'
 import Websocket from 'isomorphic-ws'
 
-// Close websockets if they are not used for 6 seconds
-const TIMEOUT = 6000
+// Close websockets if they are not used for 2 minutes
+const TIMEOUT = 2 * 60 * 1000
 
 /**
  *
@@ -15,7 +15,7 @@ const TIMEOUT = 6000
 export const request = (address, method, params, openWebSockets) => {
   const entry = openWebSockets.get(address)
 
-  if (entry && entry?.ws.readyState === 1) {
+  if (entry?.ws?.readyState === 1) {
     console.log('reusing exsiting websocket')
     const { jrpc } = entry
     return new Promise((resolve, reject) => {

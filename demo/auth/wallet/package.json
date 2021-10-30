@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@synonymdev/slashtags-actions": "^0.0.1",
+    "@synonymdev/slashtags-actions": "file:../../../packages/actions/dist",
     "@synonymdev/slashtags-auth": "^0.2.0",
     "@synonymdev/slashtags-common": "^0.1.0",
-    "@synonymdev/slashtags-core": "^0.0.3",
+    "@synonymdev/slashtags-core": "^0.0.6",
     "@synonymdev/slashtags-url": "^0.2.0",
     "bint8array": "^1.1.3",
     "isomorphic-ws": "^4.0.1",

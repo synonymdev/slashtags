@@ -1,6 +1,11 @@
-export type { KeyPair } from 'noise-curve-tiny-secp';
+import type { KeyPair } from 'noise-curve-tiny-secp';
 
-import type { KeyPair } from '.';
+export type CardMetadata = {
+  name: string;
+  image: string;
+  description?: string;
+  url?: string;
+};
 
 export type JSON =
   | string
@@ -10,27 +15,17 @@ export type JSON =
   | JSON[]
   | { [key: string]: JSON };
 
+export type Metadata = Partial<JSON & CardMetadata>;
+
 export type ACT_1Callback = {
-  onChallenge: (params: {
-    publicKey: string;
-    name: string;
-    image: string;
-    description: string;
-    background: string;
-    url: string;
-  }) =>
+  onChallenge: (params: { publicKey: string; metadata: Metadata }) => Promise<
     | {
-        metadata: JSON & {
-          name: string;
-          image: string;
-          description?: string;
-          background?: string;
-          url?: string;
-        };
+        metadata: Metadata;
         keyPair: KeyPair;
       }
     | false
-    | undefined;
+    | undefined
+  >;
   onSuccess?: (params: { metadata: JSON; responderPK: Uint8Array }) => any;
   onError?: (err: unknown) => any;
 };
