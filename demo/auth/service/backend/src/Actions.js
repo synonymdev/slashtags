@@ -49,9 +49,16 @@ module.exports = ({ wss, baseURL }) => {
     if (req.method === 'ACT_1/GET_CHALLENGE') {
       const { ticket } = req.params;
 
-      const challenge = auth.responder.newChallenge(60 * 1000 * 5);
+      const callbacks = callbacksMap.get(ticket);
 
-      const metadata = callbacksMap.get(ticket)?.onChallenge();
+      if (!callbacks) {
+        end(new Error('Expired ticket'));
+        return;
+      }
+
+      const metadata = callbacks.onChallenge();
+
+      const challenge = auth.responder.newChallenge(60 * 1000 * 5, metadata);
 
       res.result = {
         publicKey: keypair.publicKey.toString('hex'),

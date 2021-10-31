@@ -4,7 +4,7 @@
     "dev": "nodemon src/index.js"
   },
   "dependencies": {
-    "@synonymdev/slashtags-auth": "^0.2.0",
+    "@synonymdev/slashtags-auth": "^0.2.1",
     "@synonymdev/slashtags-common": "^0.1.0",
     "fastify": "^3.22.1",
     "isomorphic-ws": "^4.0.1",

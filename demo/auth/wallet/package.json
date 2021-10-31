@@ -1,14 +1,15 @@
 {
-  "name": "slashtags-contacts-demo",
+  "name": "demo-wallet",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@synonymdev/slashtags-actions": "file:../../../packages/actions/dist",
+    "@synonymdev/slashtags-actions": "^0.0.5",
     "@synonymdev/slashtags-auth": "^0.2.0",
     "@synonymdev/slashtags-common": "^0.1.0",
-    "@synonymdev/slashtags-core": "^0.0.6",
+    "@synonymdev/slashtags-core": "^0.0.7",
     "@synonymdev/slashtags-url": "^0.2.0",
     "bint8array": "^1.1.3",
+    "framer-motion": "^5.0.0",
     "isomorphic-ws": "^4.0.1",
     "multiformats": "^9.4.9",
     "noise-curve-tiny-secp": "^2.0.0",
@@ -41,8 +42,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "devDependencies": {
-    "urijs": "^1.19.7"
   }
 }

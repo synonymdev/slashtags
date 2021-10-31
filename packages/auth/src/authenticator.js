@@ -12,6 +12,8 @@ import { addSession, hex } from './sessions.js'
 import * as msgs from './messages.js'
 import bint from 'bint8array'
 
+// TODO: use the PROLOGUE for MITM attack prevention, and return mixedHash
+
 /**
  * @param {KeyPair} keypair - Authenticator's static keypair
  * @param {object} [config] - Authenticator's optional configurations

@@ -1,4 +1,5 @@
 import { memoizedCreateAuth } from '../utils.js'
+import bint from 'bint8array'
 
 /**
  * @param {object} params
@@ -11,20 +12,17 @@ import { memoizedCreateAuth } from '../utils.js'
  */
 export const ACT_1 = async ({ node, address, callbacks, act, tkt }) => {
   try {
-    /** @type {{metadata: Metadata,publicKey: string, challenge:string}} */
+    /** @type {{metadata: Metadata, publicKey: string, challenge:string}} */
     // @ts-ignore
-    const { challenge, publicKey, metadata } = await node.request(
-      address,
-      'ACT_1/GET_CHALLENGE',
-      {
-        ticket: tkt
-      }
-    )
-
-    const promptResponse = await callbacks?.[act]?.onChallenge({
-      publicKey,
-      metadata
+    const response = await node.request(address, 'ACT_1/GET_CHALLENGE', {
+      ticket: tkt
     })
+
+    // @ts-ignore
+    if (response.code < 0) throw new Error(response.message)
+
+    // TODO: defrentiate between Accounts and Contacts?
+    const promptResponse = await callbacks.onChallenge?.(response)
 
     // User rejected authentication prompt
     if (!promptResponse) {
@@ -37,17 +35,18 @@ export const ACT_1 = async ({ node, address, callbacks, act, tkt }) => {
       }
     }
 
-    const { keyPair, metadata: localMetadata } = promptResponse
+    const { keyPair: initiatorKeyPair, metadata: intitiatorMetadata } =
+      promptResponse
 
-    const auth = memoizedCreateAuth(keyPair, localMetadata)
+    const auth = memoizedCreateAuth(initiatorKeyPair, intitiatorMetadata)
 
     const { attestation, verifyResponder } = auth.initiator.respond(
-      Buffer.from(publicKey, 'hex'),
-      Buffer.from(challenge, 'hex')
+      bint.fromString(response.publicKey, 'hex'),
+      bint.fromString(response.challenge, 'hex')
     )
 
     const answer = await node.request(address, 'ACT_1/RESPOND', {
-      attestation: Buffer.from(attestation).toString('hex'),
+      attestation: bint.toString(attestation, 'hex'),
       ticket: tkt
     })
 
@@ -58,19 +57,30 @@ export const ACT_1 = async ({ node, address, callbacks, act, tkt }) => {
     // @ts-ignore
     const { attestation: responderAttestation } = answer
 
-    const verifiedResponderMetadataAndPK = verifyResponder(
-      Buffer.from(responderAttestation, 'hex')
+    // @ts-ignore
+    const { responderPK, metadata } = verifyResponder(
+      bint.fromString(responderAttestation, 'hex')
     )
 
-    callbacks?.[act]?.onSuccess?.(verifiedResponderMetadataAndPK)
+    callbacks.onSuccess?.({
+      responder: {
+        publicKey: responderPK,
+        // @ts-ignore
+        metadata
+      },
+      initiator: {
+        publicKey: initiatorKeyPair.publicKey,
+        metadata: intitiatorMetadata
+      }
+    })
 
     return { status: 'OK', act, tkt, address }
   } catch (error) {
-    callbacks?.[act]?.onError?.(error)
+    callbacks.onError?.(error)
     return { status: 'ERROR', error, address, act, tkt }
   }
 }
 
-/** @typedef {import ('../interfaces').CallBacks} CallBacks */
+/** @typedef {import ('../interfaces').ACT_1Callbacks} CallBacks */
 /** @typedef {import ('../interfaces').Metadata} Metadata */
 /** @typedef {import ('@synonymdev/slashtags-core').SlashtagsAPI} SlashtagsAPI */

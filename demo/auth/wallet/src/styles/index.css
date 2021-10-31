@@ -1,6 +1,35 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
 @import './reset.css';
 
+@font-face {
+  font-family: 'Neue Haas Grotesk Display Pro';
+  font-style: normal;
+  font-weight: 700;
+  src: url('../fonts/Neue\ Haas\ Grotesk\ Display\ Pro\ 75\ Bold.woff2')
+    format('woff2');
+}
+
+@font-face {
+  font-family: 'Neue Haas Grotesk Display Pro';
+  font-style: normal;
+  font-weight: 500;
+  src: url('../fonts/NeueHaasDisplay-Roman.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Neue Haas Grotesk Display Pro';
+  font-style: normal;
+  font-weight: 600;
+  src: url('../fonts/NeueHaasDisplay-Medium.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Neue Haas Grotesk Display Pro';
+  font-style: normal;
+  font-weight: 300;
+  src: url('../fonts/NeueHaasDisplay-Light.woff2') format('woff2');
+}
+
 html,
 body,
 #root {
@@ -10,7 +39,7 @@ body,
 }
 
 * {
-  font-family: 'Roboto', sans-serif;
+  font-family: 'Neue Haas Grotesk Display Pro', 'Roboto', sans-serif;
   box-sizing: border-box;
 }
 
@@ -36,26 +65,11 @@ body,
 /* Phone */
 
 .phone {
-  width: 30rem;
-  height: 60rem;
-  border-radius: 28px;
+  width: 37.5rem;
+  height: 81.2rem;
+  border-radius: 4.2rem;
   position: relative;
-
-  padding: 0 0.7rem;
-}
-
-.phone .frame {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 9999;
-  pointer-events: none;
-}
-
-.phone .frame path {
-  fill: #3d3d3d;
+  overflow: hidden;
 }
 
 .phone-container {
@@ -79,8 +93,9 @@ body,
 .wallet {
   width: 100%;
   height: 100%;
+  overflow: hidden;
 
-  background-color: #151718;
+  background-color: #000;
   color: #fff;
 
   padding: 4em 2em;
@@ -88,6 +103,30 @@ body,
 
   display: flex;
   flex-direction: column;
+}
+
+/* to get started */
+
+.get-started {
+  position: absolute;
+  width: 325px;
+  height: 102px;
+  left: 25px;
+  top: 310px;
+
+  /* Headline */
+
+  font-style: normal;
+  font-weight: bold;
+  font-size: 34px;
+  line-height: 34px;
+  /* or 100% */
+
+  text-align: center;
+}
+
+.get-started span {
+  color: #f7931a;
 }
 
 .header {
@@ -124,43 +163,6 @@ body,
 .home {
   padding-top: 7rem;
 }
-
-/* Cards */
-.card {
-  background-color: #232325;
-  border-radius: 1.4rem;
-  padding: 1.6rem;
-  margin: 2em 0;
-
-  width: 100%;
-
-  border: none;
-  display: flex;
-  align-items: center;
-  column-gap: 1.5rem;
-
-  cursor: pointer;
-
-  color: #fff;
-  transition: all 0.1s ease-in-out;
-}
-
-.card .right {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
-
-.card:hover,
-.card:focus-within {
-  background-color: #2e2e2e;
-}
-
-.card pre {
-  margin: 0.5em 0 0 0;
-}
-
-/* HOME */
 
 /* Footer */
 
@@ -257,5 +259,214 @@ div[aria-label='Countdown timer'] svg {
   border: 2px solid rgb(138, 138, 138);
   border-radius: 20px;
 
+  cursor: pointer;
+}
+
+.scan-box {
+  width: 275px;
+  height: 275px;
+  margin: 5rem auto;
+  border: 3px solid #ffffff;
+  box-sizing: border-box;
+  border-radius: 64px;
+}
+
+.back-button {
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+h1.title {
+  margin: 0;
+}
+
+.paste-clipboard {
+  margin: auto;
+  width: 257px;
+  /* Text 01 S */
+  font-style: normal;
+  font-weight: normal;
+  font-size: 17px;
+  line-height: 22px;
+  /* or 129% */
+  display: flex;
+  align-items: center;
+  text-align: center;
+  letter-spacing: -0.4px;
+
+  color: rgba(255, 255, 255, 0.6);
+
+  display: flex;
+  flex-direction: column;
+}
+
+.paste-clipboard button {
+  cursor: pointer;
+  margin-top: 1em;
+  border: none;
+  padding: 0.7em 1em;
+  background: #dadada;
+  border-radius: 8px;
+  font-size: 0.9em;
+
+  font-style: normal;
+  font-weight: normal;
+  line-height: 15px;
+  /* identical to box height, or 88% */
+  display: flex;
+  align-items: center;
+  text-align: center;
+  letter-spacing: -0.1px;
+
+  /* Brand/Brand */
+  color: #f75c1a;
+  font-weight: bold;
+}
+
+.header .left {
+  display: flex;
+  align-items: center;
+  column-gap: 1em;
+}
+
+.profile-button {
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 96%;
+  background-color: #151515;
+  border-radius: 4.2rem;
+
+  padding: 3.5em;
+}
+
+/* Cards */
+.card {
+  background-color: #232325;
+  border-radius: 1.4rem;
+  padding: 1.6rem;
+  margin: 2em 0;
+
+  width: 100%;
+
+  border: none;
+  display: flex;
+  align-items: center;
+  column-gap: 1.5rem;
+
+  color: #fff;
+}
+
+.card .right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.card:hover,
+.card:focus-within {
+  background-color: #2e2e2e;
+}
+
+.card pre {
+  margin: 0;
+  padding: 0.5em 0 0 0;
+  opacity: 0.7;
+}
+
+.login-modal .footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 2em;
+  column-gap: 1em;
+}
+
+.btn {
+  cursor: pointer;
+  background-color: #1c1c1d;
+  border: none;
+  border-radius: 9999px;
+  padding: 8px 16px;
+  color: #fff;
+  font-size: 1.3rem;
+  transition: all 0.1s ease-in-out;
+}
+
+.btn:hover,
+.btn:focus-within {
+  background-color: #2e2e2e;
+}
+
+.login-modal .footer .btn {
+  font-size: 1.4em;
+}
+
+.login-modal .switch {
+  opacity: 0.7;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  border-radius: 8px;
+  border: 1px solid #2e2e2e;
+  overflow: hidden;
+
+  /* width: fit-content; */
+  margin: auto;
+  margin-bottom: 1em;
+}
+
+.login-modal .switch .btn {
+  flex: 1;
+  border-radius: 0;
+  font-size: 1.3em;
+  padding: 0.4em;
+}
+
+.login-modal .switch .btn.active {
+  background-color: #292929;
+  color: #fff;
+}
+
+.login-modal .anon-description {
+  font-size: 1.3em;
+  opacity: 0.6;
+  width: 100%;
+  text-align: center;
+}
+
+.btn.primary {
+  background-color: #f7931a;
+  font-weight: bold;
+}
+
+.home .arrow-svg {
+  position: absolute;
+  transform: rotate(213deg);
+  top: 70px;
+  right: 99px;
+}
+
+.article-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1.2rem;
+}
+
+.article-header svg {
   cursor: pointer;
 }

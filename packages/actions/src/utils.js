@@ -5,7 +5,7 @@ const auths = new Map()
 
 /**
  * @param {KeyPair} keyPair
- * @param {JSON} metadata
+ * @param {Metadata} metadata
  * @returns {{initiator: Initiator}}
  */
 export const memoizedCreateAuth = (keyPair, metadata) => {
@@ -14,6 +14,7 @@ export const memoizedCreateAuth = (keyPair, metadata) => {
   let auth = auths.get(pk)
   if (auth) return auth
 
+  // @ts-ignore
   auth = createAuth(keyPair, { metadata })
   auths.set(pk, auth)
   return auth
@@ -21,4 +22,4 @@ export const memoizedCreateAuth = (keyPair, metadata) => {
 
 /** @typedef {import ('@synonymdev/slashtags-auth/types/authenticator').Initiator } Initiator */
 /** @typedef {import ('noise-curve-tiny-secp').KeyPair} KeyPair */
-/** @typedef {import ('./interfaces').JSON} JSON */
+/** @typedef {import ('./interfaces').Metadata} Metadata */

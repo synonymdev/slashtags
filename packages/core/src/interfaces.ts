@@ -56,7 +56,7 @@ export type Server = WsServer;
 
 export interface SlashtagsAPI {
   use: (middleware: JsonRpcMiddleware<any, any>) => void;
-  listen: (server: ServerOptions | Server) => Promise<Server>;
+  listen: (server: Server) => Promise<Server>;
   request: (
     address: string,
     method: JsonRpcRequest<any>['method'],

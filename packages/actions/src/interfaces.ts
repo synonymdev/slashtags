@@ -17,8 +17,12 @@ export type JSON =
 
 export type Metadata = Partial<JSON & CardMetadata>;
 
-export type ACT_1Callback = {
-  onChallenge: (params: { publicKey: string; metadata: Metadata }) => Promise<
+export type ACT_1Callbacks = {
+  onChallenge: (params: {
+    challenge: string;
+    publicKey: string;
+    metadata: Metadata;
+  }) => Promise<
     | {
         metadata: Metadata;
         keyPair: KeyPair;
@@ -26,12 +30,15 @@ export type ACT_1Callback = {
     | false
     | undefined
   >;
-  onSuccess?: (params: { metadata: JSON; responderPK: Uint8Array }) => any;
+  onSuccess?: (params: {
+    responder: { publicKey: Uint8Array; metadata: Metadata };
+    initiator: { publicKey: Uint8Array; metadata: Metadata };
+  }) => any;
   onError?: (err: unknown) => any;
 };
 
 export type CallBacks = {
-  ACT_1?: ACT_1Callback;
+  ACT_1?: ACT_1Callbacks;
   [key: string]: any;
 };
 

@@ -15,8 +15,7 @@ const TIMEOUT = 2 * 60 * 1000
 export const request = (address, method, params, openWebSockets) => {
   const entry = openWebSockets.get(address)
 
-  if (entry?.ws?.readyState === 1) {
-    console.log('reusing exsiting websocket')
+  if (entry?.ws.readyState === 1) {
     const { jrpc } = entry
     return new Promise((resolve, reject) => {
       jrpc
@@ -27,7 +26,6 @@ export const request = (address, method, params, openWebSockets) => {
         .catch((error) => resolve(error))
     })
   } else {
-    console.log('requesting from new websocket')
     const ws = new Websocket(address)
     const jrpc = new SimpleJsonrpc()
 

@@ -2,6 +2,7 @@ import URI from 'urijs'
 import { base32 } from 'multiformats/bases/base32'
 import { varint } from '@synonymdev/slashtags-common'
 import { ACT_1 } from './actions/act_1.js'
+import bint from 'bint8array'
 
 /**
  *
@@ -24,7 +25,7 @@ const processAddress = (address) => {
   result = varint.split(result[1])
   result = varint.split(result[1])
 
-  return new URL(Buffer.from(result[1]).toString()).toString()
+  return new URL(bint.toString(result[1], 'utf-8')).toString()
 }
 
 /**
@@ -33,7 +34,7 @@ const processAddress = (address) => {
  * @returns
  */
 export const SlashtagsActions = ({ node }) => {
-  // TODO: test if instance of SlashtagsAPI (create the classe in the first place)
+  // TODO: Check if node is a SlashtagsAPI
   if (!node) {
     throw new Error('SlashActions requires a node implementing SlashtagsAPI')
   }
@@ -47,14 +48,14 @@ export const SlashtagsActions = ({ node }) => {
    * @returns {Promise<HandleResponse>}
    */
   const handle = async (url, callbacks) => {
+    // TODO: handle empty string or invalid url in general
+    // TODO: check if the ticket is valid? for all actions?
     const { hostname, query } = parseURL(url)
 
     /** @type {{act: string, tkt: string}} */
     // @ts-ignore
     let { act, tkt } = query
     act = 'ACT_' + act
-
-    // TODO: check if the ticket is valid? for all actions?
 
     const address = processAddress(hostname)
 
@@ -90,7 +91,14 @@ export const SlashtagsActions = ({ node }) => {
 
     switch (act) {
       case 'ACT_1':
-        return await ACT_1({ node, address, act, tkt, callbacks })
+        return await ACT_1({
+          node,
+          address,
+          act,
+          tkt,
+          // @ts-ignore
+          callbacks: callbacks[act]
+        })
 
       default:
         return {

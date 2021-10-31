@@ -1,17 +1,10 @@
-import WebSocket from 'isomorphic-ws'
-
 /**
  *
  * @param {JsonRpcEngine} engine
- * @param {ServerOptions | Server} server
+ * @param {Server} wss
  * @returns {Promise<Server>}
  */
-export const WebsocketTransport = async (engine, server) => {
-  const wss =
-      server instanceof WebSocket.Server
-        ? server
-        : new WebSocket.Server(server)
-
+export const WebsocketTransport = async (engine, wss) => {
   wss.on('connection', function (socket) {
     socket.on(
       'message',
@@ -41,5 +34,4 @@ export const WebsocketTransport = async (engine, server) => {
 }
 
 /** @typedef {import ('json-rpc-engine').JsonRpcEngine} JsonRpcEngine */
-/** @typedef {import ('ws').ServerOptions} ServerOptions */
 /** @typedef {import ('isomorphic-ws').Server} Server */

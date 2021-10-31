@@ -1,8 +1,9 @@
 import { useContext } from 'react';
 import { StoreContext } from '../strore';
-import { QR, Contacts, AddContact } from '../pages/Contacts';
-import { Connecting } from '../pages/Connecting';
+import { ScanQRPage } from '../pages/ScanQR';
+import { ProfilesPage } from '../pages/Profiles';
 import { Home } from '../pages/Home';
+import { Modal } from './Modal';
 
 export const Wallet = () => {
   const { store } = useContext(StoreContext);
@@ -13,18 +14,15 @@ export const Wallet = () => {
         switch (store.view) {
           case 'home':
             return <Home />;
-          case 'contacts':
-            return <Contacts />;
-          case 'qr':
-            return <QR />;
-          case 'add-contact':
-            return <AddContact />;
-          case 'connecting':
-            return <Connecting />;
+          case 'scanQR':
+            return <ScanQRPage />;
+          case 'profiles':
+            return <ProfilesPage />;
           default:
             return <Home />;
         }
       })()}
+      <Modal />
     </div>
   );
 };

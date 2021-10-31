@@ -53,7 +53,7 @@ export const Website = () => {
                 })
               }
             >
-              <img alt="" src={store.user.metadata.image}></img>
+              <img alt="" src={store.user.metadata?.image}></img>
             </div>
           ) : (
             <div className="login">
