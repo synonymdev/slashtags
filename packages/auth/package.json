@@ -1,6 +1,6 @@
 {
   "name": "@synonymdev/slashtags-auth",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Bidirectional authentication for keypair verification through attestation.",
   "type": "module",
   "keywords": [
