@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { useContext, useState } from 'react';
 import { StoreContext, types } from '../strore';
 import { Sheet } from '../components/Sheet';
@@ -39,6 +40,7 @@ const Login = ({ data, cancel, resolve }) => {
         <button
           onClick={() => {
             setAnon(false);
+            setProfile(store.profiles[0]);
           }}
           className={'btn ' + (!anon ? 'active' : '')}
         >
@@ -53,16 +55,19 @@ const Login = ({ data, cancel, resolve }) => {
         <p className="anon-description">Select an existing profile.</p>
       )}
       {!anon &&
-        store.profiles.map((profile) => {
+        store.profiles.map((p) => {
           return (
-            <button key={profile.publicKey} onClick={() => setProfile(profile)}>
-              <Card
-                publicKey={Buffer.from(profile.keyPair.publicKey).toString(
-                  'hex',
-                )}
-                metadata={profile.metadata}
-              ></Card>
-            </button>
+            <Card
+              key={p.keyPair.publicKey}
+              publicKey={Buffer.from(p.keyPair.publicKey).toString('hex')}
+              metadata={p.metadata}
+              className={
+                profile.keyPair.publicKey === p.keyPair.publicKey
+                  ? 'active login-profile'
+                  : 'login-profile'
+              }
+              onClick={() => setProfile(p)}
+            ></Card>
           );
         })}
 

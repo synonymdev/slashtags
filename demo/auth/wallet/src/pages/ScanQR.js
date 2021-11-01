@@ -14,37 +14,52 @@ export const ScanQRPage = () => {
     navigator.clipboard.writeText(clipboard);
 
     if (clipboard) {
-      const result = await slashActs.handle(clipboard, {
-        ACT_1: {
-          onChallenge: async (data) => {
-            return new Promise((resolve) => {
+      try {
+        const result = await slashActs.handle(clipboard, {
+          ACT_1: {
+            onChallenge: async (data) => {
+              return new Promise((resolve) => {
+                dispatch({
+                  type: types.SET_PROMPT,
+                  prompt: { type: 'login', resolve, data },
+                });
+              });
+            },
+            onSuccess: ({ responder, initiator }) => {
+              dispatch({
+                type: types.ADD_ACCOUNT,
+                account: {
+                  service: {
+                    publicKey: Buffer.from(responder.publicKey).toString('hex'),
+                    metadata: responder.metadata,
+                  },
+                  profile: {
+                    publicKey: Buffer.from(initiator.publicKey).toString('hex'),
+                    metadata: initiator.metadata,
+                  },
+                },
+              });
+            },
+            onError: (error) => {
+              console.log('got error');
               dispatch({
                 type: types.SET_PROMPT,
-                prompt: { type: 'login', resolve, data },
+                prompt: { type: 'error', error: error.message },
               });
-            });
+            },
           },
-          onSuccess: ({ responderPK, metadata }) => {
-            console.log('success', metadata);
-            dispatch({
-              type: types.SET_ACCOUNT,
-              account: {
-                publicKey: Buffer.from(responderPK).toString('hex'),
-                metadata,
-              },
-            });
-          },
-          onError: (error) => {
-            console.log('got error', error);
-            dispatch({
-              type: types.SET_PROMPT,
-              prompt: { type: 'error', error },
-            });
-          },
-        },
-      });
+        });
 
-      console.log('Result', result);
+        console.log('Result', result);
+      } catch (error) {
+        dispatch({
+          type: types.SET_PROMPT,
+          prompt: {
+            type: 'error',
+            error: `Something went wrong, couldn't parse QR: "${clipboard}"`,
+          },
+        });
+      }
     }
   };
 

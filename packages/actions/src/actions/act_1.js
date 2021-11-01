@@ -51,7 +51,7 @@ export const ACT_1 = async ({ node, address, callbacks, act, tkt }) => {
     })
 
     // @ts-ignore
-    if (answer.code < 0) return { status: 'Error', ...answer }
+    if (answer.code < 0) throw new Error(answer.message)
 
     /** @type {{attestation: string}} */
     // @ts-ignore

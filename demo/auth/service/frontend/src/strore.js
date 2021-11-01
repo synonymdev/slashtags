@@ -13,7 +13,7 @@ export const setupRPC = async (dispatch) => {
     (publicKey, metadata) => {
       console.log('UserAuthenticated: ' + publicKey + ' ' + metadata);
       dispatch({
-        type: types.USER_AUTHENTICATED,
+        type: types.SET_USER,
         user: { publicKey, metadata },
       });
     },
@@ -44,7 +44,7 @@ export const initialValue = {
 
 export const types = {
   SET_TICKET: 'SET_TICKET',
-  USER_AUTHENTICATED: 'USER_AUTHENTICATED',
+  SET_USER: 'SET_USER',
 };
 
 export const reducer = (state, action) => {
@@ -54,7 +54,7 @@ export const reducer = (state, action) => {
     case types.SET_TICKET:
       result = { ...state, loginURL: action.url };
       break;
-    case types.USER_AUTHENTICATED:
+    case types.SET_USER:
       result = { ...state, user: action.user };
       break;
 

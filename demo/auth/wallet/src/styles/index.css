@@ -148,8 +148,6 @@ body,
 
   border: 2px solid #555;
   overflow: hidden;
-
-  cursor: pointer;
 }
 
 .header .profile img,
@@ -277,7 +275,7 @@ div[aria-label='Countdown timer'] svg {
   height: 40px;
 
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
 }
 
@@ -339,7 +337,7 @@ h1.title {
   width: 40px;
   height: 40px;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
 }
 
@@ -469,4 +467,104 @@ h1.title {
 
 .article-header svg {
   cursor: pointer;
+}
+
+.alert {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* background-color: #1c1c1dc2; */
+}
+
+.alert .error {
+  width: 75%;
+  background-color: #292929;
+  border-radius: 8px;
+  padding: 2em;
+  font-size: 1.3rem;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.alert .error .btn {
+  margin-top: 1em;
+  font-size: 1rem;
+}
+
+.card.login-profile {
+  border: 2px solid #181818;
+  cursor: pointer;
+}
+
+.card.active {
+  border: 2px solid #f75c1a;
+}
+
+.account-title {
+  background: none !important;
+  padding: 0 !important;
+}
+
+.account-subprofile {
+  margin-left: 2em;
+  width: 90%;
+  cursor: pointer;
+}
+
+.feeds-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  row-gap: 1.3rem;
+}
+.feeds-image {
+  border-radius: 99999px;
+  width: 40px;
+  height: 40px;
+  border: 2px solid #2e2e2e;
+}
+
+.feeds-title {
+  font-size: 3rem;
+  font-weight: bold;
+}
+
+.feed-name {
+  margin-top: 1.6rem;
+  font-size: 1.8rem;
+  font-weight: bold;
+}
+
+.feed-label {
+  font-style: normal;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 18px;
+  /* identical to box height, or 138% */
+  letter-spacing: -0.078px;
+
+  /* Brand/Brand */
+  color: #f75c1a;
+  margin-left: 2rem;
+
+  margin-top: 1.6rem;
+}
+
+.feed-value {
+  color: #fff;
+  font-size: 1.7rem;
+  margin: 0 2rem;
+  padding-top: 0.6rem;
+  padding-bottom: 1.6rem;
+  border-bottom: 1px solid #2e2e2e;
+  white-space: pre-wrap;
+  word-break: break-all;
 }

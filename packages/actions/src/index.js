@@ -48,7 +48,7 @@ export const SlashtagsActions = ({ node }) => {
    * @returns {Promise<HandleResponse>}
    */
   const handle = async (url, callbacks) => {
-    // TODO: handle empty string or invalid url in general
+    // TODO: return 'ParseError' if url is not valid?
     // TODO: check if the ticket is valid? for all actions?
     const { hostname, query } = parseURL(url)
 

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Template } from '../containers/Template';
 import { Card } from '../components/Card';
 import { ArrowSVG } from '../components/ArrowSVG';
@@ -8,7 +9,15 @@ import { Article } from '../components/Article';
 export const Home = () => {
   const { store, dispatch } = useContext(StoreContext);
 
-  const isNew = store.accounts?.length === 0 || store.contacts?.length === 0;
+  const accounts = Object.values(store.accounts).reduce((acc, service) => {
+    acc.push({
+      service: Object.values(service)[0].service,
+      profiles: Object.values(service),
+    });
+    return acc;
+  }, []);
+
+  const isNew = accounts?.length === 0 || store.contacts?.length === 0;
 
   return (
     <Template title={'Wallet'}>
@@ -23,19 +32,36 @@ export const Home = () => {
           </>
         ) : (
           <>
-            {store.accounts.length > 0 && (
+            {accounts?.length > 0 && (
               <Article
                 title="Accounts"
                 onClick={() =>
                   dispatch({ type: types.SET_VIEW, view: 'scanQR' })
                 }
               >
-                {store.accounts.map((account) => (
-                  <Card
-                    key={account.publicKey}
-                    publicKey={account.publicKey}
-                    metadata={account.metadata}
-                  />
+                {accounts.map((account) => (
+                  <>
+                    <Card
+                      key={account.service.publicKey}
+                      className="account-title"
+                      publicKey={account.service.publicKey}
+                      metadata={account.service.metadata}
+                    />
+                    {account.profiles.map((p) => (
+                      <Card
+                        key={p.publicKey}
+                        className="account-subprofile"
+                        publicKey={p.profile.publicKey}
+                        metadata={p.profile.metadata}
+                        onClick={() =>
+                          dispatch({
+                            type: types.SET_ACCOUNT,
+                            account: p,
+                          })
+                        }
+                      />
+                    ))}
+                  </>
                 ))}
               </Article>
             )}

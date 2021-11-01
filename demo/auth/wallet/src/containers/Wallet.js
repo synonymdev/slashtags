@@ -4,6 +4,8 @@ import { ScanQRPage } from '../pages/ScanQR';
 import { ProfilesPage } from '../pages/Profiles';
 import { Home } from '../pages/Home';
 import { Modal } from './Modal';
+import { Error } from './Error';
+import { FeedsPage } from '../pages/Feeds';
 
 export const Wallet = () => {
   const { store } = useContext(StoreContext);
@@ -18,11 +20,14 @@ export const Wallet = () => {
             return <ScanQRPage />;
           case 'profiles':
             return <ProfilesPage />;
+          case 'account':
+            return <FeedsPage />;
           default:
             return <Home />;
         }
       })()}
       <Modal />
+      <Error />
     </div>
   );
 };

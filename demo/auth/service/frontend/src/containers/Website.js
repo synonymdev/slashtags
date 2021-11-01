@@ -4,6 +4,9 @@ import { useState, useContext, useEffect } from 'react';
 import { getTiceket, StoreContext, types } from '../strore';
 import Form from '@rjsf/core';
 import { LoginForm } from '../components/LoginForm';
+import { ArrowSVG } from '../components/ArrowSVG';
+import { anonImage } from '../constants';
+import { truncateMid } from '../utils';
 
 export const Website = () => {
   const [openLogin, setOpenLogin] = useState(false);
@@ -44,16 +47,12 @@ export const Website = () => {
           </div>
 
           {store.user ? (
-            <div
-              className="user"
-              onClick={() =>
-                dispatch({
-                  type: types.SET_WEBSITE_VIEW,
-                  websiteView: 'Account',
-                })
-              }
-            >
-              <img alt="" src={store.user.metadata?.image}></img>
+            <div className="user">
+              <div className="left">
+                <p>{store.user.metadata?.name || 'Anon...'}</p>
+                <p>{truncateMid(store.user.publicKey, 4)}</p>
+              </div>
+              <img alt="" src={store.user.metadata?.image || anonImage}></img>
             </div>
           ) : (
             <div className="login">
@@ -63,30 +62,46 @@ export const Website = () => {
           )}
         </div>
 
-        {store.websiteView === 'Account' ? (
-          <main className="main">
-            <h1>Account</h1>
-            <Form schema={account.schema} formData={account.data} />
-          </main>
-        ) : (
-          account && (
-            <main className="main">
-              <h1>Welcome {account.data.accountName}</h1>
-              <h2>
-                Here are some new items you might like according to your
-                favorite tags:
-              </h2>
-              <ul className="tags">
-                {account.data.tags.map((t) => (
-                  <li key={t}>{t}</li>
-                ))}
-              </ul>
-              <div className="podcast"></div>
-              <div className="podcast"></div>
-              <div className="podcast"></div>
-            </main>
-          )
-        )}
+        {!store.user && <ArrowSVG />}
+        <div className="main-title">
+          {store.user ? (
+            <p>
+              Successfully logged in
+              <br />
+              <b>
+                {store.user.metadata?.name ? (
+                  <>
+                    <span>as </span>
+                    <span className="orange">{store.user.metadata.name}</span>
+                  </>
+                ) : (
+                  <span> Anonymously </span>
+                )}
+                🎉
+              </b>
+              <br />
+              <span style={{ fontSize: '.8em' }}>
+                Check your wallet for feeds
+              </span>
+              <br />
+              <button
+                className="btn logout"
+                onClick={() => window.location.reload(true)}
+              >
+                Logout
+              </button>
+            </p>
+          ) : (
+            <p>
+              Hello there <br />
+              <span style={{ fontSize: '1.5em' }}>
+                Welcome to <span className="orange">Slashtags</span>
+              </span>
+              <br /> login with your <span className="orange">Bitcoin</span>
+              <span className="orange"> publicKey</span>.
+            </p>
+          )}
+        </div>
       </div>
     </Browser>
   );
