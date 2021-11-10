@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
-@import './reset.css';
+@import './normalize.css';
+@import './reboot.css';
 
 @font-face {
   font-family: 'Neue Haas Grotesk Display Pro';
@@ -126,7 +127,7 @@ body,
 }
 
 .get-started span {
-  color: #f7931a;
+  color: #f50;
 }
 
 .header {
@@ -329,7 +330,6 @@ h1.title {
 .header .left {
   display: flex;
   align-items: center;
-  column-gap: 1em;
 }
 
 .profile-button {
@@ -362,8 +362,9 @@ h1.title {
   width: 100%;
 
   border: none;
-  display: flex;
+  display: grid;
   align-items: center;
+  grid-template-columns: auto 1fr;
   column-gap: 1.5rem;
 
   color: #fff;
@@ -448,7 +449,7 @@ h1.title {
 }
 
 .btn.primary {
-  background-color: #f7931a;
+  background-color: #f50;
   font-weight: bold;
 }
 

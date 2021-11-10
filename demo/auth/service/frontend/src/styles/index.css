@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
 @import './normalize.css';
+@import './reboot.css';
 
 @font-face {
   font-family: 'Neue Haas Grotesk Display Pro';
@@ -68,7 +69,6 @@ body,
   display: flex;
   justify-content: center;
   align-items: center;
-  column-gap: 2em;
   padding: 2em;
 
   background-size: cover;
@@ -207,6 +207,9 @@ body,
   height: 100%;
   fill: #fff;
   cursor: pointer;
+  display: grid;
+  column-gap: 1rem;
+  grid-template-columns: auto auto;
 }
 
 .website .login {
@@ -321,9 +324,10 @@ body,
 }
 
 .website .user {
-  display: flex;
+  display: grid;
   color: #fff;
   align-items: center;
+  grid-template-columns: auto auto;
   column-gap: 1em;
   font-size: 1.3rem;
 }
@@ -370,228 +374,6 @@ body,
   background-color: rgb(75, 75, 75);
   margin: 2em 0;
   border-radius: 8px;
-}
-
-/* Wallet */
-
-.wallet {
-  width: 100%;
-  height: 100%;
-
-  background-color: #151718;
-  color: #fff;
-
-  padding: 4em 2em;
-  text-align: left;
-}
-
-.wallet .title {
-  font-weight: 600;
-  font-size: 2rem;
-  line-height: 6rem;
-  letter-spacing: 0.4px;
-
-  /* Base/White */
-  color: #ffffff;
-
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.wallet .title svg {
-  cursor: pointer;
-}
-
-.wallet .notice {
-  color: #fff;
-  opacity: 0.4;
-  font-size: 1.4rem;
-}
-
-.wallet .login > h2 {
-  font-size: 1.4rem;
-  padding-bottom: 1em;
-}
-
-.pre {
-  padding: 0.2rem;
-  background: #22222242;
-  border-radius: 4px;
-  font-size: 1.4em;
-  grid-column-start: 2;
-  width: 100%;
-  white-space: pre-wrap;
-}
-
-.modal {
-  align-items: center;
-  padding: 16px;
-
-  height: 88px;
-  left: 66px;
-  top: 784px;
-
-  background: #2b2b2b;
-  border-radius: 16px;
-
-  font-size: 1.6rem;
-  line-height: 1.6;
-}
-.modal b {
-  font-weight: bold;
-}
-
-.service {
-  display: grid;
-  column-gap: 1em;
-  grid-template-columns: 40px auto;
-  align-items: center;
-  padding: 20px 16px;
-
-  left: 66px;
-  top: 784px;
-
-  background: #2b2b2b;
-  border-radius: 16px;
-}
-
-.service .logo {
-  border-radius: 9999px;
-  width: 32px;
-  height: 32px;
-  display: block;
-}
-
-.service * {
-  font-family: sans-serif;
-  margin: 0;
-  padding: 0;
-  text-align: left;
-}
-
-.service h2 {
-  font-size: 1.6rem;
-  font-weight: bold;
-  padding-bottom: 0.5rem;
-}
-
-.service .pre {
-  font-size: 1.4rem;
-  grid-column-start: 2;
-  max-width: 70%;
-  white-space: pre-wrap;
-}
-
-.wallet .footer {
-  position: absolute;
-  bottom: 3rem;
-  left: 0;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  column-gap: 2rem;
-}
-
-.wallet button.login,
-.rjsf button.btn[type='submit'] {
-  border: none;
-
-  padding: 18px 28px;
-
-  background: rgba(37, 39, 43, 0.92);
-  box-shadow: 0px 20px 48px rgba(0, 0, 0, 0.3), 0px 8px 40px rgba(0, 0, 0, 0.1);
-
-  border-radius: 44px;
-
-  color: #fff;
-  cursor: pointer;
-  margin: auto;
-}
-
-.btn {
-  cursor: pointer;
-}
-
-/* Form */
-
-.rjsf #root {
-  display: grid !important;
-  max-width: 246px !important;
-  background: none;
-  font-size: 1.5rem;
-}
-
-.rjsf > .form-group.field {
-  border: none !important;
-}
-
-.rjsf .form-group.field {
-  display: grid;
-  grid-template-columns: 50% 50%;
-  padding: 0.5em 0;
-  border-bottom: 1px solid #333;
-  width: 100%;
-}
-
-.rjsf #root__title,
-.rjsf #root__description {
-  display: none;
-}
-
-.rjsf fieldset {
-  border: none;
-  padding: 0;
-}
-
-.rjsf .form-group.field label,
-.rjsf .form-group.field input {
-  background-color: transparent;
-  border: none;
-  color: #fff;
-}
-
-.rjsf .form-group.field label {
-  color: #868686;
-}
-
-.rjsf button.btn {
-  display: none !important;
-}
-
-.rjsf button.btn[type='submit'] {
-  display: block !important;
-}
-
-.rjsf .array-item button {
-  background-color: #fff;
-  color: #000;
-  padding: auto;
-}
-
-.rjsf .form-group.field.field-array {
-  display: block;
-}
-.rjsf .form-group.field.field-array legend {
-  color: #868686;
-}
-
-.rjsf .field.field-array.field-array-of-string {
-  width: 100% !important;
-  display: grid;
-  grid-template-columns: 50% 1fr;
-}
-
-.rjsf .row.array-item-list {
-  min-width: 0;
-}
-
-.rjsf .row.array-item-list .form-group.field.field-string {
-  display: block;
-}
-
-.rjsf .row.array-item-list input {
-  width: 100%;
 }
 
 /* QR */
@@ -647,7 +429,7 @@ body,
 }
 
 .orange {
-  color: #f7931a;
+  color: #f50;
 }
 
 .arrow-svg {

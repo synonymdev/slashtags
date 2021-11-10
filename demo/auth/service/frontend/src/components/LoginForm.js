@@ -24,7 +24,7 @@ export const LoginForm = ({ qrURL }) => {
       <p>Don't have a Slashtags compatible wallet?</p>
       <a
         className="get-it"
-        href="https://slashtags-contacts-demo.netlify.app/"
+        href="https://slashtags-wallet.netlify.app/"
         target="_blank"
         rel="noreferrer"
       >
