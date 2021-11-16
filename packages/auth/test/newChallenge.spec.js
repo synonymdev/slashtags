@@ -1,7 +1,7 @@
 import { createAuth } from '../src/authenticator.js'
 import { DEFAULT_CHALLENGE_LENGTH, DEFAULT_CURVE } from '../src/constants.js'
 import test from 'ava'
-import { sessionID } from '../src/sessions.js'
+import { hex } from '../src/sessions.js'
 
 const keypair = DEFAULT_CURVE.generateKeyPair()
 
@@ -17,7 +17,7 @@ test('should save the newly created challenge in the sessions map', (t) => {
   const { responder } = createAuth(keypair)
   const challenge = responder.newChallenge(10)
 
-  const id = sessionID(challenge)
+  const id = hex(challenge)
   const session = responder.sessions.get(id)
 
   t.deepEqual(session?.metadata, new Uint8Array(0))
@@ -29,7 +29,7 @@ test('should save the global metdata in the session', (t) => {
   const { responder } = createAuth(keypair, { metadata: { foo: 'bar' } })
   const challenge = responder.newChallenge(10)
 
-  const id = sessionID(challenge)
+  const id = hex(challenge)
   const session = responder.sessions.get(id)
 
   t.deepEqual(
@@ -42,7 +42,7 @@ test('should save the overriding session metadata in the session', (t) => {
   const { responder } = createAuth(keypair, { metadata: { foo: 'bar' } })
   const challenge = responder.newChallenge(10, { foo: 'zar' })
 
-  const id = sessionID(challenge)
+  const id = hex(challenge)
   const session = responder.sessions.get(id)
 
   t.deepEqual(
@@ -55,7 +55,7 @@ test('should remove the challenge from sessions after timeout', async (t) => {
   const { responder } = createAuth(keypair)
   const challenge = responder.newChallenge(10)
 
-  const id = sessionID(challenge)
+  const id = hex(challenge)
   const session = responder.sessions.get(id)
 
   t.deepEqual(session.timer._destroyed, false)

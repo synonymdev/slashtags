@@ -14,3 +14,6 @@ packages/*/logs/
 packages/*/package-lock.json
 packages/*/types
 packages/*/dist
+.npmrc
+# Local Netlify folder
+.netlify

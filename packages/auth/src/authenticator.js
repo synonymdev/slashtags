@@ -8,9 +8,11 @@ import {
   createHandshake,
   validateKeyForCurve
 } from './crypto.js'
-import { addSession, sessionID } from './sessions.js'
+import { addSession, hex } from './sessions.js'
 import * as msgs from './messages.js'
 import bint from 'bint8array'
+
+// TODO: use the PROLOGUE for MITM attack prevention, and return mixedHash
 
 /**
  * @param {KeyPair} keypair - Authenticator's static keypair
@@ -132,7 +134,7 @@ export const createAuth = (keypair, config = {}) => {
     const { metadata: initiatorMetadata, rest: challenge } =
       msgs.decodePayload(payload)
 
-    const id = sessionID(challenge)
+    const id = hex(challenge)
     const session = sessions.get(id)
 
     if (!session) throw new Error(`Challenge ${id} not found`)
@@ -143,7 +145,7 @@ export const createAuth = (keypair, config = {}) => {
       msgs.encodePayload(session.metadata, keypair.publicKey)
     )
 
-    const metadata = JSON.parse(new TextDecoder().decode(initiatorMetadata))
+    const metadata = msgs.safeParse(initiatorMetadata)
 
     return {
       metadata,

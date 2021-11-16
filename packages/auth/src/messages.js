@@ -45,3 +45,18 @@ export const decodePayload = (message) => {
     rest: concatenated.subarray(count)
   }
 }
+
+/**
+ * Safely parse metadata as JSON
+ * @param {Uint8Array} metadata
+ * @returns {JSON}
+ */
+export const safeParse = (metadata) => {
+  try {
+    return JSON.parse(new TextDecoder().decode(metadata))
+  } catch (error) {
+    return null
+  }
+}
+
+/** @typedef {import('./interfaces').JSON} JSON */

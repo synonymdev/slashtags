@@ -1,0 +1,25 @@
+{
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
+  },
+  "dependencies": {
+    "@synonymdev/slashtags-accounts": "file:../../../../packages/accounts/dist",
+    "@synonymdev/slashtags-auth": "^0.2.2",
+    "@synonymdev/slashtags-common": "^0.1.0",
+    "fastify": "^3.22.1",
+    "isomorphic-ws": "^4.0.1",
+    "json-rpc-engine": "^6.1.0",
+    "multiformats": "^9.4.9",
+    "noise-curve-tiny-secp": "^2.0.0",
+    "react": "^17.0.2",
+    "urijs": "^1.19.7",
+    "ws": "^8.2.3"
+  },
+  "engines": {
+    "node": "14.x"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.14"
+  }
+}

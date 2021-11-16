@@ -1,0 +1,44 @@
+{
+  "name": "@synonymdev/slashtags-core",
+  "version": "0.0.8",
+  "description": "Core implementation of Slashtags protocol in JS",
+  "type": "module",
+  "keywords": [
+    "slashtags",
+    "core",
+    "rpc"
+  ],
+  "homepage": "https://github.com/synonymdev/slashtags/tree/master/packages/core/#readme",
+  "bugs": {
+    "url": "https://github.com/synonymdev/slashtags/issues"
+  },
+  "author": "Nazeh <ar.nazeh@gmail.com>",
+  "types": "./types/index.d.ts",
+  "main": "src/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/synonymdev/slashtags.git"
+  },
+  "scripts": {
+    "lint": "rm -rf dist && standard --fix",
+    "build": "rm -rf dist types && ipjs build && tsc && mv types/src dist/types",
+    "test": "echo ADD TEST FILES",
+    "prepublishOnly": "npm run lint && npm run build && npm run test"
+  },
+  "dependencies": {
+    "@synonymdev/slashtags-common": "^0.1.0",
+    "hyper-sdk": "^3.0.9",
+    "isomorphic-ws": "^4.0.1",
+    "json-rpc-engine": "^6.1.0",
+    "lru-memoizer": "^2.1.4",
+    "multiformats": "^9.4.9",
+    "simple-jsonrpc-js": "^1.2.0",
+    "ws": "^8.2.3"
+  },
+  "devDependencies": {
+    "@types/debug": "^4.1.7",
+    "@types/ws": "^8.2.0",
+    "debug": "^4.3.2",
+    "noise-curve-tiny-secp": "^2.0.0"
+  }
+}
