@@ -71,6 +71,7 @@ body,
   border-radius: 4.2rem;
   position: relative;
   overflow: hidden;
+  border: 3px solid #fff;
 }
 
 .phone-container {
