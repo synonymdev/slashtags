@@ -1,26 +1,23 @@
-const { base32 } = require('multiformats/bases/base32');
-const { varint } = require('@synonymdev/slashtags-common');
-const { JsonRpcEngine } = require('json-rpc-engine');
-const { base58btc } = require('multiformats/bases/base58');
-
-const { createAuth } = require('@synonymdev/slashtags-auth');
-const { secp256k1: curve } = require('noise-curve-tiny-secp');
-const { randomBytes } = require('crypto');
-const URI = require('urijs');
-
-const keypair = curve.generateSeedKeyPair('slashtags-demo');
-const auth = createAuth(keypair, {
-  metadata: {},
-});
+import { base32 } from 'multiformats/bases/base32';
+import { varint } from '@synonymdev/slashtags-common';
+import { base58btc } from 'multiformats/bases/base58';
+import { JsonRpcEngine } from 'json-rpc-engine';
+import { createAuth } from '@synonymdev/slashtags-auth';
+import { randomBytes } from 'crypto';
+import URI from 'urijs';
 
 /**
  *
  * @param {Object} opts
  * @param {string} [opts.baseURL]
  * @param {import('ws').WebSocketServer} [opts.wss]
+ * @param {*} [opts.metadata]
+ * @param {*} [opts.keyPair]
  * @returns
  */
-module.exports = ({ wss, baseURL }) => {
+export const SlashtagsAccounts = ({ wss, baseURL, metadata, keyPair }) => {
+  const auth = createAuth(keyPair, { metadata });
+
   if (!wss) throw new Error('wss must be provided');
 
   // Tickets callbacks correlation
@@ -56,12 +53,10 @@ module.exports = ({ wss, baseURL }) => {
         return;
       }
 
-      const metadata = callbacks.onChallenge();
-
       const challenge = auth.responder.newChallenge(60 * 1000 * 5, metadata);
 
       res.result = {
-        publicKey: keypair.publicKey.toString('hex'),
+        publicKey: keyPair.publicKey.toString('hex'),
         challenge: Buffer.from(challenge).toString('hex'),
         metadata,
       };
@@ -86,7 +81,10 @@ module.exports = ({ wss, baseURL }) => {
         const { metadata, initiatorPK, responderAttestation } =
           auth.responder.verifyInitiator(Buffer.from(attestation, 'hex'));
 
-        callbacksMap.get(ticket)?.onVerify({ metadata, initiatorPK });
+        callbacksMap.get(ticket)?.onVerify({
+          metadata,
+          publicKey: Buffer.from(initiatorPK).toString('hex'),
+        });
 
         res.result = {
           attestation: Buffer.from(responderAttestation).toString('hex'),
@@ -94,6 +92,7 @@ module.exports = ({ wss, baseURL }) => {
 
         callbacksMap.delete(ticket);
       } catch (error) {
+        //@ts-ignore
         res.error = error.message;
       }
       end();
@@ -113,22 +112,21 @@ module.exports = ({ wss, baseURL }) => {
     /**
      *
      * @param {object} opts
-     * @param {string} opts.action
-     * @param {Record<string, Record<string, ()=>void>>} opts.callbacks
+     * @param {()=>void} opts.onVerify
      * @param {number} [opts.timeout]
      * @returns
      */
-    generateURL: ({ action, callbacks, timeout = 2 * 60 * 1000 }) => {
+    generateURL: ({ onVerify, timeout = 2 * 60 * 1000 }) => {
       const url = new URI({
         protocol: 'slash',
         hostname: address,
       });
 
-      url.addQuery('act', action.replace(/^ACT_/, ''));
+      url.addQuery('act', 1);
 
       const ticket = base58btc.encode(randomBytes(8));
 
-      callbacksMap.set(ticket, callbacks[action]);
+      callbacksMap.set(ticket, { onVerify });
 
       setTimeout(() => {
         callbacksMap.delete(ticket);

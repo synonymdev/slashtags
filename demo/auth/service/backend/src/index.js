@@ -3,17 +3,20 @@ const websocket = require('isomorphic-ws');
 const { JsonRpcEngine } = require('json-rpc-engine');
 const { parse } = require('url');
 
-const Acts = require('./Actions');
+const { secp256k1: curve } = require('noise-curve-tiny-secp');
+const { SlashtagsAccounts } = require('@synonymdev/slashtags-accounts');
 const { metadata } = require('./metadata');
 
 const slashtagsActionsWSS = new websocket.Server({ noServer: true });
 
-// Setting up the Slashtags Actions
-const slashActs = Acts({
+// Setting up the Slashtags Accounts
+const slashtagsAccounts = SlashtagsAccounts({
   baseURL: process.env.PORT
     ? 'wss://slashtags.herokuapp.com/slashtags'
     : 'ws://localhost:9000/slashtags',
   wss: slashtagsActionsWSS,
+  metadata,
+  keyPair: curve.generateSeedKeyPair('slashtags-demo'),
 });
 
 const app = fastify({ logger: true });
@@ -51,28 +54,17 @@ engine.push((req, res, next, end) => {
 
 // Setting up one route for requesting new tickets
 engine.push((req, res, next, end) => {
-  if (req.method === 'REQUEST_TICKET') {
-    const url = slashActs.generateURL({
-      action: req.params.act,
-      callbacks: {
-        ACT_1: {
-          onChallenge: () => metadata,
-          onVerify: ({ metadata, initiatorPK }) => {
-            req.socket.send(
-              JSON.stringify({
-                method: 'UserAuthenticated',
-                params: {
-                  metadata,
-                  publicKey: Buffer.from(initiatorPK).toString('hex'),
-                },
-              }),
-            );
-          },
-        },
+  if (req.method === 'REQUEST_ACCOUNTS_URL') {
+    res.result = slashtagsAccounts.generateURL({
+      onVerify: (user) => {
+        req.socket.send(
+          JSON.stringify({
+            method: 'UserAuthenticated',
+            params: user,
+          }),
+        );
       },
     });
-
-    res.result = url;
 
     end();
   }
