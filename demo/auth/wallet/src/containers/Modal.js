@@ -1,6 +1,6 @@
 //@ts-nocheck
 import { useContext, useState } from 'react';
-import { StoreContext, types } from '../strore';
+import { StoreContext, types } from '../store';
 import { Sheet } from '../components/Sheet';
 import { Card } from '../components/Card';
 import { secp256k1 as curve } from 'noise-curve-tiny-secp';

@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { StoreContext, types } from '../strore';
+import { StoreContext, types } from '../store';
 
 const ScanQR = () => {
   const { store, dispatch } = useContext(StoreContext);

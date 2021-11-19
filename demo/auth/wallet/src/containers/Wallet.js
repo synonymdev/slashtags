@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { StoreContext } from '../strore';
+import { StoreContext } from '../store';
 import { ScanQRPage } from '../pages/ScanQR';
 import { ProfilesPage } from '../pages/Profiles';
 import { Home } from '../pages/Home';
