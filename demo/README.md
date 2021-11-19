@@ -24,7 +24,7 @@ npm start # test @ localhost:3000
 ```
 
 ### Setup Demo Wallet
-__Note:__ This library imports the core `@synonymdev/slashtag-*` packages. Be sure to run `npm link` when using a local version.
+__Note:__ This project imports the core `@synonymdev/slashtag-*` packages. Be sure to run `npm link` when using a local version.
 
 ```
 cd ~/slashtags/demo/auth/wallet
