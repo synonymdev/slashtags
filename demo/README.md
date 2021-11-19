@@ -12,7 +12,7 @@
 
 ```
 cd ~/slashtags/demo/auth/service/backend
-npm instal
+npm install
 npm start # test @ localhost:9000
 ```
 
