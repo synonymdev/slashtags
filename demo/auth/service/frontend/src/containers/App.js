@@ -1,8 +1,8 @@
 import background from './Wallpaper.jpg';
 import { useEffect, useReducer } from 'react';
-import { initialValue, reducer, StoreContext } from '../strore';
+import { initialValue, reducer, StoreContext } from '../store';
 import { Website } from './Website';
-import { setupRPC } from '../strore';
+import { setupRPC } from '../store';
 
 export const App = () => {
   const [store, dispatch] = useReducer(reducer, initialValue);

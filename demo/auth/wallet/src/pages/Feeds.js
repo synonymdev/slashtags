@@ -1,6 +1,6 @@
 import { Template } from '../containers/Template';
 import { useContext, useState, useEffect } from 'react';
-import { StoreContext, types } from '../strore';
+import { StoreContext, types } from '../store';
 import { truncateMid } from '../utils';
 import faker from 'faker';
 

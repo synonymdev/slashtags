@@ -2,7 +2,7 @@ import { Template } from '../containers/Template';
 import { Core } from '@synonymdev/slashtags-core';
 import { SlashtagsActions } from '@synonymdev/slashtags-actions';
 import { useContext } from 'react';
-import { StoreContext, types } from '../strore';
+import { StoreContext, types } from '../store';
 
 const slashActs = SlashtagsActions({ node: Core() });
 

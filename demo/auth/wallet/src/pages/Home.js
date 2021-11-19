@@ -3,7 +3,7 @@ import { Template } from '../containers/Template';
 import { Card } from '../components/Card';
 import { ArrowSVG } from '../components/ArrowSVG';
 import { useContext } from 'react';
-import { StoreContext, types } from '../strore';
+import { StoreContext, types } from '../store';
 import { Article } from '../components/Article';
 
 export const Home = () => {

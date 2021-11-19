@@ -1,7 +1,7 @@
 import { Phone } from './Phone';
 import background from './Wallpaper.jpg';
 import { useReducer } from 'react';
-import { initialValue, reducer, StoreContext } from '../strore';
+import { initialValue, reducer, StoreContext } from '../store';
 
 export const App = () => {
   const [store, dispatch] = useReducer(reducer, initialValue);

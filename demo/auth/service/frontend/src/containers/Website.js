@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { Browser } from '../components/Browser';
 import { useState, useContext, useEffect } from 'react';
-import { getTiceket, StoreContext, types } from '../strore';
+import { getTicket, StoreContext, types } from '../store';
 import Form from '@rjsf/core';
 import { LoginForm } from '../components/LoginForm';
 import { ArrowSVG } from '../components/ArrowSVG';
@@ -17,7 +17,7 @@ export const Website = () => {
   const handleLogin = () => {
     setOpenLogin(!openLogin);
     if (store.loginURL) return;
-    getTiceket(dispatch);
+    getTicket(dispatch);
   };
 
   useEffect(() => {

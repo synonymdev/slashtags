@@ -20,7 +20,7 @@ export const setupRPC = async (dispatch) => {
   );
 };
 
-export const getTiceket = async (dispatch) => {
+export const getTicket = async (dispatch) => {
   const jrpc = await RPC();
 
   const url = await jrpc.call('REQUEST_ACCOUNTS_URL');
