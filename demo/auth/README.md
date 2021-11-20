@@ -35,7 +35,7 @@ Then visit `http://localhost:3000/`
 - Run the demo wallet
 
 ```
-cd service/wallet/
+cd wallet/
 
 npm install
 
