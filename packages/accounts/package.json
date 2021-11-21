@@ -29,7 +29,7 @@
     "@synonymdev/slashtags-auth": "^0.2.2",
     "@synonymdev/slashtags-common": "^0.1.0",
     "json-rpc-engine": "^6.1.0",
-    "multiformats": "^9.4.10",
+    "multiformats": "^9.4.9",
     "npm": "^7.23.0",
     "urijs": "^1.19.7"
   }

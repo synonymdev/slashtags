@@ -23,9 +23,11 @@
     "skipLibCheck": true,
     "stripInternal": true,
     "resolveJsonModule": true,
+    "rootDir": ".",
     // paths
     "paths": {
       "@synonymdev/slashtags-*": ["./packages/*"]
     }
-  }
+  },
+  "include": ["packages/*/src", "types"]
 }
