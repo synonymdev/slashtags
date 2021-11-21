@@ -5,10 +5,15 @@ lerna-debug.log
 .vscode
 *.iml
 docs/
-dist
+build
+lib
 yarn.lock
-types
 packages/*/node_modules/
 packages/*/coverage/
 packages/*/logs/
 packages/*/package-lock.json
+packages/*/types
+packages/*/dist
+.npmrc
+# Local Netlify folder
+.netlify

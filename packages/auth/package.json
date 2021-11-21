@@ -1,23 +1,36 @@
 {
-    "name": "@synonymdev/slashtags-auth",
-    "version": "0.0.1",
-    "description": "Bidirectional authentication for keypair verification through attestation.",
-    "main": "./src/index.js",
-    "types": "./types/index.d.ts",
-    "type": "module",
-    "keywords": [
-        "slashtags",
-        "authentication",
-        "attestation"
-    ],
-    "author": "Ar Nazeh <ar.nazeh@gmail.com>",
-    "scripts": {
-        "test": "ava",
-        "lint": "../../node_modules/.bin/eslint ./src --fix",
-        "build:types": "../../node_modules/.bin/tsc -p tsconfig.json"
-    },
-    "dependencies": {
-        "noise-curve-secp": "^1.0.2",
-        "noise-handshake": "^1.2.2"
-    }
+  "name": "@synonymdev/slashtags-auth",
+  "version": "0.2.2",
+  "description": "Bidirectional authentication for keypair verification through attestation.",
+  "type": "module",
+  "keywords": [
+    "slashtags",
+    "authentication",
+    "attestation",
+    "handshake"
+  ],
+  "homepage": "https://github.com/synonymdev/slashtags/tree/master/packages/auth/#readme",
+  "bugs": {
+    "url": "https://github.com/synonymdev/slashtags/issues"
+  },
+  "author": "Nazeh <ar.nazeh@gmail.com>",
+  "types": "./types/index.d.ts",
+  "main": "src/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/synonymdev/slashtags.git"
+  },
+  "scripts": {
+    "lint": "rm -rf dist && standard --fix",
+    "build": "rm -rf dist types && ipjs build && tsc && mv types/src dist/types",
+    "test": "hundreds ava ./test/**/*.js",
+    "prepublishOnly": "npm run lint && npm run build && npm run test"
+  },
+  "dependencies": {
+    "@synonymdev/slashtags-common": "^0.1.0",
+    "bint8array": "^1.1.3",
+    "noise-curve-tiny-secp": "^2.0.0",
+    "noise-handshake": "^2.1.0",
+    "npm": "^7.23.0"
+  }
 }

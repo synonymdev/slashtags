@@ -1,0 +1,42 @@
+{
+  "name": "demo-wallet",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@synonymdev/slashtags-actions": "^0.0.6",
+    "@synonymdev/slashtags-core": "^0.0.8",
+    "faker": "^5.5.3",
+    "framer-motion": "^5.0.0",
+    "noise-curve-tiny-secp": "^2.0.0",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-scripts": "4.0.3"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ]
+  },
+  "devDependencies": {
+    "@types/faker": "^5.5.9"
+  }
+}

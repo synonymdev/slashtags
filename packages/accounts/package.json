@@ -1,0 +1,36 @@
+{
+  "name": "@synonymdev/slashtags-accounts",
+  "version": "0.0.1",
+  "description": "Create website accounts or log in with bitcoin keypair",
+  "type": "module",
+  "keywords": [
+    "slashtags",
+    "authentication",
+    "accounts"
+  ],
+  "homepage": "https://github.com/synonymdev/slashtags/tree/master/packages/accounts/#readme",
+  "bugs": {
+    "url": "https://github.com/synonymdev/slashtags/issues"
+  },
+  "author": "Nazeh <ar.nazeh@gmail.com>",
+  "types": "./types/index.d.ts",
+  "main": "src/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/synonymdev/slashtags.git"
+  },
+  "scripts": {
+    "lint": "rm -rf dist && standard --fix",
+    "build": "rm -rf dist types && ipjs build && tsc && mv types/src dist/types",
+    "test": "hundreds ava ./test/**/*.js",
+    "prepublishOnly": "echo add prepublish"
+  },
+  "dependencies": {
+    "@synonymdev/slashtags-auth": "^0.2.2",
+    "@synonymdev/slashtags-common": "^0.1.0",
+    "json-rpc-engine": "^6.1.0",
+    "multiformats": "^9.4.10",
+    "npm": "^7.23.0",
+    "urijs": "^1.19.7"
+  }
+}

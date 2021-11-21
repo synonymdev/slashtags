@@ -1,34 +1,31 @@
 {
   "compilerOptions": {
+    "strict": true,
+    // project options
     "allowJs": true,
     "checkJs": true,
-    "forceConsistentCasingInFileNames": true,
-    "noImplicitReturns": false,
-    "noImplicitAny": true,
-    "noImplicitThis": true,
+    "target": "ESNEXT",
+    "noEmitOnError": true,
+    "emitDeclarationOnly": true,
+    "incremental": true,
+    "composite": true,
+    "isolatedModules": true,
+    // module resolution
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    // linter checks
     "noFallthroughCasesInSwitch": true,
     "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "strictFunctionTypes": false,
-    "strictNullChecks": true,
-    "strictPropertyInitialization": true,
-    "strictBindCallApply": true,
-    "strict": true,
-    "alwaysStrict": true,
-    "esModuleInterop": true,
-    "target": "ES2018",
-    "moduleResolution": "node",
-    "declaration": true,
-    "declarationMap": true,
+    "noUnusedParameters": false,
+    // advanced
+    "importsNotUsedAsValues": "error",
+    "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
     "stripInternal": true,
     "resolveJsonModule": true,
-    "emitDeclarationOnly": true,
-    "baseUrl": "./packages",
+    // paths
     "paths": {
-      "@slashtags/*": ["./packages/*"]
+      "@synonymdev/slashtags-*": ["./packages/*"]
     }
-  },
-  "exclude": ["node_modules"],
-  "compileOnSave": false
+  }
 }

@@ -1,2 +1,3 @@
-export { createResponder } from './responder/index.js';
-export { createInitiatior } from './initiator/index.js';
+import { createAuth } from './authenticator.js'
+
+export { createAuth }

@@ -1,0 +1,21 @@
+{
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
+  },
+  "dependencies": {
+    "@synonymdev/slashtags-accounts": "^0.0.1",
+    "fastify": "^3.22.1",
+    "isomorphic-ws": "^4.0.1",
+    "json-rpc-engine": "^6.1.0",
+    "noise-curve-tiny-secp": "^2.0.0",
+    "react": "^17.0.2",
+    "ws": "^8.2.3"
+  },
+  "engines": {
+    "node": "14.x"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.14"
+  }
+}
