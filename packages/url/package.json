@@ -22,15 +22,12 @@
   },
   "scripts": {
     "lint": "rm -rf dist && standard --fix",
-    "build": "rm -rf dist types && ipjs build && tsc && mv types/src dist/types",
-    "test": "hundreds ava ./test/**/*.js",
-    "prepublishOnly": "npm run lint && npm run build && npm run test"
+    "build": "echo TODO: Update slashtags-url",
+    "test": "echo TODO: Update slashtags-url",
+    "prepublishOnly": "echo TODO: Update slashtags-url"
   },
   "dependencies": {
     "@synonymdev/slashtags-common": "^0.1.0",
-    "@synonymdev/slashtags-docid": "^0.1.0",
-    "ajv": "^8.6.2",
-    "ajv-formats": "^2.1.1",
     "multiformats": "^9.4.7"
   }
 }

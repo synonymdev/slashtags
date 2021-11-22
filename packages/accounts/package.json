@@ -21,16 +21,15 @@
   },
   "scripts": {
     "lint": "rm -rf dist && standard --fix",
-    "build": "rm -rf dist types && ipjs build && tsc && mv types/src dist/types",
-    "test": "hundreds ava ./test/**/*.js",
-    "prepublishOnly": "echo add prepublish"
+    "build": "rm -rf dist types && ipjs build && tsc && mv types/packages/accounts/src dist/types",
+    "test": "echo TODO: ADD UNIT TESTS",
+    "prepublishOnly": "npm run lint && npm run build && npm run test && dependency-check dist --no-dev"
   },
   "dependencies": {
     "@synonymdev/slashtags-auth": "^0.2.2",
     "@synonymdev/slashtags-common": "^0.1.0",
     "json-rpc-engine": "^6.1.0",
-    "multiformats": "^9.4.10",
-    "npm": "^7.23.0",
+    "multiformats": "^9.4.9",
     "urijs": "^1.19.7"
   }
 }

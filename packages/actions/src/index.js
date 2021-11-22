@@ -91,6 +91,8 @@ export const SlashtagsActions = ({ node }) => {
 
     switch (act) {
       case 'ACT_1':
+        // TODO: Remove ts-ignore
+        // @ts-ignore
         return await ACT_1({
           node,
           address,

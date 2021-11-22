@@ -1,1 +1,1 @@
-export const SCHEME = 'slash'
+export const PROTOCOL_NAME = 'slash'

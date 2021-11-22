@@ -21,9 +21,9 @@
   },
   "scripts": {
     "lint": "rm -rf dist && standard --fix",
-    "build": "rm -rf dist types && ipjs build && tsc && mv types/src dist/types",
+    "build": "rm -rf dist types && ipjs build && tsc && mv types/packages/common/src dist/types",
     "test": "hundreds ava ./test/**/*.js",
-    "prepublishOnly": "npm run lint && npm run build && npm run test"
+    "prepublishOnly": "npm run lint && npm run build && npm run test && dependency-check dist --no-dev"
   },
   "dependencies": {
     "varint": "^6.0.0"

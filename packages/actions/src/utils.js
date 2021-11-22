@@ -20,6 +20,8 @@ export const memoizedCreateAuth = (keyPair, metadata) => {
   return auth
 }
 
+// TODO: Remove ts-ignore
+// @ts-ignore
 /** @typedef {import ('@synonymdev/slashtags-auth/types/authenticator').Initiator } Initiator */
 /** @typedef {import ('noise-curve-tiny-secp').KeyPair} KeyPair */
 /** @typedef {import ('./interfaces').Metadata} Metadata */

@@ -21,19 +21,14 @@
   },
   "scripts": {
     "lint": "rm -rf dist && standard --fix",
-    "build": "rm -rf dist types && ipjs build && tsc && mv types/src dist/types",
-    "test": "echo ADD TEST FILES",
-    "prepublishOnly": "npm run lint && npm run build && npm run test"
+    "build": "rm -rf dist types && ipjs build && tsc && mv types/packages/core/src dist/types",
+    "test": "echo TODO: ADD UNIT TESTS",
+    "prepublishOnly": "npm run lint && npm run build && npm run test && dependency-check dist --no-dev"
   },
   "dependencies": {
-    "@synonymdev/slashtags-common": "^0.1.0",
-    "hyper-sdk": "^3.0.9",
     "isomorphic-ws": "^4.0.1",
     "json-rpc-engine": "^6.1.0",
-    "lru-memoizer": "^2.1.4",
-    "multiformats": "^9.4.9",
-    "simple-jsonrpc-js": "^1.2.0",
-    "ws": "^8.2.3"
+    "simple-jsonrpc-js": "^1.2.0"
   },
   "devDependencies": {
     "@types/debug": "^4.1.7",
