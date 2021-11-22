@@ -24,6 +24,7 @@
   "devDependencies": {
     "@types/node": "^16.7.13",
     "ava": "^3.15.0",
+    "dependency-check": "^4.1.0",
     "hundreds": "^0.0.9",
     "ipjs": "^5.1.0",
     "lerna": "^4.0.0",

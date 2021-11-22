@@ -24,13 +24,12 @@
     "lint": "rm -rf dist && standard --fix",
     "build": "rm -rf dist types && ipjs build && tsc && mv types/packages/auth/src dist/types",
     "test": "hundreds ava ./test/**/*.js",
-    "prepublishOnly": "npm run lint && npm run build && npm run test"
+    "prepublishOnly": "npm run lint && npm run build && npm run test && dependency-check dist --no-dev"
   },
   "dependencies": {
     "@synonymdev/slashtags-common": "^0.1.0",
     "bint8array": "^1.1.3",
     "noise-curve-tiny-secp": "^2.0.0",
-    "noise-handshake": "^2.1.0",
-    "npm": "^7.23.0"
+    "noise-handshake": "^2.1.0"
   }
 }

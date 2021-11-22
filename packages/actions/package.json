@@ -22,9 +22,9 @@
   },
   "scripts": {
     "lint": "rm -rf dist && standard --fix",
-    "build": "rm -rf dist types && ipjs build && tsc && mv types/src dist/types",
-    "test": "echo ADD TEST FILES",
-    "prepublishOnly": "npm run lint && npm run build && npm run test"
+    "build": "rm -rf dist types && ipjs build && tsc && mv types/packages/actions/src dist/types",
+    "test": "echo TODO: ADD UNIT TESTS",
+    "prepublishOnly": "npm run lint && npm run build && npm run test && dependency-check dist --no-dev"
   },
   "dependencies": {
     "@synonymdev/slashtags-auth": "^0.2.2",
@@ -34,10 +34,7 @@
     "urijs": "^1.19.7"
   },
   "devDependencies": {
-    "@synonymdev/slashtags-core": "^0.0.8",
-    "@types/debug": "^4.1.7",
     "@types/urijs": "^1.19.17",
-    "@types/ws": "^8.2.0",
     "noise-curve-tiny-secp": "^2.0.0"
   }
 }

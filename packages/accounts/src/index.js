@@ -30,7 +30,7 @@ export const SlashtagsAccounts = ({ wss, baseURL, metadata, keyPair }) => {
       try {
         const json = JSON.parse(data.toString())
 
-        engine.handle(json, (err, res) => {
+        engine.handle(json, (_, res) => {
           socket.send(JSON.stringify(res))
         })
       } catch (error) {
