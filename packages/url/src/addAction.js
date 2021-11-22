@@ -5,5 +5,5 @@
  * @returns {*} actionID string
  */
 export const addAction = (schema) => {
-  return;
-};
+
+}

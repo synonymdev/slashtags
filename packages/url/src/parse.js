@@ -1,8 +1,8 @@
-import { base64url } from 'multiformats/bases/base64';
-import * as json from 'multiformats/codecs/json';
-import { varint } from '@synonymdev/slashtags-common';
-import { PROTOCOL_NAME } from './constants.js';
-import { validate } from './validate.js';
+import { base64url } from 'multiformats/bases/base64'
+import * as json from 'multiformats/codecs/json'
+import { varint } from '@synonymdev/slashtags-common'
+import { PROTOCOL_NAME } from './constants.js'
+import { validate } from './validate.js'
 
 /**
  *
@@ -12,25 +12,23 @@ import { validate } from './validate.js';
  * @returns {*}
  */
 export const parse = (url, throwInvalid = false) => {
-  const parsed = new URL(url);
-  const protocol = parsed.protocol.slice(0, parsed.protocol.length - 1);
+  const parsed = new URL(url)
+  const protocol = parsed.protocol.slice(0, parsed.protocol.length - 1)
 
   if (protocol !== PROTOCOL_NAME) {
-    throw new Error('Protocol should be ' + PROTOCOL_NAME);
+    throw new Error('Protocol should be ' + PROTOCOL_NAME)
   }
 
-  const isAction = !parsed.hostname;
+  const isAction = !parsed.hostname
 
-  const docIDStr = isAction ? parsed.pathname.split('/')[0] : parsed.hostname;
+  const docIDStr = isAction ? parsed.pathname.split('/')[0] : parsed.hostname
 
   if (isAction) {
-    const baseFree = base64url.decode(parsed.hash.substring(1));
-    const payload = json.decode(varint.split(baseFree)[1]);
+    const baseFree = base64url.decode(parsed.hash.substring(1))
+    const payload = json.decode(varint.split(baseFree)[1])
 
-    validate(docIDStr, payload, throwInvalid);
+    validate(docIDStr, payload, throwInvalid)
   }
-
-  return;
-};
+}
 
 /** @typedef {import('./interfaces').SlashtagsURL} SlashtagsURL */

@@ -6,5 +6,5 @@
  * @returns {object}
  */
 export const validate = (actionID, data, throwInvalid = false) => {
-  return data;
-};
+  return data
+}

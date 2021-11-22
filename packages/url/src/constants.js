@@ -1,1 +1,1 @@
-export const PROTOCOL_NAME = 'slash';
+export const PROTOCOL_NAME = 'slash'

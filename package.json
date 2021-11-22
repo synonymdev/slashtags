@@ -1,11 +1,11 @@
 {
   "name": "slashtags-js",
   "scripts": {
-    "postinstall": "lerna link && lerna bootstrap --hoist --ci",
+    "postinstall": "lerna link && lerna bootstrap",
     "test": "lerna exec npm t",
     "lint": "lerna run lint",
     "build": "lerna run build",
-    "publish": "lerna publish --contents dist",
+    "publish": "lerna publish",
     "clean": "npm run clean:deps && npm run clean:build && npm run clean:coverage",
     "clean:build": "rm -rf ./packages/*/dist",
     "clean:coverage": "rm -rf ./packages/*/coverage",
