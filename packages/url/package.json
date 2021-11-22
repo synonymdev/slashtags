@@ -28,8 +28,6 @@
   },
   "dependencies": {
     "@synonymdev/slashtags-common": "^0.1.0",
-    "ajv": "^8.6.2",
-    "ajv-formats": "^2.1.1",
     "multiformats": "^9.4.7"
   }
 }

@@ -1,7 +1,7 @@
 import { base64url } from 'multiformats/bases/base64';
 import * as json from 'multiformats/codecs/json';
 import { varint } from '@synonymdev/slashtags-common';
-import { PROTOCOL_NAME } from './constants/index.js';
+import { PROTOCOL_NAME } from './constants.js';
 import { validate } from './validate.js';
 
 /**

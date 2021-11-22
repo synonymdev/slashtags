@@ -1,4 +1,4 @@
-import { PROTOCOL_NAME } from './constants/index.js';
+import { PROTOCOL_NAME } from './constants.js';
 import * as json from 'multiformats/codecs/json';
 import { base64url } from 'multiformats/bases/base64';
 import { varint } from '@synonymdev/slashtags-common';
