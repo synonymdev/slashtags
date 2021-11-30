@@ -1,47 +1,32 @@
+import type { Duplex, EventEmitter } from 'stream';
+
 export type { debug } from 'debug';
 
-import type {
-  WebSocket as Socket,
-  ServerOptions as WsServerOptions,
-  Server as WsServer,
-} from 'ws';
-export type { KeyPair } from 'noise-curve-tiny-secp';
-import type JRPC from 'simple-jsonrpc-js';
+export type JSONElement = string | null | boolean | number;
+export type JSON = JSONElement | JSONElement[] | { [key: string]: JSONElement };
 
-import type { JsonRpcMiddleware, JsonRpcRequest } from 'json-rpc-engine';
-
-import type { KeyPair } from 'noise-curve-tiny-secp';
-
-export type keyOrName = string | Buffer;
-
-export interface Connection {
-  send: (data: Buffer) => void;
+interface Server extends EventEmitter {
+  listen: () => Promise<void>;
+  _keyPair: { publicKey: Buffer; secretKey: Buffer };
 }
 
-export type JSON =
-  | string
-  | null
-  | boolean
-  | number
-  | JSON[]
-  | { [key: string]: JSON };
+export interface NoiseSocket extends Duplex {
+  handshakeHash: Buffer;
+}
+export interface DHT {
+  createServer: (onconnection: (noiseSocket: NoiseSocket) => void) => Server;
+  connect: (key: Buffer) => NoiseSocket;
+}
 
-export type ServerHypercore = (
-  server: Server,
-  options: { keyPair: KeyPair },
-) => {};
-
-export type ServerOptions = WsServerOptions;
-
-export type Server = WsServer;
-
-export interface SlashtagsAPI {
-  use: (middleware: JsonRpcMiddleware<any, any>) => void;
-  listen: (server: Server) => Promise<Server>;
+export interface SlashtagsRPC {
+  use: (method: string, params: string[], cb: (...args: any) => any) => void;
+  listen: () => Promise<Buffer>;
   request: (
-    address: string,
-    method: JsonRpcRequest<any>['method'],
-    params: JSON,
+    address: Buffer,
+    method: string,
+    params: JSONElement[] | Record<string, JSONElement>,
   ) => Promise<JSON>;
-  _openWebSockets: Map<string, { ws: Socket; jrpc: JRPC }>;
+  _openSockets: Map<string, NoiseSocket>;
 }
+
+export interface SlashtagsAPI extends SlashtagsRPC {}
