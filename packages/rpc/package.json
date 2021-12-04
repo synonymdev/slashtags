@@ -1,0 +1,48 @@
+{
+  "name": "@synonymdev/slashtags-rpc",
+  "version": "0.0.0",
+  "description": "JsonRPC on top of Hyperswarm's secret-stream",
+  "type": "module",
+  "keywords": [
+    "slashtags",
+    "rpc",
+    "hyperswarm",
+    "dht",
+    "secret-stream"
+  ],
+  "homepage": "https://github.com/synonymdev/slashtags/tree/master/packages/rpc/#readme",
+  "bugs": {
+    "url": "https://github.com/synonymdev/slashtags/issues"
+  },
+  "license": "MIT",
+  "files": [
+    "*",
+    "!**/*.tsbuildinfo"
+  ],
+  "types": "./types/index.d.ts",
+  "main": "src/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/synonymdev/slashtags.git"
+  },
+  "scripts": {
+    "lint": "standard ./src ./test --fix",
+    "build": "rm -rf dist types && ipjs build && tsc && mv types/packages/rpc/src dist/types",
+    "test": "hundreds ava",
+    "prepublishOnly": "npm run lint && npm run build && npm run test && dependency-check dist --no-dev"
+  },
+  "dependencies": {
+    "@hyperswarm/dht": "github:hyperswarm/dht#v5.0.11",
+    "@hyperswarm/dht-relay": "github:hyperswarm/dht-relay",
+    "bint8array": "github:hyperdivision/bint8array",
+    "i": "^0.3.7",
+    "isomorphic-ws": "github:heineiuo/isomorphic-ws",
+    "npm": "^8.2.0",
+    "simple-jsonrpc-js": "github:jershell/simple-jsonrpc-js#1.2.0"
+  },
+  "devDependencies": {
+    "@types/debug": "^4.1.7",
+    "debug": "^4.3.2",
+    "noise-curve-tiny-secp": "^2.0.0"
+  }
+}
