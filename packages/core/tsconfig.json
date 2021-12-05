@@ -1,4 +1,5 @@
 {
   "extends": "../../tsconfig.json",
-  "compilerOptions": { "outDir": "types" }
+  "compilerOptions": { "outDir": "types" },
+  "include": ["src", "../../types", "../rpc/src"]
 }

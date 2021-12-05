@@ -19,7 +19,7 @@
     "*",
     "!**/*.tsbuildinfo"
   ],
-  "types": "./types/index.d.ts",
+  "types": "./types/packages/rpc/src/index.d.ts",
   "main": "src/index.js",
   "repository": {
     "type": "git",
@@ -27,7 +27,7 @@
   },
   "scripts": {
     "lint": "standard ./src ./test --fix",
-    "build": "rm -rf dist types && ipjs build && tsc && mv types/packages/rpc/src dist/types",
+    "build": "rm -rf dist types && ipjs build && tsc && cp -r types/ dist/types",
     "test": "hundreds ava",
     "prepublishOnly": "npm run lint && npm run build && npm run test && dependency-check dist --no-dev"
   },
@@ -35,14 +35,7 @@
     "@hyperswarm/dht": "github:hyperswarm/dht#v5.0.11",
     "@hyperswarm/dht-relay": "github:hyperswarm/dht-relay",
     "bint8array": "github:hyperdivision/bint8array",
-    "i": "^0.3.7",
     "isomorphic-ws": "github:heineiuo/isomorphic-ws",
-    "npm": "^8.2.0",
     "simple-jsonrpc-js": "github:jershell/simple-jsonrpc-js#1.2.0"
-  },
-  "devDependencies": {
-    "@types/debug": "^4.1.7",
-    "debug": "^4.3.2",
-    "noise-curve-tiny-secp": "^2.0.0"
   }
 }

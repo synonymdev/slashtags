@@ -1,7 +1,5 @@
 import type { Duplex, EventEmitter } from 'stream';
 
-export type { debug } from 'debug';
-
 export type JSONElement = string | null | boolean | number;
 export type JSON = JSONElement | JSONElement[] | { [key: string]: JSONElement };
 
