@@ -13,7 +13,12 @@
     "url": "https://github.com/synonymdev/slashtags/issues"
   },
   "author": "Nazeh <ar.nazeh@gmail.com>",
-  "types": "./types/index.d.ts",
+  "license": "MIT",
+  "files": [
+    "*",
+    "!**/*.tsbuildinfo"
+  ],
+  "types": "./types/packages/rpc/src/index.d.ts",
   "main": "src/index.js",
   "repository": {
     "type": "git",
@@ -21,7 +26,7 @@
   },
   "scripts": {
     "lint": "rm -rf dist && standard --fix",
-    "build": "rm -rf dist types && ipjs build && tsc && mv types/packages/common/src dist/types",
+    "build": "rm -rf dist types && ipjs build && tsc && cp -r types/ dist/types",
     "test": "hundreds ava ./test/**/*.js",
     "prepublishOnly": "npm run lint && npm run build && npm run test && dependency-check dist --no-dev"
   },

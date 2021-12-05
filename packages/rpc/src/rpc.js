@@ -1,100 +1,102 @@
-import JsonRPC from 'simple-jsonrpc-js'
-import { DHT } from './dht.js'
-import bint from 'bint8array'
+import { DHT } from './dht.js';
+import { Engine } from './engine.js';
 
 // Close websockets if they are not used for 2 minutes
-const TIMEOUT = 2 * 60 * 1000
+const TIMEOUT = 2 * 60 * 1000;
 
 /**
- *
+ * @param {object} [opts]
+ * @param {string[]} [opts.relays]
+ * @param {number} [opts.requestTimout]
  * @returns {Promise<SlashtagsRPC>}
  */
-export const RPC = async () => {
-  const jrpc = new JsonRPC()
-  const node = await DHT()
+export const RPC = async (opts) => {
+  const engine = new Engine();
+  const node = await DHT(opts);
 
-  const server = node.createServer((noiseSocket) => {
-    jrpc.toStream = (message) => noiseSocket.write(message)
+  const server = node.createServer((noiseSocket) =>
+    noiseSocket.on('data', async (data) => {
+      data = JSON.parse(data);
 
-    // @ts-ignore
-    noiseSocket.jrpc = jrpc
-    noiseSocket.on(
-      'data',
-      /** @param {Buffer | Uint8Array} data */
-      (data) => jrpc.messageHandler(bint.toString(data, 'utf-8'))
-    )
-  })
+      const response = await engine.handle({
+        ...data,
+        noiseSocket,
+      });
+
+      noiseSocket.write(response);
+    }),
+  );
 
   /**
    *
    * @type {SlashtagsRPC['listen']}
    */
   const _listen = async () => {
-    await server.listen()
-    return server.address().publicKey
-  }
+    await server.listen();
+    return server.address().publicKey;
+  };
 
   /** @type {SlashtagsRPC['_openSockets']} */
-  const _openSockets = new Map()
+  const _openSockets = new Map();
 
   /**
    *
    * @param {Buffer} destination
    */
   const setupNoiseSocket = async (destination) => {
-    const noiseSocket = node.connect(destination)
-    _openSockets.set(destination.toString('hex'), noiseSocket)
+    const noiseSocket = node.connect(destination);
+    const key = destination.toString('hex');
 
-    let timeout = setTimeout(() => noiseSocket.destroy(), TIMEOUT)
+    const createTimeout = () =>
+      setTimeout(() => {
+        noiseSocket.destroy();
+        _openSockets.delete(key);
+      }, opts?.requestTimout || TIMEOUT);
+
+    let timeout = createTimeout();
 
     const resetTimeout = () => {
-      clearTimeout(timeout)
-      timeout = setTimeout(() => noiseSocket.destroy(), TIMEOUT)
-    }
+      clearTimeout(timeout);
+      timeout = createTimeout();
+    };
 
-    /** @param {string} message */
-    jrpc.toStream = (message) => {
-      resetTimeout()
-      noiseSocket.write(message)
-    }
+    const openSocket = { noiseSocket, resetTimeout };
+    _openSockets.set(key, openSocket);
 
     noiseSocket.on(
       'data',
       /** @param {Buffer | Uint8Array} data */
       (data) => {
-        resetTimeout()
-        jrpc.messageHandler(bint.toString(data, 'utf-8'))
-      }
-    )
-  }
+        resetTimeout();
+        engine.handleResponse(data);
+      },
+    );
+
+    return { noiseSocket, resetTimeout };
+  };
 
   /**
    *
    * @type {SlashtagsRPC['request']}
    */
   const _request = async (destination, method, params) => {
-    const noiseSocket = _openSockets.get(destination.toString('hex'))
+    let openScoket = _openSockets.get(destination.toString('hex'));
 
-    if (!noiseSocket || noiseSocket.destroyed) {
-      await setupNoiseSocket(destination)
+    if (!openScoket || openScoket.noiseSocket.destroyed) {
+      openScoket = await setupNoiseSocket(destination);
     }
 
-    return new Promise((resolve, reject) =>
-      jrpc
-        .call(method, params)
-        .then((result) => resolve(result))
-        .catch((error) => resolve(error))
-    )
-  }
+    return engine.call(method, params, openScoket.noiseSocket);
+  };
 
   return {
-    destroy: async () => node.destroy(),
-    use: (method, params, callback) => jrpc.on(method, params, callback),
+    addMethods: (methods) => engine.addMethods(methods),
     listen: () => _listen(),
     request: (destination, method, params) =>
       _request(destination, method, params),
-    _openSockets
-  }
-}
+    _openSockets,
+  };
+};
 
 /** @typedef {import ('./interfaces').SlashtagsRPC} SlashtagsRPC */
+/** @typedef {import ('./interfaces').NoiseSocket} NoiseSocket */

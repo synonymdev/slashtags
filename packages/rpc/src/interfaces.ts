@@ -1,7 +1,5 @@
 import type { Duplex, EventEmitter } from 'stream';
-
-export type JSONElement = string | null | boolean | number;
-export type JSON = JSONElement | JSONElement[] | { [key: string]: JSONElement };
+import type { Defined, RpcParams } from 'jsonrpc-lite';
 
 interface Server extends EventEmitter {
   listen: () => Promise<void>;
@@ -22,14 +20,26 @@ export interface DHT {
   connect: (key: Buffer) => NoiseSocket;
 }
 
+export type EngineRequest = {
+  id: number;
+  method: string;
+  params: RpcParams;
+  jsonrpc: '2.0';
+  noiseSocket: NoiseSocket;
+};
+
+export type EngineMethod = (req: EngineRequest) => Promise<Defined>;
+
 export interface SlashtagsRPC {
-  destroy: () => Promise<void>;
-  use: (method: string, params: string[], cb: (...args: any) => any) => void;
+  addMethods(methods: Record<string, EngineMethod>): void;
   listen: () => Promise<Buffer>;
   request: (
     address: Buffer,
     method: string,
-    params: JSONElement[] | Record<string, JSONElement>,
-  ) => Promise<JSON>;
-  _openSockets: Map<string, NoiseSocket>;
+    params: RpcParams,
+  ) => Promise<{ body: Defined; noiseSocket: NoiseSocket } | undefined>;
+  _openSockets: Map<
+    string,
+    { noiseSocket: NoiseSocket; resetTimeout: () => void }
+  >;
 }
