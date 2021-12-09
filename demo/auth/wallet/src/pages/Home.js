@@ -12,10 +12,12 @@ export const Home = () => {
   const accounts = Object.values(store.accounts).reduce((acc, service) => {
     acc.push({
       service: Object.values(service)[0].service,
-      profiles: Object.values(service),
+      profiles: Object.values(service).map((s) => s.profile),
     });
     return acc;
   }, []);
+
+  console.log({ accounts });
 
   const isNew = accounts?.length === 0 || store.contacts?.length === 0;
 
@@ -42,17 +44,15 @@ export const Home = () => {
                 {accounts.map((account) => (
                   <>
                     <Card
-                      key={account.service.publicKey}
+                      key={account.service['@id']}
+                      profile={account.service}
                       className="account-title"
-                      publicKey={account.service.publicKey}
-                      metadata={account.service.metadata}
                     />
                     {account.profiles.map((p) => (
                       <Card
-                        key={p.publicKey}
+                        key={p['@id']}
+                        profile={p}
                         className="account-subprofile"
-                        publicKey={p.profile.publicKey}
-                        metadata={p.profile.metadata}
                         onClick={() =>
                           dispatch({
                             type: types.SET_ACCOUNT,

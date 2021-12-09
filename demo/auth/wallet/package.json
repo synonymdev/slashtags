@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@synonymdev/slashtags-actions": "^0.0.6",
-    "@synonymdev/slashtags-core": "^0.0.8",
+    "@synonymdev/slashtags-actions": "^0.1.0-alpha.0",
+    "@synonymdev/slashtags-auth": "^0.3.0-alpha.0",
+    "@synonymdev/slashtags-rpc": "^0.1.0-alpha.0",
     "faker": "^5.5.3",
     "framer-motion": "^5.0.0",
     "noise-curve-tiny-secp": "^2.0.0",

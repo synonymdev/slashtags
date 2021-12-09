@@ -4,18 +4,21 @@ import { StoreContext, types } from '../store';
 import { Sheet } from '../components/Sheet';
 import { Card } from '../components/Card';
 import { secp256k1 as curve } from 'noise-curve-tiny-secp';
+import { didKeyFromPubKey } from '@synonymdev/slashtags-auth';
 
-const anonymous = (publicKey) => {
-  if (!publicKey) return;
+const anonymous = (seed) => {
+  const keyPair = curve.generateSeedKeyPair(seed);
+  const id = didKeyFromPubKey(keyPair.publicKey);
   return {
-    keyPair: curve.generateSeedKeyPair(publicKey),
-    metadata: null,
+    id,
+    signer: { keyPair },
+    metadata: { '@id': id },
   };
 };
 
 const Login = ({ data, cancel, resolve }) => {
   const [anon, setAnon] = useState(true);
-  const [profile, setProfile] = useState(anonymous(data.publicKey));
+  const [profile, setProfile] = useState(anonymous(data['@id']));
   const { store, dispatch } = useContext(StoreContext);
 
   const submit = () => {
@@ -25,13 +28,13 @@ const Login = ({ data, cancel, resolve }) => {
   return (
     <div className="login-modal">
       <h1>Login to</h1>
-      <Card publicKey={data.publicKey} metadata={data.metadata} />
+      <Card profile={data} />
 
       <div className="switch">
         <button
           onClick={() => {
             setAnon(true);
-            setProfile(anonymous(data.publicKey));
+            setProfile(anonymous(data.id));
           }}
           className={'btn ' + (anon ? 'active' : '')}
         >
@@ -55,16 +58,13 @@ const Login = ({ data, cancel, resolve }) => {
         <p className="anon-description">Select an existing profile.</p>
       )}
       {!anon &&
-        store.profiles.map((p) => {
+        store.profiles.map((p, id) => {
           return (
             <Card
-              key={p.keyPair.publicKey}
-              publicKey={Buffer.from(p.keyPair.publicKey).toString('hex')}
-              metadata={p.metadata}
+              key={p.id}
+              profile={p.metadata}
               className={
-                profile.keyPair.publicKey === p.keyPair.publicKey
-                  ? 'active login-profile'
-                  : 'login-profile'
+                p.id === profile.id ? 'active login-profile' : 'login-profile'
               }
               onClick={() => setProfile(p)}
             ></Card>

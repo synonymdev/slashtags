@@ -1,20 +1,29 @@
 import { createContext } from 'react';
 import { secp256k1 as curve } from 'noise-curve-tiny-secp';
 import faker from 'faker';
+import { didKeyFromPubKey } from '@synonymdev/slashtags-auth';
 
 export const initialValue = {
   view: 'home',
   prompt: null,
   profiles: Array(3)
     .fill(0)
-    .map((_, i) => ({
-      keyPair: curve.generateSeedKeyPair(i.toString()),
-      metadata: {
-        name: faker.name.findName(),
-        image: faker.image.avatar(),
-        url: faker.internet.url(),
-      },
-    })),
+    .map((_, i) => {
+      const keyPair = curve.generateSeedKeyPair(i.toString());
+      const id = didKeyFromPubKey(keyPair.publicKey);
+      return {
+        id,
+        signer: { keyPair },
+        metadata: {
+          '@context': 'https://www.schema.org/',
+          '@type': 'Person',
+          '@id': id,
+          name: faker.name.findName(),
+          image: faker.image.avatar(),
+          url: faker.internet.url(),
+        },
+      };
+    }),
   accounts: {},
 };
 
@@ -39,9 +48,9 @@ export const reducer = (state, action) => {
         ...state,
         accounts: {
           ...state.accounts,
-          [action.account.service.publicKey]: {
-            ...state.accounts[action.account.service.publicKey],
-            [action.account.profile.publicKey]: action.account,
+          [action.account.service['@id']]: {
+            ...state.accounts[action.account.service['@id']],
+            [action.account.profile['@id']]: action.account,
           },
         },
         view: 'home',

@@ -5,6 +5,8 @@
   },
   "type": "module",
   "dependencies": {
+    "@synonymdev/slashtags-auth": "^0.3.0-alpha.0",
+    "@synonymdev/slashtags-rpc": "^0.1.0-alpha.0",
     "fastify": "^3.22.1",
     "isomorphic-ws": "^4.0.1",
     "jsonrpc-lite": "^2.2.0",

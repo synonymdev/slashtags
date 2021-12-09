@@ -10,12 +10,8 @@ export const ProfilesPage = () => {
 
   return (
     <Template title="Profiles" back={true}>
-      {profiles.map(({ metadata, keyPair }) => (
-        <Card
-          key={keyPair.publicKey.toString('hex')}
-          metadata={metadata}
-          publicKey={keyPair.publicKey.toString('hex')}
-        ></Card>
+      {profiles.map((profile) => (
+        <Card profile={profile.metadata}></Card>
       ))}
     </Template>
   );
