@@ -1,6 +1,9 @@
-export type { KeyPair } from 'noise-curve-tiny-secp';
-
 export * as varint from 'varint';
 
-export type JSONElement = string | null | boolean | number;
-export type JSON = JSONElement | JSONElement[] | { [key: string]: JSONElement };
+export type JSONElement = string | number | boolean | object | null;
+export type JSON = JSONElement | JSONElement[] | Record<string, JSONElement>;
+
+export type KeyPair = {
+  publicKey: Buffer;
+  secretKey: Buffer;
+};

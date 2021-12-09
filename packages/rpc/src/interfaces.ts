@@ -1,24 +1,26 @@
 import type { Duplex, EventEmitter } from 'stream';
-import type { Defined, RpcParams } from 'jsonrpc-lite';
+import type { JSONElement } from '@synonymdev/slashtags-common';
 
 interface Server extends EventEmitter {
   listen: () => Promise<void>;
   address: () => {
     host: string;
     port: number;
-    publicKey: Buffer;
+    publicKey: Uint8Array;
   };
 }
 
 export interface NoiseSocket extends Duplex {
-  handshakeHash: Buffer;
-  remotePublicKey: Buffer;
+  handshakeHash: Uint8Array;
+  remotePublicKey: Uint8Array;
 }
 export interface DHT {
   destroy: () => Promise<void>;
   createServer: (onconnection?: (noiseSocket: NoiseSocket) => void) => Server;
-  connect: (key: Buffer) => NoiseSocket;
+  connect: (key: Uint8Array) => NoiseSocket;
 }
+
+export type RpcParams = Record<string, JSONElement>;
 
 export type EngineRequest = {
   id: number;
@@ -28,16 +30,16 @@ export type EngineRequest = {
   noiseSocket: NoiseSocket;
 };
 
-export type EngineMethod = (req: EngineRequest) => Promise<Defined>;
+export type EngineMethod = (req: EngineRequest) => Promise<JSONElement>;
 
 export interface SlashtagsRPC {
   addMethods(methods: Record<string, EngineMethod>): void;
-  listen: () => Promise<Buffer>;
+  listen: () => Promise<Uint8Array>;
   request: (
-    address: Buffer,
+    address: Uint8Array,
     method: string,
     params: RpcParams,
-  ) => Promise<{ body: Defined; noiseSocket: NoiseSocket } | undefined>;
+  ) => Promise<{ body: JSONElement; noiseSocket: NoiseSocket } | undefined>;
   _openSockets: Map<
     string,
     { noiseSocket: NoiseSocket; resetTimeout: () => void }

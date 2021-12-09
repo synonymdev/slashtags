@@ -1,86 +1,70 @@
-import { memoizedCreateAuth } from '../utils.js'
-import bint from 'bint8array'
+import {
+  verifyJWS,
+  didKeyFromPubKey,
+  createJWS,
+  signers,
+  sessionFingerprint,
+} from '@synonymdev/slashtags-auth';
 
 /**
  * @param {object} params
- * @param {SlashtagsAPI} params.node
- * @param {string} params.address
+ * @param {SlashtagsRPC} params.node
+ * @param {Uint8Array} params.address
  * @param {CallBacks} params.callbacks
- * @param {string} params.act,
- * @param {string} params.tkt,
+ * @param {string} params.action
+ * @param {string} [params.tkt]
  * @returns
  */
-export const ACT_1 = async ({ node, address, callbacks, act, tkt }) => {
-  try {
-    /** @type {{metadata: Metadata, publicKey: string, challenge:string}} */
-    // @ts-ignore
-    const response = await node.request(address, 'ACT_1/GET_CHALLENGE', {
-      ticket: tkt
-    })
+export const ACT_1 = async ({ node, address, callbacks, action, tkt }) => {
+  if (!tkt) throw new Error('Missing param: tkt');
 
-    // @ts-ignore
-    if (response.code < 0) throw new Error(response.message)
+  const response = await node.request(address, 'ACT1_INIT', { tkt });
 
-    // TODO: defrentiate between Accounts and Contacts?
-    const promptResponse = await callbacks.onChallenge?.(response)
+  // @ts-ignore
+  const sfp = await sessionFingerprint(response, tkt);
 
-    // User rejected authentication prompt
-    if (!promptResponse) {
-      return {
-        status: 'SKIP',
-        reason: 'User rejected prompt',
-        act,
-        tkt,
-        address
-      }
-    }
+  /** @type {{peer: Peer, sfp: string }} */
+  // @ts-ignore
+  const payload = await verifyJWS(response?.body);
+  const remotePeer = payload.peer;
 
-    const { keyPair: initiatorKeyPair, metadata: intitiatorMetadata } =
-      promptResponse
+  if (payload.sfp !== sfp) return new Error('Invalid sesison fingerprint');
 
-    const auth = memoizedCreateAuth(initiatorKeyPair, intitiatorMetadata)
+  const promptResponse = await callbacks.onInitialResponse?.(remotePeer);
 
-    const { attestation, verifyResponder } = auth.initiator.respond(
-      bint.fromString(response.publicKey, 'hex'),
-      bint.fromString(response.challenge, 'hex')
-    )
+  // User rejected authentication prompt
+  if (promptResponse) {
+    const id = didKeyFromPubKey(promptResponse.signer.keyPair.publicKey);
 
-    const answer = await node.request(address, 'ACT_1/RESPOND', {
-      attestation: bint.toString(attestation, 'hex'),
-      ticket: tkt
-    })
+    const peer = {
+      '@id': id,
+      // @ts-ignore
+      ...promptResponse.metadata,
+    };
 
-    // @ts-ignore
-    if (answer.code < 0) throw new Error(answer.message)
+    const jws = await createJWS(
+      {
+        peer,
+        sfp,
+      },
+      signers[promptResponse.signer.type || 'ES256K'](
+        promptResponse.signer.keyPair.secretKey,
+      ),
+    );
 
-    /** @type {{attestation: string}} */
-    // @ts-ignore
-    const { attestation: responderAttestation } = answer
-
-    // @ts-ignore
-    const { responderPK, metadata } = verifyResponder(
-      bint.fromString(responderAttestation, 'hex')
-    )
+    const verifiedResponse = await node.request(address, 'ACT1_VERIFY', {
+      jws,
+      tkt,
+    });
 
     callbacks.onSuccess?.({
-      responder: {
-        publicKey: responderPK,
-        // @ts-ignore
-        metadata
-      },
-      initiator: {
-        publicKey: initiatorKeyPair.publicKey,
-        metadata: intitiatorMetadata
-      }
-    })
-
-    return { status: 'OK', act, tkt, address }
-  } catch (error) {
-    callbacks.onError?.(error)
-    return { status: 'ERROR', error, address, act, tkt }
+      peer,
+      remotePeer,
+      feeds: verifiedResponse?.body?.feeds,
+    });
   }
-}
+};
 
-/** @typedef {import ('../interfaces').ACT_1Callbacks} CallBacks */
-/** @typedef {import ('../interfaces').Metadata} Metadata */
-/** @typedef {import ('@synonymdev/slashtags-core').SlashtagsAPI} SlashtagsAPI */
+/** @typedef {import ('../interfaces').ACT_1_Callbacks} CallBacks */
+/** @typedef {import ('@synonymdev/slashtags-rpc').SlashtagsRPC} SlashtagsRPC */
+/** @typedef {import ('@synonymdev/slashtags-auth').Peer} Peer */

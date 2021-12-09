@@ -4,11 +4,10 @@ import { RPC } from './jrpc';
 export const setupRPC = async (dispatch) => {
   const jrpc = await RPC();
 
-  //calls
   jrpc.call('ping').then((result) => console.log('ping: ' + result));
 
   jrpc.on(
-    'UserAuthenticated',
+    'userAuthenticated',
     ['publicKey', 'metadata'],
     (publicKey, metadata) => {
       console.log('UserAuthenticated: ' + publicKey + ' ' + metadata);
@@ -22,20 +21,14 @@ export const setupRPC = async (dispatch) => {
 
 export const getTicket = async (dispatch) => {
   const jrpc = await RPC();
-
-  const url = await jrpc.call('REQUEST_ACCOUNTS_URL');
-
+  const url = await jrpc.call('authUrl');
   dispatch({ type: types.SET_TICKET, url });
+
+  jrpc.on('authUrlExpired', ['user'], async () => {
+    const url = await jrpc.call('authUrl');
+    dispatch({ type: types.SET_TICKET, url });
+  });
 };
-
-// const createServerPayload = () => {
-//   const challenge = responder.newChallenge(3600000).toString('hex');
-
-//   return {
-//     publicKey: serverKeypair.publicKey.toString('hex'),
-//     challenge,
-//   };
-// };
 
 export const initialValue = {
   loginURL: null,

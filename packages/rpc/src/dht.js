@@ -3,8 +3,8 @@ let DHTNode, dhtRelay
 
 const tryWS = async (wsServer) =>
   new Promise((resolve) => {
-    wsServer.on('error', (error) => resolve(!error))
-    wsServer.on('open', () => resolve(wsServer))
+    wsServer.onerror = (error) => resolve(!error)
+    wsServer.onopen = () => resolve(wsServer)
   })
 
 /**

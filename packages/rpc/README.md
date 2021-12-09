@@ -1,3 +1,3 @@
 # Slashtags Core
 
-> Core implementation of Slashtags protocol in JS
+> JsonRPC on top of Hyperswarm's secret-stream

@@ -1,52 +1,37 @@
-export interface KeyPair {
-  publicKey: Buffer;
-  secretKey: Buffer;
-}
+import type { Signer } from 'did-jwt';
 
-/** Read more https://github.com/chm-diederichs/noise-handshake/blob/main/dh.js#L13 */
-export interface Curve {
-  DHLEN: number;
-  PKLEN: number;
-  SKLEN: number;
-  ALG: string;
-  generateKeyPair: (privKey?: Buffer) => KeyPair;
-  dh: (pk: Buffer, lsk: Buffer) => Buffer;
-}
+import type { KeyPair } from '@synonymdev/slashtags-common';
+export type { SlashtagsRPC } from '@synonymdev/slashtags-rpc';
+import type { WithContext, Person, Organization } from 'schema-dts';
 
-export interface Session {
-  challenge: Uint8Array;
-  timer: NodeJS.Timeout;
-  metadata: Uint8Array;
-}
+export type FeedInfo = {
+  name: string;
+  schema: string;
+  src: string;
+};
 
-export type JSON =
-  | string
-  | null
-  | boolean
-  | number
-  | JSON[]
-  | { [key: string]: JSON };
+export type VerifySuccess = {
+  status: 'OK';
+  feeds: FeedInfo[];
+};
 
-export interface Initiator {
-  respond: (
-    remotePK: Uint8Array,
-    challenge: Uint8Array,
-    metdata?: JSON,
-  ) => {
-    attestation: Uint8Array;
-    verifyResponder: (responderAttestation: Uint8Array) => {
-      metadata: JSON;
-      responderPK: Uint8Array;
-    };
+export type Peer = Metadata & { '@id': string };
+
+export type OnVerify = (peer: Peer) => VerifySuccess | Promise<VerifySuccess>;
+
+export type RespondAs = {
+  metadata: Metadata;
+  signer: {
+    keyPair: KeyPair;
+    type?: 'ES256K' | 'EdDSA';
   };
-}
+};
 
-export interface Responder {
-  sessions: Map<string, Session>;
-  newChallenge: (timeout: number, metdata?: JSON | undefined) => Uint8Array;
-  verifyInitiator: (attestation: Uint8Array) => {
-    metadata: JSON;
-    initiatorPK: Uint8Array;
-    responderAttestation: Uint8Array;
-  };
-}
+export type TicketConfig = {
+  onVerify: OnVerify;
+  peer: Peer;
+  sfp?: string;
+  signer: Signer;
+};
+
+export type Metadata = WithContext<Person | Organization>;
