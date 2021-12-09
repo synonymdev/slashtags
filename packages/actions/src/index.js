@@ -1,121 +1,117 @@
-import URI from 'urijs'
 import { base32 } from 'multiformats/bases/base32'
 import { varint } from '@synonymdev/slashtags-common'
-import { ACT_1 } from './actions/act_1.js'
-import bint from 'bint8array'
-
-/**
- *
- * @param {string} url
- * @returns
- */
-export const parseURL = (url) => {
-  const uri = new URI(url)
-
-  return { hostname: uri.hostname(), query: uri.search(true) }
-}
+import { ACT1 } from './actions/act1.js'
 
 /**
  * @param {string} address
  */
-const processAddress = (address) => {
+const decodeAddress = (address) => {
   const bytes = base32.decode(address)
 
   let result = varint.split(bytes)
   result = varint.split(result[1])
-  result = varint.split(result[1])
 
-  return new URL(bint.toString(result[1], 'utf-8')).toString()
+  return result[1]
 }
 
 /**
- * @param {object} opts
- * @param {SlashtagsAPI} opts.node
+ *
+ * @param {string} url
+ */
+const parseUrl = (url) => {
+  const _url = new URL(url.replace('slash', 'http'))
+
+  const tkt = _url.searchParams.get('tkt')
+  const act = _url.searchParams.get('act')
+  const action = act && 'ACT' + act
+
+  const address = decodeAddress(_url.hostname)
+
+  return {
+    action,
+    tkt,
+    address
+  }
+}
+
+/**
+ * @param {SlashtagsRPC} node
  * @returns
  */
-export const SlashtagsActions = ({ node }) => {
-  // TODO: Check if node is a SlashtagsAPI
-  if (!node) {
-    throw new Error('SlashActions requires a node implementing SlashtagsAPI')
-  }
-
-  const supportedActions = ['ACT_1']
+export const Actions = (node) => {
+  const supportedActions = ['ACT1']
 
   /**
    *
    * @param {string} url
    * @param {CallBacks} [callbacks]
-   * @returns {Promise<HandleResponse>}
+   * @param {OnError} [onError]
+   * @returns
    */
-  const handle = async (url, callbacks) => {
-    // TODO: return 'ParseError' if url is not valid?
-    // TODO: check if the ticket is valid? for all actions?
-    const { hostname, query } = parseURL(url)
+  const handle = async (url, callbacks, onError) => {
+    const { address, action, tkt } = parseUrl(url)
 
-    /** @type {{act: string, tkt: string}} */
-    // @ts-ignore
-    let { act, tkt } = query
-    act = 'ACT_' + act
+    if (!action) {
+      onError?.({
+        code: 'MalformedURL',
+        message: 'Missing param: act',
+        url
+      })
+      return
+    }
 
-    const address = processAddress(hostname)
+    if (!tkt) {
+      onError?.({
+        code: 'MalformedURL',
+        message: 'Missing param: tkt',
+        url
+      })
+      return
+    }
 
-    if (!address) {
-      return {
-        status: 'SKIP',
-        reason: 'Invalid address',
-        address: hostname,
-        act,
-        tkt
+    const _callbacks = callbacks?.[action]
+
+    /** @param {any} error */
+    const handleCaughtErrors = (error) => {
+      if (error?.message) {
+        onError?.({
+          code: error.message,
+          url
+        })
+      } else {
+        onError?.({
+          code: 'TicketNotFound',
+          message: error?.error?.message,
+          url
+        })
       }
     }
 
-    if (!supportedActions.includes(act)) {
-      return {
-        status: 'SKIP',
-        reason: 'Unsupported action',
-        act,
-        tkt,
-        address
-      }
-    }
-
-    if (!callbacks?.[act]) {
-      return {
-        status: 'SKIP',
-        reason: 'No callback for this action',
-        act,
-        tkt,
-        address
-      }
-    }
-
-    switch (act) {
-      case 'ACT_1':
-        // TODO: Remove ts-ignore
-        // @ts-ignore
-        return await ACT_1({
+    switch (action) {
+      case 'ACT1':
+        return ACT1({
           node,
           address,
-          act,
+          action,
           tkt,
-          // @ts-ignore
-          callbacks: callbacks[act]
-        })
+          callbacks: _callbacks
+        }).catch(handleCaughtErrors)
 
       default:
-        return {
-          status: 'SKIP',
-          reason: 'Unsupported action',
-          act,
-          tkt,
-          address
-        }
+        onError?.({
+          code: 'UnsupportedAction',
+          message: `Unsupported action: actions must be one of: ${JSON.stringify(
+            supportedActions
+          )}, but got: "${action}"`,
+          url
+        })
     }
   }
 
   return { supportedActions, handle }
 }
 
-/** @typedef {import ('@synonymdev/slashtags-core').SlashtagsAPI} SlashtagsAPI */
+/** @typedef {import ('@synonymdev/slashtags-rpc').SlashtagsRPC} SlashtagsRPC */
 /** @typedef {import ('./interfaces').CallBacks} CallBacks */
-/** @typedef {import ('./interfaces').HandleResponse} HandleResponse */
+/** @typedef {import ('./interfaces').ACT1_Callbacks} ACT1_Callbacks */
+/** @typedef {import ('./interfaces').OnError} OnError */

@@ -69,6 +69,7 @@ export function Engine () {
    * @param {string} method
    * @param {RpcParams} params
    * @param {NoiseSocket} noiseSocket
+   * @throws {Error}
    */
   this.call = async function (method, params, noiseSocket) {
     const message = {
@@ -88,11 +89,10 @@ export function Engine () {
     })
 
     const parsed = jsonrpc.parseObject(response)
-    if (parsed.type === 'success') {
-      return {
-        body: parsed.payload.result,
-        noiseSocket
-      }
+    return {
+      // @ts-ignore
+      body: parsed.payload.result,
+      noiseSocket
     }
   }
 }

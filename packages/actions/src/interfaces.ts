@@ -1,49 +1,26 @@
-import type { KeyPair } from 'noise-curve-tiny-secp';
+import type { FeedInfo, RespondAs, Peer } from '@synonymdev/slashtags-auth';
 
-export type CardMetadata = {
-  name: string;
-  image: string;
-  description?: string;
-  url?: string;
-};
-
-export type JSON =
-  | string
-  | null
-  | boolean
-  | number
-  | JSON[]
-  | { [key: string]: JSON };
-
-export type Metadata = Partial<JSON & CardMetadata>;
-
-export type ACT_1Callbacks = {
-  onChallenge: (params: {
-    challenge: string;
-    publicKey: string;
-    metadata: Metadata;
-  }) => Promise<
-    | {
-        metadata: Metadata;
-        keyPair: KeyPair;
-      }
-    | false
-    | undefined
-  >;
-  onSuccess?: (params: {
-    responder: { publicKey: Uint8Array; metadata: Metadata };
-    initiator: { publicKey: Uint8Array; metadata: Metadata };
-  }) => any;
-  onError?: (err: unknown) => any;
+export type ACT1_Callbacks = {
+  onRemoteVerified: (peer: Peer) => Promise<RespondAs> | RespondAs;
+  onLocalVerified?: (response: {
+    local: Peer;
+    remote: Peer;
+    feeds: FeedInfo[];
+  }) => Promise<void> | void;
 };
 
 export type CallBacks = {
-  ACT_1?: ACT_1Callbacks;
+  ACT1?: ACT1_Callbacks;
   [key: string]: any;
 };
 
-export type HandleResponse = { act: string; tkt: string; address: string } & (
-  | { status: 'SKIP'; reason: string }
-  | { status: 'OK' }
-  | { status: 'ERROR'; error: any }
-);
+export type OnError = (error: {
+  code:
+    | 'MalformedURL'
+    | 'UnsupportedAction'
+    | 'Unknown'
+    | 'TicketNotFound'
+    | 'InvalidSessionFingerprint';
+  message?: string;
+  url: string;
+}) => void | Promise<void>;

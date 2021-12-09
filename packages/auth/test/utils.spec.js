@@ -6,6 +6,8 @@ import {
 } from '../src/utils.js'
 import { secp256k1 as curve } from 'noise-curve-tiny-secp'
 import * as u8a from 'uint8arrays'
+import { createJWS } from 'did-jwt'
+import { signers } from '../src/index.js'
 
 test('Create sessionFingerPrint', async (t) => {
   t.deepEqual(
@@ -51,4 +53,26 @@ test('verifyJWS: invalid jws', async (t) => {
       message: 'invalid_signature: Signature invalid for JWT'
     }
   )
+})
+
+test('verifyJWS: missing @id in jws', async (t) => {
+  try {
+    await verifyJWS(
+      await createJWS(
+        {
+          peer: {
+            '@context': 'https://www.schema.org/',
+            '@type': 'Person',
+            name: 'Erick Ryan',
+            image: 'https://cdn.fakercloud.com/avatars/mastermindesign_128.jpg',
+            url: 'https://javier.org'
+          },
+          sfp: 'bZLVdoo3UR5VUah/vzkCXAzS93g2BSy/qAna+g8g02w'
+        },
+        signers.ES256K(curve.generateSeedKeyPair('test').secretKey)
+      )
+    )
+  } catch (error) {
+    t.deepEqual(error, new Error('Missing @id in jws'))
+  }
 })

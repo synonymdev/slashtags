@@ -14,5 +14,5 @@ export {
 
 /** @typedef {import ('./interfaces').FeedInfo} FeedInfo */
 /** @typedef {import ('./interfaces').RespondAs} RespondAs */
-/** @typedef {import ('./interfaces').RespondAs} Metadata */
+/** @typedef {import ('./interfaces').PeerMetadata} PeerMetadata */
 /** @typedef {import ('./interfaces').Peer} Peer */

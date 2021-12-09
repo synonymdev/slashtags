@@ -39,7 +39,7 @@ export interface SlashtagsRPC {
     address: Uint8Array,
     method: string,
     params: RpcParams,
-  ) => Promise<{ body: JSONElement; noiseSocket: NoiseSocket } | undefined>;
+  ) => Promise<{ body: JSONElement; noiseSocket: NoiseSocket }>;
   _openSockets: Map<
     string,
     { noiseSocket: NoiseSocket; resetTimeout: () => void }

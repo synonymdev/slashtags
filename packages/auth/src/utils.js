@@ -48,8 +48,10 @@ const SUPPORTED_DID_METHODS = ['key']
 export const verifyJWS = async (jws) => {
   const { payload } = decodeJWT(jws)
 
-  /** @type {string} */
+  /** @type {string | null} */
   const did = payload.peer?.['@id']
+
+  if (!did) throw new Error('Missing @id in jws')
 
   const method = did.slice(4).replace(/:.*$/, '')
 

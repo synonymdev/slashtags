@@ -11,16 +11,15 @@ export type FeedInfo = {
 };
 
 export type VerifySuccess = {
-  status: 'OK';
   feeds: FeedInfo[];
 };
 
-export type Peer = Metadata & { '@id': string };
+export type Peer = PeerMetadata & { '@id': string };
 
 export type OnVerify = (peer: Peer) => VerifySuccess | Promise<VerifySuccess>;
 
 export type RespondAs = {
-  metadata: Metadata;
+  metadata: PeerMetadata;
   signer: {
     keyPair: KeyPair;
     type?: 'ES256K' | 'EdDSA';
@@ -28,10 +27,10 @@ export type RespondAs = {
 };
 
 export type TicketConfig = {
-  onVerify: OnVerify;
+  onVerify?: OnVerify;
   peer: Peer;
   sfp?: string;
   signer: Signer;
 };
 
-export type Metadata = WithContext<Person | Organization>;
+export type PeerMetadata = WithContext<Person | Organization>;

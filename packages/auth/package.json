@@ -1,6 +1,6 @@
 {
   "name": "@synonymdev/slashtags-auth",
-  "version": "0.2.2",
+  "version": "0.3.0-alpha.0",
   "description": "Bidirectional authentication of DIDs over slashtags-rpc",
   "type": "module",
   "keywords": [

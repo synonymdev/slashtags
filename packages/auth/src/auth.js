@@ -47,13 +47,13 @@ export const Auth = async (node) => {
 
       if (sfp !== sfpValid) throw new Error('Invalid session fingerprint')
 
-      const { feeds } = await config.onVerify(peer)
+      const final = await config.onVerify?.(peer)
 
       _ticketConfigs.delete(ticket)
 
       return {
         status: 'OK',
-        feeds
+        feeds: final?.feeds
       }
     }
   })
@@ -66,7 +66,7 @@ export const Auth = async (node) => {
      *
      * @param {object} opts
      * @param {RespondAs} opts.respondAs
-     * @param {OnVerify} opts.onVerify
+     * @param {OnVerify} [opts.onVerify]
      * @param {()=>Promise<void> | void} [opts.onTimeout]
      * @param {number} [opts.timeout]
      * @returns
