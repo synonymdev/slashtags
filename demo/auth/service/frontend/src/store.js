@@ -6,17 +6,13 @@ export const setupRPC = async (dispatch) => {
 
   jrpc.call('ping').then((result) => console.log('ping: ' + result));
 
-  jrpc.on(
-    'userAuthenticated',
-    ['publicKey', 'metadata'],
-    (publicKey, metadata) => {
-      console.log('UserAuthenticated: ' + publicKey + ' ' + metadata);
-      dispatch({
-        type: types.SET_USER,
-        user: { publicKey, metadata },
-      });
-    },
-  );
+  jrpc.on('userAuthenticated', ['user'], (user) => {
+    console.log('UserAuthenticated: ', user);
+    dispatch({
+      type: types.SET_USER,
+      user: user,
+    });
+  });
 };
 
 export const getTicket = async (dispatch) => {
