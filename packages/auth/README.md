@@ -54,7 +54,7 @@ const resultInitiator = verifyResponder(resultResponder.responderAttestation);
 //}
 ```
 
-## Eliptic Curves
+## Elliptic Curves
 
 By default the library uses the `secp256k1` curve.
 
