@@ -55,7 +55,7 @@ export const Website = () => {
             <div className="user">
               <div className="left">
                 <p>{store.user.metadata?.name || 'Anon...'}</p>
-                <p>{truncateMid(store.user.publicKey, 4)}</p>
+                <p>{store.user['@id']}</p>
               </div>
               <img alt="" src={store.user.metadata?.image || anonImage}></img>
             </div>
