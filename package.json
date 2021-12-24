@@ -18,7 +18,7 @@
     "url": "git+https://github.com/synonymdev/slashtags.git"
   },
   "scripts": {
-    "postinstall": "lerna link && lerna bootstrap",
+    "postinstall": "lerna link && lerna bootstrap && rm packages/*/package-lock.json",
     "test": "lerna exec npm t",
     "lint": "lerna run lint",
     "build": "lerna run build",

@@ -1,6 +1,6 @@
 {
   "name": "@synonymdev/slashtags-url",
-  "version": "0.2.1",
+  "version": "0.3.0-alpha.1",
   "description": "Slashtags parser and fromatter for documents and actions uris",
   "type": "module",
   "keywords": [
