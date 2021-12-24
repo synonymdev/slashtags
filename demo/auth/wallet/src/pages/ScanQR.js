@@ -7,19 +7,19 @@ import { StoreContext, types } from '../store';
 export const ScanQRPage = () => {
   const { dispatch } = useContext(StoreContext);
 
-  let slashActs;
+  let actions;
 
   const pasteClipboard = async () => {
-    if (!slashActs) {
+    if (!actions) {
       const node = await RPC({ relays: ['ws://testnet3.hyperdht.org:8910'] });
-      slashActs = Actions(node);
+      actions = Actions(node);
     }
 
     const clipboard = await navigator.clipboard.readText();
     navigator.clipboard.writeText(clipboard);
 
     if (clipboard) {
-      await slashActs.handle(
+      await actions.handle(
         clipboard,
         {
           /** @type {import ('@synonymdev/slashtags-actions').ACT1_Callbacks} */

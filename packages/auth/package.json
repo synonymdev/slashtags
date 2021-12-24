@@ -19,7 +19,7 @@
     "*",
     "!**/*.tsbuildinfo"
   ],
-  "types": "./types/index.d.ts",
+  "types": "./types/packages/auth/src/index.d.ts",
   "main": "src/index.js",
   "repository": {
     "type": "git",

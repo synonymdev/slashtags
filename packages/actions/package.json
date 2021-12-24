@@ -1,7 +1,7 @@
 {
   "name": "@synonymdev/slashtags-actions",
   "version": "0.1.0-alpha.0",
-  "description": "Packaged handlers for Slashtag actions",
+  "description": "Packaged handlers for Slashtags actions",
   "type": "module",
   "keywords": [
     "slashtags",
@@ -13,7 +13,11 @@
   "bugs": {
     "url": "https://github.com/synonymdev/slashtags/issues"
   },
-  "author": "Nazeh <ar.nazeh@gmail.com>",
+  "license": "MIT",
+  "files": [
+    "*",
+    "!**/*.tsbuildinfo"
+  ],
   "types": "./types/packages/actions/src/index.d.ts",
   "main": "src/index.js",
   "repository": {
