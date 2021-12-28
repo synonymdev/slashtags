@@ -5,19 +5,30 @@ import { randomBytes } from 'crypto'
 import { createJWS } from 'did-jwt'
 import { signers } from './signers.js'
 import { varint } from '@synonymdev/slashtags-common'
+import { Resolver } from 'did-resolver'
+import keyresolver from 'key-did-resolver'
 
 /**
  *
  * @param {SlashtagsRPC} node
+ * @param {object} [opts]
+ * @param {ResolverRegistry} [opts.didResolverRegistry]
  * @returns
  */
-export const Auth = async (node) => {
+export const Auth = async (node, opts) => {
   // Tickets callbacks correlation
   /** @type {Map<string, TicketConfig>} */
   const _ticketConfigs = new Map()
 
   const destination = await node.listen()
   const address = base32.encode(varint.prepend([135, 0], destination))
+
+  const registry = {
+    ...keyresolver.getResolver(),
+    ...opts?.didResolverRegistry
+  }
+  const supportedMethods = Object.keys(registry)
+  const resolver = new Resolver(registry)
 
   node.addMethods({
     ACT1_INIT: async (request) => {
@@ -41,7 +52,7 @@ export const Auth = async (node) => {
       const config = _ticketConfigs.get(ticket)
       if (!config) throw new Error(`Ticket "${ticket}" not found`)
 
-      const { peer, sfp } = await verifyJWS(jws)
+      const { peer, sfp } = await verifyJWS(jws, resolver, supportedMethods)
 
       const sfpValid = await sessionFingerprint(request, ticket)
 
@@ -104,3 +115,4 @@ export const Auth = async (node) => {
 /** @typedef {import('./interfaces').OnVerify} OnVerify */
 /** @typedef {import('./interfaces').TicketConfig} TicketConfig */
 /** @typedef {import('./interfaces').RespondAs} RespondAs */
+/** @typedef {import('did-resolver').ResolverRegistry} ResolverRegistry */

@@ -13,15 +13,19 @@ npm i @synonymdev/slashtags-actions @synonymdev/slashtags-rpc
 ### Setup
 
 ```javascript
-import { RPC } from '@synonymdev/slashtags-rpc';
+import { Core } from '@synonymdev/slashtags-core';
 import { Actions } from '@synonymdev/slashtags-actions';
 
 // Node environment
-const node = await RPC();
+const node = await Core();
 // Browser environment
 // Use a community DHT relay or run your own https://github.com/hyperswarm/dht-relay
-const node = await RPC({ relays: ['ws://trusted.dht-relay.instance.com'] });
-actions = Actions(node);
+const node = await Core({
+  rpc: { relays: ['ws://trusted.dht-relay.instance.com'] },
+});
+
+// Initialize the actions module using the Slashtags node
+const actions = Actions(node);
 ```
 
 ### Handle action urls

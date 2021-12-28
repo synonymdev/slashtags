@@ -1,6 +1,4 @@
 import { decodeJWT, verifyJWS as _verifyJWS } from 'did-jwt'
-import { Resolver } from 'did-resolver'
-import keyresolver from 'key-did-resolver'
 import { base58btc } from 'multiformats/bases/base58'
 import { varint } from '@synonymdev/slashtags-common'
 import * as u8a from 'uint8arrays'
@@ -39,38 +37,33 @@ export const sessionFingerprint = (request, ticket = '') => {
   )
 }
 
-const SUPPORTED_DID_METHODS = ['key']
-
 /**
  *
  * @param {string} jws
+ * @param {import('did-resolver').Resolver} resolver
+ * @param {string[]} supportedMethod
  */
-export const verifyJWS = async (jws) => {
+export const verifyJWS = async (jws, resolver, supportedMethod) => {
   const { payload } = decodeJWT(jws)
 
-  /** @type {string | null} */
-  const did = payload.peer?.['@id']
+  const id = payload.peer?.['@id']
 
-  if (!did) throw new Error('Missing @id in jws')
+  if (!id) throw new Error('Missing @id in jws')
 
-  const method = did.slice(4).replace(/:.*$/, '')
+  const did = await resolver.resolve(id)
 
-  if (!SUPPORTED_DID_METHODS.includes(method)) {
+  if (did.didResolutionMetadata.error) {
     throw new Error(
       `Unsupported did method: did method should be one of: ${JSON.stringify(
-        SUPPORTED_DID_METHODS
-      )}, instead got "${method}"`
+        supportedMethod
+      )}, instead got "${id.slice(4).replace(/:.*$/, '')}"`
     )
   }
-
-  const { didDocument } = await new Resolver(keyresolver.getResolver()).resolve(
-    did
-  )
 
   _verifyJWS(
     jws,
     // @ts-ignore
-    didDocument.verificationMethod
+    did.didDocument.verificationMethod
   )
 
   return payload

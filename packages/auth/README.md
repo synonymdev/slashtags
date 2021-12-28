@@ -13,14 +13,18 @@ npm i @synonymdev/slashtags-auth @synonymdev/slashtags-rpc
 ### Setup
 
 ```javascript
-import { RPC } from '@synonymdev/slashtags-rpc';
-import { Actions } from '@synonymdev/slashtags-actions';
+import { Core } from '@synonymdev/slashtags-core';
+import { Auth } from '@synonymdev/slashtags-auth';
 
 // Node environment
-const node = await RPC();
+const node = await Core();
 // Browser environment
 // Use a community DHT relay or run your own https://github.com/hyperswarm/dht-relay
-const node = await RPC({ relays: ['ws://trusted.dht-relay.instance.com'] });
+const node = await Core({
+  rpc: { relays: ['ws://trusted.dht-relay.instance.com'] },
+});
+
+// Initialize the auth module using the Slashtags node
 const auth = await Auth(node);
 ```
 

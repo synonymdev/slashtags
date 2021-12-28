@@ -5,7 +5,14 @@ import { base32 } from 'multiformats/bases/base32'
 import { Core } from '@synonymdev/slashtags-core'
 import { secp256k1 as curve } from 'noise-curve-tiny-secp'
 import { sessionFingerprint, verifyJWS } from '../src/utils.js'
-import { createJWS } from 'did-jwt';
+import { createJWS } from 'did-jwt'
+import { Resolver } from 'did-resolver'
+import keyresolver from 'key-did-resolver'
+import { rejects } from 'assert'
+
+const registry = { ...keyresolver.getResolver() }
+const supportedMethods = Object.keys(registry)
+const resolver = new Resolver(registry);
 
 (async () => {
   const keyPair = curve.generateSeedKeyPair('responder')
@@ -17,8 +24,8 @@ import { createJWS } from 'did-jwt';
     image: 'https://www.example.com/logo.png'
   }
 
-  const slash = await Core()
-  const auth = await Auth(slash)
+  const node = await Core()
+  const auth = await Auth(node)
 
   test('Issue a new ticket URL', async (t) => {
     const url = new URL(
@@ -51,7 +58,11 @@ import { createJWS } from 'did-jwt';
       ticket
     )
 
-    const verifiedResponse = await verifyJWS(response.body)
+    const verifiedResponse = await verifyJWS(
+      response.body.toString(),
+      resolver,
+      supportedMethods
+    )
 
     t.deepEqual(verifiedResponse, {
       peer: {
@@ -59,24 +70,6 @@ import { createJWS } from 'did-jwt';
         ...metadata
       },
       sfp: sessionFingerPrint
-    })
-  })
-
-  test('VerifyJWS: should throw an error for unavailable did methods', async (t) => {
-    const jws = await createJWS(
-      {
-        peer: {
-          '@id': 'did:notkey:foobar',
-          ...metadata
-        },
-        handshakeHash: Buffer.from('')
-      },
-      signers.ES256K(keyPair.secretKey)
-    )
-
-    await t.throwsAsync(async () => verifyJWS(jws), {
-      message:
-        'Unsupported did method: did method should be one of: ["key"], instead got "notkey"'
     })
   })
 
@@ -360,6 +353,59 @@ import { createJWS } from 'did-jwt';
           message: 'Ticket "" not found'
         },
         id: 0,
+        jsonrpc: '2.0'
+      })
+    }
+  })
+
+  test('Accept other did resolvers', async (t) => {
+    const node = await Core()
+    const auth = await Auth(node, {
+      didResolverRegistry: {
+        key: async () => {
+          throw new Error('override didResolverRegistry')
+        }
+      }
+    })
+
+    const url = new URL(
+      auth.issueURL({ respondAs: { signer: { keyPair }, metadata } })
+    )
+
+    const ticket = url.searchParams.get('tkt')
+    let res = varint.split(base32.decode(url.hostname))
+    res = varint.split(res[1])
+
+    const serverPublicKey = Buffer.from(res[1])
+
+    const node2 = await Core()
+    await node2.request(serverPublicKey, 'ACT1_INIT', { tkt: ticket })
+
+    const keyPairInitiator = curve.generateSeedKeyPair('initiator')
+
+    const jws = await createJWS(
+      {
+        peer: { '@id': didKeyFromPubKey(keyPairInitiator.publicKey) },
+        sfp: await sessionFingerprint(
+          Array.from(node2._openSockets.values())[0],
+          ticket
+        )
+      },
+      signers.ES256K(keyPairInitiator.secretKey)
+    )
+
+    try {
+      await node2.request(serverPublicKey, 'ACT1_VERIFY', {
+        jws,
+        tkt: ticket
+      })
+    } catch (error) {
+      t.deepEqual(error, {
+        error: {
+          code: -32000,
+          message: 'override didResolverRegistry'
+        },
+        id: 1,
         jsonrpc: '2.0'
       })
     }
