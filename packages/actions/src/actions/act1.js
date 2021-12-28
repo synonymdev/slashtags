@@ -11,18 +11,26 @@ import {
  * @param {SlashtagsRPC} params.node
  * @param {Uint8Array} params.address
  * @param {CallBacks} params.callbacks
- * @param {string} params.action
  * @param {string} params.tkt
+ * @param {import('did-resolver').Resolver} params.resolver
+ * @param {string[]} params.supportedMethods
  * @returns
  */
-export const ACT1 = async ({ node, address, callbacks, action, tkt }) => {
+export const ACT1 = async ({
+  node,
+  address,
+  callbacks,
+  tkt,
+  resolver,
+  supportedMethods
+}) => {
   const response = await node.request(address, 'ACT1_INIT', { tkt })
 
   const sfp = await sessionFingerprint(response, tkt)
 
   /** @type {{peer: Peer, sfp: string }} */
   // @ts-ignore
-  const payload = await verifyJWS(response.body)
+  const payload = await verifyJWS(response.body, resolver, supportedMethods)
   const remote = payload.peer
 
   if (payload.sfp !== sfp) throw new Error('InvalidSessionFingerprint')

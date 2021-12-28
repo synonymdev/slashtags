@@ -41,9 +41,9 @@ export const sessionFingerprint = (request, ticket = '') => {
  *
  * @param {string} jws
  * @param {import('did-resolver').Resolver} resolver
- * @param {string[]} supportedMethod
+ * @param {string[]} supportedMethods
  */
-export const verifyJWS = async (jws, resolver, supportedMethod) => {
+export const verifyJWS = async (jws, resolver, supportedMethods) => {
   const { payload } = decodeJWT(jws)
 
   const id = payload.peer?.['@id']
@@ -55,7 +55,7 @@ export const verifyJWS = async (jws, resolver, supportedMethod) => {
   if (did.didResolutionMetadata.error) {
     throw new Error(
       `Unsupported did method: did method should be one of: ${JSON.stringify(
-        supportedMethod
+        supportedMethods
       )}, instead got "${id.slice(4).replace(/:.*$/, '')}"`
     )
   }

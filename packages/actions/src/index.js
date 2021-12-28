@@ -1,6 +1,8 @@
 import { base32 } from 'multiformats/bases/base32'
 import { varint } from '@synonymdev/slashtags-common'
 import { ACT1 } from './actions/act1.js'
+import keyresolver from 'key-did-resolver'
+import { Resolver } from 'did-resolver'
 
 /**
  * @param {string} address
@@ -36,9 +38,12 @@ const parseUrl = (url) => {
 
 /**
  * @param {SlashtagsRPC} node
+ * @param {object} [opts]
+ * @param {object} [opts.auth]
+ * @param {ResolverRegistry} [opts.auth.didResolverRegistry]
  * @returns
  */
-export const Actions = (node) => {
+export const Actions = (node, opts) => {
   const supportedActions = ['ACT1']
 
   /**
@@ -86,15 +91,22 @@ export const Actions = (node) => {
         })
       }
     }
+    const registry = {
+      ...keyresolver.getResolver(),
+      ...opts?.auth?.didResolverRegistry
+    }
+    const supportedMethods = Object.keys(registry)
+    const resolver = new Resolver(registry)
 
     switch (action) {
       case 'ACT1':
         return ACT1({
           node,
           address,
-          action,
           tkt,
-          callbacks: _callbacks
+          callbacks: _callbacks,
+          resolver,
+          supportedMethods
         }).catch(handleCaughtErrors)
 
       default:
@@ -115,3 +127,4 @@ export const Actions = (node) => {
 /** @typedef {import ('./interfaces').CallBacks} CallBacks */
 /** @typedef {import ('./interfaces').ACT1_Callbacks} ACT1_Callbacks */
 /** @typedef {import ('./interfaces').OnError} OnError */
+/** @typedef {import('did-resolver').ResolverRegistry} ResolverRegistry */

@@ -8,7 +8,6 @@ import { sessionFingerprint, verifyJWS } from '../src/utils.js'
 import { createJWS } from 'did-jwt'
 import { Resolver } from 'did-resolver'
 import keyresolver from 'key-did-resolver'
-import { rejects } from 'assert'
 
 const registry = { ...keyresolver.getResolver() }
 const supportedMethods = Object.keys(registry)
