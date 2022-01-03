@@ -1,36 +1,32 @@
-import type { Signer } from 'did-jwt';
-
-import type { KeyPair } from '@synonymdev/slashtags-common';
+import type { KeyPair, JsonLdObject } from '@synonymdev/slashtags-common';
 export type { SlashtagsRPC } from '@synonymdev/slashtags-rpc';
-import type { WithContext, Person, Organization } from 'schema-dts';
+export type { JsonLdObject } from '@synonymdev/slashtags-common';
+import type { Thing, WithContext } from 'schema-dts';
 
-export type FeedInfo = {
-  name: string;
-  schema: string;
-  src: string;
+export declare type Profile = WithContext<Thing> & { '@id': string };
+
+export type Responder = {
+  profile: Profile;
+  keyPair: KeyPair;
+  keyPairType?: 'ES256K' | 'EdDSA';
 };
 
-export type VerifySuccess = {
-  feeds: FeedInfo[];
+export type InitialResponse = {
+  responder: Responder;
+  additionalItems?: JsonLdObject[];
 };
 
-export type Peer = PeerMetadata & { '@id': string };
+export type OnInit = () => Promise<InitialResponse> | InitialResponse;
 
-export type OnVerify = (peer: Peer) => VerifySuccess | Promise<VerifySuccess>;
-
-export type RespondAs = {
-  metadata: PeerMetadata;
-  signer: {
-    keyPair: KeyPair;
-    type?: 'ES256K' | 'EdDSA';
-  };
-};
+export type OnVerify = (
+  peer: Profile,
+  additionalItems?: JsonLdObject[],
+) => VerifySuccess | Promise<VerifySuccess>;
 
 export type TicketConfig = {
+  onInit: OnInit;
   onVerify?: OnVerify;
-  peer: Peer;
   sfp?: string;
-  signer: Signer;
 };
 
-export type PeerMetadata = WithContext<Person | Organization>;
+export type VerifySuccess = { additionalItems?: JsonLdObject[] };

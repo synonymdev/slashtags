@@ -33,8 +33,6 @@
   "dependencies": {
     "@synonymdev/slashtags-auth": "^0.3.0-alpha.6",
     "@synonymdev/slashtags-common": "^0.2.0-alpha.5",
-    "did-resolver": "^3.1.5",
-    "key-did-resolver": "^1.4.0",
     "multiformats": "^9.4.9"
   },
   "devDependencies": {

@@ -7,3 +7,14 @@ export type KeyPair = {
   publicKey: Buffer;
   secretKey: Buffer;
 };
+
+export interface JsonLdObject {
+  '@context': string;
+  '@id': string;
+  '@type': string;
+  [key: string]: JsonLdPrimitive | JsonLdPrimitive[];
+}
+
+export type JsonLdPrimitive = string | number | boolean | JsonLd | JSON;
+
+export type JsonLd = JsonLdObject | JsonLdObject[];

@@ -7,7 +7,6 @@
   "dependencies": {
     "@synonymdev/slashtags-auth": "^0.3.0-alpha.4",
     "@synonymdev/slashtags-rpc": "^0.1.0-alpha.4",
-    "fastify": "^3.22.1",
     "isomorphic-ws": "^4.0.1",
     "jsonrpc-lite": "^2.2.0",
     "noise-curve-tiny-secp": "^2.0.0",
@@ -19,7 +18,6 @@
     "node": "14.x"
   },
   "devDependencies": {
-    "nodemon": "^2.0.14",
-    "schema-dts": "^1.0.0"
+    "nodemon": "^2.0.14"
   }
 }

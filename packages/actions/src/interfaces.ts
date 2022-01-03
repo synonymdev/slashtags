@@ -1,12 +1,24 @@
-import type { FeedInfo, RespondAs, Peer } from '@synonymdev/slashtags-auth';
+import type { Profile, Responder } from '@synonymdev/slashtags-auth';
+import type { JsonLdObject } from '@synonymdev/slashtags-common';
+import type { SlashtagsAPI } from '@synonymdev/slashtags-core';
+
+export type ACT1_InitialResponseResult = {
+  initiator: Responder;
+  additionalItems?: JsonLdObject[];
+};
 
 export type ACT1_Callbacks = {
-  onRemoteVerified: (peer: Peer) => Promise<RespondAs> | RespondAs;
-  onLocalVerified?: (response: {
-    local: Peer;
-    remote: Peer;
-    feeds: FeedInfo[];
-  }) => Promise<void> | void;
+  onInitialResponse: (
+    remotePeer: Profile,
+    additionalItems?: JsonLdObject[],
+  ) => Promise<ACT1_InitialResponseResult> | ACT1_InitialResponseResult;
+  onConnection: (
+    connection: {
+      local: Profile;
+      remote: Profile;
+    },
+    additionalItems: JsonLdObject[],
+  ) => Promise<void> | void;
 };
 
 export type CallBacks = {
@@ -24,3 +36,11 @@ export type OnError = (error: {
   message?: string;
   url: string;
 }) => void | Promise<void>;
+
+export type ActionImplementation = (params: {
+  node: SlashtagsAPI;
+  address: Uint8Array;
+  callbacks: CallBacks;
+  tkt: string;
+  [key: string]: any;
+}) => Promise<void>;

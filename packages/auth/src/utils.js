@@ -1,6 +1,8 @@
 import { decodeJWT, verifyJWS as _verifyJWS } from 'did-jwt'
 import { base58btc } from 'multiformats/bases/base58'
 import { varint } from '@synonymdev/slashtags-common'
+import { Resolver } from 'did-resolver'
+import keyresolver from 'key-did-resolver'
 import * as u8a from 'uint8arrays'
 import createHmac from 'create-hmac'
 import createHash from 'create-hash'
@@ -40,15 +42,12 @@ export const sessionFingerprint = (request, ticket = '') => {
 /**
  *
  * @param {string} jws
+ * @param {string} id
  * @param {import('did-resolver').Resolver} resolver
  * @param {string[]} supportedMethods
  */
-export const verifyJWS = async (jws, resolver, supportedMethods) => {
+const verifyJWS = async (jws, id, resolver, supportedMethods) => {
   const { payload } = decodeJWT(jws)
-
-  const id = payload.peer?.['@id']
-
-  if (!id) throw new Error('Missing @id in jws')
 
   const did = await resolver.resolve(id)
 
@@ -69,4 +68,25 @@ export const verifyJWS = async (jws, resolver, supportedMethods) => {
   return payload
 }
 
-/** @typedef {import('did-jwt').Signer} Signer */
+/**
+ * @param {ResolverRegistry} [didResolverRegistry]
+ */
+export const verifyFactory = (didResolverRegistry) => {
+  const registry = {
+    ...keyresolver.getResolver(),
+    ...didResolverRegistry
+  }
+
+  const supportedMethods = Object.keys(registry)
+  const resolver = new Resolver(registry)
+
+  /**
+   * @param {string} jws
+   * @param {string} id
+   */
+  const verify = (jws, id) => verifyJWS(jws, id, resolver, supportedMethods)
+
+  return verify
+}
+
+/** @typedef {import('did-resolver').ResolverRegistry} ResolverRegistry */

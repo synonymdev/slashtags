@@ -1,4 +1,3 @@
-import { fastify } from 'fastify';
 import websocket from 'isomorphic-ws';
 import JsonRPC from 'simple-jsonrpc-js';
 import { metadata, keyPair } from './config.js';
@@ -6,12 +5,12 @@ import { RPC } from '@synonymdev/slashtags-rpc';
 import { Auth } from '@synonymdev/slashtags-auth';
 import jrpcLite from 'jsonrpc-lite';
 
-const app = fastify({ logger: true });
 const jrpc = new JsonRPC();
 const PORT = Number(process.env.PORT) || 9000;
 const hostanme = 'localhost' || 'slashtags.herokuapp.com';
 
 const main = async () => {
+  // Setting up slashtags node and the Auth module
   const node = await RPC();
   const auth = await Auth(node);
 
@@ -26,10 +25,19 @@ const main = async () => {
 
     // Get a url to show as a QR code
     jrpc.on('authUrl', [], () => {
+      // Main USAGE: Generate a url
       return auth.issueURL({
-        respondAs: { signer: { keyPair, type: 'ES256K' }, metadata },
-        onTimeout: () =>
-          socket.send(jrpcLite.notification('authUrlExpired').serialize()),
+        InitialResponse: {
+          peer: {
+            id: 'did:key:z6CXqY9QQX5xgjQZQjQKXyQ',
+            signer: { keyPair, type: 'ES256K' },
+            metadata,
+          },
+          foo: 'bar',
+        },
+        onTimeout: () => {
+          socket.send(jrpcLite.notification('authUrlExpired').serialize());
+        },
         onVerify: (user) => {
           socket.send(
             jrpcLite.notification('userAuthenticated', { user }).serialize(),
@@ -37,15 +45,11 @@ const main = async () => {
 
           return {
             status: 'OK',
-            feeds: [{ name: 'bar', schema: '', src: '' }],
+            foo: 'bar',
           };
         },
       });
     });
-  });
-
-  app.listen(PORT, function (err, address) {
-    console.log(`Server is now listenng on ${address}`);
   });
 };
 

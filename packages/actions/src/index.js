@@ -1,8 +1,7 @@
 import { base32 } from 'multiformats/bases/base32'
 import { varint } from '@synonymdev/slashtags-common'
 import { ACT1 } from './actions/act1.js'
-import keyresolver from 'key-did-resolver'
-import { Resolver } from 'did-resolver'
+import { verifyFactory } from '@synonymdev/slashtags-auth'
 
 /**
  * @param {string} address
@@ -39,8 +38,7 @@ const parseUrl = (url) => {
 /**
  * @param {SlashtagsRPC} node
  * @param {object} [opts]
- * @param {object} [opts.auth]
- * @param {ResolverRegistry} [opts.auth.didResolverRegistry]
+ * @param {ResolverRegistry} [opts.didResolverRegistry]
  * @returns
  */
 export const Actions = (node, opts) => {
@@ -91,12 +89,7 @@ export const Actions = (node, opts) => {
         })
       }
     }
-    const registry = {
-      ...keyresolver.getResolver(),
-      ...opts?.auth?.didResolverRegistry
-    }
-    const supportedMethods = Object.keys(registry)
-    const resolver = new Resolver(registry)
+    const verify = verifyFactory(opts?.didResolverRegistry)
 
     switch (action) {
       case 'ACT1':
@@ -105,8 +98,7 @@ export const Actions = (node, opts) => {
           address,
           tkt,
           callbacks: _callbacks,
-          resolver,
-          supportedMethods
+          verify
         }).catch(handleCaughtErrors)
 
       default:

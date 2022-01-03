@@ -1,22 +1,24 @@
 import test from 'ava'
-import { Auth, signers, didKeyFromPubKey } from '../src/index.js'
+import { Auth } from '../src/index.js'
+import { signers } from '../src/signers.js'
+import {
+  didKeyFromPubKey,
+  sessionFingerprint,
+  verifyFactory
+} from '../src/utils.js'
 import { varint } from '@synonymdev/slashtags-common'
 import { base32 } from 'multiformats/bases/base32'
 import { Core } from '@synonymdev/slashtags-core'
 import { secp256k1 as curve } from 'noise-curve-tiny-secp'
-import { sessionFingerprint, verifyJWS } from '../src/utils.js'
 import { createJWS } from 'did-jwt'
-import { Resolver } from 'did-resolver'
-import keyresolver from 'key-did-resolver'
 
-const registry = { ...keyresolver.getResolver() }
-const supportedMethods = Object.keys(registry)
-const resolver = new Resolver(registry);
+const verify = verifyFactory();
 
 (async () => {
   const keyPair = curve.generateSeedKeyPair('responder')
-  /** @type {import ('../src/interfaces').PeerMetadata} */
-  const metadata = {
+  /** @type {import ('../src/interfaces').Profile} */
+  const profile = {
+    '@id': null,
     '@context': 'https://schema.org',
     '@type': 'Person',
     name: 'responder name',
@@ -28,7 +30,7 @@ const resolver = new Resolver(registry);
 
   test('Issue a new ticket URL', async (t) => {
     const url = new URL(
-      auth.issueURL({ respondAs: { signer: { keyPair }, metadata } })
+      auth.issueURL({ onInit: () => ({ responder: { keyPair, profile } }) })
     )
 
     t.deepEqual(url.protocol, 'slash:')
@@ -38,7 +40,7 @@ const resolver = new Resolver(registry);
 
   test('Redeem ticket URL', async (t) => {
     const url = new URL(
-      auth.issueURL({ respondAs: { signer: { keyPair }, metadata } })
+      auth.issueURL({ onInit: () => ({ responder: { keyPair, profile } }) })
     )
 
     const ticket = url.searchParams.get('tkt')
@@ -52,44 +54,36 @@ const resolver = new Resolver(registry);
       tkt: ticket
     })
 
-    const sessionFingerPrint = await sessionFingerprint(
+    const validSFP = await sessionFingerprint(
       Array.from(node2._openSockets.values())[0],
       ticket
     )
 
-    const verifiedResponse = await verifyJWS(
-      response.body.toString(),
-      resolver,
-      supportedMethods
+    const verifiedResponse = await verify(
+      response.body.proof,
+      'did:key:zQ3shvrGQ5dRfTgG2ukXJqkgHeopnickw1FANCNcSojQyKyat'
     )
 
-    t.deepEqual(verifiedResponse, {
-      peer: {
-        '@id': 'did:key:zQ3shvrGQ5dRfTgG2ukXJqkgHeopnickw1FANCNcSojQyKyat',
-        ...metadata
-      },
-      sfp: sessionFingerPrint
-    })
+    t.deepEqual(verifiedResponse, { sfp: validSFP })
   })
 
   test('Clear callbacks after timeout', async (t) => {
     const ticketConfig = {
       peer: {
-        ...metadata,
+        ...profile,
         '@id': 'did:key:zQ3shvrGQ5dRfTgG2ukXJqkgHeopnickw1FANCNcSojQyKyat'
       }
     }
 
     const url = new URL(
       auth.issueURL({
-        respondAs: { signer: { keyPair }, metadata },
+        onInit: () => ({ responder: { keyPair, profile } }),
         onVerify: ticketConfig.onVerify,
         timeout: 200
       })
     )
-    const ticket = url.searchParams.get('tkt')
 
-    t.deepEqual(auth._ticketConfigs.get(ticket).peer, ticketConfig.peer)
+    const ticket = url.searchParams.get('tkt')
 
     await new Promise((resolve) =>
       setTimeout(() => {
@@ -102,25 +96,7 @@ const resolver = new Resolver(registry);
 
   test('ACT1_VERIFY: valid signature', async (t) => {
     const url = new URL(
-      auth.issueURL({
-        respondAs: { signer: { keyPair }, metadata },
-        onVerify: (peer) => {
-          return {
-            feeds: [
-              {
-                name: 'feed1',
-                schema: 'slash://someschema/',
-                src: 'slash://feed1/'
-              },
-              {
-                name: 'feed2',
-                schema: 'slash://someotherschema/',
-                src: 'slash://feed2/'
-              }
-            ]
-          }
-        }
-      })
+      auth.issueURL({ onInit: () => ({ responder: { keyPair, profile } }) })
     )
 
     const ticket = url.searchParams.get('tkt')
@@ -133,17 +109,9 @@ const resolver = new Resolver(registry);
     await node2.request(serverPublicKey, 'ACT1_INIT', { tkt: ticket })
 
     const keyPairInitiator = curve.generateSeedKeyPair('initiator')
-    const metadataInitiator = {
-      name: 'initiator name',
-      image: 'https://www.example.com/logo2.png'
-    }
 
     const jws = await createJWS(
       {
-        peer: {
-          '@id': didKeyFromPubKey(keyPairInitiator.publicKey),
-          metadata: metadataInitiator
-        },
         sfp: await sessionFingerprint(
           Array.from(node2._openSockets.values())[0],
           ticket
@@ -154,32 +122,22 @@ const resolver = new Resolver(registry);
 
     const response = await node2.request(serverPublicKey, 'ACT1_VERIFY', {
       jws,
-      tkt: ticket
+      tkt: ticket,
+      profile: {
+        '@id': didKeyFromPubKey(keyPairInitiator.publicKey),
+        '@context': 'https://schema.org',
+        '@type': 'Person',
+        name: 'responder name',
+        image: 'https://www.example.com/logo.png'
+      }
     })
 
-    t.deepEqual(response.body, {
-      feeds: [
-        {
-          name: 'feed1',
-          schema: 'slash://someschema/',
-          src: 'slash://feed1/'
-        },
-        {
-          name: 'feed2',
-          schema: 'slash://someotherschema/',
-          src: 'slash://feed2/'
-        }
-      ],
-      status: 'OK'
-    })
+    t.deepEqual(response.body, { status: 'OK' })
   })
 
   test('invalid session fingerprint', async (t) => {
     const url = new URL(
-      auth.issueURL({
-        respondAs: { signer: { keyPair }, metadata },
-        onVerify: () => {}
-      })
+      auth.issueURL({ onInit: () => ({ responder: { keyPair, profile } }) })
     )
 
     const ticket = url.searchParams.get('tkt')
@@ -191,17 +149,9 @@ const resolver = new Resolver(registry);
     const node2 = await Core()
 
     const keyPairInitiator = curve.generateSeedKeyPair('initiator')
-    const metadataInitiator = {
-      name: 'initiator name',
-      image: 'https://www.example.com/logo2.png'
-    }
 
     const jws = await createJWS(
       {
-        peer: {
-          '@id': didKeyFromPubKey(keyPairInitiator.publicKey),
-          metadata: metadataInitiator
-        },
         sfp: await sessionFingerprint(
           { noiseSocket: { handshakeHash: Buffer.from('wrong') } },
           ticket
@@ -213,7 +163,14 @@ const resolver = new Resolver(registry);
     try {
       await node2.request(serverPublicKey, 'ACT1_VERIFY', {
         jws,
-        tkt: ticket
+        tkt: ticket,
+        profile: {
+          '@id': didKeyFromPubKey(keyPairInitiator.publicKey),
+          '@context': 'https://schema.org',
+          '@type': 'Person',
+          name: 'responder name',
+          image: 'https://www.example.com/logo.png'
+        }
       })
     } catch (error) {
       t.deepEqual(error, {
@@ -229,7 +186,7 @@ const resolver = new Resolver(registry);
 
   test('Redeem ticket: Missing param tkt', async (t) => {
     const url = new URL(
-      auth.issueURL({ respondAs: { signer: { keyPair }, metadata } })
+      auth.issueURL({ onInit: () => ({ responder: { keyPair, profile } }) })
     )
 
     let res = varint.split(base32.decode(url.hostname))
@@ -255,7 +212,7 @@ const resolver = new Resolver(registry);
 
   test('Redeem ticket: ticket not found', async (t) => {
     const url = new URL(
-      auth.issueURL({ respondAs: { signer: { keyPair }, metadata } })
+      auth.issueURL({ onInit: () => ({ responder: { keyPair, profile } }) })
     )
 
     let res = varint.split(base32.decode(url.hostname))
@@ -281,7 +238,7 @@ const resolver = new Resolver(registry);
 
   test('verifyJWS: Missing param: tkt', async (t) => {
     const url = new URL(
-      auth.issueURL({ respondAs: { signer: { keyPair }, metadata } })
+      auth.issueURL({ onInit: () => ({ responder: { keyPair, profile } }) })
     )
 
     let res = varint.split(base32.decode(url.hostname))
@@ -307,7 +264,7 @@ const resolver = new Resolver(registry);
 
   test('verifyJWS: Missing param: jws', async (t) => {
     const url = new URL(
-      auth.issueURL({ respondAs: { signer: { keyPair }, metadata } })
+      auth.issueURL({ onInit: () => ({ responder: { keyPair, profile } }) })
     )
 
     let res = varint.split(base32.decode(url.hostname))
@@ -333,7 +290,7 @@ const resolver = new Resolver(registry);
 
   test('verifyJWS:  ticket not found', async (t) => {
     const url = new URL(
-      auth.issueURL({ respondAs: { signer: { keyPair }, metadata } })
+      auth.issueURL({ onInit: () => ({ responder: { keyPair, profile } }) })
     )
 
     let res = varint.split(base32.decode(url.hostname))
@@ -344,12 +301,46 @@ const resolver = new Resolver(registry);
     const node2 = await Core()
 
     try {
-      await node2.request(serverPublicKey, 'ACT1_VERIFY', { tkt: '', jws: '' })
+      await node2.request(serverPublicKey, 'ACT1_VERIFY', {
+        tkt: '',
+        jws: '',
+        profile: { '@id': 'x' }
+      })
     } catch (error) {
       t.deepEqual(error, {
         error: {
           code: -32000,
           message: 'Ticket "" not found'
+        },
+        id: 0,
+        jsonrpc: '2.0'
+      })
+    }
+  })
+
+  test('verifyJWS: id not found', async (t) => {
+    const url = new URL(
+      auth.issueURL({ onInit: () => ({ responder: { keyPair, profile } }) })
+    )
+
+    let res = varint.split(base32.decode(url.hostname))
+    res = varint.split(res[1])
+
+    const serverPublicKey = Buffer.from(res[1])
+
+    const node2 = await Core()
+
+    try {
+      await node2.request(serverPublicKey, 'ACT1_VERIFY', {
+        tkt: '',
+        jws: '',
+        profile: {}
+      })
+    } catch (error) {
+      t.deepEqual(error, {
+        error: {
+          code: -32000,
+          message: 'Missing param: profile["@id"]'
         },
         id: 0,
         jsonrpc: '2.0'
@@ -368,7 +359,7 @@ const resolver = new Resolver(registry);
     })
 
     const url = new URL(
-      auth.issueURL({ respondAs: { signer: { keyPair }, metadata } })
+      auth.issueURL({ onInit: () => ({ responder: { keyPair, profile } }) })
     )
 
     const ticket = url.searchParams.get('tkt')
@@ -384,7 +375,6 @@ const resolver = new Resolver(registry);
 
     const jws = await createJWS(
       {
-        peer: { '@id': didKeyFromPubKey(keyPairInitiator.publicKey) },
         sfp: await sessionFingerprint(
           Array.from(node2._openSockets.values())[0],
           ticket
@@ -396,7 +386,14 @@ const resolver = new Resolver(registry);
     try {
       await node2.request(serverPublicKey, 'ACT1_VERIFY', {
         jws,
-        tkt: ticket
+        tkt: ticket,
+        profile: {
+          '@id': didKeyFromPubKey(keyPairInitiator.publicKey),
+          '@context': 'https://schema.org',
+          '@type': 'Person',
+          name: 'responder name',
+          image: 'https://www.example.com/logo.png'
+        }
       })
     } catch (error) {
       t.deepEqual(error, {

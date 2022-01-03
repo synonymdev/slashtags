@@ -1,5 +1,9 @@
 import { signers } from './signers.js'
-import { didKeyFromPubKey, verifyJWS, sessionFingerprint } from './utils.js'
+import {
+  didKeyFromPubKey,
+  verifyFactory,
+  sessionFingerprint
+} from './utils.js'
 import { Auth } from './auth.js'
 import { createJWS } from 'did-jwt'
 
@@ -7,12 +11,10 @@ export {
   signers,
   Auth,
   didKeyFromPubKey,
-  verifyJWS,
+  verifyFactory,
   sessionFingerprint,
   createJWS
 }
 
-/** @typedef {import ('./interfaces').FeedInfo} FeedInfo */
-/** @typedef {import ('./interfaces').RespondAs} RespondAs */
-/** @typedef {import ('./interfaces').PeerMetadata} PeerMetadata */
-/** @typedef {import ('./interfaces').Peer} Peer */
+/** @typedef {import ('./interfaces').Profile} Profile */
+/** @typedef {import ('./interfaces').Responder} Responder */
