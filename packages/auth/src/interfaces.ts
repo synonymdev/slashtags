@@ -5,14 +5,14 @@ import type { Thing, WithContext } from 'schema-dts';
 
 export declare type Profile = WithContext<Thing> & { '@id': string };
 
-export type Responder = {
+export type PeerConfig = {
   profile: Profile;
   keyPair: KeyPair;
   keyPairType?: 'ES256K' | 'EdDSA';
 };
 
 export type InitialResponse = {
-  responder: Responder;
+  responder: PeerConfig;
   additionalItems?: JsonLdObject[];
 };
 

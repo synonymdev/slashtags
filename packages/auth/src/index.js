@@ -17,4 +17,4 @@ export {
 }
 
 /** @typedef {import ('./interfaces').Profile} Profile */
-/** @typedef {import ('./interfaces').Responder} Responder */
+/** @typedef {import ('./interfaces').PeerConfig} PeerConfig */

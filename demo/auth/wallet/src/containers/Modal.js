@@ -1,4 +1,3 @@
-//@ts-nocheck
 import { useContext, useState } from 'react';
 import { StoreContext, types } from '../store';
 import { Sheet } from '../components/Sheet';
@@ -6,24 +5,30 @@ import { Card } from '../components/Card';
 import { secp256k1 as curve } from 'noise-curve-tiny-secp';
 import { didKeyFromPubKey } from '@synonymdev/slashtags-auth';
 
+/** @returns {import ('@synonymdev/slashtags-auth').PeerConfig} */
 const anonymous = (seed) => {
   const keyPair = curve.generateSeedKeyPair(seed);
   const id = didKeyFromPubKey(keyPair.publicKey);
+
   return {
-    id,
-    signer: { keyPair },
-    metadata: { '@id': id },
+    profile: {
+      '@context': 'https://schema.org',
+      '@type': 'Person',
+      '@id': id,
+    },
+    keyPair,
   };
 };
 
 const Login = ({ data, cancel, resolve }) => {
   const [anon, setAnon] = useState(true);
-  const [profile, setProfile] = useState(anonymous(data['@id']));
+  const [persona, setPersona] = useState(anonymous(data['@id']));
   const { store, dispatch } = useContext(StoreContext);
 
-  const submit = () => {
-    resolve(profile);
-  };
+  /** @param {import ('@synonymdev/slashtags-actions').ACT1_InitialResponseResult} x*/
+  const respondToAuth = (x) => resolve(x);
+
+  const submit = () => respondToAuth({ initiator: persona });
 
   return (
     <div className="login-modal">
@@ -34,7 +39,7 @@ const Login = ({ data, cancel, resolve }) => {
         <button
           onClick={() => {
             setAnon(true);
-            setProfile(anonymous(data.id));
+            setPersona(anonymous(data.id));
           }}
           className={'btn ' + (anon ? 'active' : '')}
         >
@@ -43,7 +48,7 @@ const Login = ({ data, cancel, resolve }) => {
         <button
           onClick={() => {
             setAnon(false);
-            setProfile(store.profiles[0]);
+            setPersona(store.personas[0]);
           }}
           className={'btn ' + (!anon ? 'active' : '')}
         >
@@ -58,18 +63,24 @@ const Login = ({ data, cancel, resolve }) => {
         <p className="anon-description">Select an existing profile.</p>
       )}
       {!anon &&
-        store.profiles.map((p, id) => {
-          return (
-            <Card
-              key={p.id}
-              profile={p.metadata}
-              className={
-                p.id === profile.id ? 'active login-profile' : 'login-profile'
-              }
-              onClick={() => setProfile(p)}
-            ></Card>
-          );
-        })}
+        store.personas.map(
+          /** @param {import ('@synonymdev/slashtags-auth').PeerConfig} p*/
+          (p, id) => {
+            console.log({ p, persona });
+            return (
+              <Card
+                key={p['@id']}
+                profile={p.profile}
+                className={
+                  p.profile['@id'] === persona.profile['@id']
+                    ? 'active login-profile'
+                    : 'login-profile'
+                }
+                onClick={() => setPersona(p)}
+              ></Card>
+            );
+          },
+        )}
 
       <div className="footer">
         <button className="cancel btn" onClick={cancel}>

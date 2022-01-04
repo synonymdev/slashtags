@@ -6,24 +6,25 @@ import { didKeyFromPubKey } from '@synonymdev/slashtags-auth';
 export const initialValue = {
   view: 'home',
   prompt: null,
-  profiles: Array(3)
+  personas: Array(3)
     .fill(0)
-    .map((_, i) => {
-      const keyPair = curve.generateSeedKeyPair(i.toString());
-      const id = didKeyFromPubKey(keyPair.publicKey);
-      return {
-        id,
-        signer: { keyPair },
-        metadata: {
-          '@context': 'https://www.schema.org/',
-          '@type': 'Person',
-          '@id': id,
-          name: faker.name.findName(),
-          image: faker.image.avatar(),
-          url: faker.internet.url(),
-        },
-      };
-    }),
+    .map(
+      /** @returns {import ('@synonymdev/slashtags-auth').PeerConfig} */
+      (_, i) => {
+        const keyPair = curve.generateSeedKeyPair(i.toString());
+        const id = didKeyFromPubKey(keyPair.publicKey);
+        return {
+          keyPair,
+          profile: {
+            '@context': 'https://schema.org',
+            '@type': 'Person',
+            '@id': id,
+            name: faker.name.findName(),
+            url: faker.internet.url(),
+          },
+        };
+      },
+    ),
   accounts: {},
 };
 

@@ -1,8 +1,11 @@
 import { secp256k1 as curve } from 'noise-curve-tiny-secp';
+import { didKeyFromPubKey } from '@synonymdev/slashtags-auth';
 
-export const keyPair = curve.generateSeedKeyPair('server keys');
+export const serverKeyPair = curve.generateSeedKeyPair('server keys');
 
-export const metadata = {
+/** @type {Profile} */
+export const serverProfile = {
+  id: didKeyFromPubKey(serverKeyPair.publicKey),
   '@context': 'https://schema.org',
   '@type': 'Person',
   name: 'Slashtags Demo',
@@ -15,4 +18,4 @@ export const metadata = {
   },
 };
 
-/** @typedef {import ('@synonymdev/slashtags-auth').RespondAs['metadata']} Metadata */
+/** @typedef {import ('@synonymdev/slashtags-auth').Profile} Profile */

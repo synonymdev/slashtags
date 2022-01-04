@@ -1,9 +1,9 @@
-import type { Profile, Responder } from '@synonymdev/slashtags-auth';
+import type { Profile, PeerConfig } from '@synonymdev/slashtags-auth';
 import type { JsonLdObject } from '@synonymdev/slashtags-common';
 import type { SlashtagsAPI } from '@synonymdev/slashtags-core';
 
 export type ACT1_InitialResponseResult = {
-  initiator: Responder;
+  initiator: PeerConfig;
   additionalItems?: JsonLdObject[];
 };
 

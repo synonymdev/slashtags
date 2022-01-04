@@ -1,5 +1,5 @@
 import { Template } from '../containers/Template';
-import { RPC } from '@synonymdev/slashtags-rpc';
+import { Core } from '@synonymdev/slashtags-core';
 import { Actions } from '@synonymdev/slashtags-actions';
 import { useContext } from 'react';
 import { StoreContext, types } from '../store';
@@ -11,7 +11,9 @@ export const ScanQRPage = () => {
 
   const pasteClipboard = async () => {
     if (!actions) {
-      const node = await RPC({ relays: ['ws://testnet3.hyperdht.org:8910'] });
+      const node = await Core({
+        rpc: { relays: ['ws://testnet3.hyperdht.org:8910'] },
+      });
       actions = Actions(node);
     }
 
@@ -24,26 +26,27 @@ export const ScanQRPage = () => {
         {
           /** @type {import ('@synonymdev/slashtags-actions').ACT1_Callbacks} */
           ACT1: {
-            onRemoteVerified: async (peer) => {
+            onResponse: async (remotePeer) => {
               return new Promise((resolve) => {
                 dispatch({
                   type: types.SET_PROMPT,
-                  prompt: { type: 'login', resolve, data: peer },
+                  prompt: { type: 'login', resolve, data: remotePeer },
                 });
               });
             },
-            onLocalVerified: ({ local, remote }) => {
+            onSuccess: (connection) => {
               dispatch({
                 type: types.ADD_ACCOUNT,
                 account: {
-                  service: remote,
-                  profile: local,
+                  service: connection.remote,
+                  profile: connection.local,
                 },
               });
             },
           },
         },
         (error) => {
+          console.log(error);
           dispatch({
             type: types.SET_PROMPT,
             prompt: { type: 'error', error: error.message || error.code },

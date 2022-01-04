@@ -1,17 +1,19 @@
 import websocket from 'isomorphic-ws';
 import JsonRPC from 'simple-jsonrpc-js';
-import { metadata, keyPair } from './config.js';
-import { RPC } from '@synonymdev/slashtags-rpc';
+import { serverProfile, serverKeyPair } from './config.js';
+import { Core } from '@synonymdev/slashtags-core';
 import { Auth } from '@synonymdev/slashtags-auth';
 import jrpcLite from 'jsonrpc-lite';
+import { fastify } from 'fastify';
 
+const app = fastify({ logger: true });
 const jrpc = new JsonRPC();
 const PORT = Number(process.env.PORT) || 9000;
 const hostanme = 'localhost' || 'slashtags.herokuapp.com';
 
 const main = async () => {
   // Setting up slashtags node and the Auth module
-  const node = await RPC();
+  const node = await Core();
   const auth = await Auth(node);
 
   // Websocket server
@@ -27,17 +29,24 @@ const main = async () => {
     jrpc.on('authUrl', [], () => {
       // Main USAGE: Generate a url
       return auth.issueURL({
-        InitialResponse: {
-          peer: {
-            id: 'did:key:z6CXqY9QQX5xgjQZQjQKXyQ',
-            signer: { keyPair, type: 'ES256K' },
-            metadata,
+        onTimeout: () =>
+          socket.send(jrpcLite.notification('authUrlExpired').serialize()),
+        onRequest: () => ({
+          responder: {
+            keyPair: serverKeyPair,
+            profile: serverProfile,
           },
-          foo: 'bar',
-        },
-        onTimeout: () => {
-          socket.send(jrpcLite.notification('authUrlExpired').serialize());
-        },
+          additionalItems: [
+            {
+              '@context': 'https://bitfinex.som/schemas/',
+              '@type': '2FA_OTP_FORM',
+              '@id': 'https://bitfinex.com/schemas/2FA_OTP_FORM.json',
+              schema: {
+                $schema: '...',
+              },
+            },
+          ],
+        }),
         onVerify: (user) => {
           socket.send(
             jrpcLite.notification('userAuthenticated', { user }).serialize(),
@@ -45,11 +54,22 @@ const main = async () => {
 
           return {
             status: 'OK',
-            foo: 'bar',
+            additionalItems: [
+              {
+                '@context': 'https://bitfinex.som/schemas/',
+                '@type': 'HC_Feeds',
+                '@id': 'https://bitfinex.com/feeds/user#1',
+                feeds: ['123...def', 'def...123'],
+              },
+            ],
           };
         },
       });
     });
+  });
+
+  app.listen(PORT, function (err, address) {
+    console.log(`Server is now listenng on ${address}`);
   });
 };
 
