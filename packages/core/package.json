@@ -1,6 +1,6 @@
 {
   "name": "@synonymdev/slashtags-core",
-  "version": "0.1.0-alpha.6",
+  "version": "0.1.0-alpha.7",
   "description": "Core implementation of Slashtags protocol in JS",
   "type": "module",
   "keywords": [
@@ -32,6 +32,6 @@
     "prepublishOnly": "npm run lint && npm run build && npm run test && dependency-check dist --no-dev"
   },
   "dependencies": {
-    "@synonymdev/slashtags-rpc": "^0.1.0-alpha.7"
+    "@synonymdev/slashtags-rpc": "^0.1.0-alpha.8"
   }
 }
