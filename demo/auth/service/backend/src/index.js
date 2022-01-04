@@ -38,7 +38,7 @@ const main = async () => {
           },
           additionalItems: [
             {
-              '@context': 'https://bitfinex.som/schemas/',
+              '@context': 'https://bitfinex.com/schemas/',
               '@type': '2FA_OTP_FORM',
               '@id': 'https://bitfinex.com/schemas/2FA_OTP_FORM.json',
               schema: {
@@ -56,7 +56,7 @@ const main = async () => {
             status: 'OK',
             additionalItems: [
               {
-                '@context': 'https://bitfinex.som/schemas/',
+                '@context': 'https://bitfinex.com/schemas/',
                 '@type': 'HC_Feeds',
                 '@id': 'https://bitfinex.com/feeds/user#1',
                 feeds: ['123...def', 'def...123'],

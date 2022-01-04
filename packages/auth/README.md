@@ -32,17 +32,26 @@ const auth = await Auth(node);
 
 ```javascript
 auth.issueURL({
-  respondAs: { signer: { keyPair, type: 'ES256K' }, metadata },
+  // Do something when url expires (optional)
   onTimeout: () => {},
-  onVerify: (user) => {
-    // Do something with user information
+  onRequest: () => ({
+    responder: {
+      keyPair, // {publicKey, secretKey}
+      profile, // A Thing (see schema.org)
+    },
+    // Optional additional items to be sent to the user _before_ authentication
+    additionalItems: [],
+  }),
+  onVerify: (
+    profile, // Initiator's profile
+    additionalItems, // Optional additionalItems from the Initiator
+  ) => {
+    // Do something with authenticated user information
 
     return {
       status: 'OK',
-      feeds: [
-        // TODO: update documentation for feeds
-        // Feeds
-      ],
+      // Optional additional items to be sent to the user _after_ authentication
+      additionalItems: [],
     };
   },
 });

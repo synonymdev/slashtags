@@ -36,26 +36,30 @@ await actions.handle(
   scannedURL,
   {
     ACT1: {
-      onRemoteVerified: async (peer) => {
-        // Return the metadat and signer information after user prompting
-        return {
-          metadata,
-          signer: {
-            keyPair,
-            type: 'ES256K',
-          },
-        };
+      onResponse: (
+        profile, // Responder's profile
+        additionalItems, // Optional additionalItems from the authenticated Responder
+      ) => {
+        // Optionally Prompt the user to confirm the action,
+        //  and choose what persona to use for authentication
 
-        // Or return false if user rejected authenticating to the remote peer
-        return false;
+        return {
+          initiator: {
+            keyPair, // {publicKey, secretKey}
+            profile, // Initiator's profile A Thing (see schema.org)
+          },
+          // Optional additional items to be sent to the user _before_ authentication
+          additionalItems: [],
+        };
       },
-      onLocalVerified: ({ local, remote }) => {
-        // Use the remote peer (server or contact), and the local peer (profile used to auth) data as you see fit.
-      },
+      onSuccess: (
+        connection // {local: Initiator's profile, remote: Resopnder's profile}
+        additionalItems, // Optional additionalItems from the Responder _after_ authenticating the Initiator
+        ) => {},
     },
   },
   (error) => {
-    // display errors in UI
+    // Do something with unexpected erros (display in UI for example)
   },
 );
 ```
