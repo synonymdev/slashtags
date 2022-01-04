@@ -9,25 +9,29 @@ import {
 export const ACT1 = async ({ node, address, callbacks, tkt, verify }) => {
   const response = await node.request(address, 'ACT1_INIT', { tkt })
 
-  /** @type {{proof: string, profile: Profile, metadata: JsonLdObject[]}} */
+  /** @type {{proof: string, profile: Profile, additionalItems: JsonLdObject[]}} */
   // @ts-ignore
-  const { proof, profile: remote, metadata: initialMetadata } = response.body
+  const {
+    proof,
+    profile: responder,
+    additionalItems: responderAdditionalItems
+  } = response.body
 
   /** @type {{sfp: string}} */
-  const payload = await verify(proof, remote['@id'])
+  const payload = await verify(proof, responder['@id'])
 
   const sfp = await sessionFingerprint(response, tkt)
   if (payload.sfp !== sfp) throw new Error('InvalidSessionFingerprint')
 
   /** @type {ACT1_InitialResponseResult} */
-  const promptResponse = await callbacks.onInitialResponse?.(
-    remote,
-    initialMetadata
+  const promptAnswer = await callbacks.onResponse?.(
+    responder,
+    responderAdditionalItems
   )
 
   // User didn't reject authentication prompt
-  if (promptResponse) {
-    const initiator = promptResponse.initiator
+  if (promptAnswer) {
+    const initiator = promptAnswer.initiator
     const local = initiator.profile
 
     if (!local['@id']) {
@@ -44,16 +48,13 @@ export const ACT1 = async ({ node, address, callbacks, tkt, verify }) => {
       tkt,
       profile: local,
       // @ts-ignore
-      metadata: promptResponse.metadata
+      additionalItems: promptAnswer.additionalItems
     })
 
-    callbacks.onConnection?.(
-      {
-        local,
-        remote
-      },
+    callbacks.onSuccess?.(
+      { local, remote: responder },
       // @ts-ignore
-      verifiedResponse?.body?.metadata
+      verifiedResponse?.body?.additionalItems
     )
   }
 }

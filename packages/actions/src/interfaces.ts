@@ -8,11 +8,11 @@ export type ACT1_InitialResponseResult = {
 };
 
 export type ACT1_Callbacks = {
-  onInitialResponse: (
+  onResponse: (
     remotePeer: Profile,
     additionalItems?: JsonLdObject[],
   ) => Promise<ACT1_InitialResponseResult> | ACT1_InitialResponseResult;
-  onConnection: (
+  onSuccess: (
     connection: {
       local: Profile;
       remote: Profile;

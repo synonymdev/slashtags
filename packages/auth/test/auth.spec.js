@@ -30,7 +30,7 @@ const verify = verifyFactory();
 
   test('Issue a new ticket URL', async (t) => {
     const url = new URL(
-      auth.issueURL({ onInit: () => ({ responder: { keyPair, profile } }) })
+      auth.issueURL({ onRequest: () => ({ responder: { keyPair, profile } }) })
     )
 
     t.deepEqual(url.protocol, 'slash:')
@@ -40,7 +40,9 @@ const verify = verifyFactory();
 
   test('Redeem ticket URL', async (t) => {
     const url = new URL(
-      auth.issueURL({ onInit: () => ({ responder: { keyPair, profile } }) })
+      auth.issueURL({
+        onRequest: () => ({ responder: { keyPair, profile } })
+      })
     )
 
     const ticket = url.searchParams.get('tkt')
@@ -77,7 +79,7 @@ const verify = verifyFactory();
 
     const url = new URL(
       auth.issueURL({
-        onInit: () => ({ responder: { keyPair, profile } }),
+        onRequest: () => ({ responder: { keyPair, profile } }),
         onVerify: ticketConfig.onVerify,
         timeout: 200
       })
@@ -96,7 +98,7 @@ const verify = verifyFactory();
 
   test('ACT1_VERIFY: valid signature', async (t) => {
     const url = new URL(
-      auth.issueURL({ onInit: () => ({ responder: { keyPair, profile } }) })
+      auth.issueURL({ onRequest: () => ({ responder: { keyPair, profile } }) })
     )
 
     const ticket = url.searchParams.get('tkt')
@@ -137,7 +139,7 @@ const verify = verifyFactory();
 
   test('invalid session fingerprint', async (t) => {
     const url = new URL(
-      auth.issueURL({ onInit: () => ({ responder: { keyPair, profile } }) })
+      auth.issueURL({ onRequest: () => ({ responder: { keyPair, profile } }) })
     )
 
     const ticket = url.searchParams.get('tkt')
@@ -186,7 +188,7 @@ const verify = verifyFactory();
 
   test('Redeem ticket: Missing param tkt', async (t) => {
     const url = new URL(
-      auth.issueURL({ onInit: () => ({ responder: { keyPair, profile } }) })
+      auth.issueURL({ onRequest: () => ({ responder: { keyPair, profile } }) })
     )
 
     let res = varint.split(base32.decode(url.hostname))
@@ -212,7 +214,7 @@ const verify = verifyFactory();
 
   test('Redeem ticket: ticket not found', async (t) => {
     const url = new URL(
-      auth.issueURL({ onInit: () => ({ responder: { keyPair, profile } }) })
+      auth.issueURL({ onRequest: () => ({ responder: { keyPair, profile } }) })
     )
 
     let res = varint.split(base32.decode(url.hostname))
@@ -238,7 +240,7 @@ const verify = verifyFactory();
 
   test('verifyJWS: Missing param: tkt', async (t) => {
     const url = new URL(
-      auth.issueURL({ onInit: () => ({ responder: { keyPair, profile } }) })
+      auth.issueURL({ onRequest: () => ({ responder: { keyPair, profile } }) })
     )
 
     let res = varint.split(base32.decode(url.hostname))
@@ -264,7 +266,7 @@ const verify = verifyFactory();
 
   test('verifyJWS: Missing param: jws', async (t) => {
     const url = new URL(
-      auth.issueURL({ onInit: () => ({ responder: { keyPair, profile } }) })
+      auth.issueURL({ onRequest: () => ({ responder: { keyPair, profile } }) })
     )
 
     let res = varint.split(base32.decode(url.hostname))
@@ -290,7 +292,7 @@ const verify = verifyFactory();
 
   test('verifyJWS:  ticket not found', async (t) => {
     const url = new URL(
-      auth.issueURL({ onInit: () => ({ responder: { keyPair, profile } }) })
+      auth.issueURL({ onRequest: () => ({ responder: { keyPair, profile } }) })
     )
 
     let res = varint.split(base32.decode(url.hostname))
@@ -320,7 +322,7 @@ const verify = verifyFactory();
 
   test('verifyJWS: id not found', async (t) => {
     const url = new URL(
-      auth.issueURL({ onInit: () => ({ responder: { keyPair, profile } }) })
+      auth.issueURL({ onRequest: () => ({ responder: { keyPair, profile } }) })
     )
 
     let res = varint.split(base32.decode(url.hostname))
@@ -359,7 +361,7 @@ const verify = verifyFactory();
     })
 
     const url = new URL(
-      auth.issueURL({ onInit: () => ({ responder: { keyPair, profile } }) })
+      auth.issueURL({ onRequest: () => ({ responder: { keyPair, profile } }) })
     )
 
     const ticket = url.searchParams.get('tkt')

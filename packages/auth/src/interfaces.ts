@@ -16,7 +16,7 @@ export type InitialResponse = {
   additionalItems?: JsonLdObject[];
 };
 
-export type OnInit = () => Promise<InitialResponse> | InitialResponse;
+export type OnRequest = () => Promise<InitialResponse> | InitialResponse;
 
 export type OnVerify = (
   peer: Profile,
@@ -24,7 +24,7 @@ export type OnVerify = (
 ) => VerifySuccess | Promise<VerifySuccess>;
 
 export type TicketConfig = {
-  onInit: OnInit;
+  onRequest: OnRequest;
   onVerify?: OnVerify;
   sfp?: string;
 };

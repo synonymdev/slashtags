@@ -39,7 +39,7 @@ export const Auth = async (node, opts) => {
 
       config.sfp = sfp
 
-      const { responder, additionalItems } = await config.onInit()
+      const { responder, additionalItems } = await config.onRequest()
 
       if (!responder.profile['@id']) {
         responder.profile['@id'] = didKeyFromPubKey(
@@ -79,12 +79,12 @@ export const Auth = async (node, opts) => {
       const final = await config.onVerify?.(
         peer,
         // @ts-ignore
-        request.params.metadata
+        request.params.additionalItems
       )
 
       _ticketConfigs.delete(ticket)
 
-      return { status: 'OK', metadata: final?.additionalItems }
+      return { status: 'OK', additionalItems: final?.additionalItems }
     }
   })
 
@@ -95,17 +95,17 @@ export const Auth = async (node, opts) => {
     /**
      *
      * @param {object} opts
-     * @param {OnInit} opts.onInit
+     * @param {OnRequest} opts.onRequest
      * @param {OnVerify} [opts.onVerify]
      * @param {()=>Promise<void> | void} [opts.onTimeout]
      * @param {number} [opts.timeout]
      * @returns
      */
-    issueURL: ({ onInit, onVerify, onTimeout, timeout = 2 * 60 * 1000 }) => {
+    issueURL: ({ onRequest, onVerify, onTimeout, timeout = 2 * 60 * 1000 }) => {
       const ticket = base58btc.encode(randomBytes(8))
 
       const config = _ticketConfigs.get(ticket) || {
-        onInit,
+        onRequest,
         onVerify,
         timeout
       }
@@ -126,7 +126,7 @@ export const Auth = async (node, opts) => {
 /** @typedef {import('did-jwt').Signer} Signer */
 /** @typedef {import('./interfaces').OnVerify} OnVerify */
 /** @typedef {import('./interfaces').TicketConfig} TicketConfig */
-/** @typedef {import('./interfaces').OnInit} OnInit */
+/** @typedef {import('./interfaces').OnRequest} OnRequest */
 /** @typedef {import('./interfaces').Profile} Profile */
 /** @typedef {import('@synonymdev/slashtags-common').JsonLdObject} JsonLdObject */
 /** @typedef {import('did-resolver').ResolverRegistry} ResolverRegistry */
