@@ -1,6 +1,6 @@
 {
   "name": "@synonymdev/slashtags-actions",
-  "version": "0.1.0-alpha.8",
+  "version": "0.1.0-alpha.9",
   "description": "Packaged handlers for Slashtags actions",
   "type": "module",
   "keywords": [
@@ -31,8 +31,8 @@
     "prepublishOnly": "npm run lint && npm run build && npm run test && dependency-check dist --no-dev"
   },
   "dependencies": {
-    "@synonymdev/slashtags-auth": "^0.3.0-alpha.8",
-    "@synonymdev/slashtags-common": "^0.2.0-alpha.7",
+    "@synonymdev/slashtags-auth": "^0.3.0-alpha.9",
+    "@synonymdev/slashtags-common": "^0.2.0-alpha.8",
     "multiformats": "^9.4.9"
   },
   "devDependencies": {
