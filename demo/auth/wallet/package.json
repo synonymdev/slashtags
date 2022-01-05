@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@synonymdev/slashtags-actions": "^0.1.1",
+    "@synonymdev/slashtags-auth": "^0.3.1",
+    "@synonymdev/slashtags-core": "^0.1.1",
     "faker": "^5.5.3",
     "framer-motion": "^5.0.0",
     "jdenticon": "^3.1.1",
@@ -10,8 +13,7 @@
     "qrcode": "^1.5.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
-    "react-scripts": "4.0.3",
-    "start": "^5.1.0"
+    "react-scripts": "4.0.3"
   },
   "scripts": {
     "start": "react-scripts start",

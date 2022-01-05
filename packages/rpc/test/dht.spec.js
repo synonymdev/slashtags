@@ -2,7 +2,7 @@ import test from 'ava'
 import { DHT } from '../src/dht.js'
 import Node from '@hyperswarm/dht'
 
-const TESTING_RELAY_SERVER = 'ws://testnet3.hyperdht.org:8910'
+const TESTING_RELAY_SERVER = 'wss://dht-relay.synonym.to/'
 const INVALID_RELAY_SERVER = 'ws://invalid.something.net'
 
 const helperServerKey = async () => {

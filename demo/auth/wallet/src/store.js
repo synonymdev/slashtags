@@ -6,7 +6,7 @@ import { Core } from '@synonymdev/slashtags-core';
 import { Actions } from '@synonymdev/slashtags-actions';
 import { Auth } from '@synonymdev/slashtags-auth';
 
-const node = Core({ relays: ['ws://testnet3.hyperdht.org:8910'] });
+const node = Core({ relays: ['wss://dht-relay.synonym.to/'] });
 
 export const initialValue = {
   dependencies: {
