@@ -1,13 +1,19 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useContext } from 'react';
 import QRCode from 'qrcode';
+import { StoreContext } from '../store';
+import { truncateMid } from '../utils';
 
 export const LoginForm = ({ qrURL }) => {
   const canvasRef = useRef();
   qrURL = qrURL || '';
   const [copied, setCopied] = useState(false);
 
+  const { store, dispatch } = useContext(StoreContext);
+
   useEffect(() => {
-    if (qrURL && canvasRef.current)
+    if (store.loginURL !== qrURL) qrURL = store.loginURL;
+
+    if (qrURL && canvasRef.current) {
       QRCode.toCanvas(canvasRef.current, qrURL, {
         margin: 6,
         scale: 8,
@@ -17,7 +23,8 @@ export const LoginForm = ({ qrURL }) => {
           dark: '#fff',
         },
       });
-  }, [qrURL]);
+    }
+  }, [qrURL, store.loginURL]);
 
   return (
     <div className="options">
@@ -73,7 +80,7 @@ export const LoginForm = ({ qrURL }) => {
       </div>
 
       <a className="card url" href={qrURL}>
-        {qrURL.slice(0, 18) + '...' + qrURL.slice(-32, -13) + '...'}
+        {truncateMid(qrURL, 19)}
       </a>
     </div>
   );

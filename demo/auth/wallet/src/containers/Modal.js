@@ -1,37 +1,48 @@
-//@ts-nocheck
 import { useContext, useState } from 'react';
 import { StoreContext, types } from '../store';
 import { Sheet } from '../components/Sheet';
 import { Card } from '../components/Card';
 import { secp256k1 as curve } from 'noise-curve-tiny-secp';
+import { didKeyFromPubKey } from '@synonymdev/slashtags-auth';
 
-const anonymous = (publicKey) => {
-  if (!publicKey) return;
+/** @returns {import ('@synonymdev/slashtags-auth').PeerConfig} */
+const anonymous = (seed) => {
+  const keyPair = curve.generateSeedKeyPair(seed || '');
+  const id = didKeyFromPubKey(keyPair.publicKey);
+
   return {
-    keyPair: curve.generateSeedKeyPair(publicKey),
-    metadata: null,
+    profile: {
+      '@context': 'https://schema.org',
+      '@type': 'Person',
+      '@id': id,
+    },
+    keyPair,
   };
 };
 
-const Login = ({ data, cancel, resolve }) => {
+const Connect = ({ data, cancel, resolve }) => {
   const [anon, setAnon] = useState(true);
-  const [profile, setProfile] = useState(anonymous(data.publicKey));
-  const { store, dispatch } = useContext(StoreContext);
+  const [persona, setPersona] = useState(
+    // Derive keyPair from the responder's DID
+    anonymous(data['@id']),
+  );
+  const { store } = useContext(StoreContext);
 
-  const submit = () => {
-    resolve(profile);
-  };
+  /** @param {import ('@synonymdev/slashtags-actions').ACT1_InitialResponseResult} x*/
+  const respondToAuth = (x) => resolve(x);
+
+  const submit = () => respondToAuth({ initiator: persona });
 
   return (
     <div className="login-modal">
-      <h1>Login to</h1>
-      <Card publicKey={data.publicKey} metadata={data.metadata} />
+      <h1>Connect to</h1>
+      <Card profile={data} />
 
       <div className="switch">
         <button
           onClick={() => {
             setAnon(true);
-            setProfile(anonymous(data.publicKey));
+            setPersona(anonymous(data['@id']));
           }}
           className={'btn ' + (anon ? 'active' : '')}
         >
@@ -40,7 +51,7 @@ const Login = ({ data, cancel, resolve }) => {
         <button
           onClick={() => {
             setAnon(false);
-            setProfile(store.profiles[0]);
+            setPersona(store.personas[0]);
           }}
           className={'btn ' + (!anon ? 'active' : '')}
         >
@@ -55,21 +66,23 @@ const Login = ({ data, cancel, resolve }) => {
         <p className="anon-description">Select an existing profile.</p>
       )}
       {!anon &&
-        store.profiles.map((p) => {
-          return (
-            <Card
-              key={p.keyPair.publicKey}
-              publicKey={Buffer.from(p.keyPair.publicKey).toString('hex')}
-              metadata={p.metadata}
-              className={
-                profile.keyPair.publicKey === p.keyPair.publicKey
-                  ? 'active login-profile'
-                  : 'login-profile'
-              }
-              onClick={() => setProfile(p)}
-            ></Card>
-          );
-        })}
+        store.personas.map(
+          /** @param {import ('@synonymdev/slashtags-auth').PeerConfig} p*/
+          (p, id) => {
+            return (
+              <Card
+                key={p.profile['@id']}
+                profile={p.profile}
+                className={
+                  p.profile['@id'] === persona.profile['@id']
+                    ? 'active login-profile'
+                    : 'login-profile'
+                }
+                onClick={() => setPersona(p)}
+              ></Card>
+            );
+          },
+        )}
 
       <div className="footer">
         <button className="cancel btn" onClick={cancel}>
@@ -97,11 +110,11 @@ export const Modal = () => {
 
   return (
     <Sheet isVisible={!!resolve}>
-      <Login
+      <Connect
         data={store.prompt?.data}
         cancel={cancel}
         resolve={resolve}
-      ></Login>
+      ></Connect>
     </Sheet>
   );
 };

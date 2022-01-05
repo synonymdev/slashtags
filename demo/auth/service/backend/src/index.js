@@ -1,101 +1,78 @@
-const { fastify } = require('fastify');
-const websocket = require('isomorphic-ws');
-const { JsonRpcEngine } = require('json-rpc-engine');
-const { parse } = require('url');
-
-const { secp256k1: curve } = require('noise-curve-tiny-secp');
-const { SlashtagsAccounts } = require('@synonymdev/slashtags-accounts');
-const { metadata } = require('./metadata');
-
-const slashtagsActionsWSS = new websocket.Server({ noServer: true });
-
-// Setting up the Slashtags Accounts
-const slashtagsAccounts = SlashtagsAccounts({
-  baseURL: process.env.PORT
-    ? 'wss://slashtags.herokuapp.com/slashtags'
-    : 'ws://localhost:9000/slashtags',
-  wss: slashtagsActionsWSS,
-  metadata,
-  keyPair: curve.generateSeedKeyPair('slashtags-demo'),
-});
+import websocket from 'isomorphic-ws';
+import JsonRPC from 'simple-jsonrpc-js';
+import { serverProfile, serverKeyPair } from './config.js';
+import { Core } from '@synonymdev/slashtags-core';
+import { Auth } from '@synonymdev/slashtags-auth';
+import jrpcLite from 'jsonrpc-lite';
+import { fastify } from 'fastify';
 
 const app = fastify({ logger: true });
+const jrpc = new JsonRPC();
+const PORT = Number(process.env.PORT) || 9000;
+const hostanme = 'localhost' || 'slashtags.herokuapp.com';
 
-// Setup websocket server and json-rpc engine
-const wss = new websocket.Server({ noServer: true });
-const engine = new JsonRpcEngine();
-wss.on('connection', (socket) => {
-  socket.on('message', (message) => {
-    try {
-      const json = JSON.parse(message.toString());
+const main = async () => {
+  // Setting up slashtags node and the Auth module
+  const node = await Core();
+  const auth = await Auth(node);
 
-      // Pass the calling socket to the jrpc engine
-      json.socket = socket;
+  // Websocket server
+  const wss = new websocket.Server({ host: hostanme, port: PORT + 1 });
+  wss.on('connection', (socket) => {
+    jrpc.toStream = (message) => socket.send(message);
+    socket.on('message', (message) => jrpc.messageHandler(message));
 
-      engine.handle(json, (err, res) => {
-        socket.send(JSON.stringify(res));
+    // Methods
+    jrpc.on('ping', [], () => 'pong');
+
+    // Get a url to show as a QR code
+    jrpc.on('authUrl', [], () => {
+      // Main USAGE: Generate a url
+      return auth.issueURL({
+        onTimeout: () =>
+          socket.send(jrpcLite.notification('authUrlExpired').serialize()),
+        onRequest: () => ({
+          responder: {
+            keyPair: serverKeyPair,
+            profile: serverProfile,
+          },
+          additionalItems: [
+            {
+              '@context': 'https://bitfinex.com/schemas/',
+              '@type': '2FA_OTP_FORM',
+              '@id': 'https://bitfinex.com/schemas/2FA_OTP_FORM.json',
+              schema: {
+                $schema: '...',
+              },
+            },
+          ],
+        }),
+        onSuccess: ({ remote }) => {
+          socket.send(
+            jrpcLite
+              .notification('userAuthenticated', { user: remote })
+              .serialize(),
+          );
+
+          return {
+            status: 'OK',
+            additionalItems: [
+              {
+                '@context': 'https://bitfinex.com/schemas/',
+                '@type': 'HC_Feeds',
+                '@id': 'https://bitfinex.com/feeds/user#1',
+                feeds: ['123...def', 'def...123'],
+              },
+            ],
+          };
+        },
       });
-    } catch (error) {
-      socket.send(
-        JSON.stringify({ error: { code: -32700, message: 'Parse error' } }),
-      );
-    }
+    });
   });
-});
 
-// Service routes
-engine.push((req, res, next, end) => {
-  if (req.method === 'ping') {
-    res.result = 'pong';
-    end();
-  }
-  next();
-});
+  app.listen(PORT, function (err, address) {
+    console.log(`Server is now listenng on ${address}`);
+  });
+};
 
-// Setting up one route for requesting new tickets
-engine.push((req, res, next, end) => {
-  if (req.method === 'REQUEST_ACCOUNTS_URL') {
-    res.result = slashtagsAccounts.generateURL({
-      onVerify: (user) => {
-        req.socket.send(
-          JSON.stringify({
-            method: 'UserAuthenticated',
-            params: user,
-          }),
-        );
-      },
-    });
-
-    end();
-  }
-  next();
-});
-
-app.server.on('upgrade', function upgrade(request, socket, head) {
-  const { pathname } = parse(request.url);
-
-  if (pathname === '/') {
-    wss.handleUpgrade(request, socket, head, function done(ws) {
-      wss.emit('connection', ws, request);
-    });
-  } else if (pathname === '/slashtags') {
-    slashtagsActionsWSS.handleUpgrade(request, socket, head, function done(ws) {
-      slashtagsActionsWSS.emit('connection', ws, request);
-    });
-  } else {
-    socket.destroy();
-  }
-});
-
-app.get('/', (req, res) => {
-  res.send('Alive');
-});
-
-const PORT = process.env.PORT || 9000;
-app.listen(PORT, '0.0.0.0', function (err, address) {
-  if (err) {
-    app.log.error(err);
-    process.exit(1);
-  }
-  console.log(`Server is now listenng on ${address}`);
-});
+main();

@@ -1,39 +1,37 @@
 {
   "name": "@synonymdev/slashtags-core",
-  "version": "0.0.8",
+  "version": "0.1.1",
   "description": "Core implementation of Slashtags protocol in JS",
   "type": "module",
   "keywords": [
     "slashtags",
     "core",
-    "rpc"
+    "rpc",
+    "hyperswarm",
+    "dht"
   ],
   "homepage": "https://github.com/synonymdev/slashtags/tree/master/packages/core/#readme",
   "bugs": {
     "url": "https://github.com/synonymdev/slashtags/issues"
   },
-  "author": "Nazeh <ar.nazeh@gmail.com>",
-  "types": "./types/index.d.ts",
+  "license": "MIT",
+  "files": [
+    "*",
+    "!**/*.tsbuildinfo"
+  ],
+  "types": "./types/packages/core/src/index.d.ts",
   "main": "src/index.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/synonymdev/slashtags.git"
   },
   "scripts": {
-    "lint": "rm -rf dist && standard --fix",
-    "build": "rm -rf dist types && ipjs build && tsc && mv types/packages/core/src dist/types",
-    "test": "echo TODO: ADD UNIT TESTS",
+    "lint": "standard ./src ./test --fix",
+    "build": "rm -rf dist types && ipjs build && tsc && cp -r types/ dist/types",
+    "test": "hundreds ava",
     "prepublishOnly": "npm run lint && npm run build && npm run test && dependency-check dist --no-dev"
   },
   "dependencies": {
-    "isomorphic-ws": "^4.0.1",
-    "json-rpc-engine": "^6.1.0",
-    "simple-jsonrpc-js": "^1.2.0"
-  },
-  "devDependencies": {
-    "@types/debug": "^4.1.7",
-    "@types/ws": "^8.2.0",
-    "debug": "^4.3.2",
-    "noise-curve-tiny-secp": "^2.0.0"
+    "@synonymdev/slashtags-rpc": "^0.1.1"
   }
 }

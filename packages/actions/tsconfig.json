@@ -1,4 +1,11 @@
 {
   "extends": "../../tsconfig.json",
-  "compilerOptions": { "outDir": "types" }
+  "compilerOptions": { "outDir": "types" },
+  "include": [
+    "src",
+    "../../types",
+    "../common/src",
+    "../auth/src",
+    "../core/src/"
+  ]
 }

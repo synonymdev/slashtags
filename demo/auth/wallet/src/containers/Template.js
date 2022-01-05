@@ -2,7 +2,7 @@ import { useContext } from 'react';
 import { StoreContext, types } from '../store';
 
 const ScanQR = () => {
-  const { store, dispatch } = useContext(StoreContext);
+  const { dispatch } = useContext(StoreContext);
 
   const scanQR = () => {
     dispatch({ type: types.SET_VIEW, view: 'scanQR' });
@@ -31,7 +31,7 @@ const ScanQR = () => {
 };
 
 const BackButton = () => {
-  const { store, dispatch } = useContext(StoreContext);
+  const { dispatch } = useContext(StoreContext);
 
   return (
     <div
@@ -56,12 +56,12 @@ const BackButton = () => {
   );
 };
 
-const ProfileButton = () => {
-  const { store, dispatch } = useContext(StoreContext);
+const PersonasButton = () => {
+  const { dispatch } = useContext(StoreContext);
   return (
     <div
       className="profile-button"
-      onClick={() => dispatch({ type: types.SET_VIEW, view: 'profiles' })}
+      onClick={() => dispatch({ type: types.SET_VIEW, view: 'personas' })}
     >
       <svg
         width="24"
@@ -89,19 +89,19 @@ export const Template = ({
   children = null,
   scan = true,
 }) => {
-  const { store, dispatch } = useContext(StoreContext);
+  const { store } = useContext(StoreContext);
 
   return (
     <>
       <header className="header">
         <div className="left">
-          {back ? <BackButton /> : <ProfileButton />}
+          {back ? <BackButton /> : <PersonasButton />}
           <h1 className="title">{title}</h1>
         </div>
         <nav className="nav">
           {store.user && (
             <button className="profile">
-              <img src={store.user?.image}></img>
+              <img alt="" src={store.user?.image}></img>
             </button>
           )}
           {scan && <ScanQR />}

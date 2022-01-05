@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@rjsf/core": "^3.1.0",
+    "jdenticon": "^3.1.1",
     "qrcode": "^1.4.4",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",

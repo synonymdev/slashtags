@@ -3,13 +3,16 @@
     "start": "node src/index.js",
     "dev": "nodemon src/index.js"
   },
+  "type": "module",
   "dependencies": {
-    "@synonymdev/slashtags-accounts": "^0.0.1",
-    "fastify": "^3.22.1",
+    "@synonymdev/slashtags-auth": "^0.3.1",
+    "@synonymdev/slashtags-core": "^0.1.1",
+    "fastify": "^3.25.3",
     "isomorphic-ws": "^4.0.1",
-    "json-rpc-engine": "^6.1.0",
+    "jsonrpc-lite": "^2.2.0",
     "noise-curve-tiny-secp": "^2.0.0",
     "react": "^17.0.2",
+    "simple-jsonrpc-js": "^1.2.0",
     "ws": "^8.2.3"
   },
   "engines": {

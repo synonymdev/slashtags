@@ -18,11 +18,13 @@ export const FeedsPage = () => {
 
   const account = store.account;
 
+  console.log({ account });
+
   // Mock feeds data
   const feeds = [
     {
       name: 'Profile',
-      data: account.profile.metadata || { name: 'Anon...' },
+      data: account || { name: 'Anon...' },
     },
     {
       name: 'Balance',
@@ -41,9 +43,11 @@ export const FeedsPage = () => {
   return (
     <Template title="" back={true}>
       <div className="feeds-header">
-        <img className="feeds-image" src={account.service.metadata.image}></img>
-        <p className="feeds-title">{account.service.metadata.name}</p>
-        <p className="feeds-pk">{truncateMid(account.service.publicKey)}</p>
+        <img className="feeds-image" src={account?.image}></img>
+        <p className="feeds-title">{account?.name}</p>
+        <p className="feeds-pk">
+          {account.service && truncateMid(account.service?.['@id'])}
+        </p>
       </div>
       {feeds?.map((feed) => (
         <div>

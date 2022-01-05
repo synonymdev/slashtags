@@ -1,61 +1,58 @@
-# Slashtags Auth
+# Slashtags Accounts
 
-> Bidirectional authentication for keypair verification through attestation.
+> Bidirectional authentication of DIDs over slashtags-rpc
 
-JS implementation of Slashtags Auth.
+## Install
+
+```bash
+npm i @synonymdev/slashtags-auth @synonymdev/slashtags-rpc
+```
 
 ## Usage
 
-```js
-import { createAuth } from '@synonymdev/slashtags-auth';
-import { secp256k1 } from 'noise-curve-tiny-secp';
+### Setup
 
-// === Responder's Side ===
-const responderKeypair = secp256k1.generateKeyPair();
-const { responder } = createAuth(responderKeypair, {
-  metadata: { foo: 'responder' },
+```javascript
+import { Core } from '@synonymdev/slashtags-core';
+import { Auth } from '@synonymdev/slashtags-auth';
+
+// Node environment
+const node = await Core();
+// Browser environment
+// Use a community DHT relay or run your own https://github.com/hyperswarm/dht-relay
+const node = await Core({
+  relays: ['ws://trusted.dht-relay.instance.com'],
 });
 
-// Generate a new challenge and track session's timeout
-const challenge = responder.newChallenge(
-  100,
-  // optional metdata per session
-  { foo: 'responder-override' },
-);
-
-// === Initiator's Side ===
-// Pass the challenge to the initiator
-const initiatorKeypair = secp256k1.generateKeyPair();
-const { initiator } = createAuth(initiatorKeypair, {
-  metadata: { foo: 'intitiator' },
-});
-const { attestation, verifyResponder } = initiator.respond(
-  responderKeypair.publickey,
-  challenge,
-  // optional metdata per session
-  { foo: 'initiator-override' },
-);
-
-// === Responder's Side ===
-// Pass the attestation to the responder
-const resultResponder = responder.verifyInitiator(attestation);
-// resultResponder => {
-//  intitiatorPK: Uint8Array[...],
-//  metadata: { foo: 'initiator-override' },
-//  responderAttestation: Uint8Array[...]
-// }
-
-// === Initiator's Side ===
-// Finally pass the responder attestation to the initiator
-const resultInitiator = verifyResponder(resultResponder.responderAttestation);
-// resultInitiator => {
-//  metadata: { foo: 'responder-override' },
-//  responderPK: Uint8Array[...]
-//}
+// Initialize the auth module using the Slashtags node
+const auth = await Auth(node);
 ```
 
-## Elliptic Curves
+### Issuing a new url for auth session
 
-By default the library uses the `secp256k1` curve.
+```javascript
+auth.issueURL({
+  // Do something when url expires (optional)
+  onTimeout: () => {},
+  onRequest: () => ({
+    responder: {
+      keyPair, // {publicKey, secretKey}
+      profile, // A Thing (see schema.org)
+    },
+    // Optional additional items to be sent to the user _before_ authentication
+    additionalItems: [],
+  }),
+  onVerify: (
+    profile, // Initiator's profile
+    additionalItems, // Optional additionalItems from the Initiator
+  ) => {
+    // Do something with authenticated user information
 
-Both the initiator and the responder keypairs needs to use the same curve.
+    return {
+      status: 'OK',
+      // Optional additional items to be sent to the user _after_ authentication
+      additionalItems: [],
+    };
+  },
+});
+```

@@ -1,12 +1,27 @@
 // @ts-nocheck
 import { Browser } from '../components/Browser';
-import { useState, useContext, useEffect } from 'react';
+import { useState, useContext, useEffect, useRef } from 'react';
 import { getTicket, StoreContext, types } from '../store';
 import Form from '@rjsf/core';
 import { LoginForm } from '../components/LoginForm';
 import { ArrowSVG } from '../components/ArrowSVG';
 import { anonImage } from '../constants';
 import { truncateMid } from '../utils';
+import * as jdenticon from 'jdenticon';
+
+const Jdenticon = ({ value = 'test', size = '100%' }) => {
+  const icon = useRef(null);
+
+  useEffect(() => {
+    jdenticon.update(icon.current, value);
+  }, [value]);
+
+  return (
+    <div>
+      <svg data-jdenticon-value={value} height={size} ref={icon} width={size} />
+    </div>
+  );
+};
 
 export const Website = () => {
   const [openLogin, setOpenLogin] = useState(false);
@@ -54,10 +69,14 @@ export const Website = () => {
           {store.user ? (
             <div className="user">
               <div className="left">
-                <p>{store.user.metadata?.name || 'Anon...'}</p>
-                <p>{truncateMid(store.user.publicKey, 4)}</p>
+                <p>{store.user?.name || 'Anon...'}</p>
+                <p>{store.user['@id']}</p>
               </div>
-              <img alt="" src={store.user.metadata?.image || anonImage}></img>
+              {store.user?.image ? (
+                <img alt="" src={store.user.image}></img>
+              ) : (
+                <Jdenticon size="48" value={store.user['@id']} />
+              )}
             </div>
           ) : (
             <div className="login">

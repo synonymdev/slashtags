@@ -1,65 +1,46 @@
 import { Template } from '../containers/Template';
-import { Core } from '@synonymdev/slashtags-core';
-import { SlashtagsActions } from '@synonymdev/slashtags-actions';
 import { useContext } from 'react';
 import { StoreContext, types } from '../store';
-
-const slashActs = SlashtagsActions({ node: Core() });
 
 export const ScanQRPage = () => {
   const { store, dispatch } = useContext(StoreContext);
 
   const pasteClipboard = async () => {
+    const actions = await store.dependencies.actions;
+
     const clipboard = await navigator.clipboard.readText();
     navigator.clipboard.writeText(clipboard);
 
     if (clipboard) {
-      try {
-        const result = await slashActs.handle(clipboard, {
-          ACT_1: {
-            onChallenge: async (data) => {
+      await actions.handle(
+        clipboard,
+        {
+          /** @type {import ('@synonymdev/slashtags-actions').ACT1_Callbacks} */
+          ACT1: {
+            onResponse: async (remotePeer) => {
               return new Promise((resolve) => {
                 dispatch({
                   type: types.SET_PROMPT,
-                  prompt: { type: 'login', resolve, data },
+                  prompt: { type: 'login', resolve, data: remotePeer },
                 });
               });
             },
-            onSuccess: ({ responder, initiator }) => {
+            onSuccess: (connection) => {
               dispatch({
-                type: types.ADD_ACCOUNT,
-                account: {
-                  service: {
-                    publicKey: Buffer.from(responder.publicKey).toString('hex'),
-                    metadata: responder.metadata,
-                  },
-                  profile: {
-                    publicKey: Buffer.from(initiator.publicKey).toString('hex'),
-                    metadata: initiator.metadata,
-                  },
-                },
-              });
-            },
-            onError: (error) => {
-              console.log('got error');
-              dispatch({
-                type: types.SET_PROMPT,
-                prompt: { type: 'error', error: error.message },
+                type: types.ADD_CONNECTION,
+                connection,
               });
             },
           },
-        });
-
-        console.log('Result', result);
-      } catch (error) {
-        dispatch({
-          type: types.SET_PROMPT,
-          prompt: {
-            type: 'error',
-            error: `Something went wrong, couldn't parse QR: "${clipboard}"`,
-          },
-        });
-      }
+        },
+        (error) => {
+          console.log(error);
+          dispatch({
+            type: types.SET_PROMPT,
+            prompt: { type: 'error', error: error.message || error.code },
+          });
+        },
+      );
     }
   };
 
