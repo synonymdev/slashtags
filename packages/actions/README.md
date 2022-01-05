@@ -21,7 +21,7 @@ const node = await Core();
 // Browser environment
 // Use a community DHT relay or run your own https://github.com/hyperswarm/dht-relay
 const node = await Core({
-  rpc: { relays: ['ws://trusted.dht-relay.instance.com'] },
+  relays: ['ws://trusted.dht-relay.instance.com'],
 });
 
 // Initialize the actions module using the Slashtags node
