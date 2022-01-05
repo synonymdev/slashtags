@@ -12,20 +12,11 @@ const TIMEOUT = 2 * 60 * 1000
  * @returns {Promise<SlashtagsRPC>}
  */
 export const RPC = async (opts) => {
-  const engine = new Engine()
+  const engine = await new Engine()
   const node = await DHT(opts)
 
   const server = node.createServer((noiseSocket) =>
-    noiseSocket.on('data', async (data) => {
-      data = JSON.parse(data)
-
-      const response = await engine.handle({
-        ...data,
-        noiseSocket
-      })
-
-      noiseSocket.write(response)
-    })
+    noiseSocket.on('data', (data) => engine.handleRaw(data, noiseSocket))
   )
 
   /**

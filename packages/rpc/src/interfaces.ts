@@ -30,7 +30,9 @@ export type EngineRequest = {
   noiseSocket: NoiseSocket;
 };
 
-export type EngineMethod = (req: EngineRequest) => Promise<JSONElement>;
+export type EngineMethod = (
+  req: EngineRequest,
+) => Promise<JSONElement> | JSONElement;
 
 export interface SlashtagsRPC {
   addMethods(methods: Record<string, EngineMethod>): void;

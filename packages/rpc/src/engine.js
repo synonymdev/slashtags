@@ -20,6 +20,18 @@ export function Engine () {
   this.addMethods = (methods) => (_handlers = { ..._handlers, ...methods })
 
   /**
+   * @param {string | Uint8Array} data
+   * @param {NoiseSocket} noiseSocket
+   */
+  this.handleRaw = async (data, noiseSocket) =>
+    noiseSocket.write(
+      await this.handle({
+        ...JSON.parse(typeof data === 'string' ? data : b4a.toString(data)),
+        noiseSocket
+      })
+    )
+
+  /**
    * @param {Request} request
    * @returns
    */

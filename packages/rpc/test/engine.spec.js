@@ -50,7 +50,7 @@ test('Engine: throw error on Method not found', async (t) => {
     jsonrpc: '2.0',
     id: 3423,
     method: 'ping',
-    params: ['test'],
+    params: { foo: 'bar' },
     noiseSocket: null
   })
 
@@ -73,7 +73,7 @@ test('Engine: pass thrown errors from methods', async (t) => {
     jsonrpc: '2.0',
     id: 3423,
     method: 'ping',
-    params: ['test'],
+    params: { foo: 'bar' },
     noiseSocket: null
   })
 
@@ -96,7 +96,7 @@ test('Engine: pass thrown errors from methods, with no message', async (t) => {
     jsonrpc: '2.0',
     id: 3423,
     method: 'ping',
-    params: ['test'],
+    params: { foo: 'bar' },
     noiseSocket: null
   })
 
@@ -104,4 +104,32 @@ test('Engine: pass thrown errors from methods, with no message', async (t) => {
     response,
     '{"jsonrpc":"2.0","id":3423,"error":{"message":"Error","code":-32000}}'
   )
+})
+
+test('Engine: handle raw Uint8Array data', async (t) => {
+  const engine = new Engine()
+  engine.addMethods({ 'ping:': () => 'pong' })
+
+  const request = JSON.stringify({
+    method: 'ping:',
+    params: {},
+    id: 1,
+    jsonrpc: '2.0'
+  })
+
+  const uintRequest = Uint8Array.from(Buffer.from(request))
+
+  const response = '{"jsonrpc":"2.0","id":1,"result":"pong"}'
+
+  engine.handleRaw(uintRequest, {
+    write: (data) => {
+      t.deepEqual(data, response)
+    }
+  })
+
+  engine.handleRaw(request, {
+    write: (data) => {
+      t.deepEqual(data, response)
+    }
+  })
 })
