@@ -1,6 +1,6 @@
 {
   "name": "@synonymdev/slashtags-auth",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Bidirectional authentication of DIDs over slashtags-rpc",
   "type": "module",
   "keywords": [
@@ -32,7 +32,7 @@
     "prepublishOnly": "npm run lint && npm run build && npm run test && dependency-check dist --no-dev"
   },
   "dependencies": {
-    "@synonymdev/slashtags-common": "^0.2.0",
+    "@synonymdev/slashtags-common": "^0.2.1",
     "did-jwt": "^5.12.0",
     "did-resolver": "^3.1.3",
     "key-did-resolver": "^1.4.0",

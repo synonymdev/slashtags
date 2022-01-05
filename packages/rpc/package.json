@@ -1,6 +1,6 @@
 {
   "name": "@synonymdev/slashtags-rpc",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "JsonRPC on top of Hyperswarm's secret-stream",
   "type": "module",
   "keywords": [
