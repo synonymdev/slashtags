@@ -69,11 +69,11 @@ export const Website = () => {
           {store.user ? (
             <div className="user">
               <div className="left">
-                <p>{store.user.metadata?.name || 'Anon...'}</p>
+                <p>{store.user?.name || 'Anon...'}</p>
                 <p>{store.user['@id']}</p>
               </div>
-              {store.user.metadata?.image ? (
-                <img alt="" src={store.user.metadata?.image}></img>
+              {store.user?.image ? (
+                <img alt="" src={store.user.image}></img>
               ) : (
                 <Jdenticon size="48" value={store.user['@id']} />
               )}

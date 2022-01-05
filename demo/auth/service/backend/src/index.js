@@ -50,7 +50,7 @@ const main = async () => {
         onSuccess: ({ remote }) => {
           socket.send(
             jrpcLite
-              .notification('userAuthenticated', { user: { remote } })
+              .notification('userAuthenticated', { user: remote })
               .serialize(),
           );
 
