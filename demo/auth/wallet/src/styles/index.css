@@ -510,13 +510,13 @@ h1.title {
   border: 2px solid #f75c1a;
 }
 
-.account-title {
+.connection-local {
   background: none !important;
   padding: 0 !important;
 }
 
-.account-subprofile {
-  margin-left: 2em;
+.connection-remote {
+  margin-left: 3em;
   width: 90%;
   cursor: pointer;
 }
@@ -569,4 +569,39 @@ h1.title {
   border-bottom: 1px solid #2e2e2e;
   white-space: pre-wrap;
   word-break: break-all;
+}
+
+.btn-transparent {
+  border: none;
+  background-color: transparent;
+  padding: 0;
+  width: 100%;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.btn-transparent .card {
+  margin-bottom: 0;
+}
+
+/* QR */
+.qr {
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.qrcopy {
+  opacity: 0.5;
+
+  padding: 0.5em;
+  display: flex;
+  color: #fff;
+
+  align-items: center;
+  column-gap: 1rem;
+
+  font-size: 1.2rem;
+
+  position: absolute;
+  right: 40px;
 }

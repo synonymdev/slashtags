@@ -37,9 +37,10 @@ export const Auth = async (node, opts) => {
 
       const sfp = await sessionFingerprint(request, ticket)
 
-      config.sfp = sfp
-
       const { responder, additionalItems } = await config.onRequest()
+
+      config.sfp = sfp
+      config.local = responder.profile
 
       if (!responder.profile['@id']) {
         responder.profile['@id'] = didKeyFromPubKey(
@@ -65,19 +66,23 @@ export const Auth = async (node, opts) => {
 
       /** @type {Profile} */
       // @ts-ignore
-      const peer = request.params.profile
+      const remote = request.params.profile
 
-      if (!peer?.['@id']) throw new Error('Missing param: profile["@id"]')
+      if (!remote?.['@id']) throw new Error('Missing param: profile["@id"]')
 
       const config = _ticketConfigs.get(ticket)
       if (!config) throw new Error(`Ticket "${ticket}" not found`)
 
-      const { sfp } = await verify(jws, peer['@id'])
+      const { sfp } = await verify(jws, remote['@id'])
 
       if (sfp !== config.sfp) throw new Error('Invalid session fingerprint')
 
-      const final = await config.onVerify?.(
-        peer,
+      const final = await config.onSuccess?.(
+        {
+          // @ts-ignore
+          local: config.local,
+          remote
+        },
         // @ts-ignore
         request.params.additionalItems
       )
@@ -96,18 +101,23 @@ export const Auth = async (node, opts) => {
      *
      * @param {object} opts
      * @param {OnRequest} opts.onRequest
-     * @param {OnVerify} [opts.onVerify]
+     * @param {OnSuccess} [opts.onSuccess]
      * @param {()=>Promise<void> | void} [opts.onTimeout]
      * @param {number} [opts.timeout]
      * @returns
      */
-    issueURL: ({ onRequest, onVerify, onTimeout, timeout = 2 * 60 * 1000 }) => {
+    issueURL: ({
+      onRequest,
+      onSuccess,
+      onTimeout,
+      timeout = 2 * 60 * 1000
+    }) => {
       const ticket = base58btc.encode(randomBytes(8))
 
+      /** @type {TicketConfig} */
       const config = _ticketConfigs.get(ticket) || {
         onRequest,
-        onVerify,
-        timeout
+        onSuccess
       }
 
       setTimeout(async () => {
@@ -124,7 +134,7 @@ export const Auth = async (node, opts) => {
 
 /** @typedef {import('./interfaces').SlashtagsRPC} SlashtagsRPC */
 /** @typedef {import('did-jwt').Signer} Signer */
-/** @typedef {import('./interfaces').OnVerify} OnVerify */
+/** @typedef {import('./interfaces').OnSuccess} OnSuccess */
 /** @typedef {import('./interfaces').TicketConfig} TicketConfig */
 /** @typedef {import('./interfaces').OnRequest} OnRequest */
 /** @typedef {import('./interfaces').Profile} Profile */

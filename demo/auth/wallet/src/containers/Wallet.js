@@ -4,8 +4,8 @@ import { ScanQRPage } from '../pages/ScanQR';
 import { Home } from '../pages/Home';
 import { Modal } from './Modal';
 import { Error } from './Error';
-import { FeedsPage } from '../pages/Feeds';
 import { PersonasPage } from '../pages/Personas';
+import { QRPage } from '../pages/QRPage';
 
 export const Wallet = () => {
   const { store } = useContext(StoreContext);
@@ -18,10 +18,10 @@ export const Wallet = () => {
             return <Home />;
           case 'scanQR':
             return <ScanQRPage />;
-          case 'profiles':
+          case 'personas':
             return <PersonasPage />;
-          case 'account':
-            return <FeedsPage />;
+          case 'authQR':
+            return <QRPage />;
           default:
             return <Home />;
         }

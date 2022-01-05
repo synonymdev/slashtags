@@ -18,3 +18,5 @@ export {
 
 /** @typedef {import ('./interfaces').Profile} Profile */
 /** @typedef {import ('./interfaces').PeerConfig} PeerConfig */
+/** @typedef {import ('./interfaces').OnSuccess} OnSuccsess */
+/** @typedef {import ('./interfaces').OnRequest} OnRequest */

@@ -71,12 +71,21 @@ import { secp256k1 as curve } from 'noise-curve-tiny-secp';
         responder: { keyPair: responderKeypair, profile: responderProfile },
         additionalItems: responderAdditionalItems
       }),
-      onVerify: (peer, additionalItems) => {
-        t.deepEqual(peer, initiatorProfile, 'onVerify: peer is initiator')
+      onSuccess: (conn, additionalItems) => {
+        t.deepEqual(
+          conn.remote,
+          initiatorProfile,
+          'oSuccess: conn.remote is initiator'
+        )
+        t.deepEqual(
+          conn.local,
+          responderProfile,
+          'onSuccess: conn.local is responder'
+        )
         t.deepEqual(
           additionalItems,
           initiatorResponseAdditionalItems,
-          'onVerify: additionalItems are correct'
+          'oSuccess: additionalItems are correct'
         )
 
         return {
@@ -284,12 +293,8 @@ import { secp256k1 as curve } from 'noise-curve-tiny-secp';
           profile: responderProfile
         }
       }),
-      onVerify: (peer) => {
-        t.deepEqual(peer, {
-          ...initiatorProfile,
-          '@id': didKeyFromPubKey(initiatorKeypair.publicKey)
-        })
-        return {}
+      onSuccess: ({ remote }) => {
+        t.deepEqual(remote, initiatorProfile)
       }
     })
 

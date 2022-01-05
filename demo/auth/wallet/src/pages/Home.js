@@ -9,17 +9,7 @@ import { Article } from '../components/Article';
 export const Home = () => {
   const { store, dispatch } = useContext(StoreContext);
 
-  const accounts = Object.values(store.accounts).reduce((acc, service) => {
-    acc.push({
-      service: Object.values(service)[0].service,
-      profiles: Object.values(service).map((s) => s.profile),
-    });
-    return acc;
-  }, []);
-
-  console.log({ accounts });
-
-  const isNew = accounts?.length === 0 || store.contacts?.length === 0;
+  const isNew = Object.values(store.connections)?.length === 0;
 
   return (
     <Template title={'Wallet'}>
@@ -27,42 +17,67 @@ export const Home = () => {
         {isNew ? (
           <>
             <ArrowSVG />
-            <p className="get-started">
-              Click the scan button to add new <span> account </span>
-              or <span>contact</span>
-            </p>
+            <div className="get-started">
+              <p>
+                Add your first
+                <br />
+                <span>Connection</span>
+                <br />
+                by scanning a
+                <br />
+                <span>Slashtags Auth</span>
+                <br />
+                QR code
+              </p>
+              <br />
+              <p style={{ fontSize: '2rem' }}>
+                Or Generate a QR for one of your
+                <br />
+                <button
+                  className="btn-transparent"
+                  onClick={() =>
+                    dispatch({ type: types.SET_VIEW, view: 'personas' })
+                  }
+                >
+                  <span>Personas</span>
+                </button>
+              </p>
+            </div>
           </>
         ) : (
           <>
-            {accounts?.length > 0 && (
+            {Object.values(store.connections)?.length > 0 && (
               <Article
-                title="Accounts"
+                title="Connections"
                 onClick={() =>
                   dispatch({ type: types.SET_VIEW, view: 'scanQR' })
                 }
               >
-                {accounts.map((account) => (
-                  <>
-                    <Card
-                      key={account.service['@id']}
-                      profile={account.service}
-                      className="account-title"
-                    />
-                    {account.profiles.map((p) => (
+                {Object.values(store.connections).map(
+                  ({ persona, remotes }) => (
+                    <>
                       <Card
-                        key={p['@id']}
-                        profile={p}
-                        className="account-subprofile"
-                        onClick={() =>
-                          dispatch({
-                            type: types.SET_ACCOUNT,
-                            account: p,
-                          })
-                        }
+                        key={persona['@id']}
+                        profile={persona}
+                        className="connection-local"
                       />
-                    ))}
-                  </>
-                ))}
+                      {console.log(persona, Object.values(remotes))}
+                      {Object.values(remotes).map((remote) => (
+                        <Card
+                          key={remote['@id']}
+                          profile={remote}
+                          className="connection-remote"
+                          onClick={() =>
+                            dispatch({
+                              type: types.SET_PROFILE,
+                              profile: remote,
+                            })
+                          }
+                        />
+                      ))}
+                    </>
+                  ),
+                )}
               </Article>
             )}
             {store.contacts?.length > 0 && <Article title="Contacts"></Article>}

@@ -1,21 +1,12 @@
 import { Template } from '../containers/Template';
-import { Core } from '@synonymdev/slashtags-core';
-import { Actions } from '@synonymdev/slashtags-actions';
 import { useContext } from 'react';
 import { StoreContext, types } from '../store';
 
 export const ScanQRPage = () => {
-  const { dispatch } = useContext(StoreContext);
-
-  let actions;
+  const { store, dispatch } = useContext(StoreContext);
 
   const pasteClipboard = async () => {
-    if (!actions) {
-      const node = await Core({
-        rpc: { relays: ['ws://testnet3.hyperdht.org:8910'] },
-      });
-      actions = Actions(node);
-    }
+    const actions = await store.dependencies.actions;
 
     const clipboard = await navigator.clipboard.readText();
     navigator.clipboard.writeText(clipboard);
@@ -36,11 +27,8 @@ export const ScanQRPage = () => {
             },
             onSuccess: (connection) => {
               dispatch({
-                type: types.ADD_ACCOUNT,
-                account: {
-                  service: connection.remote,
-                  profile: connection.local,
-                },
+                type: types.ADD_CONNECTION,
+                connection,
               });
             },
           },

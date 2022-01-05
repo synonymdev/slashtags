@@ -70,17 +70,9 @@ const verify = verifyFactory();
   })
 
   test('Clear callbacks after timeout', async (t) => {
-    const ticketConfig = {
-      peer: {
-        ...profile,
-        '@id': 'did:key:zQ3shvrGQ5dRfTgG2ukXJqkgHeopnickw1FANCNcSojQyKyat'
-      }
-    }
-
     const url = new URL(
       auth.issueURL({
         onRequest: () => ({ responder: { keyPair, profile } }),
-        onVerify: ticketConfig.onVerify,
         timeout: 200
       })
     )

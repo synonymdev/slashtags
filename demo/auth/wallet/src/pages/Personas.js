@@ -1,5 +1,5 @@
 import { Template } from '../containers/Template';
-import { useContext, useState } from 'react';
+import { useContext } from 'react';
 import { StoreContext, types } from '../store';
 import { Card } from '../components/Card';
 
@@ -11,7 +11,18 @@ export const PersonasPage = () => {
   return (
     <Template title="Personas" back={true}>
       {personas.map((persona) => (
-        <Card profile={persona.profile}></Card>
+        <button
+          key={persona.profile['@id']}
+          className="btn-transparent"
+          onClick={() => {
+            dispatch({
+              type: types.AUTH_QR,
+              persona,
+            });
+          }}
+        >
+          <Card profile={persona.profile}></Card>
+        </button>
       ))}
     </Template>
   );

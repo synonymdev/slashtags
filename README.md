@@ -6,7 +6,7 @@ A monorepo containing Javascript packages for different Slashtags modules.
 
 ## ⚠️ Warning
 
-This is pre-alpha software. Please use at your own risk. Expect breaking changes.
+This is pre-alpha software. Please use at your own risk. Expect breaking changes on minor releases.
 
 ## Usage
 

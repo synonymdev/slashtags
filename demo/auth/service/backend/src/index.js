@@ -47,9 +47,11 @@ const main = async () => {
             },
           ],
         }),
-        onVerify: (user) => {
+        onSuccess: ({ remote }) => {
           socket.send(
-            jrpcLite.notification('userAuthenticated', { user }).serialize(),
+            jrpcLite
+              .notification('userAuthenticated', { user: { remote } })
+              .serialize(),
           );
 
           return {

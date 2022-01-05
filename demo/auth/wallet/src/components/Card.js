@@ -17,15 +17,10 @@ const Jdenticon = ({ value = 'test', size = '100%' }) => {
   );
 };
 
-export const Card = ({
-  profile,
-  onClick = () => {},
-  className = '',
-  key = '',
-}) => (
-  <div className={'card login ' + className} onClick={onClick} key={key}>
+export const Card = ({ profile, onClick = () => {}, className = '' }) => (
+  <div className={'card login ' + className} onClick={onClick}>
     {profile.image ? (
-      <img className="pp" src={profile?.image || anonImage}></img>
+      <img alt="" className="pp" src={profile?.image || anonImage}></img>
     ) : (
       <Jdenticon size="48" value={profile['@id']} />
     )}

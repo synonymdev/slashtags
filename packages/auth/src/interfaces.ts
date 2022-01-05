@@ -18,15 +18,18 @@ export type InitialResponse = {
 
 export type OnRequest = () => Promise<InitialResponse> | InitialResponse;
 
-export type OnVerify = (
-  peer: Profile,
-  additionalItems?: JsonLdObject[],
-) => VerifySuccess | Promise<VerifySuccess>;
+export type VerifySuccess = { additionalItems?: JsonLdObject[] };
+export type OnSuccess = (
+  connection: {
+    local: Profile;
+    remote: Profile;
+  },
+  additionalItems: JsonLdObject[],
+) => VerifySuccess | void | Promise<VerifySuccess> | Promise<void>;
 
 export type TicketConfig = {
   onRequest: OnRequest;
-  onVerify?: OnVerify;
+  onSuccess?: OnSuccess;
   sfp?: string;
+  local?: Profile;
 };
-
-export type VerifySuccess = { additionalItems?: JsonLdObject[] };

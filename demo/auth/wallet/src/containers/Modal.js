@@ -7,7 +7,7 @@ import { didKeyFromPubKey } from '@synonymdev/slashtags-auth';
 
 /** @returns {import ('@synonymdev/slashtags-auth').PeerConfig} */
 const anonymous = (seed) => {
-  const keyPair = curve.generateSeedKeyPair(seed);
+  const keyPair = curve.generateSeedKeyPair(seed || '');
   const id = didKeyFromPubKey(keyPair.publicKey);
 
   return {
@@ -20,10 +20,13 @@ const anonymous = (seed) => {
   };
 };
 
-const Login = ({ data, cancel, resolve }) => {
+const Connect = ({ data, cancel, resolve }) => {
   const [anon, setAnon] = useState(true);
-  const [persona, setPersona] = useState(anonymous(data['@id']));
-  const { store, dispatch } = useContext(StoreContext);
+  const [persona, setPersona] = useState(
+    // Derive keyPair from the responder's DID
+    anonymous(data['@id']),
+  );
+  const { store } = useContext(StoreContext);
 
   /** @param {import ('@synonymdev/slashtags-actions').ACT1_InitialResponseResult} x*/
   const respondToAuth = (x) => resolve(x);
@@ -32,14 +35,14 @@ const Login = ({ data, cancel, resolve }) => {
 
   return (
     <div className="login-modal">
-      <h1>Login to</h1>
+      <h1>Connect to</h1>
       <Card profile={data} />
 
       <div className="switch">
         <button
           onClick={() => {
             setAnon(true);
-            setPersona(anonymous(data.id));
+            setPersona(anonymous(data['@id']));
           }}
           className={'btn ' + (anon ? 'active' : '')}
         >
@@ -66,10 +69,9 @@ const Login = ({ data, cancel, resolve }) => {
         store.personas.map(
           /** @param {import ('@synonymdev/slashtags-auth').PeerConfig} p*/
           (p, id) => {
-            console.log({ p, persona });
             return (
               <Card
-                key={p['@id']}
+                key={p.profile['@id']}
                 profile={p.profile}
                 className={
                   p.profile['@id'] === persona.profile['@id']
@@ -108,11 +110,11 @@ export const Modal = () => {
 
   return (
     <Sheet isVisible={!!resolve}>
-      <Login
+      <Connect
         data={store.prompt?.data}
         cancel={cancel}
         resolve={resolve}
-      ></Login>
+      ></Connect>
     </Sheet>
   );
 };
