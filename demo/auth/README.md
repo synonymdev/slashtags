@@ -5,7 +5,7 @@ Demonstrate the implementation of Slashtags features between an application (bac
 ## Features
 
 - [x] Slashtags accounts
-- [ ] Slashtags contacts (wip)
+- [x] Slashtags contacts
 - [ ] Slashtags feeds (wip)
 
 ## usage
