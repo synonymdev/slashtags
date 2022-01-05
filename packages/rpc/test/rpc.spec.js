@@ -126,3 +126,13 @@ test('RPC: listening on an already listening server', async (t) => {
 
   t.deepEqual(destination, destination2)
 })
+
+test('RPC: throw an error if connection failed', async (t) => {
+  const node = await RPC()
+
+  try {
+    await node.request(Buffer.from('123', 'hex'), 'ping', {})
+  } catch (error) {
+    t.deepEqual(error, new Error('Could not find peer'))
+  }
+})

@@ -77,7 +77,12 @@ export const RPC = async (opts) => {
       }
     )
 
-    return { noiseSocket, resetTimeout }
+    return new Promise((resolve, reject) => {
+      noiseSocket.on('open', () => resolve({ noiseSocket, resetTimeout }))
+      noiseSocket.on('error', (error) => {
+        reject(error)
+      })
+    })
   }
 
   /**
@@ -85,13 +90,18 @@ export const RPC = async (opts) => {
    * @type {SlashtagsRPC['request']}
    */
   const _request = async (destination, method, params) => {
-    let openScoket = _openSockets.get(b4a.toString(destination, 'hex'))
+    let openSocket = _openSockets.get(b4a.toString(destination, 'hex'))
 
-    if (!openScoket || openScoket.noiseSocket.destroyed) {
-      openScoket = await setupNoiseSocket(destination)
+    if (!openSocket || openSocket.noiseSocket.destroyed) {
+      openSocket = await setupNoiseSocket(destination)
     }
 
-    return engine.call(method, params, openScoket.noiseSocket)
+    return engine.call(
+      method,
+      params,
+      // @ts-ignore Error is thrown if openSocket is undefined
+      openSocket.noiseSocket
+    )
   }
 
   return {
