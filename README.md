@@ -22,6 +22,8 @@ Make sure all packages build and pass tests successfully:
 npm run full-check
 ```
 
+[nvm](https://github.com/nvm-sh/nvm#intro) is suppported but not required
+
 ### Adding new package
 
 TODO: write documentation for all steps needed for adding new package
