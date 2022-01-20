@@ -1,11 +1,11 @@
 # Slashtags Accounts
 
-> Bidirectional authentication of DIDs over slashtags-rpc
+> Bidirectional authentication of DIDs over slashtags-core
 
 ## Install
 
 ```bash
-npm i @synonymdev/slashtags-auth @synonymdev/slashtags-rpc
+npm i @synonymdev/slashtags-auth @synonymdev/slashtags-core
 ```
 
 ## Usage
@@ -31,10 +31,11 @@ const auth = await Auth(node);
 ### Issuing a new url for auth session
 
 ```javascript
-auth.issueURL({
+const url = auth.issueURL({
   // Do something when url expires (optional)
   onTimeout: () => {},
   onRequest: () => ({
+    // Declare the keyPair and profile of the responder
     responder: {
       keyPair, // {publicKey, secretKey}
       profile, // A Thing (see schema.org)
@@ -42,7 +43,7 @@ auth.issueURL({
     // Optional additional items to be sent to the user _before_ authentication
     additionalItems: [],
   }),
-  onVerify: (
+  onSuccess: (
     profile, // Initiator's profile
     additionalItems, // Optional additionalItems from the Initiator
   ) => {

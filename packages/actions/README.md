@@ -5,7 +5,7 @@
 ## Install
 
 ```bash
-npm i @synonymdev/slashtags-actions @synonymdev/slashtags-rpc
+npm i @synonymdev/slashtags-actions @synonymdev/slashtags-core
 ```
 
 ## Usage
@@ -46,20 +46,22 @@ await actions.handle(
         return {
           initiator: {
             keyPair, // {publicKey, secretKey}
-            profile, // Initiator's profile A Thing (see schema.org)
+            profile: InitiatorProfile, // Initiator's profile A Thing (see schema.org)
           },
           // Optional additional items to be sent to the user _before_ authentication
           additionalItems: [],
         };
       },
       onSuccess: (
-        connection // {local: Initiator's profile, remote: Resopnder's profile}
+        connection, // {local: Initiator's profile, remote: Responder's profile}
         additionalItems, // Optional additionalItems from the Responder _after_ authenticating the Initiator
-        ) => {},
+      ) => {
+        // Do something with the connection and possibly the additionalItems
+      },
     },
   },
   (error) => {
-    // Do something with unexpected erros (display in UI for example)
+    // Do something with unexpected errors (display in UI for example)
   },
 );
 ```
