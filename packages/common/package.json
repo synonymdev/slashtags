@@ -5,34 +5,41 @@
   "type": "module",
   "keywords": [
     "slashtags",
-    "common",
-    "varint"
+    "common"
   ],
-  "homepage": "https://github.com/synonymdev/slashtags/tree/master/packages/common/#readme",
-  "bugs": {
-    "url": "https://github.com/synonymdev/slashtags/issues"
-  },
+  "homepage": "https://github.com/synonymdev/slashtags/tree/master/packages/common#readme",
+  "bugs": "https://github.com/synonymdev/slashtags/issues",
   "license": "MIT",
   "files": [
     "*",
     "!**/*.tsbuildinfo"
   ],
-  "types": "./types/packages/cimmon/src/index.d.ts",
+  "types": "types/src/index.d.ts",
   "main": "src/index.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/synonymdev/slashtags.git"
   },
   "scripts": {
-    "lint": "standard ./src ./test --fix",
-    "build": "rm -rf dist types && ipjs build && tsc && cp -r types/ dist/types",
-    "test": "hundreds ava",
-    "prepublishOnly": "npm run lint && npm run build && npm run test && dependency-check dist --no-dev"
+    "build": "aegir build",
+    "test": "c8 aegir test",
+    "lint": "aegir ts -p check && aegir lint --fix",
+    "clean": "rimraf ./dist",
+    "dep-check": "aegir dep-check"
   },
   "dependencies": {
     "varint": "^6.0.0"
   },
   "devDependencies": {
-    "@types/varint": "^6.0.0"
+    "@types/varint": "^6.0.0",
+    "aegir": "^36.1.3"
+  },
+  "eslintConfig": {
+    "env": {
+      "mocha": true
+    },
+    "parserOptions": {
+      "sourceType": "module"
+    }
   }
 }

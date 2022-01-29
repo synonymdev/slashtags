@@ -2,6 +2,7 @@ import varint from 'varint'
 
 /**
  * Prepend one or more varints to a Uint8Array
+ *
  * @param {number|number[]} integers
  * @param {Uint8Array} bytes
  */
@@ -29,6 +30,7 @@ export const prepend = (integers, bytes) => {
 
 /**
  * Returns a tuple of the first varint, the rest and the length of varint
+ *
  * @param {Uint8Array} bytes
  * @returns {[number, Uint8Array, number]}
  */
