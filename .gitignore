@@ -6,7 +6,6 @@ lerna-debug.log
 *.iml
 docs/
 build
-lib
 yarn.lock
 packages/*/node_modules/
 packages/*/coverage/
@@ -17,3 +16,4 @@ packages/*/dist
 .npmrc
 # Local Netlify folder
 .netlify
+*aegir.json

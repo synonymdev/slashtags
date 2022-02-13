@@ -8,6 +8,7 @@
     "wot",
     "p2p"
   ],
+  "type": "module",
   "homepage": "https://github.com/synonymdev/slashtags/tree/master/#readme",
   "bugs": {
     "url": "https://github.com/synonymdev/slashtags/issues"
