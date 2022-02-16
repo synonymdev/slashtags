@@ -1,14 +1,13 @@
 {
   "name": "@synonymdev/slashtags-core",
   "version": "0.1.1",
-  "description": "Core implementation of Slashtags protocol in JS",
+  "description": "Asynchronous bootstrapping of Slashtags nodes",
   "type": "module",
   "keywords": [
     "slashtags",
     "core",
-    "rpc",
-    "hyperswarm",
-    "dht"
+    "plugin",
+    "loader"
   ],
   "homepage": "https://github.com/synonymdev/slashtags/tree/master/packages/core/#readme",
   "bugs": {
@@ -19,7 +18,19 @@
     "*",
     "!**/*.tsbuildinfo"
   ],
-  "types": "./types/packages/core/src/index.d.ts",
+  "types": "types/src/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "*": [
+        "types/*",
+        "types/src/*"
+      ],
+      "types/*": [
+        "types/*",
+        "types/src/*"
+      ]
+    }
+  },
   "main": "src/index.js",
   "repository": {
     "type": "git",
@@ -33,10 +44,11 @@
     "dep-check": "aegir dep-check"
   },
   "dependencies": {
-    "@synonymdev/slashtags-rpc": "^0.1.1"
+    "events": "^3.3.0"
   },
   "devDependencies": {
-    "aegir": "^36.1.3"
+    "aegir": "^36.1.3",
+    "tsd": "^0.19.1"
   },
   "eslintConfig": {
     "env": {
