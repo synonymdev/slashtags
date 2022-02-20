@@ -9,4 +9,5 @@ declare module 'b4a' {
     encoding?: 'hex' | 'base64' | 'utf8' | 'utf16le' | 'ascii',
   ): Uint8Array;
   function byteLength(buf: Uint8Array): number;
+  function alloc(size: number): Buffer;
 }
