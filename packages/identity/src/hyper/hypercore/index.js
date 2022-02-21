@@ -1,78 +1,91 @@
 // @ts-ignore
-import Corestore from 'corestore';
+import Corestore from 'corestore'
 // @ts-ignore
-import RAM from 'random-access-memory';
-import b4a from 'b4a';
+import RAM from 'random-access-memory'
+import b4a from 'b4a'
 
 const DEFAULT_CORE_OPTS = {
   sparse: true,
   persist: true,
   keyEncoding: 'utf8',
-  valueEncoding: 'json',
-};
+  valueEncoding: 'json'
+}
 
 /**
  *
  * @param {import('../../interfaces').Slashtags} slash
- * @param {{}} [options]
+ * @param {*} [options]
  */
-export async function slashHypercore(slash, options) {
-  const corestore = new Corestore(RAM);
+export async function slashHypercore (slash, options) {
+  const corestore = new Corestore(RAM)
 
-  slash.onReady(corestore.ready);
+  slash.onReady(async () => {
+    await corestore.ready()
+
+    if (slash.hyperswarmOnConnection) {
+      slash.hyperswarmOnConnection((socket) => corestore.replicate(socket))
+    }
+  })
+
+  slash.onClose(async () => {
+    await corestore.close()
+  })
 
   // TODO use turbo hashmap
-  const openCores = new Map();
+  const openCores = new Map()
 
   /** @param {*} [options] */
   const getCore = async (options) => {
-    const key = options?.key || options?.keyPair?.publicKey;
-    let core;
+    const key = options?.key || options?.keyPair?.publicKey
+    let core
 
-    const keyHex = b4a.toString(key, 'hex');
+    const keyHex = b4a.toString(key, 'hex')
 
     if (openCores.has(keyHex)) {
-      core = openCores.get(keyHex);
+      core = openCores.get(keyHex)
     } else {
       core = corestore.get({
         ...DEFAULT_CORE_OPTS,
-        ...options,
-      });
+        ...options
+      })
 
-      openCores.set(key, core);
+      openCores.set(keyHex, core)
     }
 
-    await core.ready();
-    await core.update();
+    await core.ready()
 
-    return core;
-  };
+    if (slash.hyperswarmJoin) { await slash.hyperswarmJoin(core.discoveryKey, options) }
 
-  /** @type {import('../../interfaces').HypercoreExt['hypercoreCreate']} */
-  async function hypercoreCreate(options) {
-    const core = await getCore(options);
-    return { key: core.key };
+    await core.update()
+
+    return core
   }
 
-  /** @type {import('../../interfaces').HypercoreExt['hypercoreAppend']} */
-  async function hypercoreAppend(options) {
-    const core = await getCore(options);
-    return core.append(options.data);
+  /** @type {import('../../interfaces').HypercoreAPI['hypercoreCreate']} */
+  async function hypercoreCreate (options) {
+    const core = await getCore(options)
+    return { key: core.key }
   }
 
-  /** @type {import('../../interfaces').HypercoreExt['hypercoreGet']} */
-  async function hypercoreGet(options) {
-    const core = await getCore(options);
-
-    if (core.length < 1) return null;
-
-    const seq = options.seq || core.length - 1;
-    const data = await core.get(seq);
-
-    return data;
+  /** @type {import('../../interfaces').HypercoreAPI['hypercoreAppend']} */
+  async function hypercoreAppend (options) {
+    const core = await getCore(options)
+    return core.append(options.data)
   }
 
-  slash.decorate('hypercoreCreate', hypercoreCreate);
-  slash.decorate('hypercoreAppend', hypercoreAppend);
-  slash.decorate('hypercoreGet', hypercoreGet);
+  /** @type {import('../../interfaces').HypercoreAPI['hypercoreGet']} */
+  async function hypercoreGet (options) {
+    const core = await getCore(options)
+    await core.update()
+
+    if (core.length < 1) return null
+    const seq = options.seq || core.length - 1
+    const data = await core.get(seq)
+
+    return data
+  }
+
+  slash.decorate('hypercoreCreate', hypercoreCreate)
+  slash.decorate('hypercoreAppend', hypercoreAppend)
+  slash.decorate('hypercoreGet', hypercoreGet)
 }

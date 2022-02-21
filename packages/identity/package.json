@@ -62,6 +62,8 @@
     "compact-encoding-maybe-enum": "^1.0.2",
     "compact-encoding-struct": "^1.2.1",
     "corestore": "^6.0.1-alpha.9",
+    "dht-universal": "^0.3.2",
+    "hyperswarm": "^3.0.1",
     "multiformats": "^9.6.4",
     "random-access-memory": "^4.0.0",
     "sodium-universal": "^3.1.0"

@@ -1,24 +1,24 @@
 // @ts-ignore
-import c from 'compact-encoding';
+import c from 'compact-encoding'
 // @ts-ignore
-import { maybeEnum } from 'compact-encoding-maybe-enum';
+import { maybeEnum } from 'compact-encoding-maybe-enum'
 // @ts-ignore
-import { compile, opt, flag } from 'compact-encoding-struct';
+import { compile, opt, flag } from 'compact-encoding-struct'
 
 /** @type {string[]} */
 const ServiceTypes = [
   // Add commonly used Service Types here
-];
+]
 
 const Service = compile({
   id: c.string,
   type: maybeEnum(ServiceTypes),
-  serviceEndpoint: c.string,
-});
+  serviceEndpoint: c.string
+})
 
-const KeyTypes = ['ED25519'];
+const KeyTypes = ['ED25519', 'SECP256K1']
 
-const PublicKey = compile({
+const Key = compile({
   id: c.string,
   type: maybeEnum(KeyTypes),
   key: c.string,
@@ -26,12 +26,12 @@ const PublicKey = compile({
   assertionMethod: flag,
   keyAgreement: flag,
   capabilityInvocation: flag,
-  capabilityDelegation: flag,
-});
+  capabilityDelegation: flag
+})
 
 const BlockStruct = {
   services: opt(c.array(Service)),
-  publicKeys: opt(c.array(PublicKey)),
-};
+  keys: opt(c.array(Key))
+}
 
-export const SlashDIDEncoding = compile(BlockStruct);
+export const SlashDIDEncoding = compile(BlockStruct)

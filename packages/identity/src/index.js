@@ -1,89 +1,89 @@
-import b4a from 'b4a';
-import sodium from 'sodium-universal';
+import b4a from 'b4a'
+import sodium from 'sodium-universal'
 
-import { SlashDIDProvider } from './providers/slash/index.js';
+import { SlashDIDProvider } from './providers/slash/index.js'
 
-function generateKeyPair() {
+function generateKeyPair () {
   const keyPair = {
     publicKey: Buffer.alloc(32),
-    secretKey: Buffer.alloc(64),
-  };
+    secretKey: Buffer.alloc(64)
+  }
 
-  const privateKey = b4a.alloc(32);
-  sodium.randombytes_buf(privateKey);
+  const privateKey = b4a.alloc(32)
+  sodium.randombytes_buf(privateKey)
 
   sodium.crypto_sign_seed_keypair(
     keyPair.publicKey,
     keyPair.secretKey,
-    privateKey,
-  );
+    privateKey
+  )
 
-  return keyPair;
+  return keyPair
 }
 
 /**
  *
  * @param {import('./interfaces').Slashtags} slash
- * @param {import('./interfaces').IdentityOptions} [options]
+ * @param {*} [options]
  */
-export async function slashIdentity(slash, options) {
+export async function slashIdentity (slash, options) {
   /** @type {Record<string, import('./interfaces').IdentityProvider>} */
   const providers = {
-    slash: new SlashDIDProvider({ slash }),
-  };
-  const DefaultProvider = 'slash';
+    slash: new SlashDIDProvider({ slash })
+  }
+  const DefaultProvider = 'slash'
 
   /** @type {import('./interfaces').Slashtags['identityCreate']} */
-  async function identityCreate(options) {
-    const providerName = DefaultProvider;
-    const provider = providers[providerName];
+  async function identityCreate (options) {
+    const providerName = DefaultProvider
+    const provider = providers[providerName]
 
-    const opts = { ...options };
+    const opts = { ...options }
     // TODO: switch this with a keychain generator
-    if (!opts.keyPair) opts.keyPair = generateKeyPair();
+    if (!opts.keyPair) opts.keyPair = generateKeyPair()
 
     const identifier = await provider.createIdentifier(
       // @ts-ignore
-      opts,
-    );
+      opts
+    )
 
-    slash.emit('identityCreated', identifier);
-    return identifier;
+    slash.emit('identityCreated', identifier)
+    return identifier
   }
 
   /** @param {string} did */
-  const providerFromDID = (did) => providers[did.split(':')[1].split(':')[0]];
+  const providerFromDID = (did) => providers[did.split(':')[1].split(':')[0]]
 
   /** @type {import('./interfaces').Slashtags['identityGet']} */
-  async function identityGet(options) {
-    const did = options.did;
+  async function identityGet (options) {
+    const did = options.did
 
-    const provider = providerFromDID(did);
-    const identifier = await provider.getIdentifier({ did });
+    const provider = providerFromDID(did)
+    const identifier = await provider.getIdentifier({ did })
 
     return {
       ...identifier,
-      did,
-    };
+      did
+    }
   }
 
   /** @type {import('./interfaces').Slashtags['identityUpsertServices']} */
-  async function identityUpsertServices(options) {
-    const did = options.did;
+  async function identityUpsertServices (options) {
+    const did = options.did
 
-    const provider = providerFromDID(did);
+    const provider = providerFromDID(did)
     const identifier = await provider.upsertServices({
       ...options,
-      did,
-    });
+      did
+    })
 
     return {
       ...identifier,
-      did,
-    };
+      did
+    }
   }
 
-  slash.decorate('identityCreate', identityCreate);
-  slash.decorate('identityGet', identityGet);
-  slash.decorate('identityUpsertServices', identityUpsertServices);
+  slash.decorate('identityCreate', identityCreate)
+  slash.decorate('identityGet', identityGet)
+  slash.decorate('identityUpsertServices', identityUpsertServices)
 }
