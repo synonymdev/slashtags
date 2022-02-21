@@ -1,89 +1,89 @@
-import level from 'level';
 import b4a from 'b4a';
 import sodium from 'sodium-universal';
-import { derivePath } from 'ed25519-hd-key';
 
-import { slashStorage } from './storage/index.js';
+import { SlashDIDProvider } from './providers/slash/index.js';
 
-/**
- *
- * @param {import('./interfaces').Slashtags} slash
- * @param {{}} [options]
- */
-async function slashDataStore(slash, options) {
-  await slash.use(slashStorage);
+function generateKeyPair() {
+  const keyPair = {
+    publicKey: Buffer.alloc(32),
+    secretKey: Buffer.alloc(64),
+  };
 
-  /** @type {import('./interfaces').Slashtags['dataStoreCreateDB']} */
-  async function dataStoreCreateDB(options) {
-    return level(slash.storageRelativePath('/' + options.dbName));
-  }
+  const privateKey = b4a.alloc(32);
+  sodium.randombytes_buf(privateKey);
 
-  slash.decorate('dataStoreCreateDB', dataStoreCreateDB);
+  sodium.crypto_sign_seed_keypair(
+    keyPair.publicKey,
+    keyPair.secretKey,
+    privateKey,
+  );
+
+  return keyPair;
 }
 
 /**
  *
  * @param {import('./interfaces').Slashtags} slash
- * @param {{}} [options]
- */
-export async function slashKeyChain(slash, options) {
-  await slash.use(slashDataStore);
-  const keyChainDB = await slash.dataStoreCreateDB({ dbName: 'keyChain' });
-
-  /** @type {string} */
-  // @ts-ignore
-  let seedHex = undefined;
-  let offset = 1;
-
-  try {
-    seedHex = await keyChainDB.get('seed');
-    offset = await keyChainDB.get('offset-Ed25519');
-  } catch (error) {}
-
-  if (!seedHex) {
-    const seed = b4a.alloc(64);
-    sodium.randombytes_buf(seed);
-
-    seedHex = b4a.toString(seed, 'hex');
-
-    keyChainDB.put('seed', seedHex);
-  }
-
-  const Path = "m/84263362'";
-
-  /** @type {import('./interfaces').Slashtags['keyChainGenerateKey']} */
-  function keyChainGenerateKey(options) {
-    let next;
-    if (options?.offset) {
-      next = options.offset;
-    } else {
-      next = offset++;
-    }
-    const { key } = derivePath(`${Path}/${next}'`, seedHex);
-    return { secretKey: key, type: 'Ed25519' };
-  }
-  slash.decorate('keyChainGenerateKey', keyChainGenerateKey);
-
-  return;
-}
-
-/**
- *
- * @param {import('./interfaces').Slashtags} slash
- * @param {{}} [options]
+ * @param {import('./interfaces').IdentityOptions} [options]
  */
 export async function slashIdentity(slash, options) {
-  try {
-    await slash.use(slashKeyChain);
-  } catch (error) {
-    console.log(error);
-  }
+  /** @type {Record<string, import('./interfaces').IdentityProvider>} */
+  const providers = {
+    slash: new SlashDIDProvider({ slash }),
+  };
+  const DefaultProvider = 'slash';
 
   /** @type {import('./interfaces').Slashtags['identityCreate']} */
   async function identityCreate(options) {
-    const privateKey = slash.keyChainGenerateKey();
-    return {};
+    const providerName = DefaultProvider;
+    const provider = providers[providerName];
+
+    const opts = { ...options };
+    // TODO: switch this with a keychain generator
+    if (!opts.keyPair) opts.keyPair = generateKeyPair();
+
+    const identifier = await provider.createIdentifier(
+      // @ts-ignore
+      opts,
+    );
+
+    slash.emit('identityCreated', identifier);
+    return identifier;
+  }
+
+  /** @param {string} did */
+  const providerFromDID = (did) => providers[did.split(':')[1].split(':')[0]];
+
+  /** @type {import('./interfaces').Slashtags['identityGet']} */
+  async function identityGet(options) {
+    const did = options.did;
+
+    const provider = providerFromDID(did);
+    const identifier = await provider.getIdentifier({ did });
+
+    return {
+      ...identifier,
+      did,
+    };
+  }
+
+  /** @type {import('./interfaces').Slashtags['identityUpsertServices']} */
+  async function identityUpsertServices(options) {
+    const did = options.did;
+
+    const provider = providerFromDID(did);
+    const identifier = await provider.upsertServices({
+      ...options,
+      did,
+    });
+
+    return {
+      ...identifier,
+      did,
+    };
   }
 
   slash.decorate('identityCreate', identityCreate);
+  slash.decorate('identityGet', identityGet);
+  slash.decorate('identityUpsertServices', identityUpsertServices);
 }

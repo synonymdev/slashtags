@@ -1,42 +1,47 @@
 import { Slashtags } from '@synonymdev/slashtags-core';
 import type { ServiceEndpoint, KeyCapabilitySection } from 'did-resolver';
-import type level from 'level';
 
 declare module '@synonymdev/slashtags-core' {
   interface Slashtags extends Identity {}
 }
 
-export interface Storage {
-  storageRelativePath: (path: string) => string;
+// Hypercore Plugin
+
+export interface HypercoreExt {
+  hypercoreCreate: (options: {
+    key?: Buffer;
+    keyPair?: KeyPair;
+    lookup?: boolean;
+    announce?: boolean;
+    sparse?: boolean;
+    eagerUpdate?: boolean;
+    valueEncoding?: string;
+  }) => Promise<{ key: Buffer }>;
+  hypercoreAppend: (options: { key: Buffer; data: any }) => Promise<number>;
+  hypercoreGet: (options: { key: Buffer; seq?: number }) => Promise<any>;
 }
 
-export interface DataStore {
-  dataStoreCreateDB: (options: { dbName: string }) => Promise<level.LevelDB>;
+// Identity Plugin
+export interface Identity extends HypercoreExt {
+  identityCreate: (
+    options?: Partial<CreateIdentifierOptions>,
+  ) => Promise<Identifier>;
+  identityGet: (options: GetIdentifierOptions) => Promise<Identifier>;
+  identityUpsertServices: (
+    options: UpsertServicesOptions,
+  ) => Promise<Identifier>;
 }
 
-export interface KeyChain {
-  keyChainGenerateKey: (options?: { type?: KeyType; offset: number }) => {
-    secretKey: Buffer;
-    type: KeyType;
-  };
-}
-
-export interface Identity extends Storage, KeyChain, DataStore {
-  identityCreate: (options?: {
-    identifier: Omit<Identifier, 'did'>;
-  }) => Promise<Identifier>;
-  identityGet: (identifier: Partial<Identifier>) => string;
-  identitySetService: (options?: {}) => string;
-}
+export interface IdentityOptions {}
 
 // Identifier
 
-export type KeyType = 'Ed25519' | 'Secp256k1';
+export type KeyType = 'ED25519' | 'SECP256K1';
 
 export interface Identifier {
   did: string;
-  alias?: string;
   services?: Service[];
+  keys?: PublicKey[];
 }
 
 export interface Service {
@@ -46,34 +51,45 @@ export interface Service {
   description?: string;
 }
 
-export type PublicKey = {
+export interface PublicKey {
   id: string;
   type: string;
   publicKeyMultibase: string;
   purposes?: KeyCapabilitySection[];
-};
+}
+
+export interface KeyPair {
+  secretKey: Buffer;
+  publicKey?: Buffer;
+  type?: KeyType;
+}
 
 // Provider
 
+export type CreateIdentifierOptions = {
+  keyPair: KeyPair;
+} & Omit<Identifier, 'did'>;
+
+export type GetIdentifierOptions = Pick<Identifier, 'did'>;
+
+export type UpsertServicesOptions = Pick<Identifier, 'did' | 'services'>;
 export interface IdentityProvider {
   createIdentifier: {
-    (options: { privateKey: Buffer; type: KeyType }): Promise<Identifier>;
+    (options: CreateIdentifierOptions): Promise<Identifier>;
   };
-
-  // resolveIdentifier: {
-  //   (identifier: Identifier): Promise<Identifier>;
-  // };
-
-  // setService: {
-  //   (identifier: Identifier, service: Service): Promise<any>;
-  // };
+  getIdentifier: {
+    (options: GetIdentifierOptions): Promise<Identifier>;
+  };
+  upsertServices: {
+    (options: UpsertServicesOptions): Promise<Identifier>;
+  };
 }
 
 // SlashDID provider
 
-export type SlashDIDBlock = {
+export interface SlashDIDBlock {
   p?: PublicKey[];
   s?: ServiceEndpoint[];
-};
+}
 
 export { Slashtags };
