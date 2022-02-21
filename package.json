@@ -8,7 +8,6 @@
     "wot",
     "p2p"
   ],
-  "type": "module",
   "homepage": "https://github.com/synonymdev/slashtags/tree/master/#readme",
   "bugs": {
     "url": "https://github.com/synonymdev/slashtags/issues"
@@ -30,7 +29,10 @@
   },
   "devDependencies": {
     "c8": "^7.11.0",
-    "lerna": "^4.0.0"
+    "dht-universal": "^0.3.2",
+    "lerna": "^4.0.0",
+    "stream": "^0.0.2",
+    "util": "^0.12.4"
   },
   "workspaces": [
     "./packages/*"

@@ -1,7 +1,7 @@
-import DHT from '@hyperswarm/dht';
-import { setupRelay } from 'dht-universal/setup-relay.js';
+const DHT = require('@hyperswarm/dht');
+const { setupRelay } = require('dht-universal/setup-relay.js');
 
-const setupBootstrap = async () => {
+const setupTestnet = async () => {
   const node = new DHT({ ephemeral: true, bootstrap: [] });
   await node.ready();
 
@@ -14,15 +14,18 @@ const setupBootstrap = async () => {
     await dht.ready();
   }
 
+  const { port, closeRelay } = await setupRelay({ dhtOpts: { bootstrap } });
+
+  const relay = 'ws://localhost:' + port;
+
   return {
     bootstrap,
+    relay,
     closeBootstrap: () => Promise.all(nodes.map((node) => node.destroy())),
+    closeRelay: closeRelay,
   };
 };
 
-(async () => {
-  const { bootstrap, closeBootstrap } = await setupBootstrap();
-  const { port } = await setupRelay({ dhtOpts: { bootstrap } });
-
-  console.log('Running dht-relay: ws://localhost:' + port);
-})();
+module.exports = {
+  setupTestnet,
+};

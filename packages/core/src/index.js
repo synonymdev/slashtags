@@ -39,13 +39,14 @@ export class Slashtags extends EventEmitter {
    * @type {<O extends Record<string, any> = {}>(plugin:import('./interfaces').Plugin<O>, options: O)=> PromiseLike<void> & Slashtags}
    */
   // @ts-ignore
-  use (plugin, options = {}) {
+  use (plugin, options = undefined) {
     if (this.status.loaded) {
       throw errors.SLASH_ERR_ALREADY_LOADED(plugin)
     } else if (this._setup.plugins.has(plugin)) {
       if (
+        options &&
         JSON.stringify(this._setup.plugins.get(plugin)) !==
-        JSON.stringify(options)
+          JSON.stringify(options)
       ) {
         this.logger.warn(
           warnings.SLASH_WARN_ALREADY_INSTALLED_WITH_DIFFERENT_OPTIONS(
