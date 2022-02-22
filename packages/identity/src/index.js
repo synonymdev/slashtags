@@ -23,17 +23,25 @@ function generateKeyPair () {
 
 /**
  *
- * @param {import('./interfaces').Slashtags} slash
+ * @param {Slashtags} slash
  * @param {*} [options]
  */
 export async function slashIdentity (slash, options) {
-  /** @type {Record<string, import('./interfaces').IdentityProvider>} */
+  // Setup
+  /** @type {IdentityProvider} */
   const providers = {
     slash: new SlashDIDProvider({ slash })
   }
   const DefaultProvider = 'slash'
 
-  /** @type {import('./interfaces').Slashtags['identityCreate']} */
+  // API extension
+  slash.decorate('identityCreate', identityCreate)
+  slash.decorate('identityGet', identityGet)
+  slash.decorate('identityUpsertServices', identityUpsertServices)
+
+  // API Implementation
+
+  /** @type {Slashtags['identityCreate']} */
   async function identityCreate (options) {
     const providerName = DefaultProvider
     const provider = providers[providerName]
@@ -54,7 +62,7 @@ export async function slashIdentity (slash, options) {
   /** @param {string} did */
   const providerFromDID = (did) => providers[did.split(':')[1].split(':')[0]]
 
-  /** @type {import('./interfaces').Slashtags['identityGet']} */
+  /** @type {Slashtags['identityGet']} */
   async function identityGet (options) {
     const did = options.did
 
@@ -67,7 +75,7 @@ export async function slashIdentity (slash, options) {
     }
   }
 
-  /** @type {import('./interfaces').Slashtags['identityUpsertServices']} */
+  /** @type {Slashtags['identityUpsertServices']} */
   async function identityUpsertServices (options) {
     const did = options.did
 
@@ -82,8 +90,7 @@ export async function slashIdentity (slash, options) {
       did
     }
   }
-
-  slash.decorate('identityCreate', identityCreate)
-  slash.decorate('identityGet', identityGet)
-  slash.decorate('identityUpsertServices', identityUpsertServices)
 }
+
+/** @typedef {Record<string, import('./interfaces').IdentityProvider>} IdentityProvider */
+/** @typedef {import('./interfaces').Slashtags} Slashtags */

@@ -13,12 +13,14 @@ const DEFAULT_CORE_OPTS = {
 
 /**
  *
- * @param {import('../../interfaces').Slashtags} slash
+ * @param {Slashtags} slash
  * @param {*} [options]
  */
 export async function slashHypercore (slash, options) {
+  // Setup
   const corestore = new Corestore(RAM)
 
+  // Hooks
   slash.onReady(async () => {
     await corestore.ready()
 
@@ -26,10 +28,14 @@ export async function slashHypercore (slash, options) {
       slash.hyperswarmOnConnection((socket) => corestore.replicate(socket))
     }
   })
+  slash.onClose(async () => corestore.close())
 
-  slash.onClose(async () => {
-    await corestore.close()
-  })
+  // API extension
+  slash.decorate('hypercoreCreate', hypercoreCreate)
+  slash.decorate('hypercoreAppend', hypercoreAppend)
+  slash.decorate('hypercoreGet', hypercoreGet)
+
+  // API Implementation
 
   // TODO use turbo hashmap
   const openCores = new Map()
@@ -54,26 +60,28 @@ export async function slashHypercore (slash, options) {
 
     await core.ready()
 
-    if (slash.hyperswarmJoin) { await slash.hyperswarmJoin(core.discoveryKey, options) }
+    if (slash.hyperswarmJoin) {
+      await slash.hyperswarmJoin(core.discoveryKey, options)
+    }
 
     await core.update()
 
     return core
   }
 
-  /** @type {import('../../interfaces').HypercoreAPI['hypercoreCreate']} */
+  /** @type {HypercoreAPI['hypercoreCreate']} */
   async function hypercoreCreate (options) {
     const core = await getCore(options)
     return { key: core.key }
   }
 
-  /** @type {import('../../interfaces').HypercoreAPI['hypercoreAppend']} */
+  /** @type {HypercoreAPI['hypercoreAppend']} */
   async function hypercoreAppend (options) {
     const core = await getCore(options)
     return core.append(options.data)
   }
 
-  /** @type {import('../../interfaces').HypercoreAPI['hypercoreGet']} */
+  /** @type {HypercoreAPI['hypercoreGet']} */
   async function hypercoreGet (options) {
     const core = await getCore(options)
     await core.update()
@@ -84,8 +92,7 @@ export async function slashHypercore (slash, options) {
 
     return data
   }
-
-  slash.decorate('hypercoreCreate', hypercoreCreate)
-  slash.decorate('hypercoreAppend', hypercoreAppend)
-  slash.decorate('hypercoreGet', hypercoreGet)
 }
+
+/** @typedef {import('../../interfaces').Slashtags} Slashtags */
+/** @typedef {import('../../interfaces').HypercoreAPI} HypercoreAPI */
