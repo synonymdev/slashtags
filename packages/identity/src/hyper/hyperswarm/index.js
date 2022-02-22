@@ -3,6 +3,11 @@ import Hyperswarm from 'hyperswarm'
 import { DHT } from 'dht-universal'
 import b4a from 'b4a'
 
+export const events = {
+  ON_CONNECTION: 'HYPERSWARM_ON_CONNECTION',
+  JOIN: 'HYPERSWARM_JOIN'
+}
+
 /**
  *
  * @param {import('../../interfaces').Slashtags} slash
@@ -19,12 +24,16 @@ export async function slashHyperSwarm (slash, options) {
   slash.decorate('hyperswarmOnConnection', hyperswarmOnConnection)
   slash.decorate('hyperswarmJoin', hyperswarmJoin)
 
+  // Event Listeners
+  slash.on(events.ON_CONNECTION, hyperswarmOnConnection)
+  slash.on(events.JOIN, hyperswarmJoin)
+
+  // API Implementation
+
   /** @type {HyperswarmAPI['hyperswarmOnConnection']} */
   async function hyperswarmOnConnection (callback) {
     swarm.on('connection', callback)
   }
-
-  // API Implementation
 
   const discovered = new Map()
 

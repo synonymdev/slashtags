@@ -3,6 +3,7 @@ import Corestore from 'corestore'
 // @ts-ignore
 import RAM from 'random-access-memory'
 import b4a from 'b4a'
+import { events } from '../hyperswarm/index.js'
 
 const DEFAULT_CORE_OPTS = {
   sparse: true,
@@ -23,10 +24,8 @@ export async function slashHypercore (slash, options) {
   // Hooks
   slash.onReady(async () => {
     await corestore.ready()
-
-    if (slash.hyperswarmOnConnection) {
-      slash.hyperswarmOnConnection((socket) => corestore.replicate(socket))
-    }
+    // @ts-ignore
+    await slash.emit(events.ON_CONNECTION, (conn) => corestore.replicate(conn))
   })
   slash.onClose(async () => corestore.close())
 
@@ -60,9 +59,7 @@ export async function slashHypercore (slash, options) {
 
     await core.ready()
 
-    if (slash.hyperswarmJoin) {
-      await slash.hyperswarmJoin(core.discoveryKey, options)
-    }
+    await slash.emit(events.JOIN, core.discoveryKey, options)
 
     await core.update()
 
@@ -96,3 +93,4 @@ export async function slashHypercore (slash, options) {
 
 /** @typedef {import('../../interfaces').Slashtags} Slashtags */
 /** @typedef {import('../../interfaces').HypercoreAPI} HypercoreAPI */
+/** @typedef {import('../../interfaces').HyperswarmAPI} HyperswarmAPI */
