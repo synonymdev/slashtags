@@ -69,7 +69,7 @@ export async function slashHypercore (slash, options) {
   /** @type {HypercoreAPI['hypercoreCreate']} */
   async function hypercoreCreate (options) {
     const core = await getCore(options)
-    return { key: core.key }
+    return core
   }
 
   /** @type {HypercoreAPI['hypercoreAppend']} */
@@ -81,7 +81,6 @@ export async function slashHypercore (slash, options) {
   /** @type {HypercoreAPI['hypercoreGet']} */
   async function hypercoreGet (options) {
     const core = await getCore(options)
-    await core.update()
 
     if (core.length < 1) return null
     const seq = options.seq || core.length - 1

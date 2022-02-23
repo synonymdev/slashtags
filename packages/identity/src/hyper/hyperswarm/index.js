@@ -63,13 +63,14 @@ export async function slashHyperSwarm (slash, options) {
       discovered.set(keyHex, { announce, lookup })
     }
 
-    const discovery = swarm.join(discoveryKey, {
+    swarm.join(discoveryKey, {
       ...options,
       server: announce,
       client: lookup
     })
 
-    await discovery.flushed()
+    // TODO: avoid awaiting this if a clever solution was introduced at hyperswarm level
+    await swarm.flush()
   }
 }
 

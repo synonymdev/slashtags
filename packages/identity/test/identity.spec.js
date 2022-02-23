@@ -3,10 +3,8 @@ import slashtags from '@synonymdev/slashtags-core'
 import { slashIdentity } from '../src/index.js'
 import { slashHyperSwarm } from '../src/hyper/hyperswarm/index.js'
 
-const { RELAY_URL } = process.env
-// const BOOTSTRAP = JSON.parse(bootstrapString)
-
-const DHTOPTS = { relays: [RELAY_URL] }
+const { RELAY_URL, BOOTSTRAP } = process.env
+const DHTOPTS = { relays: [RELAY_URL], bootstrap: JSON.parse(BOOTSTRAP) }
 
 describe('Identity - default provider', () => {
   it('should create a new identifier', async () => {
