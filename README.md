@@ -1,6 +1,6 @@
 # Slashtags 
 
-Slashtags is set of methods and protocols for utilizing keypairs to establish accounts, contacts, and abstracted endpoints to establish cross-authenticated communication channels, verifiable attestations & metadata, and ultimately, private-yet-interoperable web-of-trust networks.
+Slashtags is set of methods and protocols for utilizing keypairs to establish accounts, contacts, and abstracted endpoints to create cross-authenticated communication channels, verifiable attestations & metadata, and ultimately, private-yet-interoperable web-of-trust networks.
 
 Slashtags currently supports a DID format for establishing self-sovereign identities, and in the future it will support personal data stores along with related access control features.
 
