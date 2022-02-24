@@ -3,6 +3,10 @@ import sodium from 'sodium-universal'
 
 import { SlashDIDProvider } from './providers/slash/index.js'
 
+export const events = {
+  IDENTIFIER_CREATED: 'IDENTITY_IDENTIFIER_CREATED'
+}
+
 function generateKeyPair () {
   const keyPair = {
     publicKey: Buffer.alloc(32),
@@ -55,7 +59,7 @@ export async function slashIdentity (slash, options) {
       opts
     )
 
-    slash.emit('identityCreated', identifier)
+    slash.emit(events.IDENTIFIER_CREATED, identifier)
     return identifier
   }
 

@@ -18,22 +18,19 @@ export async function slashHyperSwarm (slash, options) {
   const dht = await DHT.create(options?.dhtOptions || {})
   const swarm = new Hyperswarm({ dht })
 
+  swarm.on('connection', (/** @type {*[]} */ ...args) => {
+    slash.emit(events.ON_CONNECTION, ...args)
+  })
+
   slash.onClose(async () => await swarm.destroy())
 
   // API extension
-  slash.decorate('hyperswarmOnConnection', hyperswarmOnConnection)
   slash.decorate('hyperswarmJoin', hyperswarmJoin)
 
   // Event Listeners
-  slash.on(events.ON_CONNECTION, hyperswarmOnConnection)
   slash.on(events.JOIN, hyperswarmJoin)
 
   // API Implementation
-
-  /** @type {HyperswarmAPI['hyperswarmOnConnection']} */
-  async function hyperswarmOnConnection (callback) {
-    swarm.on('connection', callback)
-  }
 
   const discovered = new Map()
 
