@@ -47,7 +47,7 @@ export const QRPage = () => {
       const url = issueUrl();
       updateQR(url);
     })();
-  }, [timedOut]);
+  }, [timedOut, dispatch, store.dependencies.auth, store.responder]);
 
   return (
     <Template title={`Connect to`} back={true}>

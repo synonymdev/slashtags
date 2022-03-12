@@ -1,7 +1,15 @@
 {
   "name": "slashtags-accounts-demo",
-  "version": "0.1.0",
-  "private": true,
+  "source": "src/index.html",
+  "browserslist": "> 0.5%, last 2 versions, not dead",
+  "scripts": {
+    "start": "parcel -p 8001",
+    "build": "parcel build"
+  },
+  "devDependencies": {
+    "crypto-browserify": "^3.12.0",
+    "parcel": "^2.3.2"
+  },
   "dependencies": {
     "@rjsf/core": "^3.1.0",
     "jdenticon": "^3.1.1",
@@ -10,29 +18,5 @@
     "react-dom": "^17.0.2",
     "react-scripts": "4.0.3",
     "simple-jsonrpc-js": "^1.2.0"
-  },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
   }
 }

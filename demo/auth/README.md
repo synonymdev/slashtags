@@ -6,9 +6,14 @@ Demonstrate the implementation of Slashtags features between an application (bac
 
 - [x] Slashtags accounts
 - [x] Slashtags contacts
-- [ ] Slashtags feeds (wip)
 
 ## usage
+
+- Setup a testnet
+
+```
+node setup.js
+```
 
 - Run server
 
@@ -30,7 +35,7 @@ npm install
 npm run start
 ```
 
-Then visit `http://localhost:3000/`
+Then visit `http://localhost:8001/`
 
 - Run the demo wallet
 
@@ -42,4 +47,4 @@ npm install
 npm run start
 ```
 
-Then visit `http://localhost:3001/
+Then visit `http://localhost:8002/`

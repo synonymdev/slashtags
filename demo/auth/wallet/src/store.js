@@ -1,12 +1,14 @@
 import { createContext } from 'react';
 import { secp256k1 as curve } from 'noise-curve-tiny-secp';
-import faker from 'faker';
+import { randUrl, randFullName } from '@ngneat/falso';
 import { didKeyFromPubKey } from '@synonymdev/slashtags-auth';
 import { Core } from '@synonymdev/slashtags-core';
 import { Actions } from '@synonymdev/slashtags-actions';
 import { Auth } from '@synonymdev/slashtags-auth';
 
-const node = Core({ relays: ['wss://dht-relay.synonym.to/'] });
+import { readFileSync } from 'fs';
+
+const node = Core({ relays: ['ws://localhost:8888'] });
 
 export const initialValue = {
   dependencies: {
@@ -28,8 +30,8 @@ export const initialValue = {
             '@context': 'https://schema.org',
             '@type': 'Person',
             '@id': id,
-            name: faker.name.findName(),
-            url: faker.internet.url(),
+            name: randFullName(),
+            url: randUrl(),
           },
         };
       },

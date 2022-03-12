@@ -1,12 +1,10 @@
 // @ts-nocheck
 import { Browser } from '../components/Browser';
 import { useState, useContext, useEffect, useRef } from 'react';
-import { getTicket, StoreContext, types } from '../store';
+import { getTicket, StoreContext } from '../store';
 import Form from '@rjsf/core';
 import { LoginForm } from '../components/LoginForm';
 import { ArrowSVG } from '../components/ArrowSVG';
-import { anonImage } from '../constants';
-import { truncateMid } from '../utils';
 import * as jdenticon from 'jdenticon';
 
 const Jdenticon = ({ value = 'test', size = '100%' }) => {
@@ -93,10 +91,10 @@ export const Website = () => {
               Successfully logged in
               <br />
               <b>
-                {store.user.metadata?.name ? (
+                {store.user?.name ? (
                   <>
                     <span>as </span>
-                    <span className="orange">{store.user.metadata.name}</span>
+                    <span className="orange">{store.user.name}</span>
                   </>
                 ) : (
                   <span> Anonymously </span>
