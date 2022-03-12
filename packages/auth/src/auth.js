@@ -5,7 +5,7 @@ import {
   sessionFingerprint,
   verifyFactory
 } from './utils.js'
-import { randomBytes } from 'crypto'
+import randomBytes from 'randombytes'
 import { createJWS } from 'did-jwt'
 import { signers } from './signers.js'
 import { varint } from '@synonymdev/slashtags-common'
