@@ -5,8 +5,8 @@
   },
   "type": "module",
   "dependencies": {
-    "@synonymdev/slashtags-auth": "^0.3.1",
-    "@synonymdev/slashtags-core": "^0.1.1",
+    "@synonymdev/slashtags-auth": "file:../../../../packages/auth",
+    "@synonymdev/slashtags-core": "file:../../../../packages/core",
     "fastify": "^3.25.3",
     "isomorphic-ws": "^4.0.1",
     "jsonrpc-lite": "^2.2.0",

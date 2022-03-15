@@ -5,6 +5,7 @@ import { Core } from '@synonymdev/slashtags-core';
 import { Auth } from '@synonymdev/slashtags-auth';
 import jrpcLite from 'jsonrpc-lite';
 import { fastify } from 'fastify';
+import fs from 'fs';
 
 const app = fastify({ logger: true });
 const jrpc = new JsonRPC();
@@ -13,7 +14,10 @@ const hostanme = 'localhost' || 'slashtags.herokuapp.com';
 
 const main = async () => {
   // Setting up slashtags node and the Auth module
-  const node = await Core();
+  const bootstrap = JSON.parse(
+    fs.readFileSync('../../testnet.json').toString(),
+  );
+  const node = await Core({ bootstrap });
   const auth = await Auth(node);
 
   // Websocket server

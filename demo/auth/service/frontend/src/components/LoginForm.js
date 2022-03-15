@@ -8,7 +8,7 @@ export const LoginForm = ({ qrURL }) => {
   qrURL = qrURL || '';
   const [copied, setCopied] = useState(false);
 
-  const { store, dispatch } = useContext(StoreContext);
+  const { store } = useContext(StoreContext);
 
   useEffect(() => {
     if (store.loginURL !== qrURL) qrURL = store.loginURL;

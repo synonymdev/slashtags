@@ -1,4 +1,4 @@
-# Slashtags 
+# Slashtags
 
 Slashtags is set of methods and protocols for utilizing keypairs to establish accounts, contacts, and abstracted endpoints to create cross-authenticated communication channels, verifiable attestations & metadata, and ultimately, private-yet-interoperable web-of-trust networks.
 
@@ -19,6 +19,8 @@ This is pre-alpha software. Please use at your own risk. Expect breaking changes
 ### Getting started
 
 Currently the best way to familiarize yourself with existing features is to try these [Demos](./demo/README.md).
+
+If you rather see it in action before diving into the code, try the [Slashtags wallet demo](slash-wallet.netlify.app) that is already built and deployed.
 
 ### Development
 
