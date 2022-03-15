@@ -32,4 +32,5 @@ export type TicketConfig = {
   onSuccess?: OnSuccess;
   sfp?: string;
   local?: Profile;
+  timeout: NodeJS.Timeout;
 };

@@ -87,6 +87,7 @@ export const Auth = async (node, opts) => {
         request.params.additionalItems
       )
 
+      clearTimeout(config.timeout)
       _ticketConfigs.delete(ticket)
 
       return { status: 'OK', additionalItems: final?.additionalItems }
@@ -117,13 +118,12 @@ export const Auth = async (node, opts) => {
       /** @type {TicketConfig} */
       const config = _ticketConfigs.get(ticket) || {
         onRequest,
-        onSuccess
+        onSuccess,
+        timeout: setTimeout(async () => {
+          _ticketConfigs.delete(ticket)
+          await onTimeout?.()
+        }, timeout)
       }
-
-      setTimeout(async () => {
-        _ticketConfigs.delete(ticket)
-        await onTimeout?.()
-      }, timeout)
 
       _ticketConfigs.set(ticket, config)
 
