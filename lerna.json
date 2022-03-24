@@ -1,33 +1,30 @@
 {
-  "packages": [
-    "packages/*"
-  ],
-  "version": "independent",
   "command": {
-    "bootstrap": {
-      "hoist": true
+    "publish": {
+      "message": "chore(release): publish",
+      "createRelease": "github",
+      "conventionalCommits": true,
+      "contents": "dist"
     },
     "run": {
       "stream": true
-    },
-    "publish": {
-      "message": "chore(release): publish",
-      "ignoreChanges": [
-        "*.md",
-        "tsconfig.json",
-        "*.spec.js"
-      ],
-      "contents": "dist"
     },
     "version": {
       "allowBranch": [
         "master",
         "release/*"
-      ],
-      "forcePublish": true,
-      "ignore-changes": [
-        "demo/**"
       ]
     }
-  }
+  },
+  "ignore-changes": [
+    ".github/**",
+    "demo/**",
+    "*.md",
+    "tsconfig.json",
+    "*.spec.js"
+  ],
+  "packages": [
+    "packages/*"
+  ],
+  "version": "independent"
 }
