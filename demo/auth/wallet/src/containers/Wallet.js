@@ -1,9 +1,9 @@
 import { useContext } from 'react';
 import { StoreContext } from '../store';
-import { ScanQRPage } from '../pages/ScanQR';
 import { Home } from '../pages/Home';
 import { Modal } from './Modal';
 import { Error } from './Error';
+import { ScanQRPage } from '../pages/ScanQR';
 import { PersonasPage } from '../pages/Personas';
 import { QRPage } from '../pages/QRPage';
 

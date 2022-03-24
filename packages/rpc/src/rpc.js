@@ -1,4 +1,4 @@
-import { DHT } from './dht.js'
+import { DHT } from 'dht-universal'
 import { Engine } from './engine.js'
 import b4a from 'b4a'
 
@@ -11,9 +11,9 @@ const TIMEOUT = 2 * 60 * 1000
  * @param {number} [opts.requestTimout]
  * @returns {Promise<SlashtagsRPC>}
  */
-export const RPC = async (opts) => {
+export const RPC = async (opts = {}) => {
   const engine = await new Engine()
-  const node = await DHT(opts)
+  const node = await DHT.create(opts)
 
   const server = node.createServer((noiseSocket) =>
     noiseSocket.on('data', (data) => engine.handleRaw(data, noiseSocket))
@@ -41,6 +41,7 @@ export const RPC = async (opts) => {
    */
   const setupNoiseSocket = async (destination) => {
     const noiseSocket = node.connect(destination)
+
     const key = b4a.toString(destination, 'hex')
 
     const createTimeout = () =>
@@ -71,6 +72,7 @@ export const RPC = async (opts) => {
     return new Promise((resolve, reject) => {
       noiseSocket.on('open', () => resolve({ noiseSocket, resetTimeout }))
       noiseSocket.on('error', (error) => {
+        console.log({ error })
         reject(error)
       })
     })

@@ -2,7 +2,7 @@ const path = require('path');
 const fs = require('fs');
 
 const packagejson = (name, description) => `{
-  "name": "${name}",
+  "name": "@synonymdev/slashtags-${name}",
   "version": "0.0.0",
   "description": "${description}",
   "type": "module",
@@ -63,6 +63,25 @@ const tsconfig = `{
   "references": []
 }`;
 
+const defaultIndex = `/**
+ * @param {number} a
+ * @param {number} b
+ */
+export const add = (a, b) => {
+  return a + b
+}
+`;
+
+const defaultTest = `import { expect } from 'aegir/utils/chai.js';
+import { add } from '../src/index.js';
+
+describe('index', () => {
+  it('should add 2 + 2', async () => {
+    expect(add(2, 2)).to.equal(4);
+  });
+});
+`;
+
 const main = () => {
   const name = process.argv[2];
   const description = process.argv[3] || '';
@@ -78,7 +97,8 @@ const main = () => {
   fs.writeFileSync(path.join(_path, 'README.md'), '# slashtags-' + name);
   fs.mkdirSync(path.join(_path, 'src'));
   fs.mkdirSync(path.join(_path, 'test'));
-  fs.writeFileSync(path.join(_path, 'src/index.js'), '');
+  fs.writeFileSync(path.join(_path, 'src/index.js'), defaultIndex);
+  fs.writeFileSync(path.join(_path, 'test/index.spec.js'), defaultTest);
 };
 
 main();

@@ -7,7 +7,7 @@ import { RPC } from '@synonymdev/slashtags-rpc'
  * @returns {Promise<SlashtagsAPI>}
  */
 export const Core = async (opts) => {
-  return RPC({ relays: opts?.relays })
+  return RPC({ relays: opts?.relays, ...opts })
 }
 
 /** @typedef {import ('./interfaces').SlashtagsAPI} SlashtagsAPI */

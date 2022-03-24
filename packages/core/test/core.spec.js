@@ -56,7 +56,7 @@ test('Core: use relay for the DHT', async (t) => {
   node1.addMethods({ ping: async () => 'pong' })
   const key = await node1.listen()
 
-  const node2 = await Core({ rpc: { relays: [TESTING_RELAY_SERVER] } })
+  const node2 = await Core({ relays: [TESTING_RELAY_SERVER] })
   const result = await node2.request(key, 'ping', {})
 
   t.deepEqual(result.body, 'pong')

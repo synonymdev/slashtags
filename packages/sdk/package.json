@@ -1,5 +1,5 @@
 {
-  "name": "sdk",
+  "name": "@synonymdev/slashtags-sdk",
   "version": "0.0.0",
   "description": "slashtags development kit",
   "type": "module",

@@ -17,3 +17,6 @@ packages/*/dist
 .npmrc
 # Local Netlify folder
 .netlify
+.parcel*
+dist/
+testnet.json

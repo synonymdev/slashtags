@@ -1,6 +1,12 @@
-# Slashtags MVP
+# Slashtags
 
-A monorepo containing Javascript packages for different Slashtags modules.
+Slashtags is set of methods and protocols for utilizing keypairs to establish accounts, contacts, and abstracted endpoints to create cross-authenticated communication channels, verifiable attestations & metadata, and ultimately, private-yet-interoperable web-of-trust networks.
+
+Slashtags currently supports a DID format for establishing self-sovereign identities, and in the future it will support personal data stores along with related access control features.
+
+From these primitives, we will demonstrate how users can appy Slashtags to do many powerful things within web and Bitcoin applications by providing modules, demos, full applications, servers and web platforms that utilize Slashtags, Hypercore, Bitcoin, and the Lightning Network together.
+
+This is a monorepo containing Javascript packages for various Slashtags modules.
 
 > A practical and gradual exploration of Slashtags protocol design, through a mvp implementation.
 
@@ -12,7 +18,9 @@ This is pre-alpha software. Please use at your own risk. Expect breaking changes
 
 ### Getting started
 
-Currently the best way to get familiar with the existing features is to check the [Demos](./demo/README.md).
+Currently the best way to familiarize yourself with existing features is to try these [Demos](./demo/README.md).
+
+If you rather see it in action before diving into the code, try the [Slashtags wallet demo](slash-wallet.netlify.app) that is already built and deployed.
 
 ### Development
 
