@@ -1,7 +1,3 @@
-/**
- * @param {number} a
- * @param {number} b
- */
-export const add = (a, b) => {
-  return a + b
-}
+import { KeyManager } from './keys.js';
+
+export { KeyManager };
