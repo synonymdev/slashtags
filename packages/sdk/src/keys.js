@@ -8,11 +8,11 @@ const PREFIX = b4a.from('@slashtags/key-manager')
 export class KeyManager {
   /**
    *
-   * @param {Buffer | Uint8Array} [profile]
+   * @param {Buffer | Uint8Array} [seed]
    * @param {*} [opts]
    */
-  constructor (profile, opts = {}) {
-    this.profile = profile || KeyManager._generateProfile()
+  constructor (seed, opts = {}) {
+    this.seed = seed || generateSeed()
 
     this._namespace = opts._namespace || DEFAULT_NAMESPACE
   }
@@ -22,7 +22,7 @@ export class KeyManager {
    * @param {string} name
    * @returns
    */
-  createKeyPair (name) {
+  generateKeyPair (name) {
     const keyPair = {
       publicKey: b4a.allocUnsafe(sodium.crypto_sign_PUBLICKEYBYTES),
       secretKey: b4a.alloc(sodium.crypto_sign_SECRETKEYBYTES)
@@ -43,7 +43,9 @@ export class KeyManager {
    * @returns
    */
   _createSecret (name) {
-    if (!name || typeof name !== 'string') { throw new Error('name must be a String') }
+    if (!name || typeof name !== 'string') {
+      throw new Error('name must be a String')
+    }
     const output = b4a.alloc(32)
 
     blake2b.batch(
@@ -54,14 +56,14 @@ export class KeyManager {
         this._namespace || DEFAULT_NAMESPACE,
         b4a.from(b4a.byteLength(name, 'ascii') + '\n' + name, 'ascii')
       ],
-      this.profile
+      this.seed
     )
 
     return output
   }
 
   /**
-   * Generates a new KeyManager with the same profile, and a different namespace.
+   * Generates a new KeyManager with the same seed, and a different namespace.
    *
    * @param {string | Buffer | Uint8Array} name
    * @returns
@@ -69,14 +71,7 @@ export class KeyManager {
   namespace (name) {
     if (!b4a.isBuffer(name)) name = b4a.from(name)
     const _namespace = generateNamespace(this._namespace, name)
-    return new KeyManager(this.profile, { _namespace })
-  }
-
-  /**
-   * a convenient utility to generate a profile key.
-   */
-  static _generateProfile () {
-    return randomBytes(sodium.crypto_generichash_KEYBYTES_MIN)
+    return new KeyManager(this.seed, { _namespace })
   }
 }
 
@@ -90,10 +85,7 @@ function generateNamespace (first, second) {
   if (!b4a.isBuffer(first)) first = b4a.from(first)
   if (second && !b4a.isBuffer(second)) second = b4a.from(second)
   const out = b4a.allocUnsafe(32)
-  const input = second
-    ? // @ts-ignore
-    b4a.concat([first, second])
-    : first
+  const input = second ? b4a.concat([first, second]) : first
   sodium.crypto_generichash(out, input)
   return out
 }
@@ -107,4 +99,11 @@ function randomBytes (n) {
   const buf = b4a.allocUnsafe(n)
   sodium.randombytes_buf(buf)
   return buf
+}
+
+/**
+ * a convenient utility to generate a random seed.
+ */
+export function generateSeed () {
+  return randomBytes(sodium.crypto_generichash_KEYBYTES_MIN)
 }
