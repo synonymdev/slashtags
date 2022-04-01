@@ -68,7 +68,7 @@ describe('SDK', () => {
 
       const alice = await sdkA.slashtag({ name: 'alice' })
       await sdkA.slashtag({ name: 'alice' })
-      await sdkA.slashtag({ keyPair: alice.keyPair })
+      await sdkA.slashtag({ name: 'alice' })
 
       const keys = []
 

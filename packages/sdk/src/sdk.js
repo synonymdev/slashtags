@@ -51,5 +51,7 @@ export class SDK {
     for (const slashtag of this.slashtags.values()) {
       await slashtag.close()
     }
+
+    this.dht.destroy()
   }
 }

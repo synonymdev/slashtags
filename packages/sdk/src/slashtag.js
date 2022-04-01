@@ -42,27 +42,41 @@ export class Slashtag extends EventEmitter {
     return socket
   }
 
-  async _handleConnection (conn, peerInfo) {
+  async _handleConnection (socket, peerInfo) {
     const slashtag = new Slashtag({
       sdk: this.sdk,
-      url: formatURL(conn.remotePublicKey)
+      url: formatURL(socket.remotePublicKey)
     })
-    slashtag.ready()
 
-    conn.remoteSlashtag = slashtag
+    socket.remoteSlashtag = slashtag
 
     debug(
       'got connection, isInitiator:',
-      conn.isInitiator,
+      socket.isInitiator,
       'remoteSlashtag:',
       slashtag.url
     )
 
-    this.emit('connection', conn, Object.assign(peerInfo, slashtag))
+    this.emit('connection', socket, Object.assign(peerInfo, slashtag))
   }
 
   close () {
     return this.swarm.destroy()
+  }
+
+  registerProtocol (protocol) {
+    protocol.slashtag = this
+
+    this.on('connection', (socket) => {
+      const mux = socket.userData
+      const channel = mux.createChannel(protocol.options)
+      channel.slashtag = this
+      protocol.messages = channel.messages
+
+      channel.open()
+    })
+
+    return protocol
   }
 }
 
