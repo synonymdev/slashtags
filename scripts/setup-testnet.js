@@ -1,37 +1,26 @@
-const DHT = require('@hyperswarm/dht');
+const fs = require('fs');
+const createTestnet = require('@hyperswarm/testnet');
 const { setupRelay } = require('dht-universal/setup-relay.js');
 
-const setupTestnet = async (opts) => {
-  const node = new DHT({
-    ephemeral: true,
-    bootstrap: [],
-  });
-  await node.ready();
+const main = async () => {
+  const nodes = await createTestnet(10);
+  const bootstrap = [{ host: '127.0.0.1', port: nodes[0].address().port }];
 
-  const nodes = [node];
-
-  const bootstrap = [{ host: '127.0.0.1', port: node.address().port }];
-
-  for (let i = 1; i < 4; i++) {
-    const dht = (nodes[i] = new DHT({ ephemeral: false, bootstrap }));
-    await dht.ready();
-  }
-
-  const { port, closeRelay } = await setupRelay({
+  const { port } = await setupRelay({
     dhtOpts: { bootstrap },
-    wsServerOptions: opts?.relayPort && { port: opts?.relayPort },
+    wsServerOptions: { port: 8888 },
   });
-
   const relay = 'ws://localhost:' + port;
 
-  return {
-    bootstrap,
-    relay,
-    closeBootstrap: () => Promise.all(nodes.map((node) => node.destroy())),
-    closeRelay: closeRelay,
-  };
+  const dotenv = fs.readFileSync('.env', 'utf8');
+  const toSave =
+    dotenv.replace(/\n\n/g, '\n').replace(/BOOTSTRAP=.*\n?/g, '') +
+    ('\nBOOTSTRAP=' + JSON.stringify(bootstrap));
+  fs.writeFileSync('.env', toSave);
+
+  console.log('Testnet bootstrap now available at .env');
+  console.log('bootstrap', bootstrap);
+  console.log('DHT Relay: ' + relay);
 };
 
-module.exports = {
-  setupTestnet,
-};
+main();

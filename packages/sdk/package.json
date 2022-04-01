@@ -1,6 +1,6 @@
 {
-  "name": "@synonymdev/slashtags-sdk",
-  "version": "0.0.0",
+  "name": "slashtags-sdk",
+  "version": "0.0.0-alpha.2",
   "description": "slashtags development kit",
   "type": "module",
   "keywords": [],
@@ -33,8 +33,9 @@
   },
   "scripts": {
     "build": "aegir build",
-    "test": "c8 aegir test -t node",
-    "lint": "aegir ts -p check && aegir lint --fix",
+    "test": "c8 aegir test",
+    "ts-check": "aegir ts -p check",
+    "lint": "aegir lint --fix",
     "clean": "rimraf ./dist",
     "dep-check": "aegir dep-check"
   },
@@ -58,8 +59,9 @@
     "compact-encoding": "^2.6.1",
     "compact-encoding-struct": "^1.2.1",
     "corestore": "^6.0.1-alpha.10",
-    "dht-universal": "^0.4.0",
+    "dht-universal": "^0.4.1",
     "graceful-goodbye": "^1.0.0",
+    "hi-base32": "^0.5.1",
     "hyperbee": "^1.7.0",
     "hyperblobs": "^2.0.0-alpha.2",
     "hyperswarm": "^3.0.3",

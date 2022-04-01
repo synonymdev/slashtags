@@ -19,5 +19,5 @@ packages/*/dist
 .netlify
 .parcel*
 dist/
-testnet.json
+.env
 .store

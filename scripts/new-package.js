@@ -39,7 +39,8 @@ const packagejson = (name, description) => `{
   "scripts": {
     "build": "aegir build",
     "test": "c8 aegir test",
-    "lint": "aegir ts -p check && aegir lint --fix",
+    "ts-check": "aegir ts -p check",
+    "lint": "aegir lint --fix",
     "clean": "rimraf ./dist",
     "dep-check": "aegir dep-check"
   },

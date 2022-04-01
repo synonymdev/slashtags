@@ -11,8 +11,10 @@ Demonstrate the implementation of Slashtags features between an application (bac
 
 - Setup a testnet
 
+In root directory
+
 ```
-node setup.js
+npm run testnet
 ```
 
 - Run server

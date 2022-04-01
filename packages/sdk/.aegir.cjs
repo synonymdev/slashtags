@@ -20,7 +20,7 @@ module.exports = {
       const nodes = await createTestnet(10, (cb) => (closeTestnet = cb));
       const bootstrap = [{ host: '127.0.0.1', port: nodes[0].address().port }];
 
-      const { port, closeRelay } = await setupRelay();
+      const { port, closeRelay } = await setupRelay({ dhtOpts: { bootstrap } });
 
       return {
         closeTestnet,
