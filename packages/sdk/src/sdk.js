@@ -1,24 +1,22 @@
 import Corestore from 'corestore'
-import Hyperswarm from 'hyperswarm'
 import { DHT } from 'dht-universal'
 import RAM from 'random-access-memory'
 import goodbye from 'graceful-goodbye'
+import HashMap from 'turbo-hash-map'
 
 import { KeyManager } from './keys.js'
+import { Slashtag } from './slashtag.js'
 
 export class SDK {
   constructor (opts) {
     this.store = new Corestore(opts.storage || RAM)
-    this.keys = new KeyManager(opts?.profile)
+    this.keys = new KeyManager(opts?.seed)
     this.opts = opts
+
+    this.slashtags = new HashMap()
 
     this.ready = (async () => {
       this.dht = await DHT.create(this.opts)
-      this.swarm = new Hyperswarm({ dht: this.dht })
-
-      this.swarm.on('connection', (noiseSocket) => {
-        this.store.replicate(noiseSocket)
-      })
     })()
 
     // Gracefully shutdown
@@ -33,31 +31,25 @@ export class SDK {
     return sdk
   }
 
-  async hypercore (opts) {
-    const keys = opts.keys || this.keys
-    if (opts.name) {
-      opts.keyPair = keys.createKeyPair(opts.name)
-      delete opts.name
-    }
-    const core = this.store.get(opts)
-    await core.ready()
+  generateKeyPair (name, keys = this.keys) {
+    return keys.generateKeyPair(name)
+  }
 
-    if (Boolean(opts.announce) || Boolean(opts.lookup)) {
-      await this.swarm
-        .join(core.discoveryKey, {
-          server: opts.announce || false,
-          client: opts.lookup || false
-        })
-        .flushed()
-    }
+  async slashtag (opts) {
+    await this.ready
 
-    await core.update()
+    const keyPair = opts.keyPair || this.generateKeyPair(opts.name)
+    let slashtag = this.slashtags.get(keyPair.publicKey)
+    if (slashtag) return slashtag
 
-    return core
+    slashtag = new Slashtag({ sdk: this, keyPair })
+    this.slashtags.set(slashtag.key, slashtag)
+    return slashtag
   }
 
   async close () {
-    await this.store.close()
-    return this.swarm.destroy()
+    for (const slashtag of this.slashtags.values()) {
+      await slashtag.close()
+    }
   }
 }
