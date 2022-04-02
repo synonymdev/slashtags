@@ -45,7 +45,7 @@ export class Slashtag extends EventEmitter {
   async _handleConnection (socket, peerInfo) {
     const slashtag = new Slashtag({
       sdk: this.sdk,
-      url: formatURL(socket.remotePublicKey)
+      url: Slashtag.formatURL(socket.remotePublicKey)
     })
 
     socket.remoteSlashtag = slashtag
@@ -64,8 +64,8 @@ export class Slashtag extends EventEmitter {
     return this.swarm.destroy()
   }
 
-  registerProtocol (protocol) {
-    protocol.slashtag = this
+  registerProtocol (Protocol) {
+    const protocol = new Protocol(this)
 
     this.on('connection', (socket) => {
       const mux = socket.userData
@@ -78,6 +78,20 @@ export class Slashtag extends EventEmitter {
 
     return protocol
   }
+
+  static formatURL (key) {
+    return 'slash://' + toBase32(key)
+  }
+
+  static parseURL (url) {
+    const parsed = {}
+    parsed.protocol = url.split('://')[0]
+    url = new URL(url.replace(/^.*:\/\//, 'http://'))
+    parsed.key = fromBase32(url.hostname)
+    parsed.query = url.searchParams
+
+    return parsed
+  }
 }
 
 function toBase32 (buf) {
@@ -86,12 +100,4 @@ function toBase32 (buf) {
 
 function fromBase32 (str) {
   return b4a.from(b32.decode.asBytes(str.toUpperCase()))
-}
-
-function parseURL (url) {
-  return new URL(url.replace(/^.*:\/\//, 'http://'))
-}
-
-function formatURL (buf) {
-  return 'slash://' + toBase32(buf)
 }

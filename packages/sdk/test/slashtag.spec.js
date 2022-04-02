@@ -123,44 +123,55 @@ describe('slashtag', () => {
     })
 
     it('should register and multiplex multiple protocol over the same connection', async () => {
-      const Foo = {
-        options: {
-          protocol: 'foo',
-          messages: [
-            {
-              encoding: c.string,
-              onmessage (message, channel) {
-                channel.slashtag.emit('foo', message)
+      class Foo {
+        constructor (slashtag) {
+          this.slashtag = slashtag
+          this.messages = []
+
+          this.options = {
+            protocol: 'foo',
+            messages: [
+              {
+                encoding: c.string,
+                onmessage (message, channel) {
+                  channel.slashtag.emit('foo', message)
+                }
               }
-            }
-          ]
-        },
+            ]
+          }
+        }
 
         listen () {
           return this.slashtag.listen()
-        },
+        }
+
         async request (publicKey) {
           await this.slashtag.connect(publicKey)
           this.messages[0].send('foo')
         }
       }
 
-      const Bar = {
-        options: {
-          protocol: 'bar',
-          messages: [
-            {
-              encoding: c.string,
-              onmessage (message, channel) {
-                channel.slashtag.emit('bar', message)
+      class Bar {
+        constructor (slashtag) {
+          this.slashtag = slashtag
+          this.messages = []
+          this.options = {
+            protocol: 'bar',
+            messages: [
+              {
+                encoding: c.string,
+                onmessage (message, channel) {
+                  channel.slashtag.emit('bar', message)
+                }
               }
-            }
-          ]
-        },
+            ]
+          }
+        }
 
         listen () {
           return this.slashtag.listen()
-        },
+        }
+
         async request (publicKey) {
           await this.slashtag.connect(publicKey)
           this.messages[0].send('bar')
