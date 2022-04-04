@@ -12,11 +12,16 @@ const main = async () => {
   });
   const relay = 'ws://localhost:' + port;
 
-  const dotenv = fs.readFileSync('.env', 'utf8');
+  let dotenv;
+  try {
+    dotenv = fs.readFileSync('.env', 'utf8');
+  } catch (error) {
+    dotenv = '';
+  }
   const toSave =
     dotenv.replace(/\n\n/g, '\n').replace(/BOOTSTRAP=.*\n?/g, '') +
     ('\nBOOTSTRAP=' + JSON.stringify(bootstrap));
-  fs.writeFileSync('.env', toSave);
+  fs.writeFileSync('.env', toSave, {});
 
   console.log('Testnet bootstrap now available at .env');
   console.log('bootstrap', bootstrap);

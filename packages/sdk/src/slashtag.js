@@ -10,6 +10,7 @@ export class Slashtag extends EventEmitter {
   constructor (opts) {
     super()
     this.sdk = opts.sdk
+    this.protocols = new Map()
 
     if (opts.keyPair) {
       this.key = opts.keyPair.publicKey
@@ -30,6 +31,10 @@ export class Slashtag extends EventEmitter {
   }
 
   async connect (key) {
+    for (const socket of this.swarm.connections) {
+      if (b4a.equals(socket.remotePublicKey, key)) return socket
+    }
+
     const socket = new Promise((resolve) => {
       this.swarm.on(
         'connection',
@@ -43,6 +48,8 @@ export class Slashtag extends EventEmitter {
   }
 
   async _handleConnection (socket, peerInfo) {
+    this._setupProtocols(socket, peerInfo)
+
     const slashtag = new Slashtag({
       sdk: this.sdk,
       url: Slashtag.formatURL(socket.remotePublicKey)
@@ -60,22 +67,26 @@ export class Slashtag extends EventEmitter {
     this.emit('connection', socket, Object.assign(peerInfo, slashtag))
   }
 
+  _setupProtocols (socket, peerInfo) {
+    for (const protocol of this.protocols.values()) {
+      const mux = socket.userData
+      if (!mux.channels) mux.channels = new Map()
+
+      const channel = mux.createChannel(protocol.options)
+      if (!channel) return
+
+      mux.channels.set(channel.protocol, channel)
+      channel.open()
+    }
+  }
+
   close () {
     return this.swarm.destroy()
   }
 
   registerProtocol (Protocol) {
     const protocol = new Protocol(this)
-
-    this.on('connection', (socket) => {
-      const mux = socket.userData
-      const channel = mux.createChannel(protocol.options)
-      channel.slashtag = this
-      protocol.messages = channel.messages
-
-      channel.open()
-    })
-
+    this.protocols.set(protocol.options.protocol, protocol)
     return protocol
   }
 
