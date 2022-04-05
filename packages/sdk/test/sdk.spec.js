@@ -19,7 +19,7 @@ describe('SDK', () => {
       expect(keyPair.publicKey.length).to.equal(32)
       expect(keyPair.secretKey.length).to.equal(64)
 
-      await sdkA.close()
+      sdkA.close()
     })
 
     it('should generate a keypair with a custom KeyManager', async () => {
@@ -39,7 +39,7 @@ describe('SDK', () => {
       expect(namespacedKeyPair.publicKey).to.not.eql(keyPair.publicKey)
       expect(namespacedKeyPair.secretKey).to.not.eql(keyPair.publicKey)
 
-      await sdkA.close()
+      sdkA.close()
     })
   })
 
@@ -47,8 +47,8 @@ describe('SDK', () => {
     it('should create slashtag and close it on sdk.close()', async () => {
       const sdkA = await sdk()
 
-      const alice = await sdkA.slashtag({ name: 'alice' })
-      const bob = await sdkA.slashtag({ name: 'bob' })
+      const alice = sdkA.slashtag({ name: 'alice' })
+      const bob = sdkA.slashtag({ name: 'bob' })
 
       const keys = []
 
@@ -60,15 +60,15 @@ describe('SDK', () => {
       expect(keys.includes(b4a.toString(alice.key))).to.be.true()
       expect(keys.includes(b4a.toString(bob.key))).to.be.true()
 
-      await sdkA.close()
+      sdkA.close()
     })
 
     it('should not create an already existing writable slashtag', async () => {
       const sdkA = await sdk()
 
-      const alice = await sdkA.slashtag({ name: 'alice' })
-      await sdkA.slashtag({ name: 'alice' })
-      await sdkA.slashtag({ name: 'alice' })
+      const alice = sdkA.slashtag({ name: 'alice' })
+      sdkA.slashtag({ name: 'alice' })
+      sdkA.slashtag({ name: 'alice' })
 
       const keys = []
 
@@ -79,9 +79,7 @@ describe('SDK', () => {
       expect(keys.length).to.eql(1)
       expect(keys.includes(b4a.toString(alice.key))).to.be.true()
 
-      await sdkA.close()
+      sdkA.close()
     })
-
-    // TODO test read only Slashtag
   })
 })

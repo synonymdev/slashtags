@@ -1,5 +1,4 @@
 import { expect } from 'aegir/utils/chai.js'
-import { Slashtag } from '../src/index.js'
 import { SDK } from '../src/sdk.js'
 import b4a from 'b4a'
 import c from 'compact-encoding'
@@ -13,53 +12,14 @@ function sdk (opts = {}) {
 }
 
 describe('slashtag', () => {
-  it.skip('should create a slashtag instance with a writable drive', async () => {
-    const alice = await sdk()
-
-    const slashtag = await Slashtag.init({
-      name: 'drive for bob',
-      sdk: alice
-    })
-
-    expect(slashtag.key.length).to.eql(32)
-    expect(slashtag.key).to.eql(slashtag.drive.key)
-
-    await alice.close()
-  })
-
-  it.skip('should create a remote read-only slashtag from a url', async () => {
-    const alice = await sdk()
-    const slashtag = await Slashtag.init({
-      name: 'drive for bob',
-      sdk: alice
-    })
-
-    const content = b4a.from('hello world')
-    await slashtag.drive.write('/foo.txt', content)
-
-    const bob = await sdk()
-    const clone = await Slashtag.init({
-      url: slashtag.url,
-      sdk: alice
-    })
-
-    expect(clone.key).to.eql(slashtag.key)
-
-    const read = await clone.drive.read('/foo.txt')
-    expect(read).to.eql(content)
-
-    await alice.close()
-    await bob.close()
-  })
-
   describe('connection', () => {
     it('should return a connection', async () => {
       const sdkA = await sdk()
-      const serverSlashtag = await sdkA.slashtag({ name: 'server' })
+      const serverSlashtag = sdkA.slashtag({ name: 'server' })
       await serverSlashtag.listen()
 
       const sdkB = await sdk()
-      const clientSlashtag = await sdkB.slashtag({ name: 'client' })
+      const clientSlashtag = sdkB.slashtag({ name: 'client' })
 
       const connection = await clientSlashtag.connect(serverSlashtag.key)
       expect(connection.remotePublicKey).to.eql(serverSlashtag.key)
@@ -69,13 +29,13 @@ describe('slashtag', () => {
       )
       expect(existingConnection.remotePublicKey).to.eql(serverSlashtag.key)
 
-      await sdkA.close()
-      await sdkB.close()
+      sdkA.close()
+      sdkB.close()
     })
 
     it('should listen, connect and exchange data', async () => {
       const sdkA = await sdk()
-      const serverSlashtag = await sdkA.slashtag({ name: 'server' })
+      const serverSlashtag = sdkA.slashtag({ name: 'server' })
 
       const serverGotData = new Promise((resolve) => {
         serverSlashtag.on('connection', (socket, peerInfo) => {
@@ -92,7 +52,7 @@ describe('slashtag', () => {
       await serverSlashtag.listen()
 
       const sdkB = await sdk()
-      const clientSlashtag = await sdkB.slashtag({ name: 'client' })
+      const clientSlashtag = sdkB.slashtag({ name: 'client' })
 
       const socket = await clientSlashtag.connect(serverSlashtag.key)
 
@@ -109,13 +69,13 @@ describe('slashtag', () => {
       expect(await serverGotData).to.be.true('server got ping')
       expect(await clientGotData).to.be.true('client got pong')
 
-      await sdkA.close()
-      await sdkB.close()
+      sdkA.close()
+      sdkB.close()
     })
 
     it('should replicate hypercores over a direct connection', async () => {
       const sdkA = await sdk()
-      const alice = await sdkA.slashtag({ name: 'alice' })
+      const alice = sdkA.slashtag({ name: 'alice' })
       await alice.listen()
 
       const core = await sdkA.store.get({ name: 'foo' })
@@ -124,7 +84,7 @@ describe('slashtag', () => {
       await core.append([b4a.from('hello'), b4a.from('world')])
 
       const sdkB = await sdk()
-      const bob = await sdkB.slashtag({ name: 'alice' })
+      const bob = sdkB.slashtag({ name: 'alice' })
 
       const clone = await sdkB.store.get({ key: core.key })
       await clone.ready()
@@ -139,8 +99,8 @@ describe('slashtag', () => {
       expect(await clone.get(0)).to.eql(b4a.from('hello'))
       expect(await clone.get(1)).to.eql(b4a.from('world'))
 
-      await sdkA.close()
-      await sdkB.close()
+      sdkA.close()
+      sdkB.close()
     })
   })
 
@@ -209,7 +169,7 @@ describe('slashtag', () => {
       }
 
       const sdkA = await sdk()
-      const alice = await sdkA.slashtag({ name: 'alice' })
+      const alice = sdkA.slashtag({ name: 'alice' })
       const AliceFoo = alice.registerProtocol(Foo)
       const AliceBar = alice.registerProtocol(Bar)
 
@@ -228,7 +188,7 @@ describe('slashtag', () => {
       // ===
 
       const sdkB = await sdk()
-      const bob = await sdkB.slashtag({ name: 'bob' })
+      const bob = sdkB.slashtag({ name: 'bob' })
 
       const BobFoo = bob.registerProtocol(Foo)
       const BobBar = bob.registerProtocol(Bar)
@@ -248,8 +208,8 @@ describe('slashtag', () => {
       expect(await bar).to.eql('bar')
       expect(await ping).to.eql('ping')
 
-      await sdkA.close()
-      await sdkB.close()
+      sdkA.close()
+      sdkB.close()
       clearInterval(interval)
 
       await new Promise((resolve) =>
@@ -257,6 +217,76 @@ describe('slashtag', () => {
           resolve()
         }, 5)
       )
+    })
+  })
+
+  describe('drive', () => {
+    it('should create a slashtag instance with a writable drive', async () => {
+      const sdkA = await sdk()
+
+      const slashtag = sdkA.slashtag({
+        name: 'drive for bob',
+        sdk: sdkA
+      })
+      await slashtag.ready()
+
+      expect(slashtag.key.length).to.eql(32)
+      expect(slashtag.key).to.eql(slashtag.drive.key)
+
+      sdkA.close()
+    })
+
+    it('should create a remote read-only slashtag from a url', async () => {
+      const sdkA = await sdk()
+      const slashtag = sdkA.slashtag({
+        name: 'drive for bob',
+        sdk: sdkA
+      })
+      await slashtag.ready()
+
+      const content = b4a.from('hello world')
+      await slashtag.drive.write('/foo.txt', content)
+
+      const sdkB = await sdk()
+      const clone = sdkB.slashtag({
+        url: slashtag.url,
+        sdk: sdkB
+      })
+      await clone.ready()
+
+      expect(clone.key).to.eql(slashtag.key)
+      expect(clone.remote).to.eql(true)
+
+      const read = await clone.drive.read('/foo.txt')
+      expect(read).to.eql(content)
+
+      sdkA.close()
+      sdkB.close()
+    })
+  })
+
+  describe('profile', () => {
+    it('should set and get a profiles', async () => {
+      const sdkA = await sdk()
+      const alice = sdkA.slashtag({ name: 'alice' })
+      await alice.ready()
+
+      const profile = {
+        name: 'alice'
+      }
+
+      await alice.setProfile(profile)
+
+      expect(await alice.getProfile()).to.eql(profile)
+
+      const sdkB = await sdk()
+      const remote = sdkA.slashtag({ url: alice.url })
+      await remote.ready()
+
+      expect(await remote.getProfile()).to.eql(profile)
+
+      sdkA.close()
+      sdkB.close()
     })
   })
 })

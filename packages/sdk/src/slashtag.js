@@ -1,7 +1,8 @@
-import b32 from 'hi-base32'
 import b4a from 'b4a'
 import EventEmitter from 'events'
 import Hyperswarm from 'hyperswarm'
+import { SlashDrive } from './drive/index.js'
+import { SDK } from './index.js'
 import Debug from 'debug'
 
 const debug = Debug('slashtags:slashtag')
@@ -12,22 +13,48 @@ export class Slashtag extends EventEmitter {
     this.sdk = opts.sdk
     this.protocols = new Map()
 
-    if (opts.keyPair) {
-      this.key = opts.keyPair.publicKey
-      this.url = this.url || 'slash://' + toBase32(this.key)
+    this._ready = false
 
-      this.swarm = new Hyperswarm({
-        dht: this.sdk.dht,
-        keyPair: opts.keyPair
-      })
+    const keyPair =
+      opts.keyPair || (opts.name && this.sdk.keys.generateKeyPair(opts.name))
 
-      this.swarm.on('connection', (socket, peerInfo) => {
-        this.sdk.store.replicate(socket)
-        this._handleConnection(socket, peerInfo)
-      })
+    if (keyPair) {
+      this.key = keyPair.publicKey
+      this.swarm = new Hyperswarm({ dht: this.sdk.dht, keyPair })
 
       this.listen = this.swarm.listen.bind(this.swarm)
+
+      this.drive = new SlashDrive({
+        sdk: this.sdk,
+        keyPair,
+        swarm: this.swarm
+      })
+    } else if (opts.key) {
+      this.key = opts.key
+      this.swarm = new Hyperswarm({ dht: this.sdk.dht })
+      this.remote = true
+
+      this.drive = new SlashDrive({
+        sdk: this.sdk,
+        key: this.key,
+        swarm: this.swarm
+      })
+    } else {
+      throw new Error('Missing keyPair or key')
     }
+
+    this.swarm.on('connection', (socket, peerInfo) => {
+      this.sdk.store.replicate(socket)
+      this._handleConnection(socket, peerInfo)
+    })
+
+    this.url = SDK.formatURL(this.key)
+  }
+
+  async ready () {
+    if (this._ready) return
+    await this.drive?.ready()
+    this._ready = true
   }
 
   async connect (key) {
@@ -50,21 +77,11 @@ export class Slashtag extends EventEmitter {
   async _handleConnection (socket, peerInfo) {
     this._setupProtocols(socket, peerInfo)
 
-    const slashtag = new Slashtag({
-      sdk: this.sdk,
-      url: Slashtag.formatURL(socket.remotePublicKey)
-    })
+    debug('got connection, isInitiator:', socket.isInitiator)
 
-    socket.remoteSlashtag = slashtag
+    peerInfo.slashtag = this.sdk.slashtag({ key: peerInfo.publicKey })
 
-    debug(
-      'got connection, isInitiator:',
-      socket.isInitiator,
-      'remoteSlashtag:',
-      slashtag.url
-    )
-
-    this.emit('connection', socket, Object.assign(peerInfo, slashtag))
+    this.emit('connection', socket, peerInfo)
   }
 
   _setupProtocols (socket, peerInfo) {
@@ -74,6 +91,8 @@ export class Slashtag extends EventEmitter {
 
       const channel = mux.createChannel(protocol.options)
       if (!channel) return
+
+      channel.peerInfo = peerInfo
 
       mux.channels.set(channel.protocol, channel)
       channel.open()
@@ -90,25 +109,14 @@ export class Slashtag extends EventEmitter {
     return protocol
   }
 
-  static formatURL (key) {
-    return 'slash://' + toBase32(key)
+  async setProfile (profile) {
+    await this.ready()
+    return this.drive.write('/profile.json', b4a.from(JSON.stringify(profile)))
   }
 
-  static parseURL (url) {
-    const parsed = {}
-    parsed.protocol = url.split('://')[0]
-    url = new URL(url.replace(/^.*:\/\//, 'http://'))
-    parsed.key = fromBase32(url.hostname)
-    parsed.query = url.searchParams
-
-    return parsed
+  async getProfile () {
+    await this.ready()
+    const buffer = await this.drive.read('/profile.json')
+    return buffer && JSON.parse(b4a.toString(buffer))
   }
-}
-
-function toBase32 (buf) {
-  return b32.encode(b4a.from(buf)).replace(/[=]/g, '').toLowerCase()
-}
-
-function fromBase32 (str) {
-  return b4a.from(b32.decode.asBytes(str.toUpperCase()))
 }

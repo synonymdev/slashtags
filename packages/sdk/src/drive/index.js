@@ -1,40 +1,50 @@
 import Hyperbee from 'hyperbee'
-import cenc from 'compact-encoding'
-import { SlashDriveHeader, SlashDriveFileMetadata } from './encoding.js'
+import c from 'compact-encoding'
+import { Header, FileMetadata } from './encoding.js'
 import Hyperblobs from 'hyperblobs'
 import b4a from 'b4a'
+import Debug from 'debug'
+
+const debug = Debug('slashtags:slashdrive')
+
+const TYPE = 'slashdrive:alpha'
 
 export class SlashDrive {
   constructor (opts) {
-    this.ready = (async () => {
-      const cores =
-        opts.name || opts.keyPair
-          ? await writableCores(opts)
-          : await readOnlyCores(opts)
+    this.opts = opts
+    this.sdk = opts.sdk
+    this.swarm = opts.swarm
+    this.key = opts.key || opts.keyPair?.publicKey
+    this.keys = this.sdk.keys.namespace(this.key)
 
-      if (!cores) return null
-
-      const db = new Hyperbee(cores.indexCore)
-      this.driveDB = db.sub('/')
-
-      this.blobs = new Hyperblobs(cores.blobsCore)
-    })()
+    this._ready = false
   }
 
-  get key () {
-    return this.driveDB.feed.key
-  }
+  async ready () {
+    if (this._ready) return
 
-  static async init (opts) {
-    const drive = new SlashDrive(opts)
-    return (await drive.ready) === null ? null : drive
+    const cores = this.opts.keyPair
+      ? await setupWritableCores(this)
+      : await setupReadOnlyCores(this)
+
+    debug('Found cores', {
+      indexCore: b4a.toString(cores?.indexCore.key, 'hex'),
+      blobsCore: b4a.toString(cores?.blobsCore.key, 'hex')
+    })
+
+    const db = new Hyperbee(cores.indexCore)
+    this.driveDB = db.sub('/')
+
+    this.blobs = new Hyperblobs(cores.blobsCore)
+
+    this._ready = true
   }
 
   async write (path, content) {
     const index = await this.blobs.put(content)
     await this.driveDB.put(
       fixPath(path),
-      cenc.encode(SlashDriveFileMetadata, { blobs: [index] })
+      c.encode(FileMetadata, { blobs: [index] })
     )
   }
 
@@ -43,7 +53,7 @@ export class SlashDrive {
     const block = await this.driveDB.get(path)
     if (!block) return null
 
-    const decoded = cenc.decode(SlashDriveFileMetadata, block.value)
+    const decoded = c.decode(FileMetadata, block.value)
 
     const blobs = []
 
@@ -60,39 +70,47 @@ function fixPath (path) {
   return path.replace(/^\//, '')
 }
 
-async function writableCores (opts) {
-  const { sdk } = opts
-  opts.keyPair = opts.keyPair || sdk.keys.createKeyPair(opts.name)
+async function setupWritableCores (drive) {
+  debug('Fetching writable cores')
+  const indexCore = await drive.sdk.store.get(drive.opts)
+  await indexCore.ready()
 
-  const indexCore = await sdk.hypercore(opts)
+  const blobsKeyPair = drive.keys.generateKeyPair('blobs')
+  const blobsCore = await drive.sdk.store.get({ keyPair: blobsKeyPair })
+  await blobsCore.ready()
 
-  const blobsCore = await sdk.hypercore({
-    name: 'slashdrive:blobs',
-    keys: sdk.keys.namespace(indexCore.key)
-  })
-
-  const header = { blobsKey: blobsCore.key }
-  const encodedHeader = cenc.encode(SlashDriveHeader, header)
+  const header = { type: TYPE, blobsKey: blobsCore.key }
+  const encodedHeader = c.encode(Header, header)
   await indexCore.append(encodedHeader)
+
+  // TODO custom discovery options
+  await drive.swarm?.join(indexCore.discoveryKey).flushed()
 
   return { blobsCore, indexCore }
 }
 
-async function readOnlyCores (opts) {
-  const { sdk } = opts
-  const indexCore = await sdk.hypercore(opts)
+async function setupReadOnlyCores (drive) {
+  debug('Fetching readonly cores')
+  const indexCore = await drive.sdk.store.get(drive.opts)
+  await indexCore.ready()
+  // TODO custom discovery options
+  drive.swarm.join(indexCore.discoveryKey)
 
-  // TODO: don't await the swarm to flush, if core.update() patch was shipped
-  await sdk.swarm.flush()
+  // TODO test the findingPeers() api again after updating corestore
+  // const done = indexCore.findingPeers()
+  // drive.swarm.flush().then(done, done)
+  await drive.swarm.flush()
   await indexCore.update()
 
-  if (indexCore.length === 0) return null
+  if (indexCore.length === 0) throw new Error('Could not resolve remote drive')
 
   const header = await indexCore.get(0)
-  const decodedHeader = cenc.decode(SlashDriveHeader, header)
+  const decodedHeader = c.decode(Header, header)
   const { blobsKey } = decodedHeader
 
-  const blobsCore = await sdk.hypercore({ key: blobsKey })
+  debug('Found Blobs core key', b4a.toString(blobsKey, 'hex'))
+  const blobsCore = await drive.sdk.store.get({ key: blobsKey })
+  await blobsCore.ready()
 
   return { blobsCore, indexCore }
 }
