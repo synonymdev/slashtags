@@ -3,6 +3,7 @@ import EventEmitter from 'events'
 import Hyperswarm from 'hyperswarm'
 import { SlashDrive } from './drive/index.js'
 import { SDK } from './index.js'
+import Hypercore from 'hypercore'
 import Debug from 'debug'
 
 const debug = Debug('slashtags:slashtag')
@@ -86,7 +87,7 @@ export class Slashtag extends EventEmitter {
 
   _setupProtocols (socket, peerInfo) {
     for (const protocol of this.protocols.values()) {
-      const mux = socket.userData
+      const mux = Hypercore.getProtocolMuxer(socket)
       if (!mux.channels) mux.channels = new Map()
 
       const channel = mux.createChannel(protocol.options)

@@ -1,15 +1,9 @@
 {
   "name": "@synonymdev/slashtags-auth",
-  "version": "0.3.2",
-  "description": "Bidirectional authentication of DIDs over slashtags-rpc",
+  "version": "0.4.0-alpha.1",
+  "description": "Authorization using slashtags",
   "type": "module",
-  "keywords": [
-    "slashtags",
-    "authentication",
-    "auth",
-    "accounts",
-    "contacts"
-  ],
+  "keywords": [],
   "homepage": "https://github.com/synonymdev/slashtags/tree/master/packages/auth/#readme",
   "bugs": {
     "url": "https://github.com/synonymdev/slashtags/issues"
@@ -19,35 +13,49 @@
     "*",
     "!**/*.tsbuildinfo"
   ],
-  "types": "./types/packages/auth/src/index.d.ts",
+  "types": "types/src/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "*": [
+        "types/*",
+        "types/src/*"
+      ],
+      "types/*": [
+        "types/*",
+        "types/src/*"
+      ]
+    }
+  },
   "main": "src/index.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/synonymdev/slashtags.git"
   },
   "scripts": {
-    "lint": "standard ./src ./test --fix",
-    "build": "rm -rf dist types && ipjs build && tsc && cp -r types/ dist/types",
-    "test": "c8 ava",
-    "prepublishOnly": "npm run lint && npm run build && npm run test && dependency-check dist --no-dev"
-  },
-  "dependencies": {
-    "@synonymdev/slashtags-common": "^0.2.2",
-    "did-jwt": "^5.12.0",
-    "did-resolver": "^3.1.3",
-    "key-did-resolver": "^1.4.0",
-    "multiformats": "^9.4.9",
-    "randombytes": "^2.1.0"
+    "build": "aegir build",
+    "test": "c8 aegir test",
+    "ts-check": "aegir ts -p check",
+    "lint": "aegir lint --fix",
+    "clean": "rimraf ./dist",
+    "dep-check": "aegir dep-check"
   },
   "devDependencies": {
-    "@types/create-hash": "^1.2.2",
-    "@types/create-hmac": "^1.1.0",
-    "noise-curve-tiny-secp": "github:synonymdev/noise-curve-tiny-secp256k1",
-    "schema-dts": "^1.0.0"
+    "@hyperswarm/testnet": "^1.1.0",
+    "@types/debug": "^4.1.7",
+    "aegir": "^36.2.3",
+    "debug": "^4.3.4",
+    "dht-universal": "^0.4.1"
   },
-  "peerDependencies": {
-    "create-hash": "^1.2.0",
-    "create-hmac": "^1.1.7",
-    "uint8arrays": "^3.0.0"
+  "eslintConfig": {
+    "env": {
+      "mocha": true
+    },
+    "parserOptions": {
+      "sourceType": "module"
+    }
+  },
+  "dependencies": {
+    "compact-encoding": "^2.6.1",
+    "@synonymdev/slashtags-sdk": "~0.1.0"
   }
 }

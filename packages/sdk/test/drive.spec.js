@@ -1,5 +1,5 @@
 import { expect } from 'aegir/utils/chai.js'
-import { SlashDrive } from '../src/index.js'
+import { SlashDrive } from '../src/drive/index.js'
 import { SDK } from '../src/sdk.js'
 import b4a from 'b4a'
 import Hyperswarm from 'hyperswarm'

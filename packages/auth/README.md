@@ -1,59 +1,101 @@
-# Slashtags Accounts
+# SlashAuth
 
-> Bidirectional authentication of DIDs over slashtags-core
+> Authorization using Slashtags
 
 ## Install
 
 ```bash
-npm i @synonymdev/slashtags-auth @synonymdev/slashtags-core
+npm i @synonymdev/slashtags-sdk @synonymdev/slashtags-auth
 ```
 
 ## Usage
 
-### Setup
+### Wallet side
 
 ```javascript
-import { Core } from '@synonymdev/slashtags-core';
-import { Auth } from '@synonymdev/slashtags-auth';
+import { SDK } from '@synonymdev/slashtags-sdk';
+import { SlashAuth } from '@synonymdev/slashtags-auth';
 
-// Node environment
-const node = await Core();
-// Browser environment
-// Use a community DHT relay or run your own https://github.com/hyperswarm/dht-relay
-const node = await Core({
-  relays: ['ws://trusted.dht-relay.instance.com'],
+const sdk = await SDK.init({ seed: '<32 bytes seed>' });
+
+// Create a Slashtag
+const slashtag = sdk.slashtag({ name: 'foo' });
+await slashtag.ready();
+
+// Setup local profile
+await slashtag.setProfile({
+  name: 'Alice',
 });
 
-// Initialize the auth module using the Slashtags node
-const auth = await Auth(node);
+// Setup auth
+const auth = slashtag.registerProtocol(SlashAuth);
+
+// On getting a slashauth:// url
+const serverSlashtag = sdk.slashtag({ url: url });
+await serverSlashtag.ready();
+
+// Get the server's profile
+const profile = await serverSlashtag.getProfile();
+
+auth.on('error', (error) => {
+  // Error
+});
+
+auth.on('success', () => {
+  // Success
+});
+
+// Connect to the server and send the token in the url `?q=<token>`
+auth.request(url);
 ```
 
-### Issuing a new url for auth session
+### Server side
 
 ```javascript
-const url = auth.issueURL({
-  // Do something when url expires (optional)
-  onTimeout: () => {},
-  onRequest: () => ({
-    // Declare the keyPair and profile of the responder
-    responder: {
-      keyPair, // {publicKey, secretKey}
-      profile, // A Thing (see schema.org)
-    },
-    // Optional additional items to be sent to the user _before_ authentication
-    additionalItems: [],
-  }),
-  onSuccess: (
-    profile, // Initiator's profile
-    additionalItems, // Optional additionalItems from the Initiator
-  ) => {
-    // Do something with authenticated user information
+import { SDK } from '@synonymdev/slashtags-sdk';
+import { SlashAuth } from '@synonymdev/slashtags-auth';
 
-    return {
-      status: 'OK',
-      // Optional additional items to be sent to the user _after_ authentication
-      additionalItems: [],
-    };
-  },
+const sdk = await SDK.init({ seed: '<32 bytes seed>' });
+const slashtag = sdk.slashtag({ name: 'foo' });
+await slashtag.ready();
+
+await slashtag.setProfile({
+  name: 'Bitfinex',
 });
+
+const auth = slashtag.registerProtocol(SlashAuth);
+
+auth.on('request', async (request, response) => {
+  let remoteProfile;
+
+  try {
+    // Try resolving user's profile from their Slashtag
+    const remoteSlashtag = request.peerInfo.slashtag;
+    await remoteSlashtag.ready();
+    remoteProfile = await remoteSlashtag.getProfile();
+  } catch {
+    response.error(
+      new Error('Could not resolve your profile ... can not sign in'),
+    );
+    return;
+  }
+
+  try {
+    authorize(request.token, remoteProfile);
+    response.success();
+  } catch (e) {
+    response.error(e.message);
+  }
+});
+
+// Listen on the Slashtag.key
+await auth.listen();
+
+function authorize(token, remoteProfile) {
+  // Check the token against server's sessions, clientIDs, etc.
+  // Check if the user is already registered, blocked, etc.
+}
+
+// Generate a slashauth:// url for clients, sessions etc. and pass it to the user as QR
+SlashAuth.formatURL(slashtag.url, clientID);
 ```
