@@ -1,82 +1,114 @@
 import websocket from 'isomorphic-ws';
-import JsonRPC from 'simple-jsonrpc-js';
-import { serverProfile, serverKeyPair } from './config.js';
-import { Core } from '@synonymdev/slashtags-core';
-import { Auth } from '@synonymdev/slashtags-auth';
+import { serverProfile } from './profile.js';
 import jrpcLite from 'jsonrpc-lite';
+import { randomBytes } from 'crypto';
+import { SDK } from '../../../../../packages/sdk/src/index.js';
 import { fastify } from 'fastify';
-import fs from 'fs';
+import Dotenv from 'dotenv';
+import Debug from 'debug';
+import { SlashAuth } from '../../../../../packages/auth/src/index.js';
 
-const app = fastify({ logger: true });
-const jrpc = new JsonRPC();
-const PORT = Number(process.env.PORT) || 9000;
-const hostanme = 'localhost' || 'slashtags.herokuapp.com';
+const debug = Debug('slashtags:demo:auth:server');
 
-const main = async () => {
-  // Setting up slashtags node and the Auth module
-  const bootstrap = JSON.parse(
-    fs.readFileSync('../../testnet.json').toString(),
-  );
-  const node = await Core({ bootstrap });
-  const auth = await Auth(node);
+Dotenv.config({ path: '../../../../.env' });
+const bootstrap = JSON.parse(process.env.BOOTSTRAP);
 
-  // Websocket server
-  const wss = new websocket.Server({ host: hostanme, port: PORT + 1 });
+let slashtag;
+
+async function setupSlashtagsAuth() {
+  // Setup SDK
+  const sdk = await SDK.init({
+    bootstrap,
+    seed: Buffer.from(
+      'b61e363cdcf522e530ef67955ef342733d1ac85063b55bd6c836f68124b8a17b',
+      'hex',
+    ),
+  });
+
+  // Create server's slashtag
+  slashtag = sdk.slashtag({ name: 'Slashtags Demo' });
+  debug("Servers's slashtag url: ", slashtag.url);
+
+  await slashtag.setProfile(serverProfile(slashtag.url));
+
+  const auth = slashtag.registerProtocol(SlashAuth);
+
+  auth.on('request', async (request, response) => {
+    debug('Got slashauth sessionID', request.token);
+
+    let remoteProfile;
+
+    try {
+      const remoteSlashtag = request.peerInfo.slashtag;
+      await remoteSlashtag.ready();
+      remoteProfile = await remoteSlashtag.getProfile();
+    } catch {
+      response.error(
+        new Error('Could not resolve your profile ... can not sign in'),
+      );
+      return;
+    }
+
+    try {
+      authorize(request.token, remoteProfile);
+      response.success();
+    } catch (e) {
+      response.error(e.message);
+    }
+  });
+
+  auth.listen();
+}
+
+const sessions = new Map();
+
+function authorize(sessionID, remoteProfile) {
+  const socket = sessions.get(sessionID);
+  debug('Got valid session', sessionID);
+  if (socket) {
+    socket.send(
+      jrpcLite
+        .notification('userAuthenticated', { user: remoteProfile })
+        .serialize(),
+    );
+  }
+}
+
+function webServer() {
+  const app = fastify();
+  const PORT = Number(process.env.PORT) || 9000;
+  const hostanme = 'localhost' || 'slashtags.herokuapp.com';
+
+  const wss = new websocket.Server({ host: hostanme, port: PORT + 2 });
+
   wss.on('connection', (socket) => {
-    jrpc.toStream = (message) => socket.send(message);
-    socket.on('message', (message) => jrpc.messageHandler(message));
+    const sessionID = randomBytes(8).toString('base64');
+    sessions.set(sessionID, socket);
 
-    // Methods
-    jrpc.on('ping', [], () => 'pong');
-
-    // Get a url to show as a QR code
-    jrpc.on('authUrl', [], () => {
-      // Main USAGE: Generate a url
-      return auth.issueURL({
-        onTimeout: () =>
-          socket.send(jrpcLite.notification('authUrlExpired').serialize()),
-        onRequest: () => ({
-          responder: {
-            keyPair: serverKeyPair,
-            profile: serverProfile,
-          },
-          additionalItems: [
-            {
-              '@context': 'https://bitfinex.com/schemas/',
-              '@type': '2FA_OTP_FORM',
-              '@id': 'https://bitfinex.com/schemas/2FA_OTP_FORM.json',
-              schema: {
-                $schema: '...',
-              },
-            },
-          ],
-        }),
-        onSuccess: ({ remote }) => {
-          socket.send(
-            jrpcLite
-              .notification('userAuthenticated', { user: remote })
-              .serialize(),
-          );
-
-          return {
-            status: 'OK',
-            additionalItems: [
-              {
-                '@context': 'https://bitfinex.com/schemas/',
-                '@type': 'HC_Feeds',
-                '@id': 'https://bitfinex.com/feeds/user#1',
-                feeds: ['123...def', 'def...123'],
-              },
-            ],
-          };
-        },
-      });
+    wss.on('close', () => {
+      sessions.delete(sessionID);
     });
+
+    debug('Client connected: ', sessionID);
+
+    socket.send(
+      jrpcLite
+        .notification('slashauthUrl', {
+          url:
+            slashtag.url.replace('slash://', 'slashauth://') +
+            '?q=' +
+            sessionID,
+        })
+        .serialize(),
+    );
   });
 
-  app.listen(PORT, function (err, address) {
-    console.log(`Server is now listenng on ${address}`);
-  });
-};
+  debug(`Server is now listenng on port ${PORT + 2}`);
 
-main();
+  app.listen(PORT, function (err, address) {});
+}
+
+(async () => {
+  await setupSlashtagsAuth();
+  webServer();
+})();

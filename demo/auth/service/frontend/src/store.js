@@ -1,10 +1,31 @@
 import { createContext } from 'react';
-import { RPC } from './jrpc';
+import JsonRPC from 'simple-jsonrpc-js';
+
+const socketURL =
+  window.location.hostname === 'localhost'
+    ? 'ws://localhost:9002'
+    : 'wss://slashtags.herokuapp.com';
+
+let rpc;
+
+export const RPC = () => {
+  if (rpc) return rpc;
+  const socket = new WebSocket(socketURL);
+  var jrpc = new JsonRPC();
+
+  socket.onmessage = (event) => jrpc.messageHandler(event.data);
+  jrpc.toStream = (msg) => socket.send(msg);
+
+  return new Promise((resolve, reject) => {
+    socket.onopen = () => {
+      rpc = jrpc;
+      resolve(jrpc);
+    };
+  });
+};
 
 export const setupRPC = async (dispatch) => {
   const jrpc = await RPC();
-
-  jrpc.call('ping').then((result) => console.log('ping: ' + result));
 
   jrpc.on('userAuthenticated', ['user'], (user) => {
     console.log('UserAuthenticated: ', user);
@@ -13,16 +34,12 @@ export const setupRPC = async (dispatch) => {
       user: user,
     });
   });
-};
 
-export const getTicket = async (dispatch) => {
-  const jrpc = await RPC();
-  const url = await jrpc.call('authUrl');
-  dispatch({ type: types.SET_TICKET, url });
-
-  jrpc.on('authUrlExpired', ['user'], async () => {
-    const url = await jrpc.call('authUrl');
-    dispatch({ type: types.SET_TICKET, url });
+  jrpc.on('slashauthUrl', ['url'], (url) => {
+    dispatch({
+      type: types.SET_AUTH_URL,
+      url,
+    });
   });
 };
 
@@ -32,21 +49,20 @@ export const initialValue = {
 };
 
 export const types = {
-  SET_TICKET: 'SET_TICKET',
   SET_USER: 'SET_USER',
+  SET_AUTH_URL: 'SET_AUTH_URL',
 };
 
 export const reducer = (state, action) => {
   let result = { ...state };
 
   switch (action.type) {
-    case types.SET_TICKET:
-      result = { ...state, loginURL: action.url };
+    case types.SET_AUTH_URL:
+      result = { ...state, authURL: action.url };
       break;
     case types.SET_USER:
       result = { ...state, user: action.user };
       break;
-
     default:
       break;
   }

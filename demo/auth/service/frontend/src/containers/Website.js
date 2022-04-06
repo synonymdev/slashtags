@@ -1,8 +1,7 @@
 // @ts-nocheck
 import { Browser } from '../components/Browser';
 import { useState, useContext, useEffect, useRef } from 'react';
-import { getTicket, StoreContext } from '../store';
-import Form from '@rjsf/core';
+import { StoreContext } from '../store';
 import { LoginForm } from '../components/LoginForm';
 import { ArrowSVG } from '../components/ArrowSVG';
 import * as jdenticon from 'jdenticon';
@@ -30,14 +29,11 @@ export const Website = () => {
   const handleLogin = () => {
     setOpenLogin(!openLogin);
     if (store.loginURL) return;
-    getTicket(dispatch);
   };
 
   useEffect(() => {
-    if (!qrURL) setQRURL(store.loginURL);
-  }, [store.loginURL, qrURL]);
-
-  const account = Object.values(store.accounts || {})[0];
+    if (!qrURL) setQRURL(store.authURL);
+  }, [store.authURL, qrURL]);
 
   return (
     <Browser>
@@ -57,7 +53,7 @@ export const Website = () => {
               />
               <path
                 d="M58.578 0.298837C87.7176 3.37791 108.78 29.4831 105.701 58.578C102.622 87.7176 76.5169 108.78 47.422 105.701C18.2824 102.622 -2.78023 76.5169 0.298837 47.422C3.37791 18.2824 29.4831 -2.78023 58.578 0.298837ZM57.4178 11.3656C34.5256 8.9113 13.7753 25.69 11.3656 48.5822C8.9113 71.4744 25.69 92.2247 48.5822 94.6344C71.4744 97.0887 92.2247 80.31 94.6344 57.4178C97.0887 34.5256 80.31 13.7753 57.4178 11.3656Z"
-                fill="#F50"
+                fill="#f00"
               />
             </svg>
 
@@ -73,7 +69,7 @@ export const Website = () => {
               {store.user?.image ? (
                 <img alt="" src={store.user.image}></img>
               ) : (
-                <Jdenticon size="48" value={store.user['@id']} />
+                <Jdenticon size="48" value={store.user.id} />
               )}
             </div>
           ) : (
@@ -102,10 +98,6 @@ export const Website = () => {
                 🎉
               </b>
               <br />
-              <span style={{ fontSize: '.8em' }}>
-                Check your wallet for feeds
-              </span>
-              <br />
               <button
                 className="btn logout"
                 onClick={() => window.location.reload(true)}
@@ -115,12 +107,13 @@ export const Website = () => {
             </p>
           ) : (
             <p>
-              Hello there <br />
               <span style={{ fontSize: '1.5em' }}>
-                Welcome to <span className="orange">Slashtags</span>
+                Welcome to the
+                <br />
+                <span className="gradient-text">Atomic Economy</span>
               </span>
-              <br /> login with your <span className="orange">Bitcoin</span>
-              <span className="orange"> publicKey</span>.
+              <br />
+              login with <span className="orange">Slashtags</span>
             </p>
           )}
         </div>

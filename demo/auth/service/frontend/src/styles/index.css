@@ -423,7 +423,7 @@ body,
 }
 
 .main-title p {
-  max-width: 30ch;
+  max-width: 20ch;
   margin: auto;
 }
 
@@ -465,4 +465,16 @@ body,
   margin-top: 1em;
 
   background-color: #151718;
+}
+
+.gradient-text {
+  background: linear-gradient(
+    90deg,
+    rgba(228, 103, 53, 0.98) 0,
+    rgba(201, 50, 80, 0.98) 70.83%,
+    rgba(202, 72, 140, 0.98) 100%
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }

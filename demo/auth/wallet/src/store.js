@@ -1,95 +1,113 @@
 import { createContext } from 'react';
-import { secp256k1 as curve } from 'noise-curve-tiny-secp';
-import { randUrl, randFullName } from '@ngneat/falso';
-import { didKeyFromPubKey } from '@synonymdev/slashtags-auth';
-import { Core } from '@synonymdev/slashtags-core';
-import { Actions } from '@synonymdev/slashtags-actions';
-import { Auth } from '@synonymdev/slashtags-auth';
+import * as falso from '@ngneat/falso';
+import { SDK } from '../../../../packages/sdk/src/index.js';
+import { SlashAuth } from '../../../../packages/auth/src/index.js';
+import randomBytes from 'randombytes';
 
-import { readFileSync } from 'fs';
+import b4a from 'b4a';
+import Debug from 'debug';
 
-const node = Core({ relays: ['ws://localhost:8888'] });
+const log = Debug('slashtags:demo:wallet');
+
+const sdk = (async () => {
+  console.log('sdk again ');
+  let seed = localStorage.getItem('seed');
+  log('Stored seed', seed);
+  if (seed) {
+    seed = Buffer.from(seed, 'hex');
+  } else {
+    seed = randomBytes(32);
+    localStorage.setItem('seed', b4a.toString(seed, 'hex'));
+  }
+
+  const sdk = await SDK.init({
+    seed,
+    relays: ['ws://localhost:8888'],
+  });
+
+  return sdk;
+})();
+
+let user = sdk.then(async (sdk) => {
+  const name = window.location.pathname;
+  const slashtag = await sdk.slashtag({ name });
+
+  const profile = {
+    id: slashtag.url,
+    type: 'Person',
+    name: falso.randFullName(),
+    url: falso.randUrl(),
+    email: falso.randEmail(),
+  };
+
+  await slashtag.setProfile(profile);
+
+  log('Created a slashtag', slashtag.url);
+
+  return slashtag;
+});
+
+const auth = user.then((slashtag) => {
+  return slashtag.registerProtocol(SlashAuth);
+});
 
 export const initialValue = {
-  dependencies: {
-    actions: node.then((n) => Actions(n)),
-    auth: node.then((n) => Auth(n)),
-  },
+  sdk,
+  currentUser: user,
+  auth,
   view: 'home',
-  prompt: null,
-  personas: Array(3)
-    .fill(0)
-    .map(
-      /** @returns {import ('@synonymdev/slashtags-auth').PeerConfig} */
-      (_, i) => {
-        const keyPair = curve.generateSeedKeyPair(i.toString());
-        const id = didKeyFromPubKey(keyPair.publicKey);
-        return {
-          keyPair,
-          profile: {
-            '@context': 'https://schema.org',
-            '@type': 'Person',
-            '@id': id,
-            name: randFullName(),
-            url: randUrl(),
-          },
-        };
-      },
-    ),
-  connections: {},
+  viewOptions: {},
+  accounts: [],
+  contacts: [],
 };
+
+log('InitialValue', initialValue);
 
 export const types = {
   SET_VIEW: 'SET_VIEW',
-  SET_PROMPT: 'SET_PROMPT',
-  ADD_CONNECTION: 'ADD_CONNECTION',
-  SET_PROFILE: 'SET_PROFILE',
-  AUTH_QR: 'AUTH_QR',
+  ADD_ACCOUNT: 'ADD_ACCOUNT',
+  ADD_CONTACT: 'ADD_CONTACT',
 };
 
 export const reducer = (state, action) => {
   let result = { ...state };
   switch (action.type) {
     case types.SET_VIEW:
-      result = { ...state, view: action.view };
-      break;
-    case types.SET_PROMPT:
-      result = { ...state, prompt: action.prompt };
-      break;
-    case types.ADD_CONNECTION:
-      console.log({ action });
       result = {
         ...state,
-        connections: {
-          ...state.connections,
-          [action.connection.local['@id']]: {
-            persona: action.connection.local,
-            remotes: {
-              ...(state.connections[action.connection.local['@id']]?.remotes ||
-                {}),
-              [action.connection.remote['@id']]: action.connection.remote,
-            },
-          },
-        },
-        view: 'home',
-        prompt: null,
+        view: action.view,
+        viewOptions: action.viewOptions || {},
       };
       break;
-    case types.SET_PROFILE:
-      result = { ...state, view: 'profile', profile: action.profile };
-      break;
-    case types.AUTH_QR:
+    case types.ADD_ACCOUNT:
       result = {
         ...state,
-        view: 'authQR',
-        responder: action.persona,
+        view: 'home',
+        accounts: [
+          ...state.accounts
+            .map((account) => account.id !== action.account.id)
+            .filter(Boolean),
+          action.account,
+        ],
+      };
+      break;
+    case types.ADD_CONTACT:
+      result = {
+        ...state,
+        view: 'home',
+        contacts: [
+          ...state.contacts
+            .map((contact) => contact.id !== action.contact.id)
+            .filter(Boolean),
+          action.contact,
+        ],
       };
       break;
     default:
       break;
   }
 
-  console.log('store', result);
+  log('Store update\n  ', action, '\n  ', result);
   return result;
 };
 

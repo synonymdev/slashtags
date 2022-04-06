@@ -1,7 +1,8 @@
-import { truncateMid } from '../utils';
-import { anonImage } from '../constants';
 import React, { useRef, useEffect } from 'react';
 import * as jdenticon from 'jdenticon';
+
+export const truncateMid = (pk, num = 9) =>
+  pk.slice(0, num) + '...' + pk.slice(pk.length - num);
 
 const Jdenticon = ({ value = 'test', size = '100%' }) => {
   const icon = useRef(null);
@@ -17,16 +18,24 @@ const Jdenticon = ({ value = 'test', size = '100%' }) => {
   );
 };
 
-export const Card = ({ profile, onClick = () => {}, className = '' }) => (
-  <div className={'card login ' + className} onClick={onClick}>
-    {profile.image ? (
-      <img alt="" className="pp" src={profile?.image || anonImage}></img>
-    ) : (
-      <Jdenticon size="48" value={profile['@id']} />
-    )}
-    <div className="right">
-      <h2>{profile?.name || 'Anon...'}</h2>
-      <pre>{profile?.['@id'] && truncateMid(profile['@id'], 15)}</pre>
+export const Card = ({ profile, onClick = () => {}, className = '' }) => {
+  profile.id = profile.id || profile['@id'];
+
+  return (
+    <div className={'card login ' + className} onClick={onClick}>
+      {profile.image ? (
+        <img alt="" className="pp" src={profile?.image}></img>
+      ) : (
+        <Jdenticon size="48" value={profile.id} />
+      )}
+      <div className="right">
+        <h2>{profile?.name || 'Anon...'}</h2>
+        <pre>{profile?.id && truncateMid(profile.id, 15)}</pre>
+      </div>
+      <div className="rows">
+        <div className="url">{profile?.url}</div>
+        <div className="description">{profile?.description}</div>
+      </div>
     </div>
-  </div>
-);
+  );
+};

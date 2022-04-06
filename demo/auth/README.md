@@ -49,4 +49,4 @@ npm install
 npm run start
 ```
 
-Then visit `http://localhost:8002/`
+Then visit `http://localhost:8080/`

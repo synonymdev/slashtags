@@ -3,13 +3,13 @@ import { Template } from '../containers/Template';
 import { Card } from '../components/Card';
 import { ArrowSVG } from '../components/ArrowSVG';
 import { useContext } from 'react';
-import { StoreContext, types } from '../store';
-import { Article } from '../components/Article';
+import { StoreContext } from '../store';
+import { Footer } from '../components/Footer.js';
 
 export const Home = () => {
-  const { store, dispatch } = useContext(StoreContext);
+  const { state, dispatch } = useContext(StoreContext);
 
-  const isNew = Object.values(store.connections)?.length === 0;
+  const isNew = state.contacts.length === 0 && state.accounts.length === 0;
 
   return (
     <Template title={'Wallet'}>
@@ -19,71 +19,46 @@ export const Home = () => {
             <ArrowSVG />
             <div className="get-started">
               <p>
-                Add your first
+                Scan a QR <br />
+                to add your first
                 <br />
-                <span>Connection</span>
+                <span>Account</span>
                 <br />
-                by scanning a
+                Or
                 <br />
-                <span>Slashtags Auth</span>
+                <span>Contact</span>
                 <br />
-                QR code
-              </p>
-              <br />
-              <p style={{ fontSize: '2rem' }}>
-                Or Generate a QR for one of your
-                <br />
-                <button
-                  className="btn-transparent"
-                  onClick={() =>
-                    dispatch({ type: types.SET_VIEW, view: 'personas' })
-                  }
-                >
-                  <span>Personas</span>
-                </button>
+                Or show your Slashtag QR
               </p>
             </div>
           </>
         ) : (
           <>
-            {Object.values(store.connections)?.length > 0 && (
-              <Article
-                title="Connections"
-                onClick={() =>
-                  dispatch({ type: types.SET_VIEW, view: 'scanQR' })
-                }
-              >
-                {Object.values(store.connections).map(
-                  ({ persona, remotes }) => (
-                    <>
-                      <Card
-                        key={persona['@id']}
-                        profile={persona}
-                        className="connection-local"
-                      />
-                      {console.log(persona, Object.values(remotes))}
-                      {Object.values(remotes).map((remote) => (
-                        <Card
-                          key={remote['@id']}
-                          profile={remote}
-                          className="connection-remote"
-                          onClick={() =>
-                            dispatch({
-                              type: types.SET_PROFILE,
-                              profile: remote,
-                            })
-                          }
-                        />
-                      ))}
-                    </>
-                  ),
-                )}
-              </Article>
+            {state.accounts.length > 0 && (
+              <article>
+                <header className="article-header">
+                  <h2>Accounts</h2>
+                </header>
+                {state.accounts.map(({ profile }) => (
+                  <Card key={profile.id} profile={profile} />
+                ))}
+              </article>
             )}
-            {store.contacts?.length > 0 && <Article title="Contacts"></Article>}
+            {state?.contacts?.length > 0 && (
+              <article>
+                <header className="article-header">
+                  <h2>Contacts</h2>
+                </header>
+                {state.contacts.map(({ profile }) => (
+                  <Card key={profile.id} profile={profile} />
+                ))}
+              </article>
+            )}
           </>
         )}
       </div>
+
+      <Footer />
     </Template>
   );
 };

@@ -1,7 +1,9 @@
 import { useState, useRef, useEffect, useContext } from 'react';
 import QRCode from 'qrcode';
 import { StoreContext } from '../store';
-import { truncateMid } from '../utils';
+
+const truncateMid = (pk, count = 9) =>
+  pk.slice(0, count) + '...' + pk.slice(pk.length - count);
 
 export const LoginForm = ({ qrURL }) => {
   const canvasRef = useRef();
@@ -11,7 +13,7 @@ export const LoginForm = ({ qrURL }) => {
   const { store } = useContext(StoreContext);
 
   useEffect(() => {
-    if (store.loginURL !== qrURL) qrURL = store.loginURL;
+    if (store.authURL !== qrURL) qrURL = store.authURL;
 
     if (qrURL && canvasRef.current) {
       QRCode.toCanvas(canvasRef.current, qrURL, {
@@ -31,7 +33,7 @@ export const LoginForm = ({ qrURL }) => {
       <p>Don't have a Slashtags compatible wallet?</p>
       <a
         className="get-it"
-        href="https://slashtags-wallet.netlify.app/"
+        href="https://slash-wallet.netlify.app/"
         target="_blank"
         rel="noreferrer"
       >
@@ -80,7 +82,7 @@ export const LoginForm = ({ qrURL }) => {
       </div>
 
       <a className="card url" href={qrURL}>
-        {truncateMid(qrURL, 19)}
+        {truncateMid(qrURL, 18)}
       </a>
     </div>
   );

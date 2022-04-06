@@ -7,11 +7,9 @@
     "build": "parcel build"
   },
   "devDependencies": {
-    "crypto-browserify": "^3.12.0",
-    "parcel": "^2.3.2"
+    "parcel": "^2.4.1"
   },
   "dependencies": {
-    "@rjsf/core": "^3.1.0",
     "jdenticon": "^3.1.1",
     "qrcode": "^1.4.4",
     "react": "^17.0.2",

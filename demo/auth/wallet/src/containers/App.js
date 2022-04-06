@@ -1,15 +1,27 @@
-import { Phone } from './Phone';
-import background from './Wallpaper.jpg';
 import { useReducer } from 'react';
-import { initialValue, reducer, StoreContext } from '../store';
+import { initialValue, reducer, StoreContext, types } from '../store';
+import { ProfilePage } from '../pages/Profile.js';
+import { Home } from '../pages/Home.js';
+import { ScanQRPage } from '../pages/ScanQR';
 
 export const App = () => {
-  const [store, dispatch] = useReducer(reducer, initialValue);
+  const [state, dispatch] = useReducer(reducer, initialValue);
 
   return (
-    <div className="App" style={{ backgroundImage: `url(${background})` }}>
-      <StoreContext.Provider value={{ store, dispatch }}>
-        <Phone />
+    <div className="App">
+      <StoreContext.Provider value={{ state, dispatch }}>
+        {(() => {
+          switch (state.view) {
+            case 'home':
+              return <Home />;
+            case 'qr':
+              return <ScanQRPage />;
+            case 'profile':
+              return <ProfilePage />;
+            default:
+              return <Home />;
+          }
+        })()}
       </StoreContext.Provider>
     </div>
   );

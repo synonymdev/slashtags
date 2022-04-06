@@ -45,7 +45,7 @@ html {
 /** `.class-name { @import "bootstrap"; }`). **/
 /** **/
 /** Includes future-proofed vendor prefixes as well. **/
-@at-root {
+/* @at-root {
   @-moz-viewport {
     width: device-width;
   }
@@ -61,7 +61,7 @@ html {
   @viewport {
     width: device-width;
   }
-}
+} */
 
 /** **/
 /** Reset HTML, body, and more **/

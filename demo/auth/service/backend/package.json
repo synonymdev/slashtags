@@ -1,24 +1,19 @@
 {
   "scripts": {
-    "start": "node src/index.js",
-    "dev": "nodemon src/index.js"
+    "start": "DEBUG=slashtags* node src/index.js",
+    "dev": "DEBUG=slashtags* nodemon src/index.js"
   },
   "type": "module",
-  "dependencies": {
-    "@synonymdev/slashtags-auth": "file:../../../../packages/auth",
-    "@synonymdev/slashtags-core": "file:../../../../packages/core",
+  "devDependencies": {
+    "debug": "^4.3.4",
+    "dotenv": "^16.0.0",
     "fastify": "^3.25.3",
     "isomorphic-ws": "^4.0.1",
     "jsonrpc-lite": "^2.2.0",
-    "noise-curve-tiny-secp": "^2.0.0",
-    "react": "^17.0.2",
-    "simple-jsonrpc-js": "^1.2.0",
+    "nodemon": "^2.0.14",
     "ws": "^8.2.3"
   },
   "engines": {
     "node": "14.x"
-  },
-  "devDependencies": {
-    "nodemon": "^2.0.14"
   }
 }

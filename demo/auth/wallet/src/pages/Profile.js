@@ -1,38 +1,23 @@
 import { Template } from '../containers/Template';
 import { useContext, useState, useEffect, useRef } from 'react';
 import { StoreContext, types } from '../store';
-import { Card } from '../components/Card';
+import { Card } from '../components/Card.js';
 import QRCode from 'qrcode';
 
-export const QRPage = () => {
-  const { store, dispatch } = useContext(StoreContext);
+export const ProfilePage = () => {
+  const { state, dispatch } = useContext(StoreContext);
   const [copied, setCopied] = useState(false);
-  const [qrURL, setQrURL] = useState('');
-  const [timedOut, setTimedOut] = useState(0);
+  const [profile, setProfile] = useState();
   const canvasRef = useRef();
 
   useEffect(() => {
     (async () => {
-      const auth = await store.dependencies.auth;
+      const slashtag = await state.currentUser;
 
-      const issueUrl = () =>
-        auth.issueURL({
-          onTimeout: () => setTimedOut(timedOut + 1),
-          /** @type {import ('@synonymdev/slashtags-auth').OnRequest} */
-          onRequest: () => ({ responder: store.responder }),
-          /** @type {import ('@synonymdev/slashtags-auth').OnSuccsess} */
-          onSuccess: (connection) => {
-            console.log('got connection', connection);
-            dispatch({
-              type: types.ADD_CONNECTION,
-              connection,
-            });
-          },
-        });
+      const profile = await slashtag.getProfile();
+      setProfile(profile);
 
       const updateQR = (url) => {
-        setQrURL(url);
-
         QRCode.toCanvas(canvasRef.current, url, {
           margin: 4,
           scale: 6.1,
@@ -44,21 +29,20 @@ export const QRPage = () => {
         });
       };
 
-      const url = issueUrl();
-      updateQR(url);
+      updateQR(profile.id);
     })();
-  }, [timedOut, dispatch, store.dependencies.auth, store.responder]);
+  }, [dispatch, state.auth]);
 
   return (
     <Template title={`Connect to`} back={true}>
-      <Card profile={store.responder.profile}></Card>
-      <div className="card">
+      <Card profile={profile || {}}></Card>
+      <div className="card card-qr">
         <canvas
           className="qr"
           ref={canvasRef}
           onClick={() => {
-            navigator.clipboard.writeText(qrURL);
-            console.log('copied QR: ', qrURL);
+            navigator.clipboard.writeText(profile.id);
+            console.log('copied QR: ', profile.id);
             setCopied(true);
             setTimeout(() => setCopied(false), 1000);
           }}
