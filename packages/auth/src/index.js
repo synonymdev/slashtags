@@ -67,7 +67,7 @@ export class SlashAuth extends EventEmitter {
 
     const connection = await this.slashtag.connect(parsed.key)
 
-    const channel = connection.userData.channels.get(this.options.protocol)
+    const channel = SDK.getChannel(connection, this.options.protocol)
     channel.messages[0].send(q)
   }
 

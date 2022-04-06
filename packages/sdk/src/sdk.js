@@ -3,6 +3,7 @@ import { DHT } from 'dht-universal'
 import RAM from 'random-access-memory'
 import goodbye from 'graceful-goodbye'
 import HashMap from 'turbo-hash-map'
+import Hypercore from 'hypercore'
 import b32 from 'hi-base32'
 import b4a from 'b4a'
 
@@ -79,6 +80,15 @@ export class SDK {
     parsed.query = url.searchParams
 
     return parsed
+  }
+
+  static getChannel (connection, protocol) {
+    const mux = Hypercore.getProtocolMuxer(connection)
+    for (const channel of mux) {
+      if (channel.protocol === protocol) {
+        return channel
+      }
+    }
   }
 }
 

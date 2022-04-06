@@ -21,28 +21,21 @@ export class Slashtag extends EventEmitter {
 
     if (keyPair) {
       this.key = keyPair.publicKey
-      this.swarm = new Hyperswarm({ dht: this.sdk.dht, keyPair })
-
-      this.listen = this.swarm.listen.bind(this.swarm)
-
-      this.drive = new SlashDrive({
-        sdk: this.sdk,
-        keyPair,
-        swarm: this.swarm
-      })
     } else if (opts.key) {
       this.key = opts.key
-      this.swarm = new Hyperswarm({ dht: this.sdk.dht })
       this.remote = true
-
-      this.drive = new SlashDrive({
-        sdk: this.sdk,
-        key: this.key,
-        swarm: this.swarm
-      })
     } else {
       throw new Error('Missing keyPair or key')
     }
+
+    this.swarm = new Hyperswarm({ dht: this.sdk.dht, keyPair })
+
+    this.drive = new SlashDrive({
+      sdk: this.sdk,
+      key: this.key,
+      keyPair: keyPair,
+      swarm: this.swarm
+    })
 
     this.swarm.on('connection', (socket, peerInfo) => {
       this.sdk.store.replicate(socket)
@@ -56,6 +49,10 @@ export class Slashtag extends EventEmitter {
     if (this._ready) return
     await this.drive?.ready()
     this._ready = true
+  }
+
+  async listen () {
+    return this.swarm.listen()
   }
 
   async connect (key) {
@@ -88,14 +85,10 @@ export class Slashtag extends EventEmitter {
   _setupProtocols (socket, peerInfo) {
     for (const protocol of this.protocols.values()) {
       const mux = Hypercore.getProtocolMuxer(socket)
-      if (!mux.channels) mux.channels = new Map()
-
       const channel = mux.createChannel(protocol.options)
       if (!channel) return
 
       channel.peerInfo = peerInfo
-
-      mux.channels.set(channel.protocol, channel)
       channel.open()
     }
   }

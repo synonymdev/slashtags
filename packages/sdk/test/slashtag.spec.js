@@ -130,9 +130,7 @@ describe('slashtag', () => {
 
         async request (publicKey) {
           const connection = await this.slashtag.connect(publicKey)
-          const channel = connection.userData.channels.get(
-            this.options.protocol
-          )
+          const channel = SDK.getChannel(connection, this.options.protocol)
           channel.messages[0].send('foo')
         }
       }
@@ -161,9 +159,7 @@ describe('slashtag', () => {
 
         async request (publicKey) {
           const connection = await this.slashtag.connect(publicKey)
-          const channel = connection.userData.channels.get(
-            this.options.protocol
-          )
+          const channel = SDK.getChannel(connection, this.options.protocol)
           channel.messages[0].send('bar')
         }
       }

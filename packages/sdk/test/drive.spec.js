@@ -12,6 +12,33 @@ function sdk () {
 }
 
 describe('drive', () => {
+  it('should namespace additional Hypercores core with the drive key', async () => {
+    const sdkA = await sdk()
+
+    const driveA = new SlashDrive({
+      keyPair: sdkA.generateKeyPair('foo'),
+      sdk: sdkA
+    })
+    await driveA.ready()
+
+    const driveB = new SlashDrive({
+      keyPair: sdkA.generateKeyPair('bar'),
+      sdk: sdkA
+    })
+    await driveB.ready()
+
+    const driveAClone = new SlashDrive({
+      keyPair: sdkA.generateKeyPair('foo'),
+      sdk: sdkA
+    })
+    await driveAClone.ready()
+
+    expect(driveB.blobs.feed.key).to.not.eql(driveA.blobs.feed.key)
+    expect(driveAClone.blobs.feed.key).to.eql(driveA.blobs.feed.key)
+
+    sdkA.close()
+  })
+
   it('should create a Slashdrive, write and read a blob of data', async () => {
     const sdkA = await sdk()
     const keyPair = sdkA.generateKeyPair('foo')
