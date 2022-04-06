@@ -13,7 +13,7 @@ import { Slashtag } from './slashtag.js'
 export class SDK {
   constructor (opts) {
     this.store = new Corestore(opts?.storage || RAM)
-    this.keys = new KeyManager(opts?.seed)
+    this.keys = new KeyManager(opts?.primaryKey)
     this.opts = opts
 
     this.slashtags = new HashMap()

@@ -8,11 +8,11 @@ const PREFIX = b4a.from('@slashtags/key-manager')
 export class KeyManager {
   /**
    *
-   * @param {Buffer | Uint8Array} [seed]
+   * @param {Buffer | Uint8Array} [primaryKey]
    * @param {*} [opts]
    */
-  constructor (seed, opts = {}) {
-    this.seed = seed || generateSeed()
+  constructor (primaryKey, opts = {}) {
+    this.primaryKey = primaryKey || generatePrimaryKey()
 
     this._namespace = opts._namespace || DEFAULT_NAMESPACE
   }
@@ -25,7 +25,17 @@ export class KeyManager {
   generateKeyPair (name) {
     const keyPair = {
       publicKey: b4a.allocUnsafe(sodium.crypto_sign_PUBLICKEYBYTES),
-      secretKey: b4a.alloc(sodium.crypto_sign_SECRETKEYBYTES)
+      secretKey: b4a.alloc(sodium.crypto_sign_SECRETKEYBYTES),
+      auth: {
+        sign: (msg) => sign(keyPair, msg),
+        verify: (signable, signature) => {
+          return sodium.crypto_sign_detached(
+            signature,
+            signable,
+            keyPair.publicKey
+          )
+        }
+      }
     }
 
     sodium.crypto_sign_seed_keypair(
@@ -56,14 +66,14 @@ export class KeyManager {
         this._namespace || DEFAULT_NAMESPACE,
         b4a.from(b4a.byteLength(name, 'ascii') + '\n' + name, 'ascii')
       ],
-      this.seed
+      this.primaryKey
     )
 
     return output
   }
 
   /**
-   * Generates a new KeyManager with the same seed, and a different namespace.
+   * Generates a new KeyManager with the same primaryKey, and a different namespace.
    *
    * @param {string | Buffer | Uint8Array} name
    * @returns
@@ -71,7 +81,7 @@ export class KeyManager {
   namespace (name) {
     if (!b4a.isBuffer(name)) name = b4a.from(name)
     const _namespace = generateNamespace(this._namespace, name)
-    return new KeyManager(this.seed, { _namespace })
+    return new KeyManager(this.primaryKey, { _namespace })
   }
 }
 
@@ -102,8 +112,15 @@ function randomBytes (n) {
 }
 
 /**
- * a convenient utility to generate a random seed.
+ * generate a random primaryKey.
  */
-export function generateSeed () {
+export function generatePrimaryKey () {
   return randomBytes(sodium.crypto_generichash_KEYBYTES_MIN)
+}
+
+function sign (keyPair, message) {
+  if (!keyPair.secretKey) throw new Error('Invalid key pair')
+  const signature = b4a.allocUnsafe(sodium.crypto_sign_BYTES)
+  sodium.crypto_sign_detached(signature, message, keyPair.secretKey)
+  return signature
 }

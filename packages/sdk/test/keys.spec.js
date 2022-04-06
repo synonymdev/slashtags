@@ -1,5 +1,5 @@
 import { expect } from 'aegir/utils/chai.js'
-import { KeyManager, generateSeed } from '../src/keys.js'
+import { KeyManager, generatePrimaryKey } from '../src/keys.js'
 import RAM from 'random-access-memory'
 import Corestore from 'corestore'
 import b4a from 'b4a'
@@ -66,15 +66,15 @@ describe('keys', () => {
   })
 
   it('should generates the same keyPairs deterministically from the same profile and path', () => {
-    const profile = generateSeed()
+    const primaryKey = generatePrimaryKey()
 
-    const rootsA = new KeyManager(profile)
+    const rootsA = new KeyManager(primaryKey)
     const aliceA = rootsA.namespace('Alice')
     const bobA = aliceA.namespace('Bob')
     const keyPairA = bobA.generateKeyPair('core1')
     const publicKeyA = keyPairA.publicKey
 
-    const rootsB = new KeyManager(profile)
+    const rootsB = new KeyManager(primaryKey)
     const aliceB = rootsB.namespace('Alice')
     const bobB = aliceB.namespace('Bob')
     const keyPairB = bobB.generateKeyPair('core1')

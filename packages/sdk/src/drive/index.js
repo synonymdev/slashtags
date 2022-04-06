@@ -96,10 +96,8 @@ async function setupReadOnlyCores (drive) {
   // TODO custom discovery options
   drive.swarm.join(indexCore.discoveryKey)
 
-  // TODO test the findingPeers() api again after updating corestore
-  // const done = indexCore.findingPeers()
-  // drive.swarm.flush().then(done, done)
-  await drive.swarm.flush()
+  const done = indexCore.findingPeers()
+  drive.swarm.flush().then(done, done)
   await indexCore.update()
 
   if (indexCore.length === 0) throw new Error('Could not resolve remote drive')

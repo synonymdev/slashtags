@@ -18,7 +18,7 @@ Create a new SDK instance, managing storage, Hypercores, DHT, and Hyperswarms, a
 
 ```js
 {
-  seed: Buffer, // 32 bytes seed used to derive all the keyPairs for Slashtags and their components
+  primaryKey: Buffer, // 32 bytes used to derive all the keyPairs for Slashtags and their components
   relays: [] // Array of websocket relay addresses, needed for browser environments
 }
 ```
@@ -31,7 +31,7 @@ Creates a new Slashtag instance
 
 ```js
 {
-  name: string, // a string used to generate the same Slashtag keyPair given the same seed in the SDK
+  name: string, // a string used to generate the same Slashtag keyPair given the same primaryKey in the SDK
   url: string, // if no name is provided, a remote/readonly Slashtag can be created from a url
 }
 ```
