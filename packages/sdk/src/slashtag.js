@@ -28,6 +28,8 @@ export class Slashtag extends EventEmitter {
       throw new Error('Missing keyPair or key')
     }
 
+    this.url = SDK.formatURL(this.key)
+
     this.swarm = new Hyperswarm({ dht: this.sdk.dht, keyPair })
 
     this.drive = new SlashDrive({
@@ -37,12 +39,7 @@ export class Slashtag extends EventEmitter {
       swarm: this.swarm
     })
 
-    this.swarm.on('connection', (socket, peerInfo) => {
-      this.sdk.store.replicate(socket)
-      this._handleConnection(socket, peerInfo)
-    })
-
-    this.url = SDK.formatURL(this.key)
+    this.swarm.on('connection', this._handleConnection.bind(this))
   }
 
   async ready () {
@@ -73,6 +70,18 @@ export class Slashtag extends EventEmitter {
   }
 
   async _handleConnection (socket, peerInfo) {
+    this.sdk.store.replicate(socket)
+
+    socket.on('error', function (err) {
+      debug('Error in swarm connection', err)
+    })
+    socket.on('close', function () {
+      debug(
+        'Swarm connection closed',
+        b4a.toString(socket.remotePublicKey, 'hex')
+      )
+    })
+
     this._setupProtocols(socket, peerInfo)
 
     debug('got connection, isInitiator:', socket.isInitiator)
