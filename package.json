@@ -26,17 +26,15 @@
     "clean": "lerna run clean",
     "dep-check": "lerna run dep-check",
     "create": "node ./scripts/new-package.js",
-    "reset": "lerna run clean && rimraf packages/*/node_modules node_modules package-lock.json packages/*/package-lock.json",
-    "testnet": "node scripts/setup-testnet.js"
+    "reset": "lerna run clean && rimraf packages/*/node_modules node_modules packages/*/package-lock.json",
+    "testnet": "node scripts/setup-testnet.js",
+    "relay": "node scripts/setup-relay.js"
   },
   "devDependencies": {
     "@hyperswarm/testnet": "^1.1.0",
-    "ava": "^4.1.0",
     "c8": "^7.11.0",
     "dht-universal": "^0.4.1",
-    "ipjs": "^5.2.0",
-    "lerna": "^4.0.0",
-    "standard": "^16.0.4"
+    "lerna": "^4.0.0"
   },
   "workspaces": [
     "./packages/*"
