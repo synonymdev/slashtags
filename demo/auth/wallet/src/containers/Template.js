@@ -30,13 +30,18 @@ const BackButton = () => {
 
 export const Template = ({ title, back = false, children = null }) => {
   const { state, dispatch } = useContext(StoreContext);
-  const [profile, setProfile] = useState({});
 
   useEffect(() => {
+    if (state.profile) return;
+
     (async () => {
       const currentUser = await state.currentUser;
       const profile = await currentUser.getProfile();
-      setProfile(profile);
+
+      dispatch({
+        type: types.SET_PROFILE,
+        profile,
+      });
     })();
   }, [state.currentUser]);
 
@@ -51,10 +56,13 @@ export const Template = ({ title, back = false, children = null }) => {
             className="top-right-button"
             onClick={() => dispatch({ type: types.SET_VIEW, view: 'profile' })}
           >
-            {profile.image ? (
-              <img className="image" src={profile.image}></img>
+            {state.profile?.image ? (
+              <img className="image" src={state.profile?.image}></img>
             ) : (
-              <Jdenticon className="image" value={profile.id}></Jdenticon>
+              <Jdenticon
+                className="image"
+                value={state.profile?.id}
+              ></Jdenticon>
             )}
           </button>
         </nav>

@@ -7,15 +7,17 @@ import QRCode from 'qrcode';
 export const ProfilePage = () => {
   const { state, dispatch } = useContext(StoreContext);
   const [copied, setCopied] = useState(false);
-  const [profile, setProfile] = useState();
   const canvasRef = useRef();
 
   useEffect(() => {
     (async () => {
-      const slashtag = await state.currentUser;
+      if (!state.profile) {
+        const slashtag = await state.currentUser;
 
-      const profile = await slashtag.getProfile();
-      setProfile(profile);
+        const profile = await slashtag.getProfile();
+
+        dispatch({ type: types.SET_PROFILE, profile });
+      }
 
       const updateQR = (url) => {
         QRCode.toCanvas(canvasRef.current, url, {
@@ -28,21 +30,20 @@ export const ProfilePage = () => {
           },
         });
       };
-
-      updateQR(profile.id);
+      updateQR(state.profile?.id);
     })();
   }, [dispatch, state.auth]);
 
   return (
     <Template title={`Connect to`} back={true}>
-      <Card profile={profile || {}}></Card>
+      <Card profile={state.profile || {}}></Card>
       <div className="card card-qr">
         <canvas
           className="qr"
           ref={canvasRef}
           onClick={() => {
-            navigator.clipboard.writeText(profile.id);
-            console.log('copied QR: ', profile.id);
+            navigator.clipboard.writeText(state.profile?.id);
+            console.log('copied QR: ', state.profile?.id);
             setCopied(true);
             setTimeout(() => setCopied(false), 1000);
           }}

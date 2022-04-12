@@ -7,8 +7,13 @@ import Hyperswarm from 'hyperswarm'
 const { RELAY_URL, BOOTSTRAP } = process.env
 const bootstrap = JSON.parse(BOOTSTRAP)
 
-function sdk () {
-  return SDK.init({ bootstrap, relays: [RELAY_URL] })
+function sdk (opts) {
+  return SDK.init({
+    bootstrap,
+    relays: [RELAY_URL],
+    persistent: false,
+    ...opts
+  })
 }
 
 describe('drive', () => {
@@ -33,8 +38,8 @@ describe('drive', () => {
     })
     await driveAClone.ready()
 
-    expect(driveB.blobs.feed.key).to.not.eql(driveA.blobs.feed.key)
-    expect(driveAClone.blobs.feed.key).to.eql(driveA.blobs.feed.key)
+    expect(driveB.content.feed.key).to.not.eql(driveA.content.feed.key)
+    expect(driveAClone.content.feed.key).to.eql(driveA.content.feed.key)
 
     sdkA.close()
   })
@@ -62,7 +67,11 @@ describe('drive', () => {
   })
 
   it('should resolve a remote drive', async () => {
-    const sdkA = await sdk()
+    const sdkA = await sdk({
+      persistent: true,
+      storage: './test/.storage',
+      primaryKey: b4a.from('a'.repeat(64))
+    })
     const keyPair = sdkA.generateKeyPair('foo')
 
     const swarmA = new Hyperswarm({ dht: sdkA.dht })

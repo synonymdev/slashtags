@@ -27,13 +27,17 @@
     }
   },
   "main": "src/index.js",
+  "browser": {
+    "./src/storage.js": "./src/storage.browser.js"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/synonymdev/slashtags.git"
   },
   "scripts": {
     "build": "aegir build",
-    "test": "c8 aegir test",
+    "test": "c8 aegir test -f test/*.spec.js && npm run test-storage",
+    "test-storage": "c8 aegir test -t node -f test/storage/node.spec.js && c8 aegir test -t browser -f test/storage/browser.spec.js",
     "ts-check": "aegir ts -p check",
     "lint": "aegir lint --fix",
     "clean": "rimraf ./dist",
@@ -58,7 +62,7 @@
     "blake2b-universal": "^1.0.1",
     "compact-encoding": "^2.6.1",
     "compact-encoding-struct": "^1.2.1",
-    "corestore": "^6.0.1-alpha.12",
+    "corestore": "^6.0.1-alpha.13",
     "dht-universal": "^0.4.1",
     "graceful-goodbye": "^1.0.0",
     "hi-base32": "^0.5.1",
@@ -67,6 +71,7 @@
     "hypercore": "^10.0.0-alpha.34",
     "hyperswarm": "^3.0.3",
     "random-access-memory": "^4.0.0",
+    "random-access-web": "^2.0.3",
     "sodium-universal": "^3.1.0",
     "turbo-hash-map": "^1.0.3"
   }

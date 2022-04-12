@@ -10,6 +10,14 @@ import Debug from 'debug';
 const log = Debug('slashtags:demo:wallet');
 
 const sdk = (async () => {
+  const requestFileSystem =
+    global.requestFileSystem || global.webkitRequestFileSystem;
+
+  if (!requestFileSystem)
+    alert(
+      "This browser doesn't supports the FileSystem API, storage will be in memory",
+    );
+
   console.log('sdk again ');
   let primaryKey = localStorage.getItem('primaryKey');
   log('Stored primaryKey', primaryKey);
@@ -32,15 +40,21 @@ let user = sdk.then(async (sdk) => {
   const name = window.location.pathname;
   const slashtag = await sdk.slashtag({ name });
 
-  const profile = {
-    id: slashtag.url,
-    type: 'Person',
-    name: falso.randFullName(),
-    url: falso.randUrl(),
-    email: falso.randEmail(),
-  };
+  const existing = await slashtag.getProfile();
 
-  await slashtag.setProfile(profile);
+  log('Found existing profile', existing);
+
+  if (!existing) {
+    const profile = {
+      id: slashtag.url,
+      type: 'Person',
+      name: falso.randFullName(),
+      url: falso.randUrl(),
+      email: falso.randEmail(),
+    };
+
+    await slashtag.setProfile(profile);
+  }
 
   log('Created a slashtag', slashtag.url);
 
@@ -54,6 +68,15 @@ const auth = user.then((slashtag) => {
 export const initialValue = {
   sdk,
   currentUser: user,
+  profile: (() => {
+    let profile;
+    try {
+      const localStored = localStorage.getItem('profile');
+      if (localStored) profile = JSON.parse(localStored);
+    } catch (error) {}
+
+    return profile;
+  })(),
   auth,
   view: 'home',
   viewOptions: {},
@@ -67,6 +90,7 @@ export const types = {
   SET_VIEW: 'SET_VIEW',
   ADD_ACCOUNT: 'ADD_ACCOUNT',
   ADD_CONTACT: 'ADD_CONTACT',
+  SET_PROFILE: 'SET_PROFILE',
 };
 
 export const reducer = (state, action) => {
@@ -103,6 +127,14 @@ export const reducer = (state, action) => {
         ],
       };
       break;
+    case types.SET_PROFILE:
+      localStorage.setItem('profile', JSON.stringify(action.profile));
+      result = {
+        ...state,
+        profile: action.profile,
+      };
+      break;
+
     default:
       break;
   }

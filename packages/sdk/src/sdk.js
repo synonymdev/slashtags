@@ -9,10 +9,12 @@ import b4a from 'b4a'
 
 import { KeyManager } from './keys.js'
 import { Slashtag } from './slashtag.js'
+import { storage } from './storage.js'
 
 export class SDK {
   constructor (opts) {
-    this.store = new Corestore(opts?.storage || RAM)
+    this.storage = opts.persistent === false ? RAM : storage(opts.storage)
+    this.store = new Corestore(this.storage)
     this.keys = new KeyManager(opts?.primaryKey)
     this.opts = opts
 

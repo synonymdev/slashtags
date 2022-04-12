@@ -19,5 +19,4 @@ packages/*/dist
 .netlify
 .parcel*
 dist/
-.env
-.store
+.*

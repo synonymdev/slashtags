@@ -19,7 +19,9 @@ Create a new SDK instance, managing storage, Hypercores, DHT, and Hyperswarms, a
 ```js
 {
   primaryKey: Buffer, // 32 bytes used to derive all the keyPairs for Slashtags and their components
-  relays: [] // Array of websocket relay addresses, needed for browser environments
+  relays: [], // Array of websocket relay addresses, needed for browser environments
+  storage, // random-access-storage instance or a path to a directory, defaults to `.slashtags/` in home directory
+  persistent: true, // whether to persist storage to disk, defaults to true, if false, storage will be in-memory only
 }
 ```
 

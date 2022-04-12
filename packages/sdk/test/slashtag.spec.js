@@ -8,7 +8,7 @@ const { RELAY_URL, BOOTSTRAP } = process.env
 const bootstrap = JSON.parse(BOOTSTRAP)
 
 function sdk (opts = {}) {
-  return SDK.init({ bootstrap, relays: [RELAY_URL] })
+  return SDK.init({ bootstrap, relays: [RELAY_URL], persistent: false })
 }
 
 describe('slashtag', () => {
