@@ -11,17 +11,17 @@ const log = Debug('slashtags:demo:wallet');
 
 const sdk = (async () => {
   console.log('sdk again ');
-  let seed = localStorage.getItem('seed');
-  log('Stored seed', seed);
-  if (seed) {
-    seed = Buffer.from(seed, 'hex');
+  let primaryKey = localStorage.getItem('primaryKey');
+  log('Stored primaryKey', primaryKey);
+  if (primaryKey) {
+    primaryKey = Buffer.from(primaryKey, 'hex');
   } else {
-    seed = randomBytes(32);
-    localStorage.setItem('seed', b4a.toString(seed, 'hex'));
+    primaryKey = randomBytes(32);
+    localStorage.setItem('primaryKey', b4a.toString(primaryKey, 'hex'));
   }
 
   const sdk = await SDK.init({
-    seed,
+    primaryKey,
     relays: ['ws://localhost:8888'],
   });
 
