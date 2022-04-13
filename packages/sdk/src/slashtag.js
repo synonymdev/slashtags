@@ -33,10 +33,10 @@ export class Slashtag extends EventEmitter {
     this.swarm = new Hyperswarm({ dht: this.sdk.dht, keyPair })
 
     this.drive = new SlashDrive({
-      sdk: this.sdk,
+      store: this.sdk.store,
+      keys: this.sdk.keys,
       key: this.key,
-      keyPair: keyPair,
-      swarm: this.swarm
+      keyPair: keyPair
     })
 
     this.swarm.on('connection', this._handleConnection.bind(this))
@@ -44,8 +44,21 @@ export class Slashtag extends EventEmitter {
 
   async ready () {
     if (this._ready) return
-    await this.drive?.ready()
-    this._ready = true
+    await this.drive.ready()
+
+    this.writable = this.drive.writable
+
+    // TODO: pass options to the swarm discovery
+    const discovery = this.swarm.join(this.drive.discoveryKey).flushed()
+
+    if (this.writable) {
+      await discovery
+    } else {
+      const done = this.drive.findingPeers()
+      await this.swarm.flush().then(done, done)
+    }
+
+    if (this) this._ready = true
   }
 
   async listen () {

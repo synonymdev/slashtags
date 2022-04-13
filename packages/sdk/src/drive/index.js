@@ -14,13 +14,17 @@ const HeaderKeys = {
   version: 'v'
 }
 
+const SubPrefixes = {
+  headers: 'h',
+  metadata: '/'
+}
+
 export class SlashDrive {
   constructor (opts) {
     this.opts = opts
-    this.sdk = opts.sdk
-    this.swarm = opts.swarm
+    this.store = opts.store
     this.key = opts.key || opts.keyPair?.publicKey
-    this.keys = this.sdk.keys.namespace(this.key)
+    this.keys = opts.keys.namespace(this.key)
 
     this._ready = false
   }
@@ -28,23 +32,49 @@ export class SlashDrive {
   async ready () {
     if (this._ready) return
 
-    const { metadataCore, contentCore, db, headers } = this.opts.keyPair
-      ? await setupWritableCores(this)
-      : await setupReadOnlyCores(this)
+    const metadataCore = await this.store.get(this.opts)
+    await metadataCore.ready()
 
-    debug('Found cores', {
-      metadataCore: b4a.toString(metadataCore.key, 'hex'),
-      contentCore: b4a.toString(contentCore.key, 'hex')
-    })
+    this.writable = metadataCore.writable
 
-    this.metadata = db.sub('/')
-    this.headers = headers
-    this.content = new Hyperblobs(contentCore)
+    this.db = new Hyperbee(metadataCore)
+    this.metadata = this.db.sub(SubPrefixes.metadata)
+    this.headers = this.db.sub(SubPrefixes.headers)
 
+    this.discoveryKey = metadataCore.key
+    this.findingPeers = metadataCore.findingPeers.bind(metadataCore)
+    this.update = metadataCore.update.bind(metadataCore)
     this._ready = true
   }
 
+  async _setupContent () {
+    let contentCore
+    if (this.writable) {
+      const contentKeyPair = this.keys.generateKeyPair('content')
+      contentCore = await this.store.get({ keyPair: contentKeyPair })
+      await contentCore.ready()
+
+      if (!(await this.headers.get(HeaderKeys.content))) {
+        const batch = this.headers.batch()
+        await batch.put(HeaderKeys.content, contentCore.key)
+        await batch.put(HeaderKeys.version, b4a.from(VERSION))
+        await batch.flush()
+      }
+    } else {
+      const contentHeader = await this.headers.get(HeaderKeys.content)
+      if (!contentHeader) throw new Error('Missing content key in headers')
+      contentCore = await this.store.get({ key: contentHeader.value })
+    }
+
+    await contentCore.ready()
+    this.content = new Hyperblobs(contentCore)
+    debug('Created content core')
+  }
+
   async write (path, content) {
+    if (!this.writable) throw new Error('Drive is not writable')
+    if (!this.content) await this._setupContent()
+
     const pointer = await this.content.put(content)
     await this.metadata.put(
       fixPath(path),
@@ -53,6 +83,8 @@ export class SlashDrive {
   }
 
   async read (path) {
+    if (!this.content) await this._setupContent()
+
     path = fixPath(path)
     const block = await this.metadata.get(path)
     if (!block) return null
@@ -67,56 +99,4 @@ export class SlashDrive {
 
 function fixPath (path) {
   return path.replace(/^\//, '')
-}
-
-async function setupWritableCores (drive) {
-  debug('Fetching writable cores')
-  const metadataCore = await drive.sdk.store.get(drive.opts)
-  await metadataCore.ready()
-
-  const contentKeyPair = drive.keys.generateKeyPair('content')
-  const contentCore = await drive.sdk.store.get({ keyPair: contentKeyPair })
-  await contentCore.ready()
-
-  // TODO custom discovery options
-  await drive.swarm?.join(metadataCore.discoveryKey).flushed()
-
-  const db = new Hyperbee(metadataCore)
-  const headers = db.sub('h')
-
-  if (!(await headers.get(HeaderKeys.content))) {
-    const batch = headers.batch()
-    await batch.put(HeaderKeys.content, contentCore.key)
-    await batch.put(HeaderKeys.version, b4a.from(VERSION))
-    await batch.flush()
-  }
-
-  return { contentCore, metadataCore, db, headers }
-}
-
-async function setupReadOnlyCores (drive) {
-  debug('Fetching readonly cores')
-  const metadataCore = await drive.sdk.store.get(drive.opts)
-  await metadataCore.ready()
-  // TODO custom discovery options
-  drive.swarm.join(metadataCore.discoveryKey)
-
-  const done = metadataCore.findingPeers()
-  drive.swarm.flush().then(done, done)
-  await metadataCore.update()
-
-  if (metadataCore.length === 0) {
-    throw new Error('Could not resolve remote drive')
-  }
-
-  const db = new Hyperbee(metadataCore)
-  const headers = db.sub('h')
-
-  const { value: contentKey } = await headers.get(HeaderKeys.content)
-
-  debug('Found content key', b4a.toString(contentKey, 'hex'))
-  const contentCore = await drive.sdk.store.get({ key: contentKey })
-  await contentCore.ready()
-
-  return { contentCore, metadataCore, db, headers }
 }

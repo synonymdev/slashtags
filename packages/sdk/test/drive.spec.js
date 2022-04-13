@@ -22,21 +22,27 @@ describe('drive', () => {
 
     const driveA = new SlashDrive({
       keyPair: sdkA.generateKeyPair('foo'),
-      sdk: sdkA
+      store: sdkA.store,
+      keys: sdkA.keys
     })
     await driveA.ready()
+    await driveA.write('/foo', b4a.from('bar'))
 
     const driveB = new SlashDrive({
       keyPair: sdkA.generateKeyPair('bar'),
-      sdk: sdkA
+      store: sdkA.store,
+      keys: sdkA.keys
     })
     await driveB.ready()
+    await driveB.write('/foo', b4a.from('bar'))
 
     const driveAClone = new SlashDrive({
       keyPair: sdkA.generateKeyPair('foo'),
-      sdk: sdkA
+      store: sdkA.store,
+      keys: sdkA.keys
     })
     await driveAClone.ready()
+    await driveAClone.read('/foo')
 
     expect(driveB.content.feed.key).to.not.eql(driveA.content.feed.key)
     expect(driveAClone.content.feed.key).to.eql(driveA.content.feed.key)
@@ -44,41 +50,24 @@ describe('drive', () => {
     sdkA.close()
   })
 
-  it('should create a Slashdrive, write and read a blob of data', async () => {
-    const sdkA = await sdk()
-    const keyPair = sdkA.generateKeyPair('foo')
-
-    const drive = new SlashDrive({ keyPair, sdk: sdkA })
-    await drive.ready()
-
-    const content = b4a.from(JSON.stringify({ foo: 'bar' }))
-    const other = b4a.from(JSON.stringify({ foo: 'zar' }))
-
-    await drive.write('/profile.json', content)
-    await drive.write('/other.json', other)
-
-    const read = await drive.read('/profile.json')
-    const readOther = await drive.read('/other.json')
-
-    expect(read).to.eql(content)
-    expect(readOther).to.eql(other)
-
-    sdkA.close()
-  })
-
-  it('should resolve a remote drive', async () => {
+  it('should resolve a remote drive and read a file', async () => {
     const sdkA = await sdk({
       persistent: true,
-      storage: './test/.storage',
+      storage: './test/.store/drive',
       primaryKey: b4a.from('a'.repeat(64))
     })
-    const keyPair = sdkA.generateKeyPair('foo')
 
     const swarmA = new Hyperswarm({ dht: sdkA.dht })
     swarmA.on('connection', (socket) => sdkA.store.replicate(socket))
 
-    const localDrive = new SlashDrive({ sdk: sdkA, keyPair, swarm: swarmA })
+    const keyPair = sdkA.generateKeyPair('foo')
+    const localDrive = new SlashDrive({
+      store: sdkA.store,
+      keys: sdkA.keys,
+      keyPair
+    })
     await localDrive.ready()
+    await swarmA.join(localDrive.discoveryKey).flushed()
 
     const localContent = b4a.from(JSON.stringify({ foo: 'bar' }))
     await localDrive.write('/profile.json', localContent)
@@ -89,11 +78,18 @@ describe('drive', () => {
     swarmB.on('connection', (socket) => sdkB.store.replicate(socket))
 
     const remoteDrive = new SlashDrive({
-      sdk: sdkB,
-      key: localDrive.key,
-      swarm: swarmB
+      store: sdkB.store,
+      keys: sdkB.keys,
+      key: localDrive.key
     })
     await remoteDrive.ready()
+    swarmB.join(remoteDrive.discoveryKey)
+
+    const done = remoteDrive.findingPeers()
+    swarmB.flush().then(done, done)
+    await remoteDrive.update()
+
+    expect(remoteDrive.metadata.feed.length).to.be.greaterThan(0)
 
     const remoteContent = await remoteDrive.read('/profile.json')
 
@@ -105,59 +101,116 @@ describe('drive', () => {
     swarmB.destroy()
   })
 
-  it('should throw an error on drive.ready() for unresolvable SlashDrive', async () => {
-    const sdkB = await sdk()
-    const swarm = new Hyperswarm({ dht: sdkB.dht })
-    const remoteDrive = new SlashDrive({
-      sdk: sdkB,
-      key: sdkB.generateKeyPair('foo').publicKey,
-      swarm
+  describe('read and write', async () => {
+    it('should write and read a public file', async () => {
+      const sdkA = await sdk()
+      const keyPair = sdkA.generateKeyPair('foo')
+
+      const drive = new SlashDrive({
+        keyPair,
+        store: sdkA.store,
+        keys: sdkA.keys
+      })
+      await drive.ready()
+
+      const content = b4a.from(JSON.stringify({ foo: 'bar' }))
+      const other = b4a.from(JSON.stringify({ foo: 'zar' }))
+
+      await drive.write('/profile.json', content)
+      await drive.write('/other.json', other)
+
+      const read = await drive.read('/profile.json')
+      const readOther = await drive.read('/other.json')
+
+      expect(read).to.eql(content)
+      expect(readOther).to.eql(other)
+
+      sdkA.close()
     })
 
-    let err
+    it('should throw an error for missing content key in headers', async () => {
+      const sdkA = await sdk()
+      const swarmA = new Hyperswarm({ dht: sdkA.dht })
+      swarmA.on('connection', (socket) => sdkA.store.replicate(socket))
 
-    try {
+      const localDrive = new SlashDrive({
+        store: sdkA.store,
+        keys: sdkA.keys,
+        keyPair: sdkA.generateKeyPair('foo')
+      })
+      await localDrive.ready()
+      await swarmA.join(localDrive.discoveryKey).flushed()
+
+      const sdkB = await sdk()
+      const swarmB = new Hyperswarm({ dht: sdkB.dht })
+      swarmB.on('connection', (socket) => sdkB.store.replicate(socket))
+      const remoteDrive = new SlashDrive({
+        store: sdkB.store,
+        keys: sdkB.keys,
+        key: localDrive.key
+      })
       await remoteDrive.ready()
-    } catch (error) {
-      err = error
-    }
+      swarmB.join(localDrive.discoveryKey)
+      const done = remoteDrive.findingPeers()
+      swarmB.flush().then(done, done)
+      await remoteDrive.update()
 
-    expect(err).to.be.an('error')
-    expect(err.message).to.equal('Could not resolve remote drive')
+      let err
+      try {
+        await remoteDrive.read('/profile.json')
+      } catch (error) {
+        err = error
+      }
 
-    sdkB.close()
-    swarm.destroy()
-  })
+      expect(err.message).to.eql('Missing content key in headers')
 
-  it('should return null for not-found files', async () => {
-    const sdkA = await sdk()
-    const swarmA = new Hyperswarm({ dht: sdkA.dht })
-    swarmA.on('connection', (socket) => sdkA.store.replicate(socket))
-
-    const localDrive = new SlashDrive({
-      sdk: sdkA,
-      keyPair: sdkA.generateKeyPair('foo'),
-      swarm: swarmA
+      sdkA.close()
+      sdkB.close()
+      swarmA.destroy()
+      swarmB.destroy()
     })
-    await localDrive.ready()
 
-    const sdkB = await sdk()
-    const swarmB = new Hyperswarm({ dht: sdkB.dht })
-    swarmB.on('connection', (socket) => sdkB.store.replicate(socket))
-    const remoteDrive = new SlashDrive({
-      sdk: sdkB,
-      key: localDrive.key,
-      swarm: swarmB
+    it('should return null for not-found files', async () => {
+      const sdkA = await sdk()
+      const swarmA = new Hyperswarm({ dht: sdkA.dht })
+      swarmA.on('connection', (socket) => sdkA.store.replicate(socket))
+
+      const localDrive = new SlashDrive({
+        store: sdkA.store,
+        keys: sdkA.keys,
+        keyPair: sdkA.generateKeyPair('foo')
+      })
+      await localDrive.ready()
+
+      await localDrive.write(
+        '/not-profile.json',
+        b4a.from(JSON.stringify({ foo: 'bar' }))
+      )
+
+      await swarmA.join(localDrive.discoveryKey).flushed()
+
+      const sdkB = await sdk()
+      const swarmB = new Hyperswarm({ dht: sdkB.dht })
+      swarmB.on('connection', (socket) => sdkB.store.replicate(socket))
+      const remoteDrive = new SlashDrive({
+        store: sdkB.store,
+        keys: sdkB.keys,
+        key: localDrive.key
+      })
+      await remoteDrive.ready()
+      swarmB.join(localDrive.discoveryKey)
+      const done = remoteDrive.findingPeers()
+      swarmB.flush().then(done, done)
+      await remoteDrive.update()
+
+      const remoteContent = await remoteDrive.read('/profile.json')
+
+      expect(remoteContent).to.eql(null)
+
+      sdkA.close()
+      sdkB.close()
+      swarmA.destroy()
+      swarmB.destroy()
     })
-    await remoteDrive.ready()
-
-    const remoteContent = await remoteDrive.read('/profile.json')
-
-    expect(remoteContent).to.eql(null)
-
-    sdkA.close()
-    sdkB.close()
-    swarmA.destroy()
-    swarmB.destroy()
   })
 })
