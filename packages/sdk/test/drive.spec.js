@@ -213,4 +213,110 @@ describe('drive', () => {
       swarmB.destroy()
     })
   })
+
+  describe('exists', () => {
+    it('should return a boolean for the existence of a public file', async () => {
+      const sdkA = await sdk()
+
+      const driveA = new SlashDrive({
+        keyPair: sdkA.generateKeyPair('foo'),
+        store: sdkA.store,
+        keys: sdkA.keys
+      })
+      await driveA.ready()
+      await driveA.write('/foo', b4a.from('bar'))
+
+      expect(await driveA.exists('/foo')).to.eql(true)
+      expect(await driveA.exists('/bar')).to.eql(false)
+
+      sdkA.close()
+    })
+
+    it('should return a boolean for the existence of a public directory', async () => {
+      const sdkA = await sdk()
+
+      const driveA = new SlashDrive({
+        keyPair: sdkA.generateKeyPair('foo'),
+        store: sdkA.store,
+        keys: sdkA.keys
+      })
+      await driveA.ready()
+      await driveA.write('/foo/bar.txt', b4a.from('bar'))
+
+      expect(await driveA.exists('/foo/')).to.eql(true)
+      expect(await driveA.exists('/foo/bar/')).to.eql(false)
+
+      sdkA.close()
+    })
+  })
+
+  describe('ls', () => {
+    it('should throw an error for non directory path', async () => {
+      const sdkA = await sdk()
+
+      const driveA = new SlashDrive({
+        keyPair: sdkA.generateKeyPair('foo'),
+        store: sdkA.store,
+        keys: sdkA.keys
+      })
+      await driveA.ready()
+
+      let err
+
+      try {
+        await driveA.ls('/foo')
+      } catch (error) {
+        err = error
+      }
+
+      expect(err.message).to.eql('Can not list a file')
+
+      sdkA.close()
+    })
+
+    it('should throw an error for non existent path', async () => {
+      const sdkA = await sdk()
+
+      const driveA = new SlashDrive({
+        keyPair: sdkA.generateKeyPair('foo'),
+        store: sdkA.store,
+        keys: sdkA.keys
+      })
+      await driveA.ready()
+
+      let err
+
+      try {
+        await driveA.ls('/foo/')
+      } catch (error) {
+        err = error
+      }
+
+      expect(err.message).to.eql('Directory does not exist')
+
+      sdkA.close()
+    })
+
+    it('should list the content of a directory', async () => {
+      const sdkA = await sdk()
+
+      const driveA = new SlashDrive({
+        keyPair: sdkA.generateKeyPair('foo'),
+        store: sdkA.store,
+        keys: sdkA.keys
+      })
+      await driveA.ready()
+
+      await driveA.write('/foo.txt', b4a.from('bar'))
+      await driveA.write('/foo/bar.txt', b4a.from('bar'))
+      await driveA.write('/foo/bar/zar.txt', b4a.from('bar'))
+      await driveA.write('/foo/bara/zar.txt', b4a.from('bar'))
+
+      expect(await driveA.ls('/')).to.eql(['foo.txt', 'foo/'])
+      expect(await driveA.ls('/foo/')).to.eql(['bar.txt', 'bar/', 'bara/'])
+      expect(await driveA.ls('/foo/bar/')).to.eql(['zar.txt'])
+
+      sdkA.close()
+    })
+  })
 })

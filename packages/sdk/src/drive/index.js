@@ -95,8 +95,53 @@ export class SlashDrive {
 
     return blob
   }
+
+  async exists (path) {
+    path = fixPath(path)
+    let block
+    if (isDirectory(path)) {
+      block = await this.metadata.peek({ gte: path })
+    } else {
+      block = await this.metadata.get(path)
+    }
+    return Boolean(block)
+    // TODO: handle private paths
+  }
+
+  async ls (path) {
+    if (!isDirectory(path)) throw new Error('Can not list a file')
+    if (!(await this.exists(path))) throw new Error('Directory does not exist')
+    const prefix = fixPath(path)
+
+    const ite = this.metadata.createRangeIterator({
+      gte: prefix,
+      // TODO: works for ASCII, handle UTF-8
+      lt: prefix + '~'
+    })
+
+    await ite.open()
+    let next = await ite.next()
+
+    const paths = []
+
+    while (next) {
+      const key = b4a.toString(next.key)
+      const withoutPrefix = key.slice(prefix.length)
+      const withoutTrailingPath = withoutPrefix.replace(/\/.+/, '/')
+      if (paths[paths.length - 1] !== withoutTrailingPath) {
+        paths.push(withoutTrailingPath)
+      }
+      next = await ite.next()
+    }
+
+    return paths
+  }
 }
 
 function fixPath (path) {
   return path.replace(/^\//, '')
+}
+
+function isDirectory (path) {
+  return path.length === 0 || path.endsWith('/')
 }
