@@ -66,8 +66,8 @@ export class SDK {
     for (const slashtag of this.slashtags.values()) {
       await slashtag.close()
     }
-
-    this.dht.destroy()
+    await this.store.close()
+    await this.dht.destroy()
   }
 
   static formatURL (key) {
