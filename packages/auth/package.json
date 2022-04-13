@@ -1,6 +1,6 @@
 {
   "name": "@synonymdev/slashtags-auth",
-  "version": "0.4.0-alpha.2",
+  "version": "0.4.0-alpha.3",
   "description": "Authorization using slashtags",
   "type": "module",
   "keywords": [],
@@ -55,7 +55,7 @@
     }
   },
   "dependencies": {
-    "compact-encoding": "^2.6.1",
-    "@synonymdev/slashtags-sdk": "~0.1.0"
+    "@synonymdev/slashtags-sdk": "~0.1.0-alpha.3",
+    "compact-encoding": "^2.6.1"
   }
 }
