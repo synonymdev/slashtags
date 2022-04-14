@@ -101,6 +101,27 @@ describe('drive', () => {
     swarmB.destroy()
   })
 
+  it('should create an encrypted drive', async () => {
+    const sdkA = await sdk()
+
+    const encryptionKey = sdkA.generateKeyPair('bar').secretKey
+
+    const drive = new SlashDrive({
+      keyPair: sdkA.generateKeyPair('foo'),
+      store: sdkA.store,
+      keys: sdkA.keys,
+      encryptionKey
+    })
+    await drive.ready()
+
+    await drive.write('/foo', b4a.from('bar'))
+
+    expect(drive.metadata.feed.encryptionKey).to.eql(encryptionKey)
+    expect(drive.content.feed.encryptionKey).to.eql(encryptionKey)
+
+    sdkA.close()
+  })
+
   describe('read and write', async () => {
     it('should write and read a public file', async () => {
       const sdkA = await sdk()

@@ -7,7 +7,7 @@ import Debug from 'debug'
 
 const debug = Debug('slashtags:slashdrive')
 
-const VERSION = '0.1.0-alpha.2'
+const VERSION = '0.1.0-alpha.4'
 
 const HeaderKeys = {
   content: 'c',
@@ -16,7 +16,7 @@ const HeaderKeys = {
 
 const SubPrefixes = {
   headers: 'h',
-  metadata: '/'
+  paths: '/'
 }
 
 export class SlashDrive {
@@ -38,7 +38,7 @@ export class SlashDrive {
     this.writable = metadataCore.writable
 
     this.db = new Hyperbee(metadataCore)
-    this.metadata = this.db.sub(SubPrefixes.metadata)
+    this.metadata = this.db.sub(SubPrefixes.paths)
     this.headers = this.db.sub(SubPrefixes.headers)
 
     this.discoveryKey = metadataCore.key
@@ -51,7 +51,10 @@ export class SlashDrive {
     let contentCore
     if (this.writable) {
       const contentKeyPair = this.keys.generateKeyPair('content')
-      contentCore = await this.store.get({ keyPair: contentKeyPair })
+      contentCore = await this.store.get({
+        ...this.opts,
+        keyPair: contentKeyPair
+      })
       await contentCore.ready()
 
       if (!(await this.headers.get(HeaderKeys.content))) {
@@ -77,7 +80,7 @@ export class SlashDrive {
 
     const pointer = await this.content.put(content)
     await this.metadata.put(
-      fixPath(path),
+      removeRoot(path),
       c.encode(FileMetadata, { content: pointer })
     )
   }
@@ -85,7 +88,7 @@ export class SlashDrive {
   async read (path) {
     if (!this.content) await this._setupContent()
 
-    path = fixPath(path)
+    path = removeRoot(path)
     const block = await this.metadata.get(path)
     if (!block) return null
 
@@ -97,7 +100,9 @@ export class SlashDrive {
   }
 
   async exists (path) {
-    path = fixPath(path)
+    if (isRootDir(path)) return true
+    path = removeRoot(path)
+
     let block
     if (isDirectory(path)) {
       block = await this.metadata.peek({ gte: path })
@@ -111,7 +116,7 @@ export class SlashDrive {
   async ls (path) {
     if (!isDirectory(path)) throw new Error('Can not list a file')
     if (!(await this.exists(path))) throw new Error('Directory does not exist')
-    const prefix = fixPath(path)
+    const prefix = removeRoot(path)
 
     const ite = this.metadata.createRangeIterator({
       gte: prefix,
@@ -127,9 +132,9 @@ export class SlashDrive {
     while (next) {
       const key = b4a.toString(next.key)
       const withoutPrefix = key.slice(prefix.length)
-      const withoutTrailingPath = withoutPrefix.replace(/\/.+/, '/')
-      if (paths[paths.length - 1] !== withoutTrailingPath) {
-        paths.push(withoutTrailingPath)
+      const path = removeTrailingPath(withoutPrefix)
+      if (paths[paths.length - 1] !== path) {
+        paths.push(path)
       }
       next = await ite.next()
     }
@@ -138,10 +143,28 @@ export class SlashDrive {
   }
 }
 
-function fixPath (path) {
-  return path.replace(/^\//, '')
+function removeRoot (path) {
+  const directory = isDirectory(path)
+  const parts = pathParts(path)
+  if (parts.length === 0) return ''
+  return parts.join('/') + (directory ? '/' : '')
 }
 
 function isDirectory (path) {
-  return path.length === 0 || path.endsWith('/')
+  return path.endsWith('/')
+}
+
+function isRootDir (path) {
+  return path === '/'
+}
+
+function pathParts (path) {
+  return path.split('/').filter(Boolean)
+}
+
+function removeTrailingPath (path) {
+  const parts = pathParts(path)
+  if (parts.length === 0) return ''
+  const first = parts[0]
+  return parts.length > 1 ? first + '/' : first
 }
