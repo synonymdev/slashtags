@@ -1,6 +1,6 @@
 {
   "name": "@synonymdev/slashtags-sdk",
-  "version": "0.1.0-alpha.4",
+  "version": "0.1.0-alpha.5",
   "description": "slashtags development kit",
   "type": "module",
   "keywords": [],
@@ -46,8 +46,7 @@
   "devDependencies": {
     "@hyperswarm/testnet": "^1.1.0",
     "@types/debug": "^4.1.7",
-    "aegir": "^36.2.3",
-    "debug": "^4.3.4"
+    "aegir": "^36.2.3"
   },
   "eslintConfig": {
     "env": {
@@ -63,6 +62,7 @@
     "compact-encoding": "^2.6.1",
     "compact-encoding-struct": "^1.2.1",
     "corestore": "^6.0.1-alpha.13",
+    "debug": "^4.3.4",
     "dht-universal": "^0.4.1",
     "graceful-goodbye": "^1.0.0",
     "hi-base32": "^0.5.1",
