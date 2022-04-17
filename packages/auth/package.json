@@ -1,6 +1,6 @@
 {
   "name": "@synonymdev/slashtags-auth",
-  "version": "0.4.0-alpha.3",
+  "version": "0.4.0-alpha.4",
   "description": "Authorization using slashtags",
   "type": "module",
   "keywords": [],
@@ -41,9 +41,7 @@
   },
   "devDependencies": {
     "@hyperswarm/testnet": "^1.1.0",
-    "@types/debug": "^4.1.7",
     "aegir": "^36.2.3",
-    "debug": "^4.3.4",
     "dht-universal": "^0.4.1"
   },
   "eslintConfig": {
@@ -55,7 +53,7 @@
     }
   },
   "dependencies": {
-    "@synonymdev/slashtags-sdk": "~0.1.0-alpha.3",
+    "@synonymdev/slashtags-sdk": "^0.1.0-alpha.6",
     "compact-encoding": "^2.6.1"
   }
 }

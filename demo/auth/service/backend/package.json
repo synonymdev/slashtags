@@ -4,7 +4,11 @@
     "dev": "DEBUG=slashtags* nodemon src/index.js"
   },
   "type": "module",
-  "devDependencies": {
+  "engines": {
+    "node": "14.x"
+  },
+  "dependencies": {
+    "simple-jsonrpc-js": "^1.2.0",
     "debug": "^4.3.4",
     "dotenv": "^16.0.0",
     "fastify": "^3.25.3",
@@ -12,8 +16,5 @@
     "jsonrpc-lite": "^2.2.0",
     "nodemon": "^2.0.14",
     "ws": "^8.2.3"
-  },
-  "engines": {
-    "node": "14.x"
   }
 }

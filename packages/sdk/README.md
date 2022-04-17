@@ -70,15 +70,7 @@ Emitted whenever the swarm connects to a new peer.
 
 Adds a [Protomux](https://github.com/mafintosh/protomux/) channel to incoming and outgoing connection.
 
-`Protocol` a Class constructor that includes `Protocol.options` that conforms to the [Protomux](https://github.com/mafintosh/protomux/) `createChannel(opts)` options.
+`Protocol` a Class constructor that extends `SlashtagProtocol`, and it should at least implement the following methods:
 
-Returns an instance of `Protocol` for the `slashtag` it is registered on.
-
-Once registered, a [Protomux](https://github.com/mafintosh/protomux/)'s channel can be accessed on every connection using `SDK.getChannel(connection, 'my-protocol')`.
-
-_NOTE_: channels are also decorated with the `peerInfo`, including the remote peer's Slashtag at `peerInfo.slashtag`.
-
-#### `const channel = SDK.getChannel(connection, protocol)`
-
-`connection` is any connection created using a Slashtag
-`protocol` is the name of the registered protocol
+- `static get protocol()`
+- `get messages()` that conforms to the messages option in [`Protomux`](https://github.com/mafintosh/protomux/)'s `createChannel(opts)`.

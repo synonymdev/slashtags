@@ -2,8 +2,7 @@ import b4a from 'b4a'
 import EventEmitter from 'events'
 import Hyperswarm from 'hyperswarm'
 import { SlashDrive } from './drive/index.js'
-import { SDK } from './index.js'
-import Hypercore from 'hypercore'
+import { formatURL } from './url.js'
 import Debug from 'debug'
 
 const debug = Debug('slashtags:slashtag')
@@ -28,7 +27,7 @@ export class Slashtag extends EventEmitter {
       throw new Error('Missing keyPair or key')
     }
 
-    this.url = SDK.formatURL(this.key)
+    this.url = formatURL(this.key)
 
     this.swarm = new Hyperswarm({ dht: this.sdk.dht, keyPair })
 
@@ -59,6 +58,10 @@ export class Slashtag extends EventEmitter {
     }
 
     if (this) this._ready = true
+  }
+
+  close () {
+    return this.swarm.destroy()
   }
 
   async listen () {
@@ -95,33 +98,23 @@ export class Slashtag extends EventEmitter {
       )
     })
 
-    this._setupProtocols(socket, peerInfo)
-
-    debug('got connection, isInitiator:', socket.isInitiator)
-
     peerInfo.slashtag = this.sdk.slashtag({ key: peerInfo.publicKey })
 
+    this._setupProtocols(socket, peerInfo)
     this.emit('connection', socket, peerInfo)
   }
 
   _setupProtocols (socket, peerInfo) {
     for (const protocol of this.protocols.values()) {
-      const mux = Hypercore.getProtocolMuxer(socket)
-      const channel = mux.createChannel(protocol.options)
-      if (!channel) return
-
-      channel.peerInfo = peerInfo
-      channel.open()
+      protocol.createChannel(socket, peerInfo)
     }
   }
 
-  close () {
-    return this.swarm.destroy()
-  }
-
   registerProtocol (Protocol) {
-    const protocol = new Protocol(this)
-    this.protocols.set(protocol.options.protocol, protocol)
+    let protocol = this.protocols.get(Protocol.protocol)
+    if (protocol) return protocol
+    protocol = new Protocol({ slashtag: this })
+    this.protocols.set(Protocol.protocol, protocol)
     return protocol
   }
 

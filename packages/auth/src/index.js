@@ -1,32 +1,29 @@
 import c from 'compact-encoding'
-import { EventEmitter } from 'events'
-import { SDK } from '@synonymdev/slashtags-sdk'
+import { SlashtagProtocol, urlUtil } from '@synonymdev/slashtags-sdk'
 
-export class SlashAuth extends EventEmitter {
-  constructor (slashtag) {
-    super()
-    this.slashtag = slashtag
+export class SlashAuth extends SlashtagProtocol {
+  static get protocol () {
+    return 'slashauth:alpha'
+  }
 
-    this.options = {
-      protocol: 'slashauth:alpha',
-      messages: [
-        {
-          // Request
-          encoding: c.string,
-          onmessage: this._onRequest.bind(this)
-        },
-        {
-          // Success
-          encoding: c.bool,
-          onmessage: this._onSuccess.bind(this)
-        },
-        {
-          // Response
-          encoding: c.string,
-          onmessage: this._onError.bind(this)
-        }
-      ]
-    }
+  get messages () {
+    return [
+      {
+        // Request
+        encoding: c.string,
+        onmessage: this._onRequest.bind(this)
+      },
+      {
+        // Success
+        encoding: c.bool,
+        onmessage: this._onSuccess.bind(this)
+      },
+      {
+        // Response
+        encoding: c.string,
+        onmessage: this._onError.bind(this)
+      }
+    ]
   }
 
   _onRequest (message, channel) {
@@ -57,17 +54,12 @@ export class SlashAuth extends EventEmitter {
     this.emit('error', error)
   }
 
-  listen () {
-    return this.slashtag.listen()
-  }
-
   async request (url) {
-    const parsed = SDK.parseURL(url)
+    const parsed = urlUtil.parseURL(url)
     const q = parsed.query.get('q')
 
-    const connection = await this.slashtag.connect(parsed.key)
+    const { channel } = await this.connect(parsed.key)
 
-    const channel = SDK.getChannel(connection, this.options.protocol)
     channel.messages[0].send(q)
   }
 

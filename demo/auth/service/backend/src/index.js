@@ -1,11 +1,11 @@
 import websocket from 'isomorphic-ws';
 import { serverProfile } from './profile.js';
 import jrpcLite from 'jsonrpc-lite';
-import { randomBytes } from 'crypto';
 import { SDK } from '../../../../../packages/sdk/src/index.js';
 import { fastify } from 'fastify';
 import Dotenv from 'dotenv';
 import Debug from 'debug';
+import JsonRPC from 'simple-jsonrpc-js';
 import { SlashAuth } from '../../../../../packages/auth/src/index.js';
 
 const debug = Debug('slashtags:demo:auth:server');
@@ -57,7 +57,7 @@ async function setupSlashtagsAuth() {
     }
   });
 
-  auth.listen();
+  slashtag.listen();
 }
 
 const sessions = new Map();
@@ -82,25 +82,24 @@ function webServer() {
   const wss = new websocket.Server({ host: hostanme, port: PORT + 2 });
 
   wss.on('connection', (socket) => {
-    const sessionID = randomBytes(8).toString('base64');
-    sessions.set(sessionID, socket);
+    const jrpc = new JsonRPC();
 
-    wss.on('close', () => {
-      sessions.delete(sessionID);
+    socket.onmessage = (event) => jrpc.messageHandler(event.data);
+    jrpc.toStream = (msg) => socket.send(msg);
+
+    jrpc.on('clientID', ['clientID'], (clientID) => {
+      const existing = sessions.get(clientID);
+      existing?.close();
+
+      sessions.set(clientID, socket);
+      debug('Client connected: ', clientID);
+      debug('Sessions: ', sessions.size);
+
+      jrpc.notification('slashauthUrl', {
+        url:
+          slashtag.url.replace('slash://', 'slashauth://') + '?q=' + clientID,
+      });
     });
-
-    debug('Client connected: ', sessionID);
-
-    socket.send(
-      jrpcLite
-        .notification('slashauthUrl', {
-          url:
-            slashtag.url.replace('slash://', 'slashauth://') +
-            '?q=' +
-            sessionID,
-        })
-        .serialize(),
-    );
   });
 
   debug(`Server is now listenng on port ${PORT + 2}`);

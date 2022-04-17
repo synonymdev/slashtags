@@ -46,7 +46,7 @@ describe('SlashAuth', () => {
       })
     })
 
-    await auth.listen()
+    await serverSlashtag.listen()
 
     // Wallet side
 
@@ -95,7 +95,7 @@ describe('SlashAuth', () => {
       response.error(new Error(ServerErrorMessage))
     })
 
-    await auth.listen()
+    await serverSlashtag.listen()
 
     // Wallet side
 

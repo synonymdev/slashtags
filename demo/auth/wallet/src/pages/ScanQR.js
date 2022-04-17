@@ -56,11 +56,11 @@ export const ScanQRPage = () => {
     switch (parsed.protocol) {
       case 'slashauth':
         const auth = await state.auth;
-        auth.on('error', (error) => {
+        auth.once('error', (error) => {
           alert(error);
         });
 
-        auth.on('success', () => {
+        auth.once('success', () => {
           dispatch({ type: types.ADD_ACCOUNT, account: { profile } });
         });
         return;

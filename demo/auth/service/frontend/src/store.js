@@ -7,6 +7,12 @@ const socketURL =
     : 'wss://slashtags.herokuapp.com';
 
 let rpc;
+let clientID = localStorage.getItem('clientID');
+
+if (!clientID) {
+  clientID = Math.random().toString(36).slice(2);
+  localStorage.setItem('clientID', clientID);
+}
 
 export const RPC = () => {
   if (rpc) return rpc;
@@ -26,6 +32,8 @@ export const RPC = () => {
 
 export const setupRPC = async (dispatch) => {
   const jrpc = await RPC();
+
+  jrpc.call('clientID', { clientID });
 
   jrpc.on('userAuthenticated', ['user'], (user) => {
     console.log('UserAuthenticated: ', user);

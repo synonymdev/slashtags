@@ -37,11 +37,11 @@ await serverSlashtag.ready();
 // Get the server's profile
 const profile = await serverSlashtag.getProfile();
 
-auth.on('error', (error) => {
+auth.once('error', (error) => {
   // Error
 });
 
-auth.on('success', () => {
+auth.once('success', () => {
   // Success
 });
 
@@ -89,7 +89,7 @@ auth.on('request', async (request, response) => {
 });
 
 // Listen on the Slashtag.key
-await auth.listen();
+await slashtag.listen();
 
 function authorize(token, remoteProfile) {
   // Check the token against server's sessions, clientIDs, etc.

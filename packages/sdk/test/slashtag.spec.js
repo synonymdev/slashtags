@@ -1,8 +1,6 @@
 import { expect } from 'aegir/utils/chai.js'
 import { SDK } from '../src/sdk.js'
 import b4a from 'b4a'
-import c from 'compact-encoding'
-import { EventEmitter } from 'events'
 
 const { RELAY_URL, BOOTSTRAP } = process.env
 const bootstrap = JSON.parse(BOOTSTRAP)
@@ -101,118 +99,6 @@ describe('slashtag', () => {
 
       sdkA.close()
       sdkB.close()
-    })
-  })
-
-  describe('protocols', () => {
-    it('should register and multiplex multiple protocol over the same connection', async () => {
-      class Foo extends EventEmitter {
-        constructor (slashtag) {
-          super()
-          this.slashtag = slashtag
-          const self = this
-          this.options = {
-            protocol: 'foo',
-            messages: [
-              {
-                encoding: c.string,
-                onmessage (message) {
-                  self.emit('message', message)
-                }
-              }
-            ]
-          }
-        }
-
-        listen () {
-          return this.slashtag.listen()
-        }
-
-        async request (publicKey) {
-          const connection = await this.slashtag.connect(publicKey)
-          const channel = SDK.getChannel(connection, this.options.protocol)
-          channel.messages[0].send('foo')
-        }
-      }
-
-      class Bar extends EventEmitter {
-        constructor (slashtag) {
-          super()
-          this.slashtag = slashtag
-          const self = this
-          this.options = {
-            protocol: 'bar',
-            messages: [
-              {
-                encoding: c.string,
-                onmessage (message) {
-                  self.emit('message', message)
-                }
-              }
-            ]
-          }
-        }
-
-        listen () {
-          return this.slashtag.listen()
-        }
-
-        async request (publicKey) {
-          const connection = await this.slashtag.connect(publicKey)
-          const channel = SDK.getChannel(connection, this.options.protocol)
-          channel.messages[0].send('bar')
-        }
-      }
-
-      const sdkA = await sdk()
-      const alice = sdkA.slashtag({ name: 'alice' })
-      const AliceFoo = alice.registerProtocol(Foo)
-      const AliceBar = alice.registerProtocol(Bar)
-
-      await AliceFoo.listen()
-      await AliceBar.listen()
-
-      const ping = new Promise((resolve) => {
-        alice.on('connection', (conn) => {
-          conn.on('data', (data) => {
-            data = b4a.toString(data)
-            if (data === 'ping') resolve(data)
-          })
-        })
-      })
-
-      // ===
-
-      const sdkB = await sdk()
-      const bob = sdkB.slashtag({ name: 'bob' })
-
-      const BobFoo = bob.registerProtocol(Foo)
-      const BobBar = bob.registerProtocol(Bar)
-
-      const foo = new Promise((resolve) => AliceFoo.on('message', resolve))
-      const bar = new Promise((resolve) => AliceBar.on('message', resolve))
-
-      const connection = bob.connect(alice.key)
-
-      const interval = setInterval(async () => {
-        (await connection).write(b4a.from('ping'))
-      }, 10)
-
-      BobFoo.request(alice.key)
-      BobBar.request(alice.key)
-      expect(await foo).to.eql('foo')
-      expect(await bar).to.eql('bar')
-      expect(await ping).to.eql('ping')
-
-      sdkA.close()
-      sdkB.close()
-      clearInterval(interval)
-
-      await new Promise((resolve) =>
-        setTimeout(() => {
-          resolve()
-        }, 5)
-      )
     })
   })
 
