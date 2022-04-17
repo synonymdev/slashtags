@@ -20,7 +20,7 @@ This is pre-alpha software. Please use at your own risk. Expect breaking changes
 
 Currently the best way to familiarize yourself with existing features is to try these [Demos](./demo/README.md).
 
-If you rather see it in action before diving into the code, try the [Slashtags wallet demo](slash-wallet.netlify.app) that is already built and deployed.
+If you rather see it in action before diving into the code, try the [Slashtags wallet demo](https://slashtags.netlify.app) that is already built and deployed.
 
 ### Development
 
