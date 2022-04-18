@@ -4,7 +4,7 @@ import { StoreContext, types } from '../store';
 import { Sheet } from '../components/Sheet';
 import { Card } from '../components/Card';
 
-import { SDK } from '../../../../../packages/sdk/src';
+import { SDK, urlUtil } from '../../../../../packages/sdk/src';
 
 export const ScanQRPage = () => {
   const { state, dispatch } = useContext(StoreContext);
@@ -33,7 +33,7 @@ export const ScanQRPage = () => {
 
     let parsed;
     try {
-      parsed = SDK.parseURL(clipboard);
+      parsed = urlUtil.parseURL(clipboard);
       setURL(clipboard);
     } catch (error) {
       alert(`"${clipboard}" is not a valid URL`);
@@ -81,7 +81,7 @@ export const ScanQRPage = () => {
       </p>
       <Sheet isVisible={isVisible}>
         {(() => {
-          switch (url && SDK.parseURL(url).protocol) {
+          switch (url && urlUtil.parseURL(url).protocol) {
             case 'slashauth':
               return (
                 <div className="login-modal">

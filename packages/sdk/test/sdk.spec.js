@@ -44,17 +44,57 @@ describe('SDK', () => {
   })
 
   describe('slashtags', () => {
+    it('should throw an error if no key or url was given', async () => {
+      const sdkA = await sdk()
+
+      let err
+      try {
+        sdkA.slashtag({})
+      } catch (error) {
+        err = error
+      }
+
+      expect(err.message).to.eql('Missing keyPair, key or url')
+
+      sdkA.close()
+    })
+
+    it('should not create a new instance of an already opened slashtag', async () => {
+      const sdkA = await sdk()
+
+      const alice = sdkA.slashtag({ name: 'alice' })
+      await alice.ready()
+
+      const aliceAgain = sdkA.slashtag({ name: 'alice' })
+      expect(aliceAgain).to.eql(alice)
+
+      sdkA.close()
+    })
+
+    it('should remove the slashtag on close', async () => {
+      const sdkA = await sdk()
+
+      const alice = sdkA.slashtag({ name: 'alice' })
+      await alice.ready()
+
+      expect(sdkA.slashtags.get(alice.key)).to.eql(alice)
+
+      await alice.close()
+
+      setTimeout(() => {
+        expect(sdkA.slashtags.get(alice.key)).to.be.undefined()
+      }, 1)
+
+      return sdkA.close()
+    })
+
     it('should create slashtag and close it on sdk.close()', async () => {
       const sdkA = await sdk()
 
       const alice = sdkA.slashtag({ name: 'alice' })
       const bob = sdkA.slashtag({ name: 'bob' })
 
-      const keys = []
-
-      for (const key of sdkA.slashtags.keys()) {
-        keys.push(b4a.toString(key))
-      }
+      const keys = [...sdkA.slashtags.keys()].map((key) => b4a.toString(key))
 
       expect(keys.length).to.eql(2)
       expect(keys.includes(b4a.toString(alice.key))).to.be.true()
@@ -70,11 +110,7 @@ describe('SDK', () => {
       sdkA.slashtag({ name: 'alice' })
       sdkA.slashtag({ name: 'alice' })
 
-      const keys = []
-
-      for (const key of sdkA.slashtags.keys()) {
-        keys.push(b4a.toString(key))
-      }
+      const keys = [...sdkA.slashtags.keys()].map((key) => b4a.toString(key))
 
       expect(keys.length).to.eql(1)
       expect(keys.includes(b4a.toString(alice.key))).to.be.true()

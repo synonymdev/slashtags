@@ -7,7 +7,7 @@ import HashMap from 'turbo-hash-map'
 import { KeyManager } from './keys.js'
 import { Slashtag } from './slashtag.js'
 import { storage } from './storage.js'
-import { formatURL, parseURL } from './url.js'
+import { parseURL } from './url.js'
 
 export class SDK {
   constructor (opts) {
@@ -46,31 +46,28 @@ export class SDK {
     const key =
       opts.key || keyPair?.publicKey || (opts.url && parseURL(opts.url).key)
 
-    if (!key) {
-      throw new Error('Missing keyPair, key or url')
-    }
+    if (!key) throw new Error('Missing keyPair, key or url')
 
     let slashtag = this.slashtags.get(key)
     if (slashtag) return slashtag
 
     slashtag = new Slashtag({ ...opts, sdk: this, keyPair, key })
     this.slashtags.set(slashtag.key, slashtag)
+
+    slashtag.on('close', () => {
+      if (!this.closed) this.slashtags.delete(slashtag.key)
+    })
+
     return slashtag
   }
 
   async close () {
+    if (this.closed) return
+    this.closed = true
     for (const slashtag of this.slashtags.values()) {
       await slashtag.close()
     }
     await this.store.close()
     await this.dht.destroy()
-  }
-
-  static formatURL (key) {
-    return formatURL(key)
-  }
-
-  static parseURL (url) {
-    return parseURL(url)
   }
 }

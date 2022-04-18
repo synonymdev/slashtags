@@ -3,7 +3,7 @@ import blake2b from 'blake2b-universal'
 import b4a from 'b4a'
 
 const DEFAULT_NAMESPACE = b4a.alloc(0)
-const PREFIX = b4a.from('@slashtags/key-manager')
+const PREFIX = b4a.from('slashtags')
 
 export class KeyManager {
   /**

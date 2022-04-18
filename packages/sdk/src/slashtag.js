@@ -60,8 +60,9 @@ export class Slashtag extends EventEmitter {
     if (this) this._ready = true
   }
 
-  close () {
-    return this.swarm.destroy()
+  async close () {
+    await this.swarm.destroy()
+    this.emit('close')
   }
 
   async listen () {
