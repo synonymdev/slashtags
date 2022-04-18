@@ -1,20 +1,8 @@
 import { expect } from 'aegir/utils/chai.js'
 import { SlashDrive } from '../src/drive/index.js'
-import { SDK } from '../src/sdk.js'
 import b4a from 'b4a'
 import Hyperswarm from 'hyperswarm'
-
-const { RELAY_URL, BOOTSTRAP } = process.env
-const bootstrap = JSON.parse(BOOTSTRAP)
-
-function sdk (opts) {
-  return SDK.init({
-    bootstrap,
-    relays: [RELAY_URL],
-    persistent: false,
-    ...opts
-  })
-}
+import { sdk } from './helpers/setup-sdk.js'
 
 describe('drive', () => {
   it('should namespace additional Hypercores core with the drive key', async () => {

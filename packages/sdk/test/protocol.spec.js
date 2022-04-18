@@ -1,14 +1,9 @@
 import { expect } from 'aegir/utils/chai.js'
-import { SDK, SlashtagProtocol } from '../src/index.js'
+import { SlashtagProtocol } from '../src/index.js'
 import b4a from 'b4a'
 import c from 'compact-encoding'
 
-const { RELAY_URL, BOOTSTRAP } = process.env
-const bootstrap = JSON.parse(BOOTSTRAP)
-
-function sdk (opts = {}) {
-  return SDK.init({ bootstrap, relays: [RELAY_URL], persistent: false })
-}
+import { sdk } from './helpers/setup-sdk.js'
 
 class Foo extends SlashtagProtocol {
   static get protocol () {

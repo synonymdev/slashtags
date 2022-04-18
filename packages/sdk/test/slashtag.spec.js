@@ -1,13 +1,6 @@
 import { expect } from 'aegir/utils/chai.js'
-import { SDK } from '../src/sdk.js'
+import { sdk } from './helpers/setup-sdk.js'
 import b4a from 'b4a'
-
-const { RELAY_URL, BOOTSTRAP } = process.env
-const bootstrap = JSON.parse(BOOTSTRAP)
-
-function sdk (opts = {}) {
-  return SDK.init({ bootstrap, relays: [RELAY_URL], persistent: false })
-}
 
 describe('slashtag', () => {
   describe('connection', () => {
@@ -106,40 +99,31 @@ describe('slashtag', () => {
     it('should create a slashtag instance with a writable drive', async () => {
       const sdkA = await sdk()
 
-      const slashtag = sdkA.slashtag({
-        name: 'drive for bob',
-        sdk: sdkA
-      })
+      const slashtag = sdkA.slashtag({ name: 'drive for bob' })
       await slashtag.ready()
 
       expect(slashtag.key.length).to.eql(32)
-      expect(slashtag.key).to.eql(slashtag.drive.key)
+      expect(slashtag.key).to.eql(slashtag.publicDrive.key)
 
       sdkA.close()
     })
 
     it('should create a remote read-only slashtag from a url', async () => {
       const sdkA = await sdk()
-      const slashtag = sdkA.slashtag({
-        name: 'drive for bob',
-        sdk: sdkA
-      })
-      await slashtag.ready()
+      const alice = sdkA.slashtag({ name: 'alice' })
+      await alice.ready()
 
       const content = b4a.from('hello world')
-      await slashtag.drive.write('/foo.txt', content)
+      await alice.publicDrive.write('/foo.txt', content)
 
       const sdkB = await sdk()
-      const clone = sdkB.slashtag({
-        url: slashtag.url,
-        sdk: sdkB
-      })
-      await clone.ready()
+      const remoteAlice = sdkB.slashtag({ url: alice.url })
+      await remoteAlice.ready()
 
-      expect(clone.key).to.eql(slashtag.key)
-      expect(clone.remote).to.eql(true)
+      expect(remoteAlice.key).to.eql(remoteAlice.key)
+      expect(remoteAlice.remote).to.eql(true)
 
-      const read = await clone.drive.read('/foo.txt')
+      const read = await remoteAlice.publicDrive.read('/foo.txt')
       expect(read).to.eql(content)
 
       sdkA.close()

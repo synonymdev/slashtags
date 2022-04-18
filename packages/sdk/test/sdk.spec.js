@@ -1,13 +1,6 @@
 import { expect } from 'aegir/utils/chai.js'
-import { SDK } from '../src/sdk.js'
+import { sdk } from './helpers/setup-sdk.js'
 import b4a from 'b4a'
-
-const { RELAY_URL, BOOTSTRAP } = process.env
-const bootstrap = JSON.parse(BOOTSTRAP)
-
-function sdk () {
-  return SDK.init({ bootstrap, relays: [RELAY_URL], persistent: false })
-}
 
 describe('SDK', () => {
   describe('keys', () => {
