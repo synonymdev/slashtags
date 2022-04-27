@@ -4,33 +4,20 @@ import b4a from 'b4a'
 
 describe('SDK', () => {
   describe('keys', () => {
-    it('should generate keyPair from a name', async () => {
-      const sdkA = await sdk()
-
-      const keyPair = sdkA.keys.generateKeyPair('foo')
-
-      expect(keyPair.publicKey.length).to.equal(32)
-      expect(keyPair.secretKey.length).to.equal(64)
-
-      sdkA.close()
-    })
-
-    it('should generate a keypair with a custom KeyManager', async () => {
-      const sdkA = await sdk()
-
-      const keyPair = sdkA.keys.generateKeyPair('foo')
+    it('should generate slashtag keyPair from a primaryKey and a name', async () => {
+      const primaryKey = b4a.from('a'.repeat(32), 'hex')
+      const sdkA = await sdk({ primaryKey })
+      const keyPair = sdkA.createKeyPair('foo')
 
       expect(keyPair.publicKey.length).to.equal(32)
       expect(keyPair.secretKey.length).to.equal(64)
 
-      const namespacedKeys = sdkA.keys.namespace('namespaced')
-      const namespacedKeyPair = namespacedKeys.generateKeyPair('foo')
-
-      expect(namespacedKeyPair.publicKey.length).to.equal(32)
-      expect(namespacedKeyPair.secretKey.length).to.equal(64)
-
-      expect(namespacedKeyPair.publicKey).to.not.eql(keyPair.publicKey)
-      expect(namespacedKeyPair.secretKey).to.not.eql(keyPair.publicKey)
+      expect(keyPair.publicKey).to.eql(
+        b4a.from(
+          'b478b4e8f3ee07558e7756d421a3d2584b9cae2ec6bec09225138ed45f411916',
+          'hex'
+        )
+      )
 
       sdkA.close()
     })
@@ -47,7 +34,7 @@ describe('SDK', () => {
         err = error
       }
 
-      expect(err.message).to.eql('Missing keyPair, key or url')
+      expect(err.message).to.eql('Missing keyPair or key')
 
       sdkA.close()
     })

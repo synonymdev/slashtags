@@ -4,7 +4,7 @@ import RAM from 'random-access-memory'
 import goodbye from 'graceful-goodbye'
 import HashMap from 'turbo-hash-map'
 
-import { KeyManager } from './keys.js'
+import { createKeyPair, randomBytes } from './crypto.js'
 import { Slashtag } from './slashtag.js'
 import { storage } from './storage.js'
 import { parseURL } from './url.js'
@@ -13,8 +13,9 @@ export class SDK {
   constructor (opts) {
     this.storage = opts.persistent === false ? RAM : storage(opts.storage)
     this.store = new Corestore(this.storage)
-    this.keys = new KeyManager(opts?.primaryKey)
     this.opts = opts
+
+    this.primaryKey = opts.primaryKey || randomBytes(32)
 
     this.slashtags = new HashMap()
 
@@ -35,18 +36,21 @@ export class SDK {
     return sdk
   }
 
-  generateKeyPair (name, keys = this.keys) {
-    return keys.generateKeyPair(name)
+  /**
+   * Generates a Slashtag keypair from a name, and the `SDK.primaryKey`.
+   *
+   * @param {string} name
+   */
+  createKeyPair (name) {
+    return createKeyPair(this.primaryKey, name)
   }
 
   slashtag (opts) {
     const keyPair =
-      opts.keyPair || (opts.name && this.keys.generateKeyPair(opts.name))
+      opts.keyPair || (opts.name && this.createKeyPair(opts.name))
 
     const key =
       opts.key || keyPair?.publicKey || (opts.url && parseURL(opts.url).key)
-
-    if (!key) throw new Error('Missing keyPair, key or url')
 
     let slashtag = this.slashtags.get(key)
     if (slashtag) return slashtag
