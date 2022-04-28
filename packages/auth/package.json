@@ -40,7 +40,7 @@
     "dep-check": "aegir dep-check"
   },
   "devDependencies": {
-    "@hyperswarm/testnet": "^1.1.0",
+    "@hyperswarm/testnet": "^2.0.0",
     "aegir": "^36.2.3",
     "dht-universal": "^0.4.1"
   },
@@ -54,6 +54,7 @@
   },
   "dependencies": {
     "@synonymdev/slashtags-sdk": "^0.1.0-alpha.6",
-    "compact-encoding": "^2.6.1"
+    "compact-encoding": "^2.6.1",
+    "compact-encoding-struct": "^1.2.1"
   }
 }

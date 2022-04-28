@@ -44,7 +44,7 @@
     "dep-check": "aegir dep-check"
   },
   "devDependencies": {
-    "@hyperswarm/testnet": "^1.1.0",
+    "@hyperswarm/testnet": "^2.0.0",
     "@types/debug": "^4.1.7",
     "aegir": "^36.2.3"
   },

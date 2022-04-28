@@ -17,16 +17,17 @@ module.exports = {
     async before(options) {
       let closeTestnet;
 
-      const nodes = await createTestnet(10, (cb) => (closeTestnet = cb));
-      const bootstrap = [{ host: '127.0.0.1', port: nodes[0].address().port }];
+      const testnet = await createTestnet(10, (cb) => (closeTestnet = cb));
 
-      const { port, closeRelay } = await setupRelay({ dhtOpts: { bootstrap } });
+      const { port, closeRelay } = await setupRelay({
+        dhtOpts: { bootstrap: testnet.bootstrap },
+      });
 
       return {
         closeTestnet,
         closeRelay,
         env: {
-          BOOTSTRAP: JSON.stringify(bootstrap),
+          BOOTSTRAP: JSON.stringify(testnet.bootstrap),
           RELAY_URL: 'ws://localhost:' + port,
         },
       };
