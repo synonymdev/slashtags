@@ -1,6 +1,11 @@
+import b4a from 'b4a'
+import sodium from 'sodium-universal'
+
 import { expect } from 'aegir/utils/chai.js'
 import { createKeyPair } from '../src/crypto.js'
-import b4a from 'b4a'
+
+const verify = (signature, message, publicKey) =>
+  sodium.crypto_sign_verify_detached(signature, message, publicKey)
 
 describe('crypto', () => {
   describe('slashtags key derivation', () => {
@@ -44,6 +49,47 @@ describe('crypto', () => {
           'hex'
         )
       )
+    })
+  })
+
+  describe('keypair auth', () => {
+    describe('signature', () => {
+      it('should correctly sign a message', () => {
+        const keyPair = createKeyPair(b4a.from('a'.repeat(32), 'hex'), 'foo')
+
+        const message = b4a.from('Hello World')
+        const signature = keyPair.auth.sign(message)
+
+        expect(message).to.not.eql(signature)
+
+        expect(verify(signature, message, keyPair.publicKey)).to.be.true()
+      })
+    })
+
+    describe('verify', () => {
+      it('should verify a valid message', () => {
+        const keyPair = createKeyPair(b4a.from('a'.repeat(32), 'hex'), 'foo')
+
+        const message = b4a.from('Hello World')
+        const signature = keyPair.auth.sign(message)
+
+        expect(message).to.not.eql(signature)
+
+        expect(verify(signature, message, keyPair.publicKey)).to.be.true()
+        expect(keyPair.auth.verify(message, signature)).to.be.true()
+      })
+
+      it('should return false for invalid signature', () => {
+        const keyPair = createKeyPair(b4a.from('a'.repeat(32), 'hex'), 'foo')
+
+        const message = b4a.from('Hello World')
+        const invalidSignature = b4a.alloc(sodium.crypto_sign_BYTES)
+
+        expect(
+          verify(invalidSignature, message, keyPair.publicKey)
+        ).to.be.false()
+        expect(keyPair.auth.verify(message, invalidSignature)).to.be.false()
+      })
     })
   })
 })
