@@ -1,9 +1,12 @@
 import Hyperbee from 'hyperbee'
 import c from 'compact-encoding'
-import { FileMetadata } from './encoding.js'
 import Hyperblobs from 'hyperblobs'
 import b4a from 'b4a'
 import Debug from 'debug'
+import EventEmitter from 'events'
+
+import { ObjectMetadata } from './encoding.js'
+import { hash } from '../crypto.js'
 
 const debug = Debug('slashtags:slashdrive')
 
@@ -16,15 +19,27 @@ const HeaderKeys = {
 
 const SubPrefixes = {
   headers: 'h',
-  paths: '/'
+  objects: 'o'
 }
 
-export class SlashDrive {
+export class SlashDrive extends EventEmitter {
+  /**
+   *
+   * @param {object} opts
+   * @param {*} opts.store
+   * @param {string} [opts.name]
+   * @param {Uint8Array} [opts.key]
+   * @param {import('../interfaces.js').KeyPair} [opts.keyPair]
+   * @param {boolean} [opts.encrypted]
+   * @param {Uint8Array} [opts.encryptionKey]
+   */
   constructor (opts) {
-    this.opts = opts
-    this.store = opts.store
-    this.key = opts.key || opts.keyPair?.publicKey
-    this.keys = opts.keys.namespace(this.key)
+    super()
+    this._opts = opts
+
+    if (!(opts.key || opts.keyPair || opts.name)) {
+      throw new Error('Missing keyPair, key, or name')
+    }
 
     this._ready = false
   }
@@ -32,28 +47,45 @@ export class SlashDrive {
   async ready () {
     if (this._ready) return
 
-    const metadataCore = await this.store.get(this.opts)
+    const opts = this._opts
+    // @ts-ignore
+    this._opts = undefined
+
+    this.writable = Boolean(opts.keyPair) || Boolean(opts.name)
+
+    const metadataCoreOpts = this.writable
+      ? await (async () => {
+        const keyPair =
+            opts.keyPair || (await opts.store.createKeyPair(opts.name))
+
+        const encryptionKey = opts.encrypted && hash(keyPair.secretKey)
+
+        return { keyPair, encryptionKey }
+      })()
+      : { key: opts.key, encryptionKey: opts.encryptionKey }
+
+    this.store = opts.store.namespace(
+      opts.name || opts.keyPair?.publicKey || opts.key
+    )
+
+    const metadataCore = await this.store.get(metadataCoreOpts)
     await metadataCore.ready()
 
-    this.writable = metadataCore.writable
+    this.key = metadataCore.key
+    this.encryptionKey = metadataCore.encryptionKey
 
     this.db = new Hyperbee(metadataCore)
-    this.metadata = this.db.sub(SubPrefixes.paths)
+    this.metadata = this.db.sub(SubPrefixes.objects)
     this.headers = this.db.sub(SubPrefixes.headers)
 
-    this.discoveryKey = metadataCore.key
-    this.findingPeers = metadataCore.findingPeers.bind(metadataCore)
-    this.update = metadataCore.update.bind(metadataCore)
-    this._ready = true
-  }
+    this.discoveryKey = metadataCore.discoveryKey
 
-  async _setupContent () {
-    let contentCore
+    metadataCore.on('append', () => this.emit('update'))
+
     if (this.writable) {
-      const contentKeyPair = this.keys.generateKeyPair('content')
-      contentCore = await this.store.get({
-        ...this.opts,
-        keyPair: contentKeyPair
+      const contentCore = await this.store.get({
+        name: 'content',
+        encryptionKey: this.encryptionKey
       })
       await contentCore.ready()
 
@@ -63,108 +95,151 @@ export class SlashDrive {
         await batch.put(HeaderKeys.version, b4a.from(VERSION))
         await batch.flush()
       }
-    } else {
-      const contentHeader = await this.headers.get(HeaderKeys.content)
-      if (!contentHeader) throw new Error('Missing content key in headers')
-      contentCore = await this.store.get({ key: contentHeader.value })
+      this.content = new Hyperblobs(contentCore)
     }
+
+    this._ready = true
+  }
+
+  async update () {
+    await this.ready()
+    await this.metadata.feed.update()
+    return this._setupRemoteContent()
+  }
+
+  async findingPeers () {
+    await this.ready()
+    return this.metadata.feed.findingPeers()
+  }
+
+  /**
+   *
+   * @param {boolean} isInitiator
+   * @param {*} opts
+   * @returns
+   */
+  replicate (isInitiator, opts) {
+    return this.store.replicate(isInitiator, opts)
+  }
+
+  async _setupRemoteContent () {
+    if (this.content) return
+
+    await validateRemote(this)
+    const contentHeader = await this.headers.get(HeaderKeys.content)
+    if (!contentHeader?.value) {
+      throw new Error('Missing content key in headers')
+    }
+
+    const contentCore = await this.store.get({
+      key: contentHeader.value,
+      encryptionKey: this.encryptionKey
+    })
 
     await contentCore.ready()
     this.content = new Hyperblobs(contentCore)
-    debug('Created content core')
   }
 
-  async write (path, content) {
+  /**
+   *
+   * @param {string} key
+   * @param {Uint8Array} content
+   * @param {object} [options]
+   * @param {object} [options.metadata]
+   */
+  async put (key, content, options) {
     if (!this.writable) throw new Error('Drive is not writable')
-    if (!this.content) await this._setupContent()
+    await this.ready()
+    // TODO support streamable content
 
+    // @ts-ignore
     const pointer = await this.content.put(content)
     await this.metadata.put(
-      removeRoot(path),
-      c.encode(FileMetadata, { content: pointer })
+      key,
+      c.encode(ObjectMetadata, {
+        content: pointer,
+        userMetadata: options?.metadata
+      })
     )
   }
 
-  async read (path) {
-    if (!this.content) await this._setupContent()
+  /**
+   *
+   * @param {string} key
+   * @returns
+   */
+  async get (key) {
+    if (!this.content) await this.update()
 
-    path = removeRoot(path)
-    const block = await this.metadata.get(path)
+    const block = await this.metadata.get(key)
     if (!block) return null
 
-    const metadata = c.decode(FileMetadata, block.value)
+    const metadata = c.decode(ObjectMetadata, block.value)
 
+    // @ts-ignore
     const blob = await this.content.get(metadata.content)
 
     return blob
   }
 
-  async exists (path) {
-    if (isRootDir(path)) return true
-    path = removeRoot(path)
+  async list (prefix) {
+    await this.ready()
 
-    let block
-    if (isDirectory(path)) {
-      block = await this.metadata.peek({ gte: path })
-    } else {
-      block = await this.metadata.get(path)
-    }
-    return Boolean(block)
-    // TODO: handle private paths
-  }
-
-  async ls (path) {
-    if (!isDirectory(path)) throw new Error('Can not list a file')
-    if (!(await this.exists(path))) throw new Error('Directory does not exist')
-    const prefix = removeRoot(path)
-
-    const ite = this.metadata.createRangeIterator({
+    const options = {
       gte: prefix,
       // TODO: works for ASCII, handle UTF-8
       lt: prefix + '~'
+    }
+    const stream = this.metadata.createReadStream(options)
+    const entries = await collect(stream)
+
+    const objects = entries.map((entry) => {
+      const metadata = c.decode(ObjectMetadata, entry.value)
+
+      return {
+        key: b4a.toString(entry.key),
+        metadata: {
+          ...metadata.userMetadata,
+          contentLength: metadata.content.byteLength
+        }
+      }
     })
 
-    await ite.open()
-    let next = await ite.next()
-
-    const paths = []
-
-    while (next) {
-      const key = b4a.toString(next.key)
-      const withoutPrefix = key.slice(prefix.length)
-      const path = removeTrailingPath(withoutPrefix)
-      if (paths[paths.length - 1] !== path) {
-        paths.push(path)
-      }
-      next = await ite.next()
-    }
-
-    return paths
+    return objects
   }
 }
 
-function removeRoot (path) {
-  const directory = isDirectory(path)
-  const parts = pathParts(path)
-  if (parts.length === 0) return ''
-  return parts.join('/') + (directory ? '/' : '')
+function collect (stream) {
+  return new Promise((resolve, reject) => {
+    const entries = []
+    stream.on('data', (d) => entries.push(d))
+    stream.on('end', () => resolve(entries))
+    stream.on('error', (err) => reject(err))
+    stream.on('close', () => reject(new Error('Premature close')))
+  })
 }
 
-function isDirectory (path) {
-  return path.endsWith('/')
-}
+async function validateRemote (drive) {
+  const metadataCore = drive.metadata.feed
 
-function isRootDir (path) {
-  return path === '/'
-}
+  await metadataCore.update()
 
-function pathParts (path) {
-  return path.split('/').filter(Boolean)
-}
+  // First block is hyperbee and the second is the content header
+  if (metadataCore.length < 2) {
+    throw new Error('Could not resolve remote drive')
+  }
 
-function removeTrailingPath (path) {
-  const parts = pathParts(path)
-  if (parts.length === 0) return ''
-  const first = parts[0]
-  return parts.length > 1 ? first + '/' : first
+  try {
+    await drive.headers.get(HeaderKeys.content)
+  } catch (error) {
+    debug(
+      'Corrupted remote drive',
+      'error:',
+      error,
+      '\ncontent header block:',
+      b4a.toString(await metadataCore.get(1))
+    )
+
+    throw new Error('Encrypted or corrupt drive')
+  }
 }

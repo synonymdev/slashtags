@@ -1,5 +1,6 @@
 import c from 'compact-encoding'
-import { compile } from 'compact-encoding-struct'
+import { compile, opt } from 'compact-encoding-struct'
+import b4a from 'b4a'
 
 export const BlobIndex = compile({
   byteOffset: c.uint,
@@ -8,6 +9,18 @@ export const BlobIndex = compile({
   byteLength: c.uint
 })
 
-export const FileMetadata = compile({
-  content: BlobIndex
+const json = c.from({
+  /** @param {Object} json */
+  encode (json) {
+    return b4a.from(JSON.stringify(json))
+  },
+  /** @param {Uint8Array} buf */
+  decode (buf) {
+    return JSON.parse(b4a.toString(buf))
+  }
+})
+
+export const ObjectMetadata = compile({
+  content: BlobIndex,
+  userMetadata: opt(json, {})
 })

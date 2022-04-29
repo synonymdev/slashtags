@@ -1,6 +1,7 @@
+import { homedir } from 'os'
+
 import { expect } from 'aegir/utils/chai.js'
 import { storage } from '../../src/storage.js'
-import { homedir } from 'os'
 
 describe('Storage nodejs', () => {
   it('should return the default Directory if path not defined', () => {

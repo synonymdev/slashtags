@@ -1,7 +1,8 @@
-import { expect } from 'aegir/utils/chai.js'
-import { storage } from '../../src/storage.js'
 import Corestore from 'corestore'
 import b4a from 'b4a'
+
+import { expect } from 'aegir/utils/chai.js'
+import { storage } from '../../src/storage.js'
 
 describe('Storage browser', () => {
   it('should save and retrieve data', async () => {

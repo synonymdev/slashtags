@@ -1,6 +1,7 @@
+import b4a from 'b4a'
+
 import { expect } from 'aegir/utils/chai.js'
 import { sdk } from './helpers/setup-sdk.js'
-import b4a from 'b4a'
 
 describe('SDK', () => {
   describe('keys', () => {

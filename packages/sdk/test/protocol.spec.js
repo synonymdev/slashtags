@@ -1,8 +1,8 @@
-import { expect } from 'aegir/utils/chai.js'
-import { SlashtagProtocol } from '../src/index.js'
 import b4a from 'b4a'
 import c from 'compact-encoding'
 
+import { expect } from 'aegir/utils/chai.js'
+import { SlashtagProtocol } from '../src/index.js'
 import { sdk } from './helpers/setup-sdk.js'
 
 class Foo extends SlashtagProtocol {
