@@ -6,5 +6,5 @@ export interface KeyPair {
 
 export interface Auth {
   sign: (message: Uint8Array) => Uint8Array
-  verify: (signable: Uint8Array, signature: Uint8Array) => boolean
+  verify: (message: Uint8Array, signature: Uint8Array) => boolean
 }
