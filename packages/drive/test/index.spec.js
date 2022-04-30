@@ -5,7 +5,7 @@ import Hyperswarm from 'hyperswarm'
 import { DHT } from 'dht-universal'
 
 import { expect } from 'aegir/utils/chai.js'
-import { SlashDrive } from '../src/drive/index.js'
+import { SlashDrive } from '../src/index.js'
 import { replicate } from './helpers/replicate.js'
 
 describe('drive', () => {
@@ -38,20 +38,34 @@ describe('drive', () => {
 
       expect(drive.key.length).to.eql(32)
     })
+
+    it('should throw an error on missing parameters', async () => {
+      const store = new Corestore(RAM)
+
+      let err
+      try {
+        const drive = new SlashDrive({ store })
+        await drive.ready()
+      } catch (error) {
+        err = error
+      }
+
+      expect(err.message).to.eql('Missing keyPair, key, or name')
+    })
   })
 
   describe('put and get', async () => {
     it('should throw an error on trying to put on a non-writable drive', async () => {
       const store = new Corestore(RAM)
-      const dirve = new SlashDrive({
+      const drive = new SlashDrive({
         key: (await store.createKeyPair('foo')).publicKey,
         store
       })
-      await dirve.ready()
+      await drive.ready()
 
       let err
       try {
-        await dirve.put('foo', b4a.from('hello'))
+        await drive.put('foo', b4a.from('hello'))
       } catch (error) {
         err = error
       }
@@ -209,7 +223,7 @@ describe('drive', () => {
   })
 
   describe('encryption', () => {
-    it('should create an encrypted drive', async () => {
+    it('should create an encrypted drive with the same encryption key every time', async () => {
       const store = new Corestore(RAM)
 
       const drive = new SlashDrive({
@@ -321,6 +335,30 @@ describe('drive', () => {
       }
 
       expect(err.message).to.eql('Encrypted or corrupt drive')
+    })
+
+    it('should throw an error for unresolvable remote drives', async () => {
+      const localDrive = new SlashDrive({
+        name: 'foo',
+        store: new Corestore(RAM),
+        encrypted: true
+      })
+      await localDrive.ready()
+
+      const remoteDrive = new SlashDrive({
+        store: new Corestore(RAM),
+        key: localDrive.key
+      })
+      await remoteDrive.ready()
+
+      let err
+      try {
+        await remoteDrive.update()
+      } catch (error) {
+        err = error
+      }
+
+      expect(err.message).to.eql('Could not resolve remote drive')
     })
   })
 
