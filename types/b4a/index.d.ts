@@ -15,5 +15,5 @@ declare module 'b4a' {
     encoding?: 'hex' | 'base64' | 'utf8' | 'utf16le' | 'ascii',
   ): number;
   function concat(...args: Array<Buffer>): Buffer;
-  function equals(buf: Buffer, buf2: Buffer): boolean;
+  function equals(buf: Uint8Array, buf2: Uint8Array): boolean;
 }

@@ -7,12 +7,12 @@ const NS = hash('slashtags')
  * Generates a seed from the slashtags Namespace, name and primaryKey.
  *
  * @param {Uint8Array} pk
- * @param {string} name
+ * @param {string} [name]
  * @returns
  */
-function generateSeed (pk, name) {
+function generateSeed (pk, name = '') {
   const seed = b4a.allocUnsafe(32)
-  sodium.crypto_generichash_batch(seed, [NS, Buffer.from(name)], pk)
+  sodium.crypto_generichash_batch(seed, [NS, b4a.from(name)], pk)
   return seed
 }
 
@@ -20,10 +20,10 @@ function generateSeed (pk, name) {
  * Generates a Slashtag keypair from a primary key and a name.
  *
  * @param {Uint8Array} primaryKey
- * @param {string} name
+ * @param {string} [name]
  */
 export function createKeyPair (primaryKey, name) {
-  /** @type {KeyPair} */
+  /** @type {import('./interfaces').KeyPair} */
   const keyPair = {
     publicKey: b4a.allocUnsafe(sodium.crypto_sign_PUBLICKEYBYTES),
     secretKey: b4a.allocUnsafe(sodium.crypto_sign_SECRETKEYBYTES),
@@ -71,7 +71,3 @@ export function hash (input) {
   sodium.crypto_generichash(output, input)
   return output
 }
-
-/**
- * @typedef {import('./interfaces').KeyPair} KeyPair
- */

@@ -9,6 +9,21 @@ const verify = (signature, message, publicKey) =>
 
 describe('crypto', () => {
   describe('slashtags key derivation', () => {
+    it('should generate a keypair form a private key only with no name', () => {
+      const primaryKey = b4a.from('a'.repeat(32), 'hex')
+      const keyPair = createKeyPair(primaryKey)
+
+      expect(keyPair.publicKey.length).to.equal(32)
+      expect(keyPair.secretKey.length).to.equal(64)
+
+      expect(keyPair.publicKey).to.eql(
+        b4a.from(
+          '2b8a8e5c7167f89b780fed400a238e13ac1c442ef7b6e9f4e1255aeed7e13ad2',
+          'hex'
+        )
+      )
+    })
+
     it('should generate a different keyPairs from different names', () => {
       const primaryKey = b4a.from('a'.repeat(32), 'hex')
       const keyPair = createKeyPair(primaryKey, 'foo')
