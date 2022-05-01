@@ -21,4 +21,20 @@ export interface SecretStream {
   remotePublicKey: Uint8Array
 
   opened: Promise<boolean>
+
+  write: (message: Uint8Array) => Promise<boolean>
+}
+
+export interface ProtomuxMessage {
+  encoding: any
+  onmessage: (message: any, channel: ProtomuxChannel) => void
+  close?: () => void
+  send?: (data: any) => void
+}
+
+export interface ProtomuxChannel {
+  peerInfo: PeerInfo
+
+  open: () => void
+  messages: ProtomuxMessage[]
 }
