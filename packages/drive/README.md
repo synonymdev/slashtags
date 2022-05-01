@@ -101,6 +101,10 @@ In general you do NOT need to wait for ready, unless checking a synchronous prop
 
 Buffer containing the public key identifying this core.
 
+#### `drive.keyPair`
+
+Object containing the publicKey, secretKey and auth object for this core.
+
 #### `drive.discoveryKey`
 
 Buffer containing a key derived from the metadata's core's public key. In contrast to core.key this key does not allow you to verify the data but can be used to announce or look for peers that are sharing the same drive, without leaking the core key.
@@ -108,6 +112,16 @@ Buffer containing a key derived from the metadata's core's public key. In contra
 #### `drive.encryptionKey`
 
 Buffer containing the optional encryption key for this drive.
+
+#### `drive.writable`
+
+Returns true if the metadata core and the content core are both [writable](https://github.com/hypercore-protocol/hypercore-next/#corewritable)
+
+#### `drive.readable`
+
+Returns true if the metadata core and the content core are both [readable](https://github.com/hypercore-protocol/hypercore-next/#corereadable).
+
+Especially useful in remote drives to check if the drive got the content core already.
 
 #### `await drive.findingPeers()`
 

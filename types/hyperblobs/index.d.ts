@@ -3,6 +3,8 @@ declare module 'hyperblobs' {
   export = class Hyperblobs {
     constructor(core: Hypercore);
 
+    core: Hypercore;
+
     put(blob: Uint8Array): Promise<{
       byteOffset: number;
       blockOffset: number;

@@ -21,6 +21,6 @@ const json = c.from({
 })
 
 export const ObjectMetadata = compile({
-  content: BlobIndex,
+  blobIndex: BlobIndex,
   userMetadata: opt(json, {})
 })
