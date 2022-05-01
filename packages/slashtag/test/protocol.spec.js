@@ -57,6 +57,18 @@ describe('protocol', () => {
     expect(barFirst).to.eql(barSecond)
   })
 
+  it('should not register a protocol on a remote Slashtag', () => {
+    const alice = new Slashtag({
+      key: Slashtag.createKeyPair().publicKey,
+      swarmOpts: dhtOpts,
+      protocols: [Foo]
+    })
+
+    expect(() => alice.protocol(Foo)).to.throw(
+      'Cannot register protocol on a remote slashtag'
+    )
+  })
+
   it('should register and multiplex multiple protocol over the same connection', async () => {
     const alice = new Slashtag({
       keyPair: Slashtag.createKeyPair(),

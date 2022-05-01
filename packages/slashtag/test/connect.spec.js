@@ -8,7 +8,7 @@ import { swarmOpts } from './helpers/swarmOpts.js'
 const dhtOpts = swarmOpts()
 
 describe('connect', () => {
-  it('should listen and receives dht connections', async () => {
+  it('should connect to a Hyperswarm/dht server', async () => {
     const dht = await DHT.create(dhtOpts)
     const alice = new Slashtag({
       keyPair: Slashtag.createKeyPair(),
@@ -18,7 +18,9 @@ describe('connect', () => {
     const server = dht.createServer()
     const serverGotMessage = new Promise((resolve) => {
       server.on('connection', (conn) => {
-        conn.on('data', resolve)
+        conn.on('data', (data) => {
+          if (b4a.equals(data, b4a.from('hello world'))) resolve(true)
+        })
         conn.on('error', () => dht.destroy())
       })
     })
@@ -28,9 +30,15 @@ describe('connect', () => {
       dht.defaultKeyPair.publicKey
     )
 
-    expect(connection.remotePublicKey).to.eql(dht.defaultKeyPair.publicKey)
+    expect(connection.remotePublicKey).to.eql(
+      dht.defaultKeyPair.publicKey,
+      'should connect to the correct public key'
+    )
     expect(await connection.opened).to.be.true()
-    expect(peerInfo.publicKey).to.eql(dht.defaultKeyPair.publicKey)
+    expect(peerInfo.publicKey).to.eql(
+      dht.defaultKeyPair.publicKey,
+      'should augment peerInfo with a Slashtag instance generated from the remote peer public key'
+    )
     expect(peerInfo.slashtag.key).to.eql(
       dht.defaultKeyPair.publicKey,
       "Slahstag's client connection should augment peerInfo with a Slashtag instance generated from the remote peer public key"
@@ -43,9 +51,10 @@ describe('connect', () => {
 
     connection.write(b4a.from('hello world'))
 
-    expect(await serverGotMessage).to.eql(b4a.from('hello world'))
+    expect(await serverGotMessage).to.eql(true)
 
     await alice.close()
+    await dht.destroy()
   })
 
   it('should not try to open an existing and open connection', async () => {

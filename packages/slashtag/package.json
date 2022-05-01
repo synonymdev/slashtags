@@ -55,6 +55,7 @@
     "b4a": "^1.5.0",
     "compact-encoding": "^2.6.1",
     "corestore": "^6.0.1-alpha.17",
+    "debug": "^4.3.4",
     "dht-universal": "^0.4.1",
     "hyperswarm": "^3.0.4",
     "random-access-memory": "^4.1.0",

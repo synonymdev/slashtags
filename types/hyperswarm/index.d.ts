@@ -18,5 +18,7 @@ declare module 'hyperswarm' {
     listen(): Promise<undefined>;
     destroy(): Promise<undefined>;
     joinPeer(key: Uint8Array): undefined;
+    join(discoveryKey?: Uint8Array, options?: object);
+    flush(): Promise<undefined>;
   };
 }

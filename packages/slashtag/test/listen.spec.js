@@ -1,5 +1,6 @@
 import { expect } from 'aegir/utils/chai.js'
 import { DHT } from 'dht-universal'
+import b4a from 'b4a'
 
 import { Slashtag } from '../src/index.js'
 import { swarmOpts } from './helpers/swarmOpts.js'
@@ -7,10 +8,18 @@ import { swarmOpts } from './helpers/swarmOpts.js'
 const dhtOpts = swarmOpts()
 
 describe('listen', () => {
-  it('should listen and receives dht connections', async () => {
+  it('should listen and receives Hyperswarm/dht connections', async () => {
     const alice = new Slashtag({
       keyPair: Slashtag.createKeyPair(),
       swarmOpts: dhtOpts
+    })
+
+    const serverGotMessage = new Promise((resolve) => {
+      alice.on('connection', (conn) => {
+        conn.on('data', (data) => {
+          if (b4a.equals(data, b4a.from('hello world'))) resolve(true)
+        })
+      })
     })
 
     await alice.listen()
@@ -25,6 +34,8 @@ describe('listen', () => {
 
     const connection = await dht.connect(alice.key)
 
+    connection.write(b4a.from('hello world'))
+
     expect(connection.remotePublicKey).to.eql(alice.key)
     expect(await connection.opened).to.be.true()
     expect((await serverConnection).peerInfo.publicKey).to.eql(
@@ -34,6 +45,8 @@ describe('listen', () => {
       dht.defaultKeyPair.publicKey,
       "Slahstag's server connection should augment peerInfo with a Slashtag instance generated from the remote peer public key"
     )
+
+    expect(await serverGotMessage).to.be.true()
 
     await alice.close()
     expect(alice.swarm.server.closed).to.be.true()

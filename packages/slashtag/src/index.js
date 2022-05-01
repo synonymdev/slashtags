@@ -2,17 +2,22 @@ import EventEmitter from 'events'
 import { DHT } from 'dht-universal'
 import Hyperswarm from 'hyperswarm'
 import b4a from 'b4a'
-import { SlashtagProtocol } from './protocol.js'
 import Corestore from 'corestore'
 import RAM from 'random-access-memory'
-// import Debug from 'debug';
+import { SlashDrive } from '@synonymdev/slashdrive'
+import Debug from 'debug'
 
+import { SlashtagProtocol } from './protocol.js'
 import { randomBytes, createKeyPair } from './crypto.js'
 import { catchConnection } from './utils.js'
 
 export { SlashtagProtocol }
 
-// const debug = Debug('slashtags:slashtag');
+export const DRIVE_KEYS = {
+  profile: 'profile.json'
+}
+
+const debug = Debug('slashtags:slashtag')
 
 export class Slashtag extends EventEmitter {
   /**
@@ -48,17 +53,37 @@ export class Slashtag extends EventEmitter {
   async ready () {
     if (this._ready) return true
 
-    if (!this.remote) {
-      const dht = await DHT.create({ ...this._swarmOpts })
-      this.swarm = new Hyperswarm({
-        ...this._swarmOpts,
-        keyPair: this.keyPair,
-        dht
-      })
-      this.swarm.on('connection', this._handleConnection.bind(this))
+    const dht = await DHT.create({ ...this._swarmOpts })
+    this.swarm = new Hyperswarm({
+      ...this._swarmOpts,
+      keyPair: this.keyPair,
+      dht
+    })
+    this.swarm.on('connection', this._handleConnection.bind(this))
+
+    this.publicDrive = new SlashDrive({
+      store: this.store,
+      key: this.key,
+      keyPair: this.keyPair
+    })
+    await this.publicDrive.ready()
+
+    // Discovery
+    // TODO enable customizing the discovery options
+    const discovery = this.swarm.join(this.publicDrive.discoveryKey)
+    if (this.remote) {
+      const done = await this.publicDrive.findingPeers()
+      debug('discovery', this.publicDrive.discoveryKey, done)
+      this.swarm.flush().then(done, done)
+    } else {
+      await discovery.flushed()
     }
 
     this._ready = true
+    debug('Slashtag is ready', {
+      key: b4a.toString(this.key, 'hex'),
+      remote: this.remote
+    })
   }
 
   async listen () {
@@ -116,6 +141,26 @@ export class Slashtag extends EventEmitter {
     return protocol
   }
 
+  /**
+   * Sets the Slashtag's profile in its public drive
+   *
+   * @param {Object} profile
+   */
+  async setProfile (profile) {
+    await this.ready()
+    return this.publicDrive?.put(
+      DRIVE_KEYS.profile,
+      b4a.from(JSON.stringify(profile))
+    )
+  }
+
+  async getProfile () {
+    await this.ready()
+    const result = await this.publicDrive?.get(DRIVE_KEYS.profile)
+    if (!result) return null
+    return JSON.parse(b4a.toString(result))
+  }
+
   async close () {
     await this.ready()
     await this.swarm?.destroy()
@@ -163,7 +208,7 @@ export class Slashtag extends EventEmitter {
    * @param {PeerInfo} peerInfo
    */
   _setupProtocols (socket, peerInfo) {
-    // @ts-ignore
+    if (!this._protocols) return
     for (const protocol of this._protocols.values()) {
       protocol.createChannel(socket, peerInfo)
     }
