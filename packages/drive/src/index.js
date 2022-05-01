@@ -29,7 +29,7 @@ export class SlashDrive extends EventEmitter {
    * @param {*} opts.store
    * @param {string} [opts.name]
    * @param {Uint8Array} [opts.key]
-   * @param {import('hypercore').KeyPair} [opts.keyPair]
+   * @param {import('./interfaces').KeyPair} [opts.keyPair]
    * @param {boolean} [opts.encrypted]
    * @param {Uint8Array} [opts.encryptionKey]
    */
