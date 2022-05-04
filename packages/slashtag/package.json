@@ -34,7 +34,7 @@
   "scripts": {
     "build": "aegir build",
     "test": "c8 aegir test",
-    "lint": "standard --fix",
+    "lint": "standard -i dist/ --fix",
     "clean": "rimraf ./dist",
     "depcheck": "npx aegir dep-check"
   },
@@ -50,6 +50,7 @@
     "debug": "^4.3.4",
     "dht-universal": "^0.4.1",
     "graceful-goodbye": "^1.0.0",
+    "hi-base32": "^0.5.1",
     "hyperswarm": "^3.0.4",
     "random-access-memory": "^4.1.0",
     "sodium-universal": "^3.1.0",

@@ -1,4 +1,4 @@
-import { expect } from 'aegir/utils/chai.js'
+import { expect } from 'aegir/chai'
 import b4a from 'b4a'
 
 import { createKeyPair } from '../src/crypto.js'
@@ -29,5 +29,16 @@ describe('static createKeyPair()', () => {
 describe('initialize', () => {
   it('should throw an error for missing parameters', async () => {
     expect(() => new Slashtag({})).to.throw('Missing keyPair or key')
+  })
+
+  it('should set slashtag url', () => {
+    const keyPair = Slashtag.createKeyPair()
+
+    const alice = new Slashtag({
+      keyPair
+    })
+
+    expect(alice.key).to.eql(keyPair.publicKey)
+    expect(alice.url.toString()).to.be.startWith('slash://')
   })
 })

@@ -1,7 +1,7 @@
 import b4a from 'b4a'
 import sodium from 'sodium-universal'
 
-import { expect } from 'aegir/utils/chai.js'
+import { expect } from 'aegir/chai'
 import { createKeyPair } from '../src/crypto.js'
 
 const verify = (signature, message, publicKey) =>

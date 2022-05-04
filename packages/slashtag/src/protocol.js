@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events'
 
-export class SlashtagProtocol extends EventEmitter {
+export class SlashProtocol extends EventEmitter {
   /**
    *
    * @param {object} opts

@@ -1,12 +1,12 @@
 import c from 'compact-encoding'
 
-import { expect } from 'aegir/utils/chai.js'
-import { Slashtag, SlashtagProtocol } from '../src/index.js'
-import { swarmOpts } from './helpers/swarmOpts.js'
+import { expect } from 'aegir/chai'
+import { Slashtag, SlashProtocol } from '../src/index.js'
+import { getSwarmOpts } from './helpers/swarmOpts.js'
 
-const dhtOpts = swarmOpts()
+const swarmOpts = getSwarmOpts()
 
-class Foo extends SlashtagProtocol {
+class Foo extends SlashProtocol {
   static get protocol () {
     return 'foo'
   }
@@ -43,7 +43,7 @@ describe('protocol', () => {
   it('should register a protocol in an idempotent way', () => {
     const alice = new Slashtag({
       keyPair: Slashtag.createKeyPair(),
-      swarmOpts: dhtOpts,
+      swarmOpts,
       protocols: [Bar]
     })
 
@@ -60,7 +60,7 @@ describe('protocol', () => {
   it('should not register a protocol on a remote Slashtag', () => {
     const alice = new Slashtag({
       key: Slashtag.createKeyPair().publicKey,
-      swarmOpts: dhtOpts,
+      swarmOpts,
       protocols: [Foo]
     })
 
@@ -72,7 +72,7 @@ describe('protocol', () => {
   it('should register and multiplex multiple protocol over the same connection', async () => {
     const alice = new Slashtag({
       keyPair: Slashtag.createKeyPair(),
-      swarmOpts: dhtOpts,
+      swarmOpts,
       protocols: [Foo, Bar]
     })
     const AliceFoo = alice.protocol(Foo)
@@ -85,11 +85,9 @@ describe('protocol', () => {
 
     await alice.listen()
 
-    // // ===
-
     const bob = new Slashtag({
       keyPair: Slashtag.createKeyPair(),
-      swarmOpts: dhtOpts,
+      swarmOpts,
       protocols: [Foo, Bar]
     })
 

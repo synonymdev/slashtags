@@ -1,7 +1,7 @@
 import b4a from 'b4a'
 import EventEmitter from 'events'
 
-import { expect } from 'aegir/utils/chai.js'
+import { expect } from 'aegir/chai'
 import { catchConnection } from '../src/utils.js'
 
 describe('utils', () => {

@@ -4,14 +4,17 @@ import Hyperswarm from 'hyperswarm'
 import b4a from 'b4a'
 import Corestore from 'corestore'
 import RAM from 'random-access-memory'
+import goodbye from 'graceful-goodbye'
+import HashMap from 'turbo-hash-map'
 import { SlashDrive } from '@synonymdev/slashdrive'
 import Debug from 'debug'
+import { SlashURL } from './url.js'
 
-import { SlashtagProtocol } from './protocol.js'
+import { SlashProtocol } from './protocol.js'
 import { randomBytes, createKeyPair } from './crypto.js'
 import { catchConnection } from './utils.js'
 
-export { SlashtagProtocol }
+export { SlashProtocol, SlashURL }
 
 export const DRIVE_KEYS = {
   profile: 'profile.json'
@@ -26,7 +29,7 @@ export class Slashtag extends EventEmitter {
    * @param {Uint8Array} [opts.key]
    * @param {import('./interfaces').KeyPair} [opts.keyPair]
    * @param {import('corestore')} [opts.store]
-   * @param {Array<typeof import('./protocol').SlashtagProtocol>} [opts.protocols]
+   * @param {Array<typeof import('./protocol').SlashProtocol>} [opts.protocols]
    * @param {object} [opts.swarmOpts]
    * @param {string[]} [opts.swarmOpts.relays]
    * @param {Array<{host: string; port: number}>} [opts.swarmOpts.bootstrap]
@@ -37,17 +40,28 @@ export class Slashtag extends EventEmitter {
     this.keyPair = opts.keyPair
     this.remote = !this.keyPair
     this.key = opts.keyPair?.publicKey || opts.key
-
     if (!this.key) throw new Error('Missing keyPair or key')
+
+    this.url = new SlashURL(this.key)
 
     this._swarmOpts = opts.swarmOpts
     const store = opts.store || new Corestore(RAM)
     this.store = store.namespace(this.key)
 
+    this._drives = new HashMap()
+
     if (!this.remote) {
       this._protocols = new Map()
       opts.protocols?.forEach((p) => this.protocol(p))
     }
+
+    this.closed = false
+
+    // Gracefully shutdown
+    goodbye(() => {
+      !this.closed && debug('gracefully closing Slashtag')
+      return this.close()
+    })
   }
 
   async ready () {
@@ -60,26 +74,13 @@ export class Slashtag extends EventEmitter {
       dht
     })
     this.swarm.on('connection', this._handleConnection.bind(this))
+    this._ready = true
 
-    this.publicDrive = new SlashDrive({
-      store: this.store,
+    this.publicDrive = await this.drive({
       key: this.key,
       keyPair: this.keyPair
     })
-    await this.publicDrive.ready()
 
-    // Discovery
-    // TODO enable customizing the discovery options
-    const discovery = this.swarm.join(this.publicDrive.discoveryKey)
-    if (this.remote) {
-      const done = await this.publicDrive.findingPeers()
-      debug('discovery', this.publicDrive.discoveryKey, done)
-      this.swarm.flush().then(done, done)
-    } else {
-      await discovery.flushed()
-    }
-
-    this._ready = true
     debug('Slashtag is ready', {
       key: b4a.toString(this.key, 'hex'),
       remote: this.remote
@@ -154,6 +155,11 @@ export class Slashtag extends EventEmitter {
     )
   }
 
+  /**
+   * Returns the profile of the Slashtag from the public drive
+   *
+   * @returns {Promise<object | null>}
+   */
   async getProfile () {
     await this.ready()
     const result = await this.publicDrive?.get(DRIVE_KEYS.profile)
@@ -161,11 +167,57 @@ export class Slashtag extends EventEmitter {
     return JSON.parse(b4a.toString(result))
   }
 
-  async close () {
+  /**
+   * Creates a private drive namespaced to this slashtag's key,
+   * or resolves a private drives shared by other slashtags.
+   * See {@link SlashDrive} for more information.
+   *
+   * @param {object} opts
+   * @param {string} [opts.name]
+   * @param {boolean} [opts.encrypted]
+   * @param {Uint8Array} [opts.key]
+   * @param {import('./interfaces').KeyPair} [opts.keyPair]
+   * @param {Uint8Array} [opts.encryptionKey]
+   * @returns {Promise<SlashDrive>}
+   */
+  async drive (opts) {
     await this.ready()
+
+    const drive = new SlashDrive({ ...opts, store: this.store })
+    await drive.ready()
+
+    const existing = this._drives.get(drive.key)
+    if (existing) return existing
+    this._drives.set(drive.key, drive)
+
+    this._setupDiscovery(drive)
+
+    return drive
+  }
+
+  /**
+   *
+   * @param {SlashDrive} drive
+   * @param {*} opts
+   */
+  async _setupDiscovery (drive, opts = { server: true, client: true }) {
+    // TODO enable customizing the discovery option
+    this.swarm?.join(drive.discoveryKey, opts)
+
+    const done = await drive.findingPeers()
+    this.swarm?.flush().then(done, done)
+
+    debug('Setting up discovery done', b4a.toString(drive.discoveryKey, 'hex'))
+  }
+
+  async close () {
+    if (this.closed) return
+    this.closed = true
+    if (!this.swarm) return
     await this.swarm?.destroy()
     await this.store.close()
     this.emit('close')
+    debug('Slashtag closed', b4a.toString(this.key, 'hex'))
   }
 
   /**
@@ -188,15 +240,7 @@ export class Slashtag extends EventEmitter {
     this.store.replicate(socket)
     peerInfo.slashtag = new Slashtag({ key: peerInfo.publicKey })
 
-    // const info = { local: this.url, remote: peerInfo.slashtag.url };
-
-    // debug('Swarm connection OPENED', info);
-    // socket.on('error', function (err) {
-    // debug('Swarm connection ERRORED', err, info);
-    // });
-    // socket.on('close', function () {
-    // debug('Swarm connection CLOSED', info);
-    // });
+    debugConnection(socket, this, peerInfo.slashtag)
 
     this._setupProtocols(socket, peerInfo)
     this.emit('connection', socket, peerInfo)
@@ -213,6 +257,24 @@ export class Slashtag extends EventEmitter {
       protocol.createChannel(socket, peerInfo)
     }
   }
+}
+
+/**
+ *
+ * @param {SecretStream} socket
+ * @param {Slashtag} local
+ * @param {Slashtag} remote
+ */
+function debugConnection (socket, local, remote) {
+  const info = { local: local.url, remote: remote.url }
+
+  debug('Swarm connection OPENED', info)
+  socket.on('error', function (err) {
+    debug('Swarm connection ERRORED', err, info)
+  })
+  socket.on('close', function () {
+    debug('Swarm connection CLOSED', info)
+  })
 }
 
 /**

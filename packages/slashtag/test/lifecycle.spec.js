@@ -1,9 +1,9 @@
-import { expect } from 'aegir/utils/chai.js'
+import { expect } from 'aegir/chai'
 
 import { Slashtag } from '../src/index.js'
-import { swarmOpts } from './helpers/swarmOpts.js'
+import { getSwarmOpts } from './helpers/swarmOpts.js'
 
-const dhtOpts = swarmOpts()
+const swarmOpts = getSwarmOpts()
 
 describe('ready', () => {
   it('should set attributes after ready', async () => {
@@ -11,7 +11,7 @@ describe('ready', () => {
 
     const alice = new Slashtag({
       keyPair,
-      swarmOpts: dhtOpts
+      swarmOpts
     })
     await alice.ready()
 
@@ -26,8 +26,10 @@ describe('close', () => {
   it('should close all resources and emit close event', async () => {
     const alice = new Slashtag({
       keyPair: Slashtag.createKeyPair(),
-      swarmOpts: dhtOpts
+      swarmOpts
     })
+
+    await alice.ready()
 
     const closeEvent = new Promise((resolve) => {
       alice.once('close', () => resolve(true))

@@ -1,18 +1,18 @@
-import { expect } from 'aegir/utils/chai.js'
+import { expect } from 'aegir/chai'
 import b4a from 'b4a'
 import { DHT } from 'dht-universal'
 
 import { Slashtag } from '../src/index.js'
-import { swarmOpts } from './helpers/swarmOpts.js'
+import { getSwarmOpts } from './helpers/swarmOpts.js'
 
-const dhtOpts = swarmOpts()
+const swarmOpts = getSwarmOpts()
 
 describe('connect', () => {
   it('should connect to a Hyperswarm/dht server', async () => {
-    const dht = await DHT.create(dhtOpts)
+    const dht = await DHT.create(swarmOpts)
     const alice = new Slashtag({
       keyPair: Slashtag.createKeyPair(),
-      swarmOpts: dhtOpts
+      swarmOpts
     })
 
     const server = dht.createServer()
@@ -58,13 +58,13 @@ describe('connect', () => {
   })
 
   it('should not try to open an existing and open connection', async () => {
-    const dht = await DHT.create(dhtOpts)
+    const dht = await DHT.create(swarmOpts)
     const server = dht.createServer()
     await server.listen()
 
     const alice = new Slashtag({
       keyPair: Slashtag.createKeyPair(),
-      swarmOpts: dhtOpts
+      swarmOpts
     })
 
     const firstCall = await alice.connect(server.address().publicKey)
@@ -81,7 +81,7 @@ describe('connect', () => {
   it('should not connect to self', async () => {
     const alice = new Slashtag({
       keyPair: Slashtag.createKeyPair(),
-      swarmOpts: dhtOpts
+      swarmOpts
     })
 
     await expect(alice.connect(alice.key)).to.eventually.be.rejectedWith(
@@ -92,7 +92,7 @@ describe('connect', () => {
   it('should throw an error for trying to listen on a remote slashtag', async () => {
     const alice = new Slashtag({
       key: Slashtag.createKeyPair().publicKey,
-      swarmOpts: dhtOpts
+      swarmOpts
     })
 
     expect(alice.remote).to.be.true()
