@@ -17,6 +17,7 @@ describe('ready', () => {
 
     expect(alice.key).to.eql(keyPair.publicKey)
     expect(alice.swarm).to.not.be.undefined()
+    expect(alice.key).to.eql(alice.publicDrive.key)
 
     await alice.close()
   })
@@ -35,9 +36,12 @@ describe('close', () => {
       alice.once('close', () => resolve(true))
     })
 
+    expect(alice.closed).to.be.false()
+
     await alice.close()
 
     expect(alice.swarm.destroyed).to.be.true()
     expect(await closeEvent).to.be.true()
+    expect(alice.closed).to.be.true()
   })
 })

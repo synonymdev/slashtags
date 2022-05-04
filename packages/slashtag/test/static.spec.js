@@ -41,4 +41,19 @@ describe('initialize', () => {
     expect(alice.key).to.eql(keyPair.publicKey)
     expect(alice.url.toString()).to.be.startWith('slash://')
   })
+
+  it('should be able to create a slasthag from a url', async () => {
+    const keyPair = Slashtag.createKeyPair()
+
+    const alice = new Slashtag({ keyPair })
+
+    const aliceRemote = new Slashtag({ url: alice.url.toString() })
+
+    expect(aliceRemote.remote).to.be.true()
+    expect(aliceRemote.key).to.eql(alice.key)
+    expect(aliceRemote.url.toString()).to.be.startWith('slash://')
+
+    await alice.close()
+    await aliceRemote.close()
+  })
 })

@@ -57,7 +57,7 @@ export class SlashProtocol extends EventEmitter {
  * Gets a specific protocol's channel from stream.
  *
  * @param {SecretStream} stream
- * @param {SlashtagProtocol} protocol
+ * @param {SlashProtocol} protocol
  * @returns
  */
 function getChannel (stream, protocol) {

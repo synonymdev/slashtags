@@ -4,7 +4,7 @@ import RAM from 'random-access-memory'
 import Hyperswarm from 'hyperswarm'
 import { DHT } from 'dht-universal'
 
-import { expect } from 'aegir/utils/chai.js'
+import { expect } from 'aegir/chai'
 import { SlashDrive } from '../src/index.js'
 import { replicate } from './helpers/replicate.js'
 

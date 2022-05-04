@@ -1,6 +1,6 @@
 import { homedir } from 'os'
 
-import { expect } from 'aegir/utils/chai.js'
+import { expect } from 'aegir/chai'
 import { storage } from '../../src/storage.js'
 
 describe('Storage nodejs', () => {

@@ -48,7 +48,9 @@ export class SlashDrive extends EventEmitter {
     return this.metadataDB?.feed.key
   }
 
+  /** @type {Uint8Array} */
   get discoveryKey () {
+    // @ts-ignore
     return this.metadataDB?.feed.discoveryKey
   }
 
@@ -217,7 +219,7 @@ export class SlashDrive extends EventEmitter {
    * @returns {Promise<Array<{key:string, metadata: Object}>>}
    */
   async list (prefix) {
-    await this.ready()
+    if (!this.content) await this.update()
 
     const options = {
       gte: prefix,

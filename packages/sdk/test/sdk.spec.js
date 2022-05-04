@@ -1,6 +1,6 @@
 import b4a from 'b4a'
 
-import { expect } from 'aegir/utils/chai.js'
+import { expect } from 'aegir/chai'
 import { sdk } from './helpers/setup-sdk.js'
 
 describe('SDK', () => {
@@ -20,7 +20,7 @@ describe('SDK', () => {
         )
       )
 
-      sdkA.close()
+      await sdkA.close()
     })
   })
 
@@ -37,36 +37,32 @@ describe('SDK', () => {
 
       expect(err.message).to.eql('Missing keyPair or key')
 
-      sdkA.close()
+      await sdkA.close()
     })
 
     it('should not create a new instance of an already opened slashtag', async () => {
       const sdkA = await sdk()
 
       const alice = sdkA.slashtag({ name: 'alice' })
-      await alice.ready()
 
       const aliceAgain = sdkA.slashtag({ name: 'alice' })
       expect(aliceAgain).to.eql(alice)
 
-      sdkA.close()
+      await sdkA.close()
     })
 
     it('should remove the slashtag on close', async () => {
       const sdkA = await sdk()
 
       const alice = sdkA.slashtag({ name: 'alice' })
-      await alice.ready()
 
       expect(sdkA.slashtags.get(alice.key)).to.eql(alice)
 
       await alice.close()
 
-      setTimeout(() => {
-        expect(sdkA.slashtags.get(alice.key)).to.be.undefined()
-      }, 1)
+      expect(sdkA.slashtags.get(alice.key)).to.be.undefined()
 
-      return sdkA.close()
+      await sdkA.close()
     })
 
     it('should create slashtag and close it on sdk.close()', async () => {
@@ -81,7 +77,12 @@ describe('SDK', () => {
       expect(keys.includes(b4a.toString(alice.key))).to.be.true()
       expect(keys.includes(b4a.toString(bob.key))).to.be.true()
 
-      sdkA.close()
+      await sdkA.close()
+
+      expect([...sdkA.slashtags.values()].map((s) => s.closed)).to.eql([
+        true,
+        true
+      ])
     })
 
     it('should not create an already existing writable slashtag', async () => {
@@ -96,7 +97,7 @@ describe('SDK', () => {
       expect(keys.length).to.eql(1)
       expect(keys.includes(b4a.toString(alice.key))).to.be.true()
 
-      sdkA.close()
+      await sdkA.close()
     })
   })
 })

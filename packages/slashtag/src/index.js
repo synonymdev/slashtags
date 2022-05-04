@@ -26,6 +26,7 @@ export class Slashtag extends EventEmitter {
   /**
    *
    * @param {object} opts
+   * @param {string} [opts.url]
    * @param {Uint8Array} [opts.key]
    * @param {import('./interfaces').KeyPair} [opts.keyPair]
    * @param {import('corestore')} [opts.store]
@@ -39,10 +40,11 @@ export class Slashtag extends EventEmitter {
 
     this.keyPair = opts.keyPair
     this.remote = !this.keyPair
-    this.key = opts.keyPair?.publicKey || opts.key
+    this.url = opts.url ? new SlashURL(opts.url) : null
+    this.key = opts.keyPair?.publicKey || opts.key || this.url?.slashtag.key
     if (!this.key) throw new Error('Missing keyPair or key')
 
-    this.url = new SlashURL(this.key)
+    this.url = this.url || new SlashURL(this.key)
 
     this._swarmOpts = opts.swarmOpts
     const store = opts.store || new Corestore(RAM)
@@ -64,6 +66,9 @@ export class Slashtag extends EventEmitter {
     })
   }
 
+  /**
+   * Sets up and resolves the publicDrive for this Slashtag.
+   */
   async ready () {
     if (this._ready) return true
 
@@ -123,7 +128,7 @@ export class Slashtag extends EventEmitter {
   /**
    * Registers a protocol if it wasn't already, and get and instance of it for this Slashtag.
    *
-   * @template {typeof SlashtagProtocol} P
+   * @template {typeof SlashProtocol} P
    * @param {P} Protocol
    * @returns {InstanceType<P>}
    */
@@ -192,6 +197,7 @@ export class Slashtag extends EventEmitter {
 
     this._setupDiscovery(drive)
 
+    await drive.update()
     return drive
   }
 
@@ -213,10 +219,10 @@ export class Slashtag extends EventEmitter {
   async close () {
     if (this.closed) return
     this.closed = true
+    this.emit('close')
     if (!this.swarm) return
     await this.swarm?.destroy()
     await this.store.close()
-    this.emit('close')
     debug('Slashtag closed', b4a.toString(this.key, 'hex'))
   }
 
