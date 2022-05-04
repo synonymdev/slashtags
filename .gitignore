@@ -19,4 +19,5 @@ packages/*/dist
 .netlify
 .parcel*
 dist/
-.*
+.testnet.json
+tsconfig-check.aegir.json

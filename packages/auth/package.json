@@ -2,17 +2,17 @@
   "name": "@synonymdev/slashtags-auth",
   "version": "0.4.0-alpha.4",
   "description": "Authorization using slashtags",
-  "type": "module",
-  "keywords": [],
+  "license": "MIT",
   "homepage": "https://github.com/synonymdev/slashtags/tree/master/packages/auth/#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/synonymdev/slashtags.git"
+  },
   "bugs": {
     "url": "https://github.com/synonymdev/slashtags/issues"
   },
-  "license": "MIT",
-  "files": [
-    "*",
-    "!**/*.tsbuildinfo"
-  ],
+  "keywords": [],
+  "type": "module",
   "types": "types/src/index.d.ts",
   "typesVersions": {
     "*": {
@@ -26,35 +26,32 @@
       ]
     }
   },
+  "files": [
+    "*",
+    "!**/*.tsbuildinfo"
+  ],
   "main": "src/index.js",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/synonymdev/slashtags.git"
-  },
   "scripts": {
     "build": "aegir build",
     "test": "c8 aegir test",
     "ts-check": "aegir ts -p check",
-    "lint": "aegir lint --fix",
+    "lint": "standard --fix",
     "clean": "rimraf ./dist",
-    "dep-check": "aegir dep-check"
+    "depcheck": "aegir dep-check"
+  },
+  "standard": {
+    "env": [
+      "mocha"
+    ]
+  },
+  "dependencies": {
+    "compact-encoding": "^2.6.1",
+    "compact-encoding-struct": "^1.2.1",
+    "debug": "^4.3.4"
   },
   "devDependencies": {
     "@hyperswarm/testnet": "^2.0.0",
-    "aegir": "^36.2.3",
+    "aegir": "^37.0.15",
     "dht-universal": "^0.4.1"
-  },
-  "eslintConfig": {
-    "env": {
-      "mocha": true
-    },
-    "parserOptions": {
-      "sourceType": "module"
-    }
-  },
-  "dependencies": {
-    "@synonymdev/slashtags-sdk": "^0.1.0-alpha.6",
-    "compact-encoding": "^2.6.1",
-    "compact-encoding-struct": "^1.2.1"
   }
 }

@@ -1,30 +1,38 @@
-const fs = require('fs');
-const createTestnet = require('@hyperswarm/testnet');
-const { setupRelay } = require('dht-universal/setup-relay.js');
+const fs = require('fs')
+const createTestnet = require('@hyperswarm/testnet')
+const { setupRelay } = require('dht-universal/setup-relay.js')
+const goodbye = require('graceful-goodbye')
 
-const main = async () => {
-  const testnet = await createTestnet(3);
+const TESTNET_CONFIG_PATH = '.testnet.json'
+
+setup()
+
+async function setup () {
+  const testnet = await createTestnet(3)
 
   const { port } = await setupRelay({
     dhtOpts: { bootstrap: testnet.bootstrap },
-    wsServerOptions: { port: 8888 },
-  });
-  const relay = 'ws://localhost:' + port;
+    wsServerOptions: { port: 8888 }
+  })
+  const relay = 'ws://localhost:' + port
 
-  let dotenv;
-  try {
-    dotenv = fs.readFileSync('.env', 'utf8');
-  } catch (error) {
-    dotenv = '';
+  const config = {
+    relay,
+    bootstrap: testnet.bootstrap
   }
-  const toSave =
-    dotenv.replace(/\n\n/g, '\n').replace(/BOOTSTRAP=.*\n?/g, '') +
-    ('\nBOOTSTRAP=' + JSON.stringify(testnet.bootstrap));
-  fs.writeFileSync('.env', toSave, {});
 
-  console.log('Testnet bootstrap now available at .env');
-  console.log('bootstrap', testnet.bootstrap);
-  console.log('DHT Relay: ' + relay);
-};
+  setConfig(config)
 
-main();
+  console.log('Testnet config now available at the root dir: .testnet.json')
+  console.log(JSON.stringify(config, null, 2))
+
+  goodbye(async function () {
+    fs.unlinkSync(TESTNET_CONFIG_PATH)
+    console.log('\nGracefully closing testnet and deleting config file')
+    await testnet.destroy()
+  })
+}
+
+async function setConfig (config) {
+  fs.writeFileSync(TESTNET_CONFIG_PATH, JSON.stringify(config, null, 2))
+}

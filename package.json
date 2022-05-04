@@ -2,46 +2,50 @@
   "name": "slashtags-js",
   "version": "0.0.0",
   "description": "A practical and gradual exploration of Slashtags protocol design, through a mvp implementation",
+  "private": true,
+  "license": "MIT",
+  "homepage": "https://github.com/synonymdev/slashtags/tree/master/#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/synonymdev/slashtags.git"
+  },
+  "bugs": {
+    "url": "https://github.com/synonymdev/slashtags/issues"
+  },
   "keywords": [
     "hypercore",
     "slashtags",
     "wot",
     "p2p"
   ],
-  "homepage": "https://github.com/synonymdev/slashtags/tree/master/#readme",
-  "bugs": {
-    "url": "https://github.com/synonymdev/slashtags/issues"
-  },
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/synonymdev/slashtags.git"
+  "engines": {
+    "node": ">=16.15.0",
+    "npm": ">=8.5.5"
   },
   "scripts": {
     "link": "lerna link",
-    "lint": "lerna run lint",
-    "test": "lerna run test",
+    "lint": "npx standard scripts/*.js --fix && lerna run lint",
+    "test": "npm run testnet && lerna run test && npm run close-testnet",
     "ts-check": "lerna run test",
     "build": "lerna run build",
     "clean": "lerna run clean",
-    "dep-check": "lerna run dep-check",
+    "depcheck": "lerna run depcheck",
     "create": "node ./scripts/new-package.js",
     "reset": "lerna run clean && rimraf packages/*/node_modules node_modules packages/*/package-lock.json",
-    "testnet": "node scripts/setup-testnet.js",
+    "testnet": "pm2 start scripts/setup-testnet.js || echo 'Testnet already running'",
+    "close-testnet": "pm2 delete scripts/setup-testnet.js || echo 'Testnet not running'",
     "relay": "node scripts/setup-relay.js"
   },
   "devDependencies": {
     "@hyperswarm/testnet": "^2.0.0",
     "c8": "^7.11.0",
     "dht-universal": "^0.4.1",
-    "lerna": "^4.0.0"
+    "graceful-goodbye": "^1.0.0",
+    "lerna": "^4.0.0",
+    "pm2": "^5.2.0",
+    "standard": "^17.0.0"
   },
   "workspaces": [
     "./packages/*"
-  ],
-  "engines": {
-    "node": ">=16.0.0",
-    "npm": ">=7.0.0"
-  },
-  "private": true
+  ]
 }

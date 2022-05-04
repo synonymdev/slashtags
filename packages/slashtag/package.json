@@ -2,17 +2,17 @@
   "name": "@synonymdev/slashtag",
   "version": "0.1.0-alpha.0",
   "description": "",
-  "type": "module",
-  "keywords": [],
+  "license": "MIT",
   "homepage": "https://github.com/synonymdev/slashtags/tree/master/packages/slashtag/#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/synonymdev/slashtags.git"
+  },
   "bugs": {
     "url": "https://github.com/synonymdev/slashtags/issues"
   },
-  "license": "MIT",
-  "files": [
-    "*",
-    "!**/*.tsbuildinfo"
-  ],
+  "keywords": [],
+  "type": "module",
   "types": "types/src/index.d.ts",
   "typesVersions": {
     "*": {
@@ -26,30 +26,22 @@
       ]
     }
   },
+  "files": [
+    "*",
+    "!**/*.tsbuildinfo"
+  ],
   "main": "src/index.js",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/synonymdev/slashtags.git"
-  },
   "scripts": {
     "build": "aegir build",
     "test": "c8 aegir test",
-    "ts-check": "aegir ts -p check",
-    "lint": "aegir lint --fix",
+    "lint": "standard --fix",
     "clean": "rimraf ./dist",
-    "dep-check": "aegir dep-check"
+    "depcheck": "npx aegir dep-check"
   },
-  "devDependencies": {
-    "@hyperswarm/testnet": "^2.0.0",
-    "aegir": "^36.1.3"
-  },
-  "eslintConfig": {
-    "env": {
-      "mocha": true
-    },
-    "parserOptions": {
-      "sourceType": "module"
-    }
+  "standard": {
+    "env": [
+      "mocha"
+    ]
   },
   "dependencies": {
     "b4a": "^1.5.0",
@@ -57,8 +49,13 @@
     "corestore": "^6.0.1-alpha.17",
     "debug": "^4.3.4",
     "dht-universal": "^0.4.1",
+    "graceful-goodbye": "^1.0.0",
     "hyperswarm": "^3.0.4",
     "random-access-memory": "^4.1.0",
-    "sodium-universal": "^3.1.0"
+    "sodium-universal": "^3.1.0",
+    "turbo-hash-map": "^1.0.3"
+  },
+  "devDependencies": {
+    "aegir": "^37.0.15"
   }
 }
