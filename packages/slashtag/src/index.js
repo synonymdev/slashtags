@@ -252,12 +252,14 @@ export class Slashtag extends EventEmitter {
       swarmOpts: this._swarmOpts
     })
 
-    const info = { local: this.url, remote: peerInfo.slashtag.url }
+    const info = {
+      local: this.url.toString(),
+      remote: peerInfo.slashtag.url.toString()
+    }
 
     debug('Swarm connection OPENED', info)
     socket.on('error', function (/** @type {Error} */ err) {
       debug('Swarm connection ERRORED', err, info)
-      peerInfo.slashtag.close()
     })
     socket.on('close', function () {
       debug('Swarm connection CLOSED', info)

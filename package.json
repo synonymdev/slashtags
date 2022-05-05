@@ -25,7 +25,7 @@
   "scripts": {
     "link": "lerna link",
     "lint": "npx standard scripts/*.js --fix && lerna run lint",
-    "test": "npm run testnet && lerna run test && npm run close-testnet",
+    "test": "lerna run test",
     "ts-check": "lerna run test",
     "build": "lerna run build",
     "clean": "lerna run clean",
@@ -34,7 +34,8 @@
     "reset": "lerna run clean && rimraf packages/*/node_modules node_modules packages/*/package-lock.json",
     "testnet": "pm2 start scripts/setup-testnet.js || echo 'Testnet already running'",
     "close-testnet": "pm2 delete scripts/setup-testnet.js || echo 'Testnet not running'",
-    "relay": "node scripts/setup-relay.js"
+    "relay": "node scripts/setup-relay.js",
+    "postinstall": "npm run link"
   },
   "devDependencies": {
     "@hyperswarm/testnet": "^2.0.0",

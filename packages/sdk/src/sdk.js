@@ -7,6 +7,7 @@ import Debug from 'debug'
 import { Slashtag } from '@synonymdev/slashtag'
 
 import { storage } from './storage.js'
+import { protocolsList } from './protocols.js'
 
 const debug = Debug('slashtags:sdk')
 
@@ -19,6 +20,7 @@ export class SDK {
    * @param {Uint8Array} [opts.primaryKey]
    * @param {string[]} [opts.relays]
    * @param {import('dht-universal').DHTOpts['bootstrap']} [opts.bootstrap]
+   * @param {Array<typeof import('@synonymdev/slashtag').SlashProtocol>} [opts.protocols]
    */
   constructor (opts = {}) {
     this.storage = opts.persistent === false ? RAM : storage(opts.storage)
@@ -33,6 +35,8 @@ export class SDK {
       this.dht = await DHT.create(this.opts)
       return true
     })()
+
+    this.protocols = this.opts.protocols || protocolsList
 
     // Gracefully shutdown
     goodbye(() => {
@@ -79,7 +83,8 @@ export class SDK {
     const slashtag = new Slashtag({
       ...opts,
       store: this.store,
-      swarmOpts: { relays: this.opts.relays, bootstrap: this.opts.bootstrap }
+      swarmOpts: { relays: this.opts.relays, bootstrap: this.opts.bootstrap },
+      protocols: this.protocols
     })
 
     const existing = this.slashtags.get(slashtag.key)
@@ -91,7 +96,7 @@ export class SDK {
       if (!this.closed) this.slashtags.delete(slashtag.key)
     })
 
-    debug('Created a slashtag', slashtag.url)
+    debug('Created a slashtag ' + slashtag.url)
     return slashtag
   }
 

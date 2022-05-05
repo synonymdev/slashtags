@@ -26,9 +26,6 @@ module.exports = {
       };
     },
   },
-  async after() {
-    process.exit();
-  },
   build: {
     config: esbuild,
   },
