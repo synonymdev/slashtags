@@ -44,6 +44,11 @@ describe('connect', () => {
       "Slahstag's client connection should augment peerInfo with a Slashtag instance generated from the remote peer public key"
     )
 
+    expect(peerInfo.slashtag._swarmOpts).to.eql(
+      alice._swarmOpts,
+      'Should pass swarmOpts to the slashtag created in the peerInfo'
+    )
+
     expect(alice.swarm.listenerCount('connection')).to.equal(
       1,
       'should remove the event listener after Slashtag.connect() is done'
@@ -99,5 +104,21 @@ describe('connect', () => {
     await expect(
       alice.connect(b4a.from('a'.repeat(64), 'hex'))
     ).to.eventually.be.rejectedWith(/^Cannot connect from a remote slashtag$/)
+  })
+
+  it('should be able to connect to a Slashtag url', async () => {
+    const alice = new Slashtag({
+      keyPair: Slashtag.createKeyPair(),
+      swarmOpts
+    })
+
+    await expect(alice.connect(alice.url)).to.be.eventually.rejectedWith(
+      'Cannot connect to self'
+    )
+    await expect(
+      alice.connect(alice.url.toString())
+    ).to.be.eventually.rejectedWith('Cannot connect to self')
+
+    await alice.close()
   })
 })

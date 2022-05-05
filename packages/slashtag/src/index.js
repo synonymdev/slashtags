@@ -103,11 +103,14 @@ export class Slashtag extends EventEmitter {
   /**
    * Connect to a remote Slashtag.
    *
-   * @param {Uint8Array} key
+   * @param {Uint8Array | SlashURL | string} key
    * @returns {Promise<{connection: SecretStream, peerInfo:PeerInfo}>}
    */
   async connect (key) {
     if (this.remote) throw new Error('Cannot connect from a remote slashtag')
+    if (typeof key === 'string') key = new SlashURL(key).slashtag.key
+    if (key instanceof SlashURL) key = key.slashtag.key
+
     if (b4a.equals(key, this.key)) throw new Error('Cannot connect to self')
     await this.ready()
 
@@ -244,9 +247,22 @@ export class Slashtag extends EventEmitter {
    */
   async _handleConnection (socket, peerInfo) {
     this.store.replicate(socket)
-    peerInfo.slashtag = new Slashtag({ key: peerInfo.publicKey })
+    peerInfo.slashtag = new Slashtag({
+      key: peerInfo.publicKey,
+      swarmOpts: this._swarmOpts
+    })
 
-    debugConnection(socket, this, peerInfo.slashtag)
+    const info = { local: this.url, remote: peerInfo.slashtag.url }
+
+    debug('Swarm connection OPENED', info)
+    socket.on('error', function (/** @type {Error} */ err) {
+      debug('Swarm connection ERRORED', err, info)
+      peerInfo.slashtag.close()
+    })
+    socket.on('close', function () {
+      debug('Swarm connection CLOSED', info)
+      peerInfo.slashtag.close()
+    })
 
     this._setupProtocols(socket, peerInfo)
     this.emit('connection', socket, peerInfo)
@@ -263,24 +279,6 @@ export class Slashtag extends EventEmitter {
       protocol.createChannel(socket, peerInfo)
     }
   }
-}
-
-/**
- *
- * @param {SecretStream} socket
- * @param {Slashtag} local
- * @param {Slashtag} remote
- */
-function debugConnection (socket, local, remote) {
-  const info = { local: local.url, remote: remote.url }
-
-  debug('Swarm connection OPENED', info)
-  socket.on('error', function (err) {
-    debug('Swarm connection ERRORED', err, info)
-  })
-  socket.on('close', function () {
-    debug('Swarm connection CLOSED', info)
-  })
 }
 
 /**

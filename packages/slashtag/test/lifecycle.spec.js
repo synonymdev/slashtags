@@ -44,4 +44,26 @@ describe('close', () => {
     expect(await closeEvent).to.be.true()
     expect(alice.closed).to.be.true()
   })
+
+  it('should close all the slashtags created in connection peerInfo', async () => {
+    const alice = new Slashtag({
+      keyPair: Slashtag.createKeyPair(),
+      swarmOpts
+    })
+
+    await alice.listen()
+
+    const bob = new Slashtag({
+      keyPair: Slashtag.createKeyPair(),
+      swarmOpts
+    })
+
+    const { peerInfo } = await bob.connect(alice.key)
+    await peerInfo.slashtag.ready()
+
+    await alice.close()
+    await bob.close()
+
+    expect(peerInfo.slashtag.closed).to.be.true()
+  })
 })

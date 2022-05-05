@@ -18,7 +18,7 @@ export class SDK {
    * @param {boolean} [opts.persistent]
    * @param {Uint8Array} [opts.primaryKey]
    * @param {string[]} [opts.relays]
-   * @param {import('dht-universal').DHTOpts['bootstrap']} [opts.boostrap]
+   * @param {import('dht-universal').DHTOpts['bootstrap']} [opts.bootstrap]
    */
   constructor (opts = {}) {
     this.storage = opts.persistent === false ? RAM : storage(opts.storage)
@@ -76,7 +76,11 @@ export class SDK {
       opts.keyPair = this.createKeyPair(opts.name)
     }
 
-    const slashtag = new Slashtag({ ...opts, store: this.store })
+    const slashtag = new Slashtag({
+      ...opts,
+      store: this.store,
+      swarmOpts: { relays: this.opts.relays, bootstrap: this.opts.bootstrap }
+    })
 
     const existing = this.slashtags.get(slashtag.key)
     if (existing) return existing
