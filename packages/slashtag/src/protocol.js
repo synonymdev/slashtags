@@ -1,4 +1,7 @@
 import { EventEmitter } from 'events'
+import Debug from 'debug'
+
+const debug = Debug('slashtags:slashprotocol')
 
 export class SlashProtocol extends EventEmitter {
   /**
@@ -49,6 +52,7 @@ export class SlashProtocol extends EventEmitter {
     const { connection } = await this.slashtag.connect(key)
     const channel = getChannel(connection, this.protocol)
 
+    debug('connected to: ' + channel.peerInfo.slashtag.url)
     return { connection, channel }
   }
 }

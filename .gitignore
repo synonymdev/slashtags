@@ -21,3 +21,4 @@ packages/*/dist
 dist/
 .testnet.json
 tsconfig-check.aegir.json
+examples/*/tmp/

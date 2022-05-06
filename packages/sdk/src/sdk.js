@@ -72,7 +72,7 @@ export class SDK {
    * @param {object} opts
    * @param {string} [opts.name]
    * @param {Uint8Array} [opts.key]
-   * @returns
+   * @returns {Slashtag}
    */
   slashtag (opts) {
     if (opts.name) {

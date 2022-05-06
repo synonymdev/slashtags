@@ -7,5 +7,8 @@ declare module 'corestore' {
     replicate(socket: any);
     namespace(name: string | Uint8Array): Corestore;
     close(): Promise<void>;
+
+    createKeyPair(name: string);
+    findingPeers(): () => void;
   };
 }

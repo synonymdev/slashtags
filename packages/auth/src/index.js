@@ -5,21 +5,21 @@ import { SlashProtocol, SlashURL } from '@synonymdev/slashtag'
 
 const debug = Debug('slashtags:protocol:slashauth')
 
-export const SharedDrive = cstruct.compile({
+const SharedDriveMessage = cstruct.compile({
   key: c.fixed32,
   encryptionKey: c.fixed32
 })
 
-const Request = cstruct.compile({
+const RequestMessage = cstruct.compile({
   token: c.string,
-  drive: SharedDrive
+  drive: SharedDriveMessage
 })
 
-const Success = cstruct.compile({
-  drive: SharedDrive
+const SuccessMessage = cstruct.compile({
+  drive: SharedDriveMessage
 })
 
-const Error = cstruct.compile({
+const ErrorMessage = cstruct.compile({
   message: c.string
 })
 
@@ -32,17 +32,17 @@ export class SlashAuth extends SlashProtocol {
     return [
       {
         // Request
-        encoding: Request,
+        encoding: RequestMessage,
         onmessage: this._onRequest.bind(this)
       },
       {
         // Success
-        encoding: Success,
+        encoding: SuccessMessage,
         onmessage: this._onSuccess.bind(this)
       },
       {
         // Response
-        encoding: Error,
+        encoding: ErrorMessage,
         onmessage: this._onError.bind(this)
       }
     ]
@@ -81,7 +81,7 @@ export class SlashAuth extends SlashProtocol {
         /**
          * Callback for passing an error to the initiator.
          *
-         * @param {Error} error
+         * @param {*} error
          */
         error: function (error) {
           channel.messages[2].send({
@@ -123,6 +123,8 @@ export class SlashAuth extends SlashProtocol {
 
     const q = url.searchParams.get('q')
 
+    if (!q) throw new Error('URL contains no token "q"')
+
     const { channel } = await this.connect(url.slashtag.key)
 
     /** @type {SlashDrive} */
@@ -136,11 +138,14 @@ export class SlashAuth extends SlashProtocol {
       encryptionKey: drive.encryptionKey
     }
 
-    debug('Sending request', { driveData, q })
-
-    channel.messages[0].send?.({
+    const sent = channel.messages[0].send?.({
       token: q,
       drive: driveData
+    })
+
+    debug((sent ? 'Sent request to ' : 'Failed to send  request to ') + url, {
+      driveData,
+      q
     })
 
     return { drive }

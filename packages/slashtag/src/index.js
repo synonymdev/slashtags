@@ -21,6 +21,7 @@ export const DRIVE_KEYS = {
 }
 
 const debug = Debug('slashtags:slashtag')
+const swarmDebug = Debug('slashtags:slashtag:swarm')
 
 export class Slashtag extends EventEmitter {
   /**
@@ -86,10 +87,7 @@ export class Slashtag extends EventEmitter {
       keyPair: this.keyPair
     })
 
-    debug('Slashtag is ready', {
-      key: b4a.toString(this.key, 'hex'),
-      remote: this.remote
-    })
+    debug('Slashtag is ready: ' + this.url, { remote: this.remote })
   }
 
   async listen () {
@@ -110,6 +108,8 @@ export class Slashtag extends EventEmitter {
     if (this.remote) throw new Error('Cannot connect from a remote slashtag')
     if (typeof key === 'string') key = new SlashURL(key).slashtag.key
     if (key instanceof SlashURL) key = key.slashtag.key
+
+    debug('connecting to: ' + new SlashURL(key))
 
     if (b4a.equals(key, this.key)) throw new Error('Cannot connect to self')
     await this.ready()
@@ -198,6 +198,7 @@ export class Slashtag extends EventEmitter {
     if (existing) return existing
     this._drives.set(drive.key, drive)
 
+    // TODO enable customizing the discovery option
     this._setupDiscovery(drive)
 
     await drive.update()
@@ -209,14 +210,11 @@ export class Slashtag extends EventEmitter {
    * @param {SlashDrive} drive
    * @param {*} opts
    */
-  async _setupDiscovery (drive, opts = { server: true, client: true }) {
-    // TODO enable customizing the discovery option
+  async _setupDiscovery (drive, opts = {}) {
     this.swarm?.join(drive.discoveryKey, opts)
 
     const done = await drive.findingPeers()
     this.swarm?.flush().then(done, done)
-
-    debug('Setting up discovery done', b4a.toString(drive.discoveryKey, 'hex'))
   }
 
   async close () {
@@ -257,12 +255,12 @@ export class Slashtag extends EventEmitter {
       remote: peerInfo.slashtag.url.toString()
     }
 
-    debug('Swarm connection OPENED', info)
+    swarmDebug('Swarm connection OPENED', info)
     socket.on('error', function (/** @type {Error} */ err) {
-      debug('Swarm connection ERRORED', err, info)
+      swarmDebug('Swarm connection ERRORED', err, info)
     })
     socket.on('close', function () {
-      debug('Swarm connection CLOSED', info)
+      swarmDebug('Swarm connection CLOSED', info)
       peerInfo.slashtag.close()
     })
 

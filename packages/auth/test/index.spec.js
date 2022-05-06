@@ -3,8 +3,8 @@ import { Slashtag } from '@synonymdev/slashtag'
 import { SlashAuth } from '../src/index.js'
 import b4a from 'b4a'
 
-const { RELAY_URL, BOOTSTRAP } = process.env
-const bootstrap = JSON.parse(BOOTSTRAP)
+const { RELAY_URL, BOOTSTRAP, MAINNET } = process.env
+const bootstrap = MAINNET ? undefined : JSON.parse(BOOTSTRAP)
 
 const swarmOpts = { relays: [RELAY_URL], bootstrap }
 
@@ -84,7 +84,7 @@ describe('SlashAuth', () => {
           )
 
           const sharedByInitiator = await remoteSlashtag.drive(request.drive)
-          expect(await sharedByInitiator.get('/messages/1')).to.eql(
+          expect(await sharedByInitiator.get('messages/1')).to.eql(
             b4a.from('Hello from Initiator'),
             'Should be able to resolve messages shared by the initiator'
           )
@@ -92,7 +92,7 @@ describe('SlashAuth', () => {
           // Writing a message _to_ the initiator
           const { drive: sharedByResponder } = await response.success()
           await sharedByResponder.put(
-            '/messages/1',
+            'messages/1',
             b4a.from('Hello from Responder')
           )
 
@@ -123,10 +123,7 @@ describe('SlashAuth', () => {
     const { drive: sharedByInitiator } = await authInitiator.request(url)
 
     // Sending data to the responder using the shared drive
-    await sharedByInitiator.put(
-      '/messages/1',
-      b4a.from('Hello from Initiator')
-    )
+    await sharedByInitiator.put('messages/1', b4a.from('Hello from Initiator'))
 
     const initiatorGotSuccess = await new Promise((resolve) => {
       authInitiator.once('success', async ({ drive }) => {
@@ -134,7 +131,7 @@ describe('SlashAuth', () => {
         expect(drive.encryptionKey.length).to.eql(32)
 
         const responderSharedDrive = await initiator.drive(drive)
-        expect(await responderSharedDrive.get('/messages/1')).to.eql(
+        expect(await responderSharedDrive.get('messages/1')).to.eql(
           b4a.from('Hello from Responder')
         )
 
