@@ -1,22 +1,55 @@
-import b4a from 'b4a';
-import { SDK, protocols, SlashURL } from '@synonymdev/slashtags-sdk';
-import fs from 'fs';
+import b4a from 'b4a'
+import { SDK, protocols, SlashURL } from '@synonymdev/slashtags-sdk'
+import fs from 'fs'
+import path from 'path'
+import os from 'os'
 
-request();
+main()
 
-async function request() {
-  console.time('setup');
+let sdk, initiator
+
+async function main () {
+  // === Setting up the SDK and Initiator's Slashtag ===
+  await setupSlashtag()
+
+  // === Resolve the Responder's Profile to ask User for confirmation ===
+  // In a normal App, this step can be cached and skipped for subsequent requests.
+  const url = process.env.url || urlFromFile()
+  await resolveProfile(sdk, url)
+
+  // Simulate a user confirming auth request
+  console.log('\nClick any key to authenticate...')
+  process.stdin.on('data', async (data) => {
+    // SlashAuth protocol is already available on the initiator (included in the SDK)
+    // And we can access its instance from anywhere on the initiator as follows:
+    const auth = initiator.protocol(protocols.SlashAuth)
+
+    // Once the Responder has accepted the request, we can access the drive they shared with us
+    console.time('auth response')
+    auth.once('success', onSuccess)
+
+    // === Making an Auth request ===
+    const { drive: sharedByMe } = await auth.request(new SlashURL(url))
+
+    // Writing a message _to_ the responder on the drive we shared with them
+    await sharedByMe.put('messages/1', b4a.from('Hello from Initiator'))
+  })
+}
+
+async function setupSlashtag () {
+  console.time('setup')
+  console.log('setting up slashtag...')
   // Start setup
-  const sdk = await SDK.init({
+  sdk = await SDK.init({
+    // Storage in memory to avoid bloating your disk
     persistent: false,
-    storage: './tmp/store/initiator/',
-    primaryKey: b4a.from('b'.repeat(64), 'hex'),
-  });
+    primaryKey: b4a.from('b'.repeat(64), 'hex')
+  })
 
   // Create a new Slashtag from a name
-  const initiator = await sdk.slashtag({ name: 'Initiator' });
+  initiator = sdk.slashtag({ name: 'Initiator' })
 
-  console.log('Initiator:', initiator.url.toString());
+  console.log(initiator.url.toString())
 
   // Set the initiator's profile on their public drive
   await initiator.setProfile({
@@ -24,51 +57,38 @@ async function request() {
     type: 'Person',
     name: 'Alice Bob',
     url: 'https://alice.bob',
-    description: 'Alice is a very good person',
-  });
+    description: 'Alice is a very good person'
+  })
+
   // End of setup
-  console.timeEnd('setup');
+  console.timeEnd('setup')
+}
 
-  // SlashAuth protocol is already available on the initiator (included in the SDK)
-  // And we can access its instance from anywhere on the initiator as follows:
-  const auth = initiator.protocol(protocols.SlashAuth);
-
-  // Resolve Remote profile
-  console.time('resolve profile');
-  const url = process.env.url || fs.readFileSync('./tmp/url.txt', 'utf8');
+async function resolveProfile (sdk, url) {
+  console.log('\n\nResolving profile for:\n', url)
+  console.time('resolve profile')
 
   const responderProfile = await sdk
     .slashtag({ key: new SlashURL(url).slashtag.key })
-    .getProfile();
-  console.log(`\n\n === Resolved Responder's profile === \n`, responderProfile);
-  console.timeEnd('resolve profile');
+    .getProfile()
 
-  // Making an Auth request
-  console.time('auth response');
-  const { drive: sharedByMe } = await auth.request(new SlashURL(url));
+  console.log("Responder's profile: ", responderProfile)
+  console.timeEnd('resolve profile')
+}
 
-  console.log('\n\n === Sent a request === \n');
+async function onSuccess ({ drive }) {
+  console.log('Success')
+  console.timeEnd('auth response')
 
-  // Once the Responder has accepted the request, we can access the drive they shared with us
-  auth.on('success', async ({ drive }) => {
-    console.log(`\n\n === Success: Responder shared a drive === \n`, drive);
-    console.timeEnd('auth response');
+  const sharedWithMe = await initiator.drive(drive)
+  await sharedWithMe.ready()
+  console.log('shared drive is readable', sharedWithMe.readable)
+  // Now you can read and list metadata of this drive, and even watch for changes in it.
+  // For simplicity, we will leave that for another example.
+}
 
-    console.time('read message');
-    const sharedWithMe = await initiator.drive(drive);
-
-    // Reading a message _from_ the responder on the drive they shared with us
-    console.log(
-      "\n === Resolved Initiator's shared drive: === \n",
-      '   - /messages/1',
-      b4a.toString(await sharedWithMe.get('messages/1')),
-    );
-    console.timeEnd('read message');
-
-    // Done, closing the sdk gracefully
-    await sdk.close();
-  });
-
-  // Writing a message _to_ the responder on the drive we shared with them
-  await sharedByMe.put('messages/1', b4a.from('Hello from Initiator'));
+function urlFromFile () {
+  return fs
+    .readFileSync(path.join(os.tmpdir(), 'slashtags-examples/auth/url.txt'))
+    .toString()
 }

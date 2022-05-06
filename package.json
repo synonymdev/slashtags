@@ -24,7 +24,7 @@
   },
   "scripts": {
     "link": "lerna link",
-    "lint": "npx standard scripts/*.js --fix && lerna run lint",
+    "lint": "npx standard scripts/*.js examples/**/*.js --fix && lerna run lint",
     "test": "lerna run test",
     "ts-check": "lerna run test",
     "build": "lerna run build",

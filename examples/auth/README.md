@@ -10,13 +10,17 @@ Demonstrate the implementation of Slashtags features between a Responder, and an
 npm run listen
 ```
 
-You should see the responder's Auth url, and it will be saved in ./url.txt
+You should see the responder's Auth url, and it will be saved at `/slashtags-examples/auth/url.txt` in your operating system's temporary directory alongside the data of the SlashDrives.
 
 - Run the Initiator's client (in a separate terminal)
 
 ```bash
 npm run request
 ```
+
+It should resolves the Responder's profile, and ask you to click any key to continue.
+
+Wait until the `listen` scripts resolves the Initiator's profile too before closing the terminal.
 
 ## Testing
 
