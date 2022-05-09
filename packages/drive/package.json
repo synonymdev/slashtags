@@ -33,7 +33,8 @@
   "main": "src/index.js",
   "scripts": {
     "build": "aegir build",
-    "test": "c8 aegir test",
+    "test": "c8 aegir test -f test/*.spec.js && npm run test:node",
+    "test:node": "c8 aegir test -t node -f test/node/*.spec.js",
     "lint": "standard -i dist/ --fix",
     "clean": "rimraf ./dist",
     "depcheck": "aegir dep-check"
