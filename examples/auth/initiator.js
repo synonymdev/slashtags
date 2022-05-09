@@ -19,7 +19,7 @@ async function main () {
 
   // Simulate a user confirming auth request
   console.log('\nClick any key to authenticate...')
-  process.stdin.on('data', async (data) => {
+  process.stdin.once('data', async (data) => {
     // SlashAuth protocol is already available on the initiator (included in the SDK)
     // And we can access its instance from anywhere on the initiator as follows:
     const auth = initiator.protocol(protocols.SlashAuth)
@@ -41,8 +41,7 @@ async function setupSlashtag () {
   console.log('setting up slashtag...')
   // Start setup
   sdk = await SDK.init({
-    // Storage in memory to avoid bloating your disk
-    persistent: false,
+    storage: path.join(os.tmpdir(), 'slashtags-examples/auth/initiator'),
     primaryKey: b4a.from('b'.repeat(64), 'hex')
   })
 

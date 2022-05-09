@@ -36,8 +36,9 @@
   },
   "scripts": {
     "build": "aegir build",
-    "test": "c8 aegir test -f test/*.spec.js && npm run test-storage",
-    "test-storage": "c8 aegir test -t node -f test/storage/node.spec.js && c8 aegir test -t browser -f test/storage/browser.spec.js",
+    "test": "c8 aegir test -f test/*.spec.js && npm run test:node && npm run test:browser",
+    "test:node": "c8 aegir test -t node -f test/node/*",
+    "test:browser": "aegir test -t browser -f test/browser/*",
     "ts-check": "aegir ts -p check",
     "lint": "standard -i dist/ --fix",
     "clean": "rimraf ./dist",
