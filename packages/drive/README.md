@@ -89,6 +89,8 @@ Make a new SlashDrive instance.
 }
 ```
 
+_NOTE_ `drive.store` is replaced with the a namespaced instance, so `drive.store.close()` won't close the parent store you passed to the drive options.
+
 #### `await drive.ready()`
 
 Wait for the core to fully open.
@@ -123,6 +125,14 @@ Returns true if the metadata core and the content core are both [readable](https
 
 Especially useful in remote drives to check if the drive got the content core already.
 
+#### `drive.replicate()`
+
+Creates a replication stream that is capable of replicating the metadata and content cores at the same time.
+
+Available before the drive is ready.
+
+Same as `drive.store.replicate()`, more about [corestore.replicate](https://github.com/hypercore-protocol/corestore-next#const-stream--storereplicateopts)
+
 #### `await drive.findingPeers()`
 
 Returns a callback that informs this.update() that peer discovery is done, more at [Hypercore.findingPeers](https://github.com/hypercore-protocol/hypercore-next/#const-done--corefindingpeers).
@@ -138,12 +148,6 @@ If the drive is not writable, it will also try to read the Content's core key fr
 If it failed to find any peers, or couldn't retrieve the headers needed to find the Content's core, it will throw an error.
 
 If the remote drive is encrypted or corrupt, it will throw a different error for that case as well.
-
-#### `drive.replicate()`
-
-Creates a replication stream that is capable of replicating the metadata and content cores at the same time.
-
-Same as `drive.store.replicate()`, more about [corestore.replicate](https://github.com/hypercore-protocol/corestore-next#const-stream--storereplicateopts)
 
 #### `await drive.put(key, content, [options])`
 

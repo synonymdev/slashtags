@@ -41,6 +41,10 @@ export class SlashDrive extends EventEmitter {
       throw new Error('Missing keyPair, key, or name')
     }
 
+    this.store = opts.store.namespace(
+      opts.name || opts.keyPair?.publicKey || opts.key
+    )
+
     this._ready = false
   }
 
@@ -87,10 +91,6 @@ export class SlashDrive extends EventEmitter {
         return { keyPair, encryptionKey }
       })()
       : { key: opts.key, encryptionKey: opts.encryptionKey }
-
-    this.store = opts.store.namespace(
-      opts.name || opts.keyPair?.publicKey || opts.key
-    )
 
     const metadataCore = await this.store.get(metadataCoreOpts)
     await metadataCore.ready()
@@ -181,9 +181,9 @@ export class SlashDrive extends EventEmitter {
    * @param {object} [options.metadata]
    */
   async put (key, content, options) {
-    if (!this.writable) throw new Error('Drive is not writable')
-    await this.ready()
     // TODO support streamable content
+    await this.ready()
+    if (!this.writable) throw new Error('Drive is not writable')
 
     const blobIndex = await this.content?.put(content)
     await this.metadataDB?.put(

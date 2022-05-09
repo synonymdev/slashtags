@@ -59,6 +59,12 @@ describe('attributes', () => {
     const keyPair = await store.createKeyPair('foo')
 
     const drive = new SlashDrive({ keyPair, store, encrypted: true })
+
+    expect(() => drive.replicate(true)).to.not.throw(
+      /.*/g,
+      'Replication should be allowed before ready'
+    )
+
     await drive.ready()
 
     expect(drive.key.length).to.eql(32)
