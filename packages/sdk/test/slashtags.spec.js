@@ -7,14 +7,7 @@ describe('slashtags', () => {
   it('should throw an error if no key or url was given', async () => {
     const sdkA = await sdk()
 
-    let err
-    try {
-      sdkA.slashtag({})
-    } catch (error) {
-      err = error
-    }
-
-    expect(err.message).to.eql('Missing keyPair or key')
+    expect(() => sdkA.slashtag({})).to.throw('Missing keyPair, key, or url')
 
     await sdkA.close()
   })

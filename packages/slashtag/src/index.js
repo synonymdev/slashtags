@@ -43,7 +43,7 @@ export class Slashtag extends EventEmitter {
     this.remote = !this.keyPair
     this.url = opts.url ? new SlashURL(opts.url) : null
     this.key = opts.keyPair?.publicKey || opts.key || this.url?.slashtag.key
-    if (!this.key) throw new Error('Missing keyPair or key')
+    if (!this.key) throw new Error('Missing keyPair, key, or url')
 
     this.url = this.url || new SlashURL(this.key)
 
