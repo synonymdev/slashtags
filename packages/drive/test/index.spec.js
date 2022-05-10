@@ -41,15 +41,9 @@ describe('initialization', () => {
   it('should throw an error on missing parameters', async () => {
     const store = new Corestore(RAM)
 
-    let err
-    try {
-      const drive = new SlashDrive({ store })
-      await drive.ready()
-    } catch (error) {
-      err = error
-    }
-
-    expect(err.message).to.eql('Missing keyPair, key, or name')
+    expect(() => new SlashDrive({ store })).to.throw(
+      'Missing keyPair, key, or name'
+    )
   })
 })
 
@@ -112,14 +106,9 @@ describe('put and get', async () => {
     })
     await drive.ready()
 
-    let err
-    try {
-      await drive.put('foo', b4a.from('hello'))
-    } catch (error) {
-      err = error
-    }
-
-    expect(err.message).to.eql('Drive is not writable')
+    await expect(
+      drive.put('foo', b4a.from('hello'))
+    ).to.eventually.be.rejectedWith('Drive is not writable')
   })
 
   it('should write and read a public file', async () => {
@@ -157,14 +146,9 @@ describe('put and get', async () => {
 
     await replicate(localDrive, remoteDrive)
 
-    let err
-    try {
-      await remoteDrive.update()
-    } catch (error) {
-      err = error
-    }
-
-    expect(err.message).to.eql('Missing content key in headers')
+    await expect(remoteDrive.update()).to.eventually.be.rejectedWith(
+      'Missing content key in headers'
+    )
   })
 
   it('should return null for not-found objects', async () => {
@@ -376,14 +360,9 @@ describe('replicate', () => {
 
     await replicate(localDrive, remoteDrive)
 
-    let err
-    try {
-      await remoteDrive.update()
-    } catch (error) {
-      err = error
-    }
-
-    expect(err.message).to.eql('Encrypted or corrupt drive')
+    await expect(remoteDrive.update()).to.eventually.be.rejectedWith(
+      'Encrypted or corrupt drive'
+    )
   })
 
   it('should throw an error for unresolvable remote drives', async () => {
@@ -400,14 +379,9 @@ describe('replicate', () => {
     })
     await remoteDrive.ready()
 
-    let err
-    try {
-      await remoteDrive.update()
-    } catch (error) {
-      err = error
-    }
-
-    expect(err.message).to.eql('Could not resolve remote drive')
+    await expect(remoteDrive.update()).to.eventually.be.rejectedWith(
+      'Could not resolve remote drive'
+    )
   })
 })
 
