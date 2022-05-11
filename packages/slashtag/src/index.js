@@ -232,7 +232,7 @@ export class Slashtag extends EventEmitter {
    * Generates a Slashtags KeyPair, randomly or optionally from primary key and a name.
    *
    * @param {Uint8Array} [primaryKey]
-   * @param {string} [name]
+   * @param {string | Uint8Array} [name]
    */
   static createKeyPair (primaryKey = randomBytes(), name = '') {
     return createKeyPair(primaryKey, name)

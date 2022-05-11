@@ -28,7 +28,7 @@ describe('static createKeyPair()', () => {
 
 describe('initialize', () => {
   it('should throw an error for missing parameters', async () => {
-    expect(() => new Slashtag({})).to.throw('Missing keyPair or key')
+    expect(() => new Slashtag({})).to.throw('Missing keyPair, key, or url')
   })
 
   it('should set slashtag url', () => {

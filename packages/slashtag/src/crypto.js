@@ -7,7 +7,7 @@ const NS = hash('slashtags')
  * Generates a seed from the slashtags Namespace, name and primaryKey.
  *
  * @param {Uint8Array} pk
- * @param {string} [name]
+ * @param {string | Uint8Array} [name]
  * @returns
  */
 function generateSeed (pk, name = '') {
@@ -20,7 +20,7 @@ function generateSeed (pk, name = '') {
  * Generates a Slashtag keypair from a primary key and a name.
  *
  * @param {Uint8Array} primaryKey
- * @param {string} [name]
+ * @param {string | Uint8Array} [name]
  */
 export function createKeyPair (primaryKey, name) {
   /** @type {import('./interfaces').KeyPair} */

@@ -61,7 +61,7 @@ export class SDK {
   /**
    * Generates a Slashtag keypair from a name, and the `SDK.primaryKey`.
    *
-   * @param {string} name
+   * @param {string | Uint8Array} name
    */
   createKeyPair (name) {
     return Slashtag.createKeyPair(this.primaryKey, name)
@@ -70,7 +70,7 @@ export class SDK {
   /**
    *
    * @param {object} opts
-   * @param {string} [opts.name]
+   * @param {string | Uint8Array} [opts.name]
    * @param {Uint8Array} [opts.key]
    * @param {string} [opts.url]
    * @returns {Slashtag}

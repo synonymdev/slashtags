@@ -20,6 +20,20 @@ describe('slashtags', () => {
     const aliceAgain = sdkA.slashtag({ name: 'alice' })
     expect(aliceAgain).to.eql(alice)
 
+    const aliceByKey = sdkA.slashtag({ key: alice.key })
+    expect(aliceByKey).to.eql(alice)
+
+    const aliceByURL = sdkA.slashtag({ url: alice.url.toString() })
+    expect(aliceByURL).to.eql(alice)
+
+    await sdkA.close()
+  })
+
+  it('should create a slashtag from a Uint8Array name', async () => {
+    const sdkA = await sdk()
+
+    sdkA.slashtag({ name: b4a.from('foo') })
+
     await sdkA.close()
   })
 
