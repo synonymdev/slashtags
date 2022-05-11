@@ -16,7 +16,7 @@ This document describes how Bitcoin wallets can use the same mnemonic seed phras
 
 ### From seed to PrimaryKey
 
-[BIP32](https://bips.xyz/32) is used to derive the path `m/44'/123456'/0'/0/0` (according to the Slashtags entry on [SLIP44](https://github.com/satoshilabs/slips/blob/master/slip-0044.md)) TODO.
+[BIP32](https://bips.xyz/32) is used to derive the path `m/44'/123456'/0'/0/0` (according to the Slashtags entry on [SLIP44](https://github.com/satoshilabs/slips/blob/master/slip-0044.md)).
 
 ### From PrimaryKey to Slashtag key
 
@@ -31,9 +31,9 @@ sodium.crypto_generichash_batch(seed, [NS, Buffer.from(name)], pk);
 - where:
 
   - `NS` is `<Buffer 15 8a 40 6f 1f 9b e5 89 9b 0a 7f 04 71 ad eb 39 2d 3e d6 0d 24 e6 47 c5 3c c5 06 d3 f2 0f ac b4>` which is the [BLAKE2b](https://sodium-friends.github.io/docs/docs/generichashing#crypto_generichash) hash of `slashtags` string
-  - `name` is a utf8 string
+  - `name` is a Uint8Array or a utf8 string
   - `pk` is the primaryKey
-  - `seed` is the resulting 32 bytes Buffer
+  - `seed` is the resulting 32 bytes Uint8Array
 
 2. Using the resulting `seed` to generate the Slashtags [Ed25519](https://doc.libsodium.org/public-key_cryptography/public-key_signatures#key-pair-generation) KeyPair:
 

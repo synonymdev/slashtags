@@ -101,13 +101,17 @@ export class Slashtag extends EventEmitter {
   /**
    * Connect to a remote Slashtag.
    *
-   * @param {Uint8Array | SlashURL | string} key
+   * @param {Uint8Array | SlashURL | string} destination
    * @returns {Promise<{connection: SecretStream, peerInfo:PeerInfo}>}
    */
-  async connect (key) {
+  async connect (destination) {
     if (this.remote) throw new Error('Cannot connect from a remote slashtag')
-    if (typeof key === 'string') key = new SlashURL(key).slashtag.key
-    if (key instanceof SlashURL) key = key.slashtag.key
+    const key =
+      typeof destination === 'string'
+        ? new SlashURL(destination).slashtag.key
+        : destination instanceof SlashURL
+          ? destination.slashtag.key
+          : destination
 
     debug('connecting to: ' + new SlashURL(key))
 
@@ -206,18 +210,6 @@ export class Slashtag extends EventEmitter {
     return drive
   }
 
-  /**
-   *
-   * @param {SlashDrive} drive
-   * @param {*} opts
-   */
-  async _setupDiscovery (drive, opts = {}) {
-    this.swarm?.join(drive.discoveryKey, opts)
-
-    const done = drive.findingPeers()
-    this.swarm?.flush().then(done, done)
-  }
-
   async close () {
     if (this.closed) return
     this.closed = true
@@ -229,13 +221,25 @@ export class Slashtag extends EventEmitter {
   }
 
   /**
-   * Generates a Slashtags KeyPair, randomly or optionally from primary key and a name.
+   * Creates a Slashtags KeyPair, randomly or optionally from primary key and a name.
    *
    * @param {Uint8Array} [primaryKey]
    * @param {string | Uint8Array} [name]
    */
   static createKeyPair (primaryKey = randomBytes(), name = '') {
     return createKeyPair(primaryKey, name)
+  }
+
+  /**
+   *
+   * @param {SlashDrive} drive
+   * @param {*} opts
+   */
+  async _setupDiscovery (drive, opts = {}) {
+    this.swarm?.join(drive.discoveryKey, opts)
+
+    const done = drive.findingPeers()
+    this.swarm?.flush().then(done, done)
   }
 
   /**

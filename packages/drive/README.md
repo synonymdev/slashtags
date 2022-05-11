@@ -76,7 +76,7 @@ _NOTE_ `drive.store` is replaced with the a namespaced instance, so `drive.store
 
 Wait for the drive to fully open.
 
-After this has called, the `this.discoveryKey` and other properties have been set.
+After `ready()` has been called, the `this.discoveryKey` and other properties have been set.
 
 In general you do NOT need to wait for ready, unless checking a synchronous property, as all internals await this themselves.
 
@@ -153,3 +153,9 @@ Returns an array of the metadata of the objects with keys starting with a given 
 ```js
 [{ key: 'somekey', metadata: { contentLength, ...userMetadata } }];
 ```
+
+#### `drive.on('update')
+
+Emitted when the metadata has been updataed.
+
+Same as `drive.metadata.feed.on('append')` see [core.on('append')](https://github.com/hypercore-protocol/hypercore-next/#coreonappend)
