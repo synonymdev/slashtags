@@ -1,6 +1,6 @@
 # slashdrive
 
-SlashDrive is a simple, secure, realtime distributed Object-storage-like system optimized for p2p sharing.
+SlashDrive is a simple, secure, realtime distributed Object-storage system optimized for p2p sharing.
 
 SlashDrive consists of two Append-only logs, one for storing objects metadata, and the other holds the blobs of data, allowing p2p sharing of metadata without the overhead of sharing the contents as well.
 
@@ -16,58 +16,39 @@ npm install @synonymdev/slashdrive corestore@next
 
 ```js
 import Corestore from 'corestore';
-import Hyperswarm from 'hyperswarm';
 import b4a from 'b4a';
+import { SlashDrive } from './src/index.js';
 
 // Create a local drive using a name and Corestore instance
-const drive = new SlashDrive({
-  name: 'foo',
-  store: new Corestore('/path/to/storage/dir/'),
+const originStore = new Corestore('./path/to/storage/origin/');
+const origin = new SlashDrive({
+  keyPair: await originStore.createKeyPair('foo'),
+  store: originStore,
   encrypted: true,
 });
-await drive.ready();
-
-// Setup Discovery
-const swarm = new Hyperswarm();
-swarm.on('conneciton', (conn) => drive.replicate(conn));
-
-await swarm.join(drive.discoveryKey).flushed();
 
 // Write an object
-await drive.put('foo', b4a.from(JSON.stringify({ name: 'Alice' })));
+await origin.put('foo', b4a.from(JSON.stringify({ name: 'Alice' })));
 
 // Share your drive data
 const driveDetails = {
-  key: drive.key,
-  encryptionKey: drive.encryptionKey,
+  key: origin.key,
+  encryptionKey: origin.encryptionKey,
 };
-```
 
-```js
-// Peers trying to read your drive now can do the following
-import Corestore from 'corestore';
-import Hyperswarm from 'hyperswarm';
-import b4a from 'b4a';
-
-const remoteDrive = new SlashDrive({
-  store: new Corestore('/path/to/storage/dir/'),
+// Peers trying to read your drive now can use the drive details you shared with them
+const clone = new SlashDrive({
+  store: new Corestore('./path/to/storage/clone/'),
   ...driveDetails,
 });
-await remoteDrive.ready();
 
-// Setup discovery in the remote node
-const swarm = new Hyperswarm();
-swarm.on('conneciton', (conn) => drive.replicate(conn));
+// Replicate the two drives over any duplex stream
+const s = clone.replicate(true);
+s.pipe(origin.replicate(false)).pipe(s);
 
-swarm.join(drive.discoveryKey);
-
-// Wait for the first peers
-const done = remoteDrive.findingPeers();
-swarm.flush().then(done, done);
-
-await remoteDrive.update();
-
-await remoteDrive.get('foo');
+// Read the object from the cloned drive
+const object = await clone.get('foo');
+console.log(object.toString()); //=> '{"name":"Alice"}'
 ```
 
 ## API
@@ -93,7 +74,7 @@ _NOTE_ `drive.store` is replaced with the a namespaced instance, so `drive.store
 
 #### `await drive.ready()`
 
-Wait for the core to fully open.
+Wait for the drive to fully open.
 
 After this has called, the `this.discoveryKey` and other properties have been set.
 
@@ -133,7 +114,7 @@ Available before the drive is ready.
 
 Same as `drive.store.replicate()`, more about [corestore.replicate](https://github.com/hypercore-protocol/corestore-next#const-stream--storereplicateopts)
 
-#### `await drive.findingPeers()`
+#### `drive.findingPeers()`
 
 Returns a callback that informs this.update() that peer discovery is done, more at [Hypercore.findingPeers](https://github.com/hypercore-protocol/hypercore-next/#const-done--corefindingpeers).
 
@@ -143,7 +124,7 @@ Wait for the drive to try and find a signed update to it's metadata core's lengt
 
 If the metadata's core length is updated it will return `true`.
 
-If the drive is not writable, it will also try to read the Content's core key from `this.headers` to resolve the content as well.
+If the drive does not have a `drive.content` already (a clone), it will try to read the Content's core key from `drive.headers` to resolve the content as well.
 
 If it failed to find any peers, or couldn't retrieve the headers needed to find the Content's core, it will throw an error.
 
@@ -157,8 +138,7 @@ Put an object by a string key, Buffer content, and optionally metadata.
 
 ```js
 {
-  metadata: {
-  } // By default metadata is a json object.
+  metadata: {...} // By default metadata is a json object.
 }
 ```
 

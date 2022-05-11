@@ -19,7 +19,7 @@ describe('Persistent storage', () => {
     // Create an encrypted drive
     const originStore = new Corestore(path.join(storageDir, '/origin'))
     const origin = new SlashDrive({
-      name: 'foo',
+      keyPair: await originStore.createKeyPair('foo'),
       store: originStore,
       encrypted: true
     })

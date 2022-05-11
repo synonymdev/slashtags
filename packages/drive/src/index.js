@@ -27,7 +27,6 @@ export class SlashDrive extends EventEmitter {
    *
    * @param {object} opts
    * @param {*} opts.store
-   * @param {string} [opts.name]
    * @param {Uint8Array} [opts.key]
    * @param {import('./interfaces').KeyPair} [opts.keyPair]
    * @param {boolean} [opts.encrypted]
@@ -35,15 +34,41 @@ export class SlashDrive extends EventEmitter {
    */
   constructor (opts) {
     super()
-    this._opts = opts
 
-    if (!(opts.key || opts.keyPair || opts.name)) {
-      throw new Error('Missing keyPair, key, or name')
+    if (!(opts.key || opts.keyPair)) {
+      throw new Error('Missing keyPair, or key')
     }
 
-    this.store = opts.store.namespace(
-      opts.name || opts.keyPair?.publicKey || opts.key
-    )
+    this.store = opts.store.namespace(opts.keyPair?.publicKey || opts.key)
+
+    /** @type {*} */
+    const metadataCoreOpts = {
+      key: opts.key,
+      encryptionKey: opts.encryptionKey
+    }
+
+    if (opts.keyPair) {
+      metadataCoreOpts.keyPair = opts.keyPair
+      metadataCoreOpts.encryptionKey =
+        opts.encrypted && hash(opts.keyPair.secretKey)
+    }
+
+    const metadataCore = this.store.get(metadataCoreOpts)
+
+    this.db = new Hyperbee(metadataCore)
+    this.metadataDB = this.db.sub(SubPrefixes.objects)
+    this.headersDB = this.db.sub(SubPrefixes.headers)
+
+    metadataCore.on('append', () => this.emit('update'))
+
+    if (opts.keyPair) {
+      const contentCore = this.store.get({
+        name: 'content',
+        encryptionKey: metadataCoreOpts.encryptionKey
+      })
+
+      this.content = new Hyperblobs(contentCore)
+    }
 
     this._ready = false
   }
@@ -56,6 +81,10 @@ export class SlashDrive extends EventEmitter {
   get discoveryKey () {
     // @ts-ignore
     return this.metadataDB?.feed.discoveryKey
+  }
+
+  get encryptionKey () {
+    return this.metadataDB?.feed.encryptionKey
   }
 
   get writable () {
@@ -75,48 +104,17 @@ export class SlashDrive extends EventEmitter {
   async ready () {
     if (this._ready) return
 
-    const opts = this._opts
-    // @ts-ignore
-    this._opts = undefined
+    await this.metadataDB.feed.ready()
+    await this.content?.core.ready()
 
-    const writable = Boolean(opts.keyPair) || Boolean(opts.name)
-
-    const metadataCoreOpts = writable
-      ? await (async () => {
-        const keyPair =
-            opts.keyPair || (await opts.store.createKeyPair(opts.name))
-
-        const encryptionKey = opts.encrypted && hash(keyPair.secretKey)
-
-        return { keyPair, encryptionKey }
-      })()
-      : { key: opts.key, encryptionKey: opts.encryptionKey }
-
-    const metadataCore = await this.store.get(metadataCoreOpts)
-    await metadataCore.ready()
-
-    this.encryptionKey = metadataCore.encryptionKey
-
-    this.db = new Hyperbee(metadataCore)
-    this.metadataDB = this.db.sub(SubPrefixes.objects)
-    this.headersDB = this.db.sub(SubPrefixes.headers)
-
-    metadataCore.on('append', () => this.emit('update'))
-
-    if (writable) {
-      const contentCore = await this.store.get({
-        name: 'content',
-        encryptionKey: this.encryptionKey
-      })
-      await contentCore.ready()
-
-      if (!(await this.headersDB.get(HeaderKeys.content))) {
+    if (this.metadataDB.feed.writable) {
+      const header = await this.headersDB.get(HeaderKeys.content)
+      if (!header) {
         const batch = this.headersDB.batch()
-        await batch.put(HeaderKeys.content, contentCore.key)
+        await batch.put(HeaderKeys.content, this.content?.core.key)
         await batch.put(HeaderKeys.semver, b4a.from(SEMVER))
         await batch.flush()
       }
-      this.content = new Hyperblobs(contentCore)
     }
 
     this._ready = true
@@ -137,12 +135,10 @@ export class SlashDrive extends EventEmitter {
    * Returns a callback that informs this.update() that peer discovery is done
    * more at https://github.com/hypercore-protocol/hypercore-next/#const-done--corefindingpeers
    *
-   * @returns {Promise<()=>void>}
+   * @returns {()=>void}
    */
-  async findingPeers () {
-    await this.ready()
-    // @ts-ignore
-    return this.metadataDB?.feed.findingPeers()
+  findingPeers () {
+    return this.metadataDB.feed.findingPeers()
   }
 
   /**
@@ -156,6 +152,7 @@ export class SlashDrive extends EventEmitter {
   }
 
   async _setupRemoteContent () {
+    await this.ready()
     if (this.content) return
 
     await validateRemote(this)

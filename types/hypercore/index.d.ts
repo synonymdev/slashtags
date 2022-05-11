@@ -19,9 +19,11 @@ declare module 'hypercore' {
     discoveryKey: Uint8Array;
     key: Uint8Array;
     keyPair: { foo: number };
+    encryptionKey: Uint8Array;
 
+    ready(): Promise<void>;
     update(): Promise<void>;
     get(seq: nubmer): Promise<any>;
-    findingPeers(): Promise<() => void>;
+    findingPeers(): () => void;
   };
 }

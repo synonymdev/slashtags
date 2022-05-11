@@ -191,6 +191,7 @@ export class Slashtag extends EventEmitter {
   async drive (opts) {
     await this.ready()
 
+    if (opts.name) opts.keyPair = await this.store.createKeyPair(opts.name)
     const drive = new SlashDrive({ ...opts, store: this.store })
     await drive.ready()
 
@@ -213,7 +214,7 @@ export class Slashtag extends EventEmitter {
   async _setupDiscovery (drive, opts = {}) {
     this.swarm?.join(drive.discoveryKey, opts)
 
-    const done = await drive.findingPeers()
+    const done = drive.findingPeers()
     this.swarm?.flush().then(done, done)
   }
 

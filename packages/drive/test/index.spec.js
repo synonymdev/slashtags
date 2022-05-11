@@ -21,7 +21,10 @@ describe('initialization', () => {
 
   it('should create a drive with a name and corestore instance', async () => {
     const store = new Corestore(RAM)
-    const drive = new SlashDrive({ name: 'foo', store })
+    const drive = new SlashDrive({
+      keyPair: await store.createKeyPair('foo'),
+      store
+    })
 
     await drive.ready()
 
@@ -41,9 +44,7 @@ describe('initialization', () => {
   it('should throw an error on missing parameters', async () => {
     const store = new Corestore(RAM)
 
-    expect(() => new SlashDrive({ store })).to.throw(
-      'Missing keyPair, key, or name'
-    )
+    expect(() => new SlashDrive({ store })).to.throw('Missing keyPair, or key')
   })
 })
 
@@ -69,9 +70,10 @@ describe('attributes', () => {
   })
 
   it('should set attributes for remote drive after update', async () => {
+    const store = new Corestore(RAM)
     const localDrive = new SlashDrive({
-      name: 'foo',
-      store: new Corestore(RAM),
+      keyPair: await store.createKeyPair('foo'),
+      store,
       encrypted: true
     })
     await localDrive.ready()
@@ -112,7 +114,11 @@ describe('put and get', async () => {
   })
 
   it('should write and read a public file', async () => {
-    const drive = new SlashDrive({ name: 'foo', store: new Corestore(RAM) })
+    const store = new Corestore(RAM)
+    const drive = new SlashDrive({
+      keyPair: await store.createKeyPair('foo'),
+      store
+    })
     await drive.ready()
 
     const content = b4a.from(JSON.stringify({ foo: 'bar' }))
@@ -129,11 +135,11 @@ describe('put and get', async () => {
   })
 
   it('should throw an error for missing content key in headers', async () => {
+    const store = new Corestore(RAM)
     const localDrive = new SlashDrive({
-      name: 'foo',
-      store: new Corestore(RAM)
+      keyPair: await store.createKeyPair('foo'),
+      store
     })
-    await localDrive.ready()
 
     // Corrupt the headers
     await localDrive.headersDB.put('c', null)
@@ -152,9 +158,10 @@ describe('put and get', async () => {
   })
 
   it('should return null for not-found objects', async () => {
+    const store = new Corestore(RAM)
     const localDrive = new SlashDrive({
-      name: 'foo',
-      store: new Corestore(RAM)
+      keyPair: await store.createKeyPair('foo'),
+      store
     })
     await localDrive.ready()
 
@@ -181,9 +188,10 @@ describe('put and get', async () => {
 
 describe('list', () => {
   it('should return an empty list for non existent prefix', async () => {
+    const store = new Corestore(RAM)
     const driveA = new SlashDrive({
-      name: 'foo',
-      store: new Corestore(RAM)
+      keyPair: await store.createKeyPair('foo'),
+      store
     })
     await driveA.ready()
 
@@ -193,9 +201,10 @@ describe('list', () => {
   })
 
   it('should list of objects with a given prefix', async () => {
+    const store = new Corestore(RAM)
     const driveA = new SlashDrive({
-      name: 'foo',
-      store: new Corestore(RAM)
+      keyPair: await store.createKeyPair('foo'),
+      store
     })
     await driveA.ready()
 
@@ -228,9 +237,10 @@ describe('list', () => {
 
 describe('metadata', () => {
   it('default json encoding', async () => {
+    const store = new Corestore(RAM)
     const driveA = new SlashDrive({
-      name: 'foo',
-      store: new Corestore(RAM)
+      keyPair: await store.createKeyPair('foo'),
+      store
     })
     await driveA.ready()
 
@@ -258,13 +268,12 @@ describe('metadata', () => {
 describe('encryption', () => {
   it('should create an encrypted drive with the same encryption key every time', async () => {
     const store = new Corestore(RAM)
-
     const drive = new SlashDrive({
-      name: 'foo',
-      store,
+      keyPair: await store.createKeyPair('foo'),
+      store: new Corestore(RAM),
       encrypted: true
     })
-    await drive.update()
+    await drive.ready()
 
     expect(drive.encryptionKey).to.not.be.null()
     expect(drive.encryptionKey).to.eql(drive.metadataDB.feed.encryptionKey)
@@ -274,7 +283,7 @@ describe('encryption', () => {
     expect(drive.content).to.not.be.undefined()
 
     const drive2 = new SlashDrive({
-      name: 'foo',
+      keyPair: await store.createKeyPair('foo'),
       store,
       encrypted: true
     })
@@ -286,8 +295,9 @@ describe('encryption', () => {
 
 describe('replicate', () => {
   it('should resolve a remote drive and get content of an object', async () => {
+    const store = new Corestore(RAM)
     const localDrive = new SlashDrive({
-      name: 'foo',
+      keyPair: await store.createKeyPair('foo'),
       store: new Corestore(RAM)
     })
     await localDrive.ready()
@@ -313,10 +323,10 @@ describe('replicate', () => {
   })
 
   it('should resolve remote encrypted drive', async () => {
+    const store = new Corestore(RAM)
     const localDrive = new SlashDrive({
-      name: 'foo',
-      store: new Corestore(RAM),
-      encrypted: true
+      keyPair: await store.createKeyPair('foo'),
+      store: new Corestore(RAM)
     })
     await localDrive.ready()
 
@@ -342,9 +352,10 @@ describe('replicate', () => {
   })
 
   it('should throw an error for encrypted drives with no encryption key', async () => {
+    const store = new Corestore(RAM)
     const localDrive = new SlashDrive({
-      name: 'foo',
-      store: new Corestore(RAM),
+      keyPair: await store.createKeyPair('foo'),
+      store,
       encrypted: true
     })
     await localDrive.ready()
@@ -366,9 +377,10 @@ describe('replicate', () => {
   })
 
   it('should throw an error for unresolvable remote drives', async () => {
+    const store = new Corestore(RAM)
     const localDrive = new SlashDrive({
-      name: 'foo',
-      store: new Corestore(RAM),
+      keyPair: await store.createKeyPair('foo'),
+      store,
       encrypted: true
     })
     await localDrive.ready()
@@ -401,8 +413,9 @@ describe('discovery', () => {
   it('should allow discovery and replication using Hyperswarm', async () => {
     const swarmA = await swarm()
 
+    const store = new Corestore(RAM)
     const localDrive = new SlashDrive({
-      name: 'foo',
+      keyPair: await store.createKeyPair('foo'),
       store: new Corestore(RAM)
     })
     await localDrive.ready()
@@ -441,9 +454,10 @@ describe('discovery', () => {
 
 describe('events', () => {
   it('should emit update event', async () => {
+    const store = new Corestore(RAM)
     const localDrive = new SlashDrive({
-      name: 'foo',
-      store: new Corestore(RAM),
+      keyPair: await store.createKeyPair('foo'),
+      store,
       encrypted: true
     })
     await localDrive.ready()
