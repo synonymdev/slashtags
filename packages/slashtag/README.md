@@ -1,4 +1,4 @@
-# slashtag
+# Slashtag
 
 Slashtag is the identity layer of Slashtags protocol, that enables attaching metadata to a keypair, and enables p2p communications between peers.
 
@@ -151,6 +151,8 @@ Each protocol needs to implement a static getter `protocol` with its unique name
 
 ### Methods:
 
+Methods available on all protocols that extends SlashProtocol:
+
 #### `protocol.connect(destination)`
 
 Each SlashProtocol instance has access to this method and it returns `{connection, channel}`
@@ -165,10 +167,12 @@ Where:
 
 ```js
 class Foo extends SlashProtocol {
+  // Protocol unique name
   static get protocol() {
     return 'foo';
   }
 
+  // List of messages
   get messages() {
     const self = this;
     return [
@@ -184,12 +188,17 @@ class Foo extends SlashProtocol {
     this.emit('message', message);
   }
 
+  // Custom methods
   async request(key) {
     const { channel, connection } = await this.connect(key);
     channel.messages[0].send(this.protocol);
     return { channel, connection };
   }
 }
+
+// Get the protocol instance
+const foo = slashtag.protocol(Foo);
+await foo.request(key);
 ```
 
 ## PeerInfo API

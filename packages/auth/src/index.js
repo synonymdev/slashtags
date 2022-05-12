@@ -5,21 +5,21 @@ import { SlashProtocol, SlashURL } from '@synonymdev/slashtag'
 
 const debug = Debug('slashtags:protocol:slashauth')
 
-const SharedDriveMessage = cstruct.compile({
+const SharedDriveEnc = cstruct.compile({
   key: c.fixed32,
   encryptionKey: c.fixed32
 })
 
-const RequestMessage = cstruct.compile({
+const RequestEnc = cstruct.compile({
   token: c.string,
-  drive: SharedDriveMessage
+  drive: SharedDriveEnc
 })
 
-const SuccessMessage = cstruct.compile({
-  drive: SharedDriveMessage
+const SuccessEnc = cstruct.compile({
+  drive: SharedDriveEnc
 })
 
-const ErrorMessage = cstruct.compile({
+const ErrorEnc = cstruct.compile({
   message: c.string
 })
 
@@ -32,17 +32,17 @@ export class SlashAuth extends SlashProtocol {
     return [
       {
         // Request
-        encoding: RequestMessage,
+        encoding: RequestEnc,
         onmessage: this._onRequest.bind(this)
       },
       {
         // Success
-        encoding: SuccessMessage,
+        encoding: SuccessEnc,
         onmessage: this._onSuccess.bind(this)
       },
       {
         // Response
-        encoding: ErrorMessage,
+        encoding: ErrorEnc,
         onmessage: this._onError.bind(this)
       }
     ]

@@ -1,4 +1,4 @@
-# slashdrive
+# SlashDrive
 
 SlashDrive is a simple, secure, realtime distributed Object-storage system optimized for p2p sharing.
 
@@ -9,7 +9,7 @@ SlashDrive is based on Hypercore and is designed with Hyperswarm p2p discovery i
 ## Installation
 
 ```
-npm install @synonymdev/slashdrive corestore@next
+npm install @synonymdev/slashdrive corestore@^6.0.0
 ```
 
 ## Usage
