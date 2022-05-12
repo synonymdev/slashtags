@@ -18,8 +18,9 @@ export class SDK {
    * @param {string} [opts.storage]
    * @param {boolean} [opts.persistent]
    * @param {Uint8Array} [opts.primaryKey]
-   * @param {string[]} [opts.relays]
-   * @param {import('dht-universal').DHTOpts['bootstrap']} [opts.bootstrap]
+   * @param {object} [opts.swarmOpts]
+   * @param {string[]} [opts.swarmOpts.relays]
+   * @param {import('dht-universal').DHTOpts['bootstrap']} [opts.swarmOpts.bootstrap]
    * @param {Array<typeof import('@synonymdev/slashtag').SlashProtocol>} [opts.protocols]
    */
   constructor (opts = {}) {
@@ -32,7 +33,7 @@ export class SDK {
     this.slashtags = new HashMap()
 
     this.ready = (async () => {
-      this.dht = await DHT.create(this.opts)
+      this.dht = await DHT.create(this.opts.swarmOpts || {})
       return true
     })()
 
@@ -84,7 +85,7 @@ export class SDK {
     const slashtag = new Slashtag({
       ...opts,
       store: this.store,
-      swarmOpts: { relays: this.opts.relays, bootstrap: this.opts.bootstrap },
+      swarmOpts: this.opts.swarmOpts,
       protocols: this.protocols
     })
 

@@ -5,8 +5,10 @@ const bootstrap = MAINNET ? undefined : JSON.parse(BOOTSTRAP)
 
 export function sdk (opts) {
   return SDK.init({
-    bootstrap,
-    relays: [RELAY_URL],
+    swarmOpts: {
+      bootstrap,
+      relays: [RELAY_URL]
+    },
     persistent: false,
     ...opts
   })
