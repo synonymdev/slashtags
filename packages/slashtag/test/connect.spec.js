@@ -44,14 +44,20 @@ describe('connect', () => {
       "Slahstag's client connection should augment peerInfo with a Slashtag instance generated from the remote peer public key"
     )
 
-    expect(peerInfo.slashtag._swarmOpts).to.eql(
-      alice._swarmOpts,
-      'Should pass swarmOpts to the slashtag created in the peerInfo'
+    expect(peerInfo.slashtag.swarm).to.equal(
+      alice.swarm,
+      'Should pass the parent Hyperswarm node to the remote sub-slashtags'
     )
 
     expect(alice.swarm.listenerCount('connection')).to.equal(
       1,
       'should remove the event listener after Slashtag.connect() is done'
+    )
+
+    await peerInfo.slashtag.close()
+
+    expect(alice.swarm.destroyed).to.be.false(
+      'should not destroy the parent Hyperswarm node'
     )
 
     connection.write(b4a.from('hello world'))

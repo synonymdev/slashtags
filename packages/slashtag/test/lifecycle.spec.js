@@ -21,6 +21,77 @@ describe('ready', () => {
 
     await alice.close()
   })
+
+  it('should use the passed hyperswarm for remote slashtags', async () => {
+    const alice = new Slashtag({
+      keyPair: Slashtag.createKeyPair(),
+      swarmOpts
+    })
+    await alice.ready()
+
+    const bob = new Slashtag({
+      keyPair: Slashtag.createKeyPair(),
+      swarmOpts
+    })
+    await bob.ready()
+
+    const remoteAlice = new Slashtag({
+      key: alice.key,
+      swarm: bob.swarm,
+      store: alice.store
+    })
+    await remoteAlice.ready()
+
+    expect(remoteAlice.key).to.eql(alice.key)
+    expect(remoteAlice.swarm).to.eql(bob.swarm)
+
+    await remoteAlice.close()
+
+    expect(remoteAlice.swarm.destroyed).to.be.false()
+    expect(bob.swarm.destroyed).to.be.false()
+
+    await bob.close()
+
+    expect(remoteAlice.swarm.destroyed).to.be.true()
+    expect(bob.swarm.destroyed).to.be.true()
+
+    await alice.close()
+  })
+
+  it('should not use passed hyperswarms for local slashtags', async () => {
+    const alice = new Slashtag({
+      keyPair: Slashtag.createKeyPair(),
+      swarmOpts
+    })
+    await alice.ready()
+
+    const bob = new Slashtag({
+      keyPair: Slashtag.createKeyPair(),
+      swarmOpts,
+      swarm: alice.swarm
+    })
+    await bob.ready()
+
+    expect(bob.swarm).to.not.eql(
+      alice.swarm,
+      'should not use the a hyperswarm with different keypair'
+    )
+
+    const aliceTwo = new Slashtag({
+      keyPair: alice.keyPair,
+      swarm: alice.swarm
+    })
+    await alice.ready()
+
+    expect(aliceTwo.swarm).to.not.eql(
+      alice.swarm,
+      'should use the same hyperswarm with the same keypair'
+    )
+
+    await alice.close()
+    await aliceTwo.close()
+    await bob.close()
+  })
 })
 
 describe('close', () => {

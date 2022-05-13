@@ -14,6 +14,7 @@ declare module 'hyperswarm' {
     connections: Iterable;
     _allConnections: Map<Uint8Array, any>;
     peers: Map<string, any>;
+    keyPair: KeyPair;
 
     listen(): Promise<undefined>;
     destroy(): Promise<undefined>;

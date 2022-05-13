@@ -31,13 +31,16 @@ export class Slashtag extends EventEmitter {
    * @param {Uint8Array} [opts.key]
    * @param {import('./interfaces').KeyPair} [opts.keyPair]
    * @param {import('corestore')} [opts.store]
-   * @param {Array<typeof import('./protocol').SlashProtocol>} [opts.protocols]
+   * @param {import('hyperswarm')} [opts.swarm]
    * @param {object} [opts.swarmOpts]
    * @param {string[]} [opts.swarmOpts.relays]
    * @param {Array<{host: string; port: number}>} [opts.swarmOpts.bootstrap]
+   * @param {Array<typeof import('./protocol').SlashProtocol>} [opts.protocols]
+   * @param {(key: Uint8Array) => Slashtag} [opts._createRemoteSlashtag]
    */
   constructor (opts = {}) {
     super()
+    this._opts = opts
 
     this.keyPair = opts.keyPair
     this.remote = !this.keyPair
@@ -47,9 +50,10 @@ export class Slashtag extends EventEmitter {
 
     this.url = this.url || new SlashURL(this.key)
 
-    this._swarmOpts = opts.swarmOpts
     const store = opts.store || new Corestore(RAM)
     this.store = store.namespace(this.key)
+
+    this.swarm = this.remote ? opts.swarm : undefined
 
     this._drives = new HashMap()
 
@@ -72,15 +76,20 @@ export class Slashtag extends EventEmitter {
    */
   async ready () {
     if (this._ready) return true
-
-    const dht = await DHT.create({ ...this._swarmOpts })
-    this.swarm = new Hyperswarm({
-      ...this._swarmOpts,
-      keyPair: this.keyPair,
-      dht
-    })
-    this.swarm.on('connection', this._handleConnection.bind(this))
     this._ready = true
+    debug('Opening slashtag: ' + this.url)
+
+    if (!this.swarm) {
+      const dht = await DHT.create({ ...this._opts.swarmOpts })
+      this.swarm = new Hyperswarm({
+        ...this._opts.swarmOpts,
+        keyPair: this.keyPair,
+        dht
+      })
+      this._shouldDestroySwarm = true
+      debug('Created Hyperswarm for: ' + this.url, { remote: this.remote })
+    }
+    this.swarm?.on('connection', this._handleConnection.bind(this))
 
     this.publicDrive = await this.drive({
       key: this.key,
@@ -212,12 +221,11 @@ export class Slashtag extends EventEmitter {
 
   async close () {
     if (this.closed) return
+    debug('Slashtag closed', b4a.toString(this.key, 'hex'))
     this.closed = true
     this.emit('close')
-    if (!this.swarm) return
-    await this.swarm?.destroy()
+    this._shouldDestroySwarm && (await this.swarm?.destroy())
     await this.store.close()
-    debug('Slashtag closed', b4a.toString(this.key, 'hex'))
   }
 
   /**
@@ -235,7 +243,7 @@ export class Slashtag extends EventEmitter {
    * @param {SlashDrive} drive
    * @param {*} opts
    */
-  async _setupDiscovery (drive, opts = {}) {
+  _setupDiscovery (drive, opts = {}) {
     this.swarm?.join(drive.discoveryKey, opts)
 
     const done = drive.findingPeers()
@@ -250,10 +258,7 @@ export class Slashtag extends EventEmitter {
    */
   async _handleConnection (socket, peerInfo) {
     this.store.replicate(socket)
-    peerInfo.slashtag = new Slashtag({
-      key: peerInfo.publicKey,
-      swarmOpts: this._swarmOpts
-    })
+    peerInfo.slashtag = this._createRemoteSlashtag(peerInfo.publicKey)
 
     const info = {
       local: this.url.toString(),
@@ -271,6 +276,23 @@ export class Slashtag extends EventEmitter {
 
     this._setupProtocols(socket, peerInfo)
     this.emit('connection', socket, peerInfo)
+  }
+
+  /**
+   * Create a remote Slashtag instance that shares this slashtag's resources.
+   *
+   * @param {Uint8Array} key
+   * @returns
+   */
+  _createRemoteSlashtag (key) {
+    return (
+      this._opts._createRemoteSlashtag?.(key) ||
+      new Slashtag({
+        key,
+        swarm: this.swarm,
+        store: this.store
+      })
+    )
   }
 
   /**

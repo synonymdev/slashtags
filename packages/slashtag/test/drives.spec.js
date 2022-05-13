@@ -37,6 +37,34 @@ describe('drive', () => {
       await alice.close()
       await remoteAlice.close()
     })
+
+    it('should resolve remote profile from a remote slashtag from a direct connection', async () => {
+      const alice = new Slashtag({
+        keyPair: Slashtag.createKeyPair(),
+        swarmOpts
+      })
+      expect(await alice.getProfile()).to.be.null()
+      const profile = {
+        name: 'Alice'
+      }
+      await alice.setProfile(profile)
+
+      const bob = new Slashtag({
+        keyPair: Slashtag.createKeyPair(),
+        swarmOpts
+      })
+
+      const { peerInfo } = await bob.connect(alice.url)
+
+      const remoteAlice = peerInfo.slashtag
+      await remoteAlice.ready()
+
+      expect(await remoteAlice.remote).to.be.true()
+      expect(await remoteAlice.getProfile()).to.eql(profile)
+
+      await alice.close()
+      await bob.close()
+    })
   })
 
   describe('private', () => {

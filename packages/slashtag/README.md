@@ -53,7 +53,8 @@ Make a new Slashtag node.
   url: 'slash://abc...123', // optional url of the read-only Slashtag node.
   key: k, // optional key of the read-only Slashtag node.
   keyPair: kp, // optional keyPair of the Slashtag node.
-  store: store, // optional Corestore instance.
+  store: store, // optional Corestore instance. won't be closed on slashtag.close()
+  swarm: swarm, // optional hyperswarm instance. only applicable for remote Slashtags.
   protocols: [...], // optional list of SlashProtocols to register.
   swarmOpts: {bootstrap, relays}, // optional options for hyperswarm instance.
 }
@@ -76,6 +77,10 @@ In general you do NOT need to wait for ready, unless checking a synchronous prop
 #### `slashtag.url`
 
 A [SlashURL](#slashurl) instance created from the public key of the slashtag.
+
+#### `slashtag.remote`
+
+A boolean, true if the slashtag is a remote (read-only) Slashtag created without KeyPair.
 
 #### `slashtag.publicDrive`
 
