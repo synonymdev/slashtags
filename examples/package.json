@@ -1,0 +1,6 @@
+{
+    "type": "module",
+    "scripts": {
+        "clean": "node clean.js"
+    }
+}

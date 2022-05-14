@@ -1,5 +1,4 @@
 import Corestore from 'corestore'
-import { DHT } from 'dht-universal'
 import RAM from 'random-access-memory'
 import goodbye from 'graceful-goodbye'
 import HashMap from 'turbo-hash-map'
@@ -7,10 +6,11 @@ import Debug from 'debug'
 import { Slashtag } from '@synonymdev/slashtag'
 
 import { storage } from './storage.js'
-import { protocolsList } from './protocols.js'
+import { protocolsList, protocols } from './protocols.js'
 
 const debug = Debug('slashtags:sdk')
 
+const ROOT_SLASHTAG_NAME = '@slashtags-sdk/root'
 export class SDK {
   /**
    *
@@ -24,26 +24,32 @@ export class SDK {
    * @param {Array<typeof import('@synonymdev/slashtag').SlashProtocol>} [opts.protocols]
    */
   constructor (opts = {}) {
-    this.storage = opts.persistent === false ? RAM : storage(opts.storage)
-    this.store = new Corestore(this.storage)
-    this.opts = opts
+    this._opts = opts
+    this._protocols = opts.protocols || protocolsList
 
+    this.storage = opts.persistent === false ? RAM : storage(opts.storage)
     this.primaryKey = opts.primaryKey || Slashtag.createKeyPair().publicKey
 
     this.slashtags = new HashMap()
 
-    this.ready = (async () => {
-      this.dht = await DHT.create(this.opts.swarmOpts || {})
-      return true
-    })()
-
-    this.protocols = this.opts.protocols || protocolsList
+    this._root = new Slashtag({
+      keyPair: this.createKeyPair(ROOT_SLASHTAG_NAME),
+      swarmOpts: opts.swarmOpts || {},
+      protocols: this._protocols,
+      store: new Corestore(this.storage)
+    })
 
     // Gracefully shutdown
     goodbye(() => {
       !this.closed && debug('gracefully closing Slashtags SDK')
       return this.close()
     })
+  }
+
+  async ready () {
+    if (this._ready) return
+    this._ready = true
+    await this._root.ready()
   }
 
   /**
@@ -53,7 +59,7 @@ export class SDK {
    */
   static async init (opts) {
     const sdk = new SDK(opts)
-    await sdk.ready
+    await sdk.ready()
 
     debug('Slashtags SDK is initiated')
     return sdk
@@ -84,9 +90,13 @@ export class SDK {
 
     const slashtag = new Slashtag({
       ...opts,
-      store: this.store,
-      swarmOpts: this.opts.swarmOpts,
-      protocols: this.protocols
+      store: this._root.store,
+      swarmOpts: {
+        ...this._opts.swarmOpts
+      },
+      protocols: this._protocols,
+      swarm: this._root.swarm,
+      _createRemoteSlashtag: (key) => this.slashtag.bind(this)({ key })
     })
 
     const existing = this.slashtags.get(slashtag.key)
@@ -98,7 +108,7 @@ export class SDK {
       if (!this.closed) this.slashtags.delete(slashtag.key)
     })
 
-    debug('Created a slashtag ' + slashtag.url)
+    debug('Created a slashtag ' + slashtag.url, { remote: slashtag.remote })
     return slashtag
   }
 
@@ -109,8 +119,11 @@ export class SDK {
     for (const slashtag of this.slashtags.values()) {
       await slashtag.close()
     }
-    await this.store.close()
-    await this.dht.destroy()
+    await this._root.close()
     debug('Slashtags SDK closed')
+  }
+
+  static get protocols () {
+    return protocols
   }
 }

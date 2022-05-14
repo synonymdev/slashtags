@@ -2,7 +2,7 @@ import b4a from 'b4a'
 import fs from 'fs'
 import path from 'path'
 import os from 'os'
-import { SDK, protocols, SlashURL } from '@synonymdev/slashtags-sdk'
+import { SDK } from '@synonymdev/slashtags-sdk'
 
 // Setting up the SDK and Initiator's Slashtag
 console.log('setting up slashtag...')
@@ -30,14 +30,15 @@ console.log('\nClick any key to authenticate...')
 process.stdin.once('data', async (data) => {
   // SlashAuth protocol is already available on the initiator (included in the SDK)
   // And we can access its instance from anywhere on the initiator as follows:
-  const auth = initiator.protocol(protocols.SlashAuth)
+  const auth = initiator.protocol(SDK.protocols.SlashAuth)
 
   // Once the Responder has accepted the request, we can access the drive they shared with us
   console.time('auth response')
   auth.once('success', onSuccess)
+  auth.once('error', (err) => console.log(err))
 
   // Making an Auth request
-  const { drive: sharedByMe } = await auth.request(new SlashURL(url))
+  const { drive: sharedByMe } = await auth.request(url)
 
   // Writing a message _to_ the responder on the drive we shared with them
   await sharedByMe.put('messages/1', b4a.from('Hello from Initiator'))
@@ -47,9 +48,7 @@ async function resolveProfile (sdk, url) {
   console.log('\n\nResolving profile for:\n', url)
   console.time('resolve profile')
 
-  const responderProfile = await sdk
-    .slashtag({ key: new SlashURL(url).slashtag.key })
-    .getProfile()
+  const responderProfile = await sdk.slashtag({ url }).getProfile()
 
   console.log("Responder's profile: ", responderProfile)
   console.timeEnd('resolve profile')

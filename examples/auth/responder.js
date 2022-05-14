@@ -2,7 +2,7 @@ import b4a from 'b4a'
 import fs from 'fs'
 import path from 'path'
 import os from 'os'
-import { SDK, protocols } from '@synonymdev/slashtags-sdk'
+import { SDK } from '@synonymdev/slashtags-sdk'
 
 // Setup the SDK and the initiator's Slashtag
 console.log('setting up slashtag...')
@@ -21,7 +21,7 @@ await responder.setProfile({
 
 // SlashAuth protocol is already available on the initiator (included in the SDK)
 // And we can access its instance from anywhere on the initiator as follows:
-const auth = responder.protocol(protocols.SlashAuth)
+const auth = responder.protocol(SDK.protocols.SlashAuth)
 
 // Listen to requests from the initiator, and optionally accept them
 auth.on('request', async ({ token, peerInfo, drive }, response) => {
@@ -42,7 +42,7 @@ auth.on('request', async ({ token, peerInfo, drive }, response) => {
 
 // Session management is out of SlashAuth scope.
 // Your app should pass the token, and decide what do with it once received.
-const authURL = protocols.SlashAuth.formatURL(responder.url, 'FOOBAR')
+const authURL = SDK.protocols.SlashAuth.formatURL(responder.url, 'FOOBAR')
 console.log('\n\nSlashAuth URL: \n' + authURL)
 
 // Passing the url to the `request` script
@@ -57,7 +57,6 @@ async function readDrives (initiator, driveData) {
 
   // Read a message from the initiator on the drive they shared with us
   const sharedByInitiator = await initiator.drive(driveData)
-  await sharedByInitiator.ready()
   console.log('shared drive is readable', sharedByInitiator.readable)
   // Now you can read and list metadata of this drive, and even watch for changes in it.
   // For simplicity, we will leave that for another example.

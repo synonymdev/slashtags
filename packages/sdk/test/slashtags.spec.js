@@ -85,4 +85,40 @@ describe('slashtags', () => {
 
     await sdkA.close()
   })
+
+  it('should create all remote slashtags from the SDK root slashtag including ones created for peerInfo', async () => {
+    const sdkA = await sdk()
+    const alice = sdkA.slashtag({ name: 'alice' })
+    await alice.ready()
+
+    const sdkB = await sdk()
+    const bob = sdkB.slashtag({ name: 'bob' })
+    await bob.ready()
+
+    const remoteAlice = sdkB.slashtag({ url: alice.url.toString() })
+    await remoteAlice.ready()
+
+    expect(remoteAlice.swarm).to.eql(sdkB._root.swarm)
+    expect(sdkB.slashtags.size).to.eql(2)
+
+    await bob.listen()
+
+    const { peerInfo } = await alice.connect(bob.url)
+    const remoteBob = peerInfo.slashtag
+    await remoteBob.ready()
+
+    expect(remoteBob.key).to.eql(bob.key)
+    expect(remoteBob.swarm).to.not.eql(alice.swarm)
+    expect(remoteBob.swarm).to.eql(sdkA._root.swarm)
+
+    // Has local Alice, and remote sdkB._root, and remote Bob
+    expect(sdkA.slashtags.size).to.eql(3)
+    const urls = [...sdkA.slashtags.values()].map((s) => s.url.toString())
+    expect(urls).to.includes(alice.url.toString())
+    expect(urls).to.includes(sdkB._root.url.toString())
+    expect(urls).to.includes(bob.url.toString())
+
+    await sdkA.close()
+    await sdkB.close()
+  })
 })

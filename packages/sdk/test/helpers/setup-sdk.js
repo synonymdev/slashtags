@@ -1,4 +1,4 @@
-import { SDK } from '../../src/sdk.js'
+import { SDK } from '../../src/index.js'
 
 const { RELAY_URL, BOOTSTRAP, MAINNET } = process.env
 const bootstrap = MAINNET ? undefined : JSON.parse(BOOTSTRAP)
