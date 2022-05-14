@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events'
 import Debug from 'debug'
 
-const debug = Debug('slashtags:slashprotocol')
+const debug = Debug('slashtags:protocol')
 
 export class SlashProtocol extends EventEmitter {
   /**
@@ -23,6 +23,20 @@ export class SlashProtocol extends EventEmitter {
   /** @type {Array<import('./interfaces').ProtomuxMessage>} */
   // @ts-ignore
   get messages () {}
+
+  onopen () {
+    debug(`"${this.protocol}" opened `, {
+      // @ts-ignore
+      remote: this.peerInfo.slashtag.url.toString()
+    })
+  }
+
+  onclose () {
+    debug(`"${this.protocol}" closed `, {
+      // @ts-ignore
+      remote: this.peerInfo.slashtag.url.toString()
+    })
+  }
 
   /**
    * Creates a new protocol channel.

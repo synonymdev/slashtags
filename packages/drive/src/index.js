@@ -103,6 +103,7 @@ export class SlashDrive extends EventEmitter {
 
   async ready () {
     if (this._ready) return
+    this._ready = true
 
     await this.metadataDB.feed.ready()
     await this.content?.core.ready()
@@ -116,8 +117,6 @@ export class SlashDrive extends EventEmitter {
         await batch.flush()
       }
     }
-
-    this._ready = true
   }
 
   /**

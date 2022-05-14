@@ -93,17 +93,17 @@ export class SlashAuth extends SlashProtocol {
   }
 
   /**
-   * Emits the success message when a success message is recieved.
+   * Emits the success message when a success message is received.
    *
    * @param {SuccessMessage} message
    */
   _onSuccess (message) {
-    debug('Recieved success', message)
+    debug('Received success', message)
     this.emit('success', message)
   }
 
   /**
-   * Emits an error event with when an error message is recieved.
+   * Emits an error event with when an error message is received.
    *
    * @param {Error} error
    */
