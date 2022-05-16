@@ -102,6 +102,10 @@ export class SDK {
     const existing = this.slashtags.get(slashtag.key)
     if (existing) return existing
 
+    // Opening remote Slashtags doesn't involve expensive IO operations.
+    // No need to keep it in memory.
+    if (slashtag.remote) return slashtag
+
     this.slashtags.set(slashtag.key, slashtag)
 
     slashtag.on('close', () => {

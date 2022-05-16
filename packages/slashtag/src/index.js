@@ -36,7 +36,6 @@ export class Slashtag extends EventEmitter {
    * @param {string[]} [opts.swarmOpts.relays]
    * @param {Array<{host: string; port: number}>} [opts.swarmOpts.bootstrap]
    * @param {Array<typeof import('./protocol').SlashProtocol>} [opts.protocols]
-   * @param {(key: Uint8Array) => Slashtag} [opts._createRemoteSlashtag]
    */
   constructor (opts = {}) {
     super()
@@ -298,14 +297,11 @@ export class Slashtag extends EventEmitter {
    * @returns
    */
   _createRemoteSlashtag (key) {
-    return (
-      this._opts._createRemoteSlashtag?.(key) ||
-      new Slashtag({
-        key,
-        swarm: this.swarm,
-        store: this.store
-      })
-    )
+    return new Slashtag({
+      key,
+      swarm: this._opts.swarm || this.swarm,
+      store: this.store
+    })
   }
 
   /**

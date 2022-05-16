@@ -12,7 +12,7 @@ describe('slashtags', () => {
     await sdkA.close()
   })
 
-  it('should not create a new instance of an already opened slashtag', async () => {
+  it('should not create a new instance of an already opened non-remote slashtag', async () => {
     const sdkA = await sdk()
 
     const alice = sdkA.slashtag({ name: 'alice' })
@@ -86,7 +86,7 @@ describe('slashtags', () => {
     await sdkA.close()
   })
 
-  it('should create all remote slashtags from the SDK root slashtag including ones created for peerInfo', async () => {
+  it('should create all remote slashtags without opening new resources', async () => {
     const sdkA = await sdk()
     const alice = sdkA.slashtag({ name: 'alice' })
     await alice.ready()
@@ -99,7 +99,6 @@ describe('slashtags', () => {
     await remoteAlice.ready()
 
     expect(remoteAlice.swarm).to.eql(sdkB._root.swarm)
-    expect(sdkB.slashtags.size).to.eql(2)
 
     await bob.listen()
 
@@ -111,12 +110,9 @@ describe('slashtags', () => {
     expect(remoteBob.swarm).to.not.eql(alice.swarm)
     expect(remoteBob.swarm).to.eql(sdkA._root.swarm)
 
-    // Has local Alice, and remote sdkB._root, and remote Bob
-    expect(sdkA.slashtags.size).to.eql(3)
+    expect(sdkA.slashtags.size).to.eql(1, 'should not add remote slashtags to sdk.slashtags')
     const urls = [...sdkA.slashtags.values()].map((s) => s.url.toString())
-    expect(urls).to.includes(alice.url.toString())
-    expect(urls).to.includes(sdkB._root.url.toString())
-    expect(urls).to.includes(bob.url.toString())
+    expect(urls).to.eql([alice.url.toString()])
 
     await sdkA.close()
     await sdkB.close()
