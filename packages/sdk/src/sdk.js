@@ -16,7 +16,7 @@ export class SDK {
    *
    * @param {object} opts
    * @param {string} [opts.storage]
-   * @param {boolean} [opts.persistent]
+   * @param {boolean} [opts.persist]
    * @param {Uint8Array} [opts.primaryKey]
    * @param {object} [opts.swarmOpts]
    * @param {string[]} [opts.swarmOpts.relays]
@@ -27,7 +27,7 @@ export class SDK {
     this._opts = opts
     this._protocols = opts.protocols || protocolsList
 
-    this.storage = opts.persistent === false ? RAM : storage(opts.storage)
+    this.storage = opts.persist === false ? RAM : storage(opts.storage)
     this.primaryKey = opts.primaryKey || Slashtag.createKeyPair().publicKey
 
     this.slashtags = new HashMap()

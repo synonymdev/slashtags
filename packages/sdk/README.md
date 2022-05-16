@@ -1,6 +1,22 @@
-# slashtags-sdk
+# Slashtags SDK
 
-> Software development kit for creating and managing Slashtags
+Software development kit for Slashtags
+
+Slashtags and its ecosystem of dependencies consists of a many low level building blocks for p2p communication and data authoring in distributed applications.
+
+This modular approach is great for managing complexity and ease of iteration, it makes it harder for consumers to build fully functional application.
+
+This SDK offers a high level batteries-included abstraction layer for these low level building blocks.
+
+If you are building a webapp over Slashtags, or adding Slashtags support to your existing wallet/application, this package is for you.
+
+## Goals
+
+- **Beginner friendly** Developing for p2p systems is hard, and this SDK is designed to implement best practices and optimization while avoiding common pitfalls.
+- **Cross platform** This SDK tries to support all the major platforms and browsers.
+- **Key management** Derive and manage all keyPairs and addresses in a from the same seed.
+- **WoT support** As we develop and experiment with managing contacts, connections and shared data (attestation, reputation etc), this SDK will be updated to support those features out of the box.
+- **Full featured** As Slashtags develop and higher level solutions and optimizations (storage services, relays, etc) are developed, this SDK will be updated to support them.
 
 ## Install
 
@@ -8,69 +24,90 @@
 npm install @synonymdev/slashtags-sdk
 ```
 
+## Usage
+
+```js
+import { SDK } from '@synonymdev/slashtags-sdk';
+
+const sdk = await SDK.init();
+```
+
+or in Commonjs
+
+```js
+async function main() {
+  const { SDK } = await import('@synonymdev/slashtags-sdk');
+  const sdk = await SDK.init();
+}
+```
+
+### Examples
+
+Check the [examples](../../examples/) directory to learn more about how to use the SDK.
+
 ## API
 
 #### `const sdk = await SDK.init([options])`
 
-Create a new SDK instance, managing storage, Hypercores, DHT, and Hyperswarms, as well as keyManager.
+Create a new SDK instance.
 
-`options` include:
+`options` is an object that includes:
+
+- `primaryKey`
+
+  - optional 32 bytes used to derive all the keyPairs for Slashtags and their components, if not provided, a random on will be generated.
+
+- `swarmOpts`
+
+  - Options passed to the Hyperswarm node
+  - Includes:
+    - `bootstrap` A list of bootstrap nodes, useful for running a testnet
+    - `relays` A list of websocket [DHT relays](https://github.com/hyperswarm/dht-relay), useful for running the SDK in browser.
+
+- `storage`:
+
+  - A path to the storage directory, defaults to `${homedir()}/.slashtags/` in home directory
+
+- `persist`:
+
+  - whether to persist storage to disk, defaults to true, if false, storage will be in-memory only.
+
+- `protocols`:
+
+  - List of Slashtags [protocols](../slashtag/README.md#slashprotocol) to register on every Slashtag created by the SDK
+
+#### `sdk.slashtag(options)`
+
+Create a [Slashtag](../slashtag/) instance.
+
+`options` includes the same options for `Slashtag` constructor, with the following additions:
+
+- `name` Create a Slashtag with a name. see how the keyPairs are derived from that name and the SDK `primaryKey` [here](../../specs/slashtags-key-derivation.md)
+- `key` Create a remote Slashtag with a key.
+- `url` Create a remote Slashtag with a [SlashURL](../slashtag/README.md#slashurl).
+
+#### `await sdk.close()`
+
+Closes all Slahstags created by this SDK as well as any other resources managed by the SDK to enable graceful shutdown.
+
+#### `SDK.protocols`
+
+A map of all the builtin [SlashProtocols](../slashtag/README.md#slashprotocol) that are available in the SDK by default.
+
+Useful to access the builtin protocols registered on a Slashtag instance, for example:
 
 ```js
-{
-  primaryKey: Buffer, // 32 bytes used to derive all the keyPairs for Slashtags and their components
-  relays: [], // Array of websocket relay addresses, needed for browser environments
-  storage, // random-access-storage instance or a path to a directory, defaults to `.slashtags/` in home directory
-  persistent: true, // whether to persist storage to disk, defaults to true, if false, storage will be in-memory only
-}
+const auth = alice.protocol(SDK.protocols.SlashAuth);
 ```
 
-#### `const slashtag = sdk.slashtag([options])`
-
-Creates a new Slashtag instance
-
-`options` include:
+Or access the static methods of the builtin protocols:
 
 ```js
-{
-  name: string, // a string used to generate the same Slashtag keyPair given the same primaryKey in the SDK
-  url: string, // if no name is provided, a remote/readonly Slashtag can be created from a url
-}
+SDK.protocols.SlashAuth.formatURL(url);
 ```
 
-#### `await slashtag.ready()`
+## Contribution and Feature requests
 
-Awaits for the internal SlashDrive to be ready.
+We aim to develop this SDK iteratively and keep the API minimal until we learn what consumers of the SDK want to achieve the most.
 
-#### `await slashtag.setProfile(profile)`
-
-Adds a json profile to the Slashtag drive at `/profile.json`.
-
-#### `await slashtag.getProfile()`
-
-Returns a profile from the Slashtag drive at `/profile.json`.
-
-#### `await slashtag.listen()`
-
-Alias to `slashtag.swarm.listen()`
-
-#### `await slashtag.connect(key)`
-
-Connects to a Slashtag by its `key` (if not already connected) and returns the connection.
-
-#### `on('connection', (socket, peerInfo) => {})`
-
-Emitted whenever the swarm connects to a new peer.
-
-`socket` is an end-to-end (Noise) encrypted Duplex stream
-
-`peerInfo` is a [`PeerInfo`](https://github.com/hyperswarm/hyperswarm/blob/v3/README.md#peerinfo-api) instance, with a `peerInfo.slashtag` property, for the remote peer's Slashtag.
-
-#### `const protocol = slashtag.registerProtocol(Protocol)`
-
-Adds a [Protomux](https://github.com/mafintosh/protomux/) channel to incoming and outgoing connection.
-
-`Protocol` a Class constructor that extends `SlashtagProtocol`, and it should at least implement the following methods:
-
-- `static get protocol()`
-- `get messages()` that conforms to the messages option in [`Protomux`](https://github.com/mafintosh/protomux/)'s `createChannel(opts)`.
+So don't hesitate to open an issue or pull request if you have a feature request.

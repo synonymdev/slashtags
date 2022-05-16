@@ -9,7 +9,7 @@ export function sdk (opts) {
       bootstrap,
       relays: [RELAY_URL]
     },
-    persistent: false,
+    persist: false,
     ...opts
   })
 }
