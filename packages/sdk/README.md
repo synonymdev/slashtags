@@ -18,6 +18,14 @@ If you are building a webapp over Slashtags, or adding Slashtags support to your
 - **WoT support** As we develop and experiment with managing contacts, connections and shared data (attestation, reputation etc), this SDK will be updated to support those features out of the box.
 - **Full featured** As Slashtags develop and higher level solutions and optimizations (storage services, relays, etc) are developed, this SDK will be updated to support them.
 
+## Security
+
+While deriving Slashtags from a mnemonic seed phrase is an important part of Slashtag's strategy for key management and decentralized identifier's long term success, it is important to note that this SDK _does not_ require access to the mnemonic seed phrase or the master private key that secures other assets.
+
+Rather your application needs to derive a `primaryKey` first as defined in the [Key Derivation](../../specs/slashtags-key-derivation.md) spec, then pass it in the `primaryKey` field of the `SDK.init()` static method.
+
+You can see an example of how to derive a `primaryKey` from a mnemonic seed phrase in Javascript [examples/primarykey/](../../examples/primarykey/).
+
 ## Install
 
 ```bash
