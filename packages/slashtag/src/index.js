@@ -253,29 +253,42 @@ export class Slashtag extends EventEmitter {
   /**
    * Augment Server and client's connections with Slashtag protocols and peerInfo.slashtag.
    *
-   * @param {*} socket
+   * @param {SecretStream} socket
    * @param {PeerInfo} peerInfo
    */
   async _handleConnection (socket, peerInfo) {
     this.store.replicate(socket)
     peerInfo.slashtag = this._createRemoteSlashtag(peerInfo.publicKey)
 
+    this._debugSocket(socket, peerInfo)
+
+    this._setupProtocols(socket, peerInfo)
+    this.emit('connection', socket, peerInfo)
+  }
+
+  /**
+   *
+   * @param {SecretStream} socket
+   * @param {PeerInfo} peerInfo
+   */
+  _debugSocket (socket, peerInfo) {
     const info = {
       local: this.url.toString(),
       remote: peerInfo.slashtag.url.toString()
     }
 
-    swarmDebug('Swarm connection OPENED', info)
-    socket.on('error', function (/** @type {Error} */ err) {
-      swarmDebug('Swarm connection ERRORED', err, info)
-    })
-    socket.on('close', function () {
-      swarmDebug('Swarm connection CLOSED', info)
-      peerInfo.slashtag.close()
+    socket.once('open', function () {
+      swarmDebug('Swarm connection OPENED', info)
+      socket.on('error', onError)
+      socket.once('close', onClose)
     })
 
-    this._setupProtocols(socket, peerInfo)
-    this.emit('connection', socket, peerInfo)
+    function onError (/** @type {Error} */ err) {
+      swarmDebug('Swarm connection ERRORED', err, info)
+    }
+    function onClose () {
+      swarmDebug('Swarm connection CLOSED', info)
+    }
   }
 
   /**
