@@ -463,13 +463,17 @@ describe('events', () => {
     await localDrive.ready()
 
     const result = new Promise((resolve) => {
-      localDrive.on('update', () => {
-        resolve(true)
+      localDrive.on('update', (data) => {
+        resolve(data)
       })
     })
 
     await localDrive.put('foo', b4a.from('foo data'))
 
-    expect(await result).to.be.true()
+    expect(await result).to.eql({
+      key: 'foo',
+      seq: 3,
+      type: 'put'
+    })
   })
 })

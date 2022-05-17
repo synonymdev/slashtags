@@ -95,8 +95,7 @@ export class SDK {
         ...this._opts.swarmOpts
       },
       protocols: this._protocols,
-      swarm: this._root.swarm,
-      _createRemoteSlashtag: (key) => this.slashtag.bind(this)({ key })
+      swarm: this._root.swarm
     })
 
     const existing = this.slashtags.get(slashtag.key)

@@ -16,7 +16,9 @@ declare module 'hyperbee' {
     };
 
     createReadStream(options: any): Readable;
+    createHistoryStream(options: any): Readable;
 
     feed: Hypercore;
+    sep: Uint8Array;
   };
 }

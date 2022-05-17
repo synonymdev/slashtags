@@ -154,8 +154,9 @@ Returns an array of the metadata of the objects with keys starting with a given 
 [{ key: 'somekey', metadata: { contentLength, ...userMetadata } }];
 ```
 
-#### `drive.on('update')
+#### `drive.on('update', ({ key, type }) => {})
 
-Emitted when the metadata has been updataed.
+Emitted when the metadata or the content of an object is updated.
 
-Same as `drive.metadata.feed.on('append')` see [core.on('append')](https://github.com/hypercore-protocol/hypercore-next/#coreonappend)
+- `key` is the key of the object.
+- `type` is the operation type, can be `'put'` or `'del'`.

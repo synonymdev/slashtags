@@ -59,7 +59,7 @@ export class SlashDrive extends EventEmitter {
     this.metadataDB = this.db.sub(SubPrefixes.objects)
     this.headersDB = this.db.sub(SubPrefixes.headers)
 
-    metadataCore.on('append', () => this.emit('update'))
+    metadataCore.on('append', this._onMetadataCoreAppend.bind(this))
 
     if (opts.keyPair) {
       const contentCore = this.store.get({
@@ -236,6 +236,20 @@ export class SlashDrive extends EventEmitter {
         }
       }
     })
+  }
+
+  async _onMetadataCoreAppend () {
+    if (!this.readable) return
+    const rs = this.db.createHistoryStream({ reverse: true, limit: 1 })
+    const last = (await collect(rs))[0]
+    if (!last || !last.key) return
+    const [prefix, key] = b4a
+      .toString(last.key)
+      .split(b4a.toString(this.db.sep))
+
+    if (prefix === SubPrefixes.objects) {
+      this.emit('update', { seq: last.seq, type: last.type, key })
+    }
   }
 }
 
