@@ -256,8 +256,14 @@ export class Slashtag extends EventEmitter {
    * @param {PeerInfo} peerInfo
    */
   async _handleConnection (socket, peerInfo) {
+    if (socket.remoteSlashtag) return
+
     this.store.replicate(socket)
-    peerInfo.slashtag = this._createRemoteSlashtag(peerInfo.publicKey)
+
+    socket.slashtag = this
+    const remoteSlashtag = this._createRemoteSlashtag(peerInfo.publicKey)
+    socket.remoteSlashtag = remoteSlashtag
+    peerInfo.slashtag = remoteSlashtag
 
     this._debugSocket(socket, peerInfo)
 

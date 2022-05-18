@@ -164,7 +164,9 @@ Each SlashProtocol instance has access to this method and it returns `{connectio
 
 Where:
 
-- `connection` is a [Encrypted Connection](https://github.com/hyperswarm/secret-stream).
+- `connection` is a [Encrypted Connection](https://github.com/hyperswarm/secret-stream), but extended with the following pointers for convenience:
+  `slashtag`: local Slashtag instance.
+  `remoteSlashtag`: Slashtag instance for the remote peer.
 - `channel` extends the protomux's [channel]() with the following:
   - `channel.peerInfo` [peerInfo](#peerinfo-api)
 

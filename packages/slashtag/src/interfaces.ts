@@ -21,6 +21,9 @@ export interface SecretStream extends EventEmitter {
   publicKey: Uint8Array;
   remotePublicKey: Uint8Array;
 
+  slashtag: Slashtag;
+  remoteSlashtag: Slashtag;
+
   opened: Promise<boolean>;
 
   write: (message: Uint8Array) => Promise<boolean>;
