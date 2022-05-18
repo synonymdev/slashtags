@@ -1,6 +1,6 @@
 # Slashtag
 
-Slashtag is the identity layer of Slashtags protocol, that enables attaching metadata to a keypair, and enables p2p communications between peers.
+Slashtag is the identity layer of Slashtags protocol, that enables attaching metadata to a keypair (through [SlashDrive](../drive/)), and p2p communications between peers.
 
 This module creates a node that manages a Slashtag's [drives](../drive/), p2p connections, and multiplexes all the registered [protocols](#slashprotocol) over these secure connections.
 

@@ -1,6 +1,6 @@
 # SlashAuth
 
-SlashAuth is a Slashtags [protocol](../slashtag/README.md#slashprotocol) for authenticating over a Slashtags connection.
+SlashAuth is a Slashtags [protocol](../slashtag/README.md#slashprotocol) for authorization over a Slashtag's connection.
 
 Once authentication is done both sides share a private encrypted [drives](../drive) dedicated to each other, and can exchange data over, as an asynchronous communication channel.
 
@@ -119,6 +119,6 @@ Once the request is accepted, now both Alice and Bob add each other as contacts,
 - Initiator 'Alice' visits a website, which can be a login page, or a 3rd party client.
 - The client formats a url from the Server's publicKey, and a unique token to that client, whether that is a session token or a clientID, etc. That is left to the each application to decide.
 - Alice connects to the server using its publicKey, and passes the token, and the dedicated drive.
-- If the Server accepts the request, Alice will now get the details of the Server's drive, and the Client will have be authenticated to request resources from the Server.
+- If the Server accepts the request, Alice will now get the details of the Server's drive, and the Server can now authorize the Client to request resources.
 
 ![server, clietn, and wallet authentication diagram](./docs/server-client-wallet-auth.png)

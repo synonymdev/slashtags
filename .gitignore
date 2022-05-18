@@ -4,7 +4,6 @@ lerna-debug.log
 .pinning.store
 .vscode
 *.iml
-docs/
 build
 lib
 yarn.lock

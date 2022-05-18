@@ -32,8 +32,8 @@
     "depcheck": "lerna run depcheck",
     "create": "node ./scripts/new-package.js",
     "reset": "lerna run clean && rimraf packages/*/node_modules node_modules packages/*/package-lock.json",
-    "testnet": "pm2 start scripts/setup-testnet.js || echo 'Testnet already running'",
-    "close-testnet": "pm2 delete scripts/setup-testnet.js || echo 'Testnet not running'",
+    "testnet:start": "pm2 start scripts/setup-testnet.js || echo 'Testnet already running'",
+    "testnet:close": "pm2 delete scripts/setup-testnet.js || echo 'Testnet not running'",
     "relay": "node scripts/setup-relay.js",
     "postinstall": "npm run link"
   },

@@ -10,6 +10,8 @@ module.exports.getTestnetConfig = function getTestnetConfig () {
       .toString()
     return JSON.parse(file)
   } catch (error) {
-    throw new Error('No testnet config found. Run `npm run testnet` first.')
+    throw new Error(
+      'No testnet config found. Run `npm run testnet:start` first.'
+    )
   }
 }
