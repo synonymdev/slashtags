@@ -2,52 +2,51 @@
   "name": "slashtags-js",
   "version": "0.0.0",
   "description": "A practical and gradual exploration of Slashtags protocol design, through a mvp implementation",
+  "private": true,
+  "license": "MIT",
+  "homepage": "https://github.com/synonymdev/slashtags/tree/master/#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/synonymdev/slashtags.git"
+  },
+  "bugs": {
+    "url": "https://github.com/synonymdev/slashtags/issues"
+  },
   "keywords": [
     "hypercore",
     "slashtags",
     "wot",
     "p2p"
   ],
-  "homepage": "https://github.com/synonymdev/slashtags/tree/master/#readme",
-  "bugs": {
-    "url": "https://github.com/synonymdev/slashtags/issues"
-  },
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/synonymdev/slashtags.git"
+  "engines": {
+    "node": ">=16.15.0",
+    "npm": ">=8.5.5"
   },
   "scripts": {
-    "postinstall": "lerna link && lerna bootstrap && rm packages/*/package-lock.json",
-    "test": "lerna exec npm t",
-    "lint": "lerna run lint",
+    "link": "lerna link",
+    "lint": "npx standard scripts/*.js examples/**/*.js --fix && lerna run lint",
+    "test": "lerna run test",
+    "ts-check": "lerna run test",
     "build": "lerna run build",
-    "publish": "lerna publish",
-    "clean": "npm run clean:deps && npm run clean:build && npm run clean:coverage && npm run clean:types",
-    "clean:build": "rm -rf ./packages/*/dist",
-    "clean:types": "rm -rf ./packages/*/types",
-    "clean:coverage": "rm -rf ./packages/*/coverage",
-    "clean:deps": "rm -rf ./node_modules packages/*/node_modules packages/*/package-lock.json package-lock.json",
-    "check-prepublish": "lerna run prepublishOnly",
-    "full-check": "npm run clean && npm i && npm run check-prepublish"
+    "clean": "lerna run clean",
+    "depcheck": "lerna run depcheck",
+    "create": "node ./scripts/new-package.js",
+    "reset": "lerna run clean && rimraf packages/*/node_modules node_modules packages/*/package-lock.json",
+    "testnet:start": "pm2 start scripts/setup-testnet.js || echo 'Testnet already running'",
+    "testnet:close": "pm2 delete scripts/setup-testnet.js || echo 'Testnet not running'",
+    "relay": "node scripts/setup-relay.js",
+    "postinstall": "npm run link"
   },
   "devDependencies": {
-    "@types/node": "^16.7.13",
-    "ava": "^3.15.0",
-    "dependency-check": "^4.1.0",
-    "hundreds": "^0.0.9",
-    "ipjs": "^5.1.0",
+    "@hyperswarm/testnet": "^2.0.0",
+    "c8": "^7.11.0",
+    "dht-universal": "^0.4.1",
+    "graceful-goodbye": "^1.0.0",
     "lerna": "^4.0.0",
-    "process": "^0.11.10",
-    "standard": "^16.0.3",
-    "stream-browserify": "^3.0.0",
-    "typescript": "^4.2.4"
+    "pm2": "^5.2.0",
+    "standard": "^17.0.0"
   },
   "workspaces": [
     "./packages/*"
-  ],
-  "engines": {
-    "node": ">=16.0.0",
-    "npm": ">=7.0.0"
-  }
+  ]
 }

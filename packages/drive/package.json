@@ -1,0 +1,64 @@
+{
+  "name": "@synonymdev/slashdrive",
+  "version": "0.1.0-alpha.1",
+  "description": "simple, secure, realtime distributed Object-storage-like system optimized for p2p sharing",
+  "license": "MIT",
+  "homepage": "https://github.com/synonymdev/slashtags/tree/master/packages/drive/#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/synonymdev/slashtags.git"
+  },
+  "bugs": {
+    "url": "https://github.com/synonymdev/slashtags/issues"
+  },
+  "keywords": [],
+  "type": "module",
+  "types": "types/src/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "*": [
+        "types/*",
+        "types/src/*"
+      ],
+      "types/*": [
+        "types/*",
+        "types/src/*"
+      ]
+    }
+  },
+  "files": [
+    "*",
+    "!**/*.tsbuildinfo"
+  ],
+  "main": "src/index.js",
+  "scripts": {
+    "build": "aegir build",
+    "test": "c8 aegir test -f test/*.spec.js && npm run test:node",
+    "test:node": "c8 aegir test -t node -f test/node/*.spec.js",
+    "lint": "standard -i dist/ --fix",
+    "clean": "rimraf ./dist",
+    "depcheck": "aegir dep-check"
+  },
+  "standard": {
+    "env": [
+      "mocha"
+    ]
+  },
+  "dependencies": {
+    "b4a": "^1.5.0",
+    "compact-encoding": "^2.6.1",
+    "compact-encoding-struct": "^1.2.1",
+    "debug": "^4.3.4",
+    "hyperbee": "^1.8.0",
+    "hyperblobs": "^2.0.0-rc.0",
+    "sodium-universal": "^3.1.0"
+  },
+  "devDependencies": {
+    "@hyperswarm/testnet": "^2.0.0",
+    "aegir": "^37.0.15",
+    "corestore": "^6.0.1-alpha.17",
+    "dht-universal": "^0.4.1",
+    "hyperswarm": "^3.0.4",
+    "random-access-memory": "^4.1.0"
+  }
+}

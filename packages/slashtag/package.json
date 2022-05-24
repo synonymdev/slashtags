@@ -1,0 +1,62 @@
+{
+  "name": "@synonymdev/slashtag",
+  "version": "0.1.0-alpha.0",
+  "description": "",
+  "license": "MIT",
+  "homepage": "https://github.com/synonymdev/slashtags/tree/master/packages/slashtag/#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/synonymdev/slashtags.git"
+  },
+  "bugs": {
+    "url": "https://github.com/synonymdev/slashtags/issues"
+  },
+  "keywords": [],
+  "type": "module",
+  "types": "types/src/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "*": [
+        "types/*",
+        "types/src/*"
+      ],
+      "types/*": [
+        "types/*",
+        "types/src/*"
+      ]
+    }
+  },
+  "files": [
+    "*",
+    "!**/*.tsbuildinfo"
+  ],
+  "main": "src/index.js",
+  "scripts": {
+    "build": "aegir build",
+    "test": "c8 aegir test",
+    "lint": "standard -i dist/ --fix",
+    "clean": "rimraf ./dist",
+    "depcheck": "npx aegir dep-check"
+  },
+  "standard": {
+    "env": [
+      "mocha"
+    ]
+  },
+  "dependencies": {
+    "b4a": "^1.5.0",
+    "compact-encoding": "^2.6.1",
+    "corestore": "^6.0.1-alpha.17",
+    "debug": "^4.3.4",
+    "dht-universal": "^0.4.1",
+    "graceful-goodbye": "^1.0.0",
+    "hi-base32": "^0.5.1",
+    "hyperswarm": "^3.0.4",
+    "random-access-memory": "^4.1.0",
+    "sodium-universal": "^3.1.0",
+    "turbo-hash-map": "^1.0.3"
+  },
+  "devDependencies": {
+    "aegir": "^37.0.15"
+  }
+}

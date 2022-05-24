@@ -1,37 +1,38 @@
-const DHT = require('@hyperswarm/dht');
-const { setupRelay } = require('dht-universal/setup-relay.js');
+const fs = require('fs')
+const createTestnet = require('@hyperswarm/testnet')
+const { setupRelay } = require('dht-universal/setup-relay.js')
+const goodbye = require('graceful-goodbye')
 
-const setupTestnet = async (opts) => {
-  const node = new DHT({
-    ephemeral: true,
-    bootstrap: [],
-  });
-  await node.ready();
+const TESTNET_CONFIG_PATH = '.testnet.json'
 
-  const nodes = [node];
+setup()
 
-  const bootstrap = [{ host: '127.0.0.1', port: node.address().port }];
+async function setup () {
+  const testnet = await createTestnet(3)
 
-  for (let i = 1; i < 4; i++) {
-    const dht = (nodes[i] = new DHT({ ephemeral: false, bootstrap }));
-    await dht.ready();
+  const { port } = await setupRelay({
+    dhtOpts: { bootstrap: testnet.bootstrap },
+    wsServerOptions: { port: 8888 }
+  })
+  const relay = 'ws://localhost:' + port
+
+  const config = {
+    relay,
+    bootstrap: testnet.bootstrap
   }
 
-  const { port, closeRelay } = await setupRelay({
-    dhtOpts: { bootstrap },
-    wsServerOptions: opts?.relayPort && { port: opts?.relayPort },
-  });
+  setConfig(config)
 
-  const relay = 'ws://localhost:' + port;
+  console.log('Testnet config now available at the root dir: .testnet.json')
+  console.log(JSON.stringify(config, null, 2))
 
-  return {
-    bootstrap,
-    relay,
-    closeBootstrap: () => Promise.all(nodes.map((node) => node.destroy())),
-    closeRelay: closeRelay,
-  };
-};
+  goodbye(async function () {
+    fs.unlinkSync(TESTNET_CONFIG_PATH)
+    console.log('\nGracefully closing testnet and deleting config file')
+    await testnet.destroy()
+  })
+}
 
-module.exports = {
-  setupTestnet,
-};
+async function setConfig (config) {
+  fs.writeFileSync(TESTNET_CONFIG_PATH, JSON.stringify(config, null, 2))
+}
