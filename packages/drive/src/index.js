@@ -242,15 +242,25 @@ export class SlashDrive extends EventEmitter {
 
   async _onMetadataCoreAppend () {
     if (!this.readable) return
-    const rs = this.db.createHistoryStream({ reverse: true, limit: 1 })
-    const last = (await collect(rs))[0]
-    if (!last || !last.key) return
+    const seq = this.db.feed.length - 1
+    if (seq === 0) return // Not part of the tree
+    const block = await this.db.getBlock(seq, {}).catch((error) => {
+      safetyCatch(error)
+      // TODO: investigate this further
+      debug('_onMetadataCoreAppend: TODO investigate this further')
+    })
+
+    if (!block || !block.key) return
     const [prefix, key] = b4a
-      .toString(last.key)
+      .toString(block.key)
       .split(b4a.toString(this.db.sep))
 
     if (prefix === SubPrefixes.objects) {
-      this.emit('update', { seq: last.seq, type: last.type, key })
+      this.emit('update', {
+        seq,
+        type: block.isDeletion() ? 'del' : 'put',
+        key
+      })
     }
   }
 }

@@ -451,27 +451,122 @@ describe('discovery', () => {
 })
 
 describe('events', () => {
-  it('should emit update event', async () => {
-    const store = new Corestore(RAM)
-    const localDrive = new SlashDrive({
-      keyPair: await store.createKeyPair('foo'),
-      store,
-      encrypted: true
-    })
-    await localDrive.ready()
+  describe('update', () => {
+    it('should emit update event', async () => {
+      const store = new Corestore(RAM)
+      const localDrive = new SlashDrive({
+        keyPair: await store.createKeyPair('foo'),
+        store,
+        encrypted: true
+      })
+      await localDrive.ready()
 
-    const result = new Promise((resolve) => {
-      localDrive.on('update', (data) => {
-        resolve(data)
+      const result = new Promise((resolve) => {
+        localDrive.on('update', (data) => {
+          resolve(data)
+        })
+      })
+
+      await localDrive.put('foo', b4a.from('foo data'))
+
+      expect(await result).to.eql({
+        key: 'foo',
+        seq: 3,
+        type: 'put'
       })
     })
 
-    await localDrive.put('foo', b4a.from('foo data'))
+    it('should emit update event when a remote drives get updates', async () => {
+      const originStore = new Corestore(RAM)
+      const origin = new SlashDrive({
+        keyPair: await originStore.createKeyPair('foo'),
+        store: originStore,
+        encrypted: true
+      })
+      await origin.ready()
 
-    expect(await result).to.eql({
-      key: 'foo',
-      seq: 3,
-      type: 'put'
+      const clone = new SlashDrive({
+        key: origin.key,
+        store: new Corestore(RAM),
+        encryptionKey: origin.encryptionKey
+      })
+      await replicate(origin, clone)
+      await clone.update()
+
+      const result = new Promise((resolve) => {
+        clone.on('update', (data) => {
+          resolve(data)
+        })
+      })
+
+      await origin.put('foo', b4a.from('foo data'))
+
+      expect(await result).to.eql({
+        key: 'foo',
+        seq: 3,
+        type: 'put'
+      })
+    })
+
+    // TODO: test again emitting update event for multiple encrypted remote drives
+    it.skip('should allow emitting updates for multiple clones', async () => {
+      const originStore = new Corestore(RAM)
+      const origin = new SlashDrive({
+        keyPair: await originStore.createKeyPair('foo'),
+        store: originStore,
+        encrypted: true
+      })
+      await origin.ready()
+
+      const clone = new SlashDrive({
+        key: origin.key,
+        store: new Corestore(RAM),
+        encryptionKey: origin.encryptionKey
+      })
+      clone.name = 'clone1'
+      await replicate(origin, clone)
+      await clone.update()
+
+      const result = new Promise((resolve) => {
+        clone.on('update', (data) => {
+          console.log('update 1', data)
+          resolve(data)
+        })
+      })
+
+      const clone2 = new SlashDrive({
+        key: origin.key,
+        store: clone.store,
+        encryptionKey: origin.encryptionKey
+      })
+      await clone2.ready()
+      await clone2.update()
+      console.log(clone2)
+      console.log({
+        clone: clone.encryptionKey,
+        clone2: clone2.encryptionKey
+      })
+
+      const result2 = new Promise((resolve) => {
+        clone2.on('update', (data) => {
+          console.log('update 2', data)
+          resolve(data)
+        })
+      })
+
+      await origin.put('foo', b4a.from('foo data'))
+
+      expect(await result).to.eql({
+        key: 'foo',
+        seq: 3,
+        type: 'put'
+      })
+
+      expect(await result2).to.eql({
+        key: 'foo',
+        seq: 3,
+        type: 'put'
+      })
     })
   })
 })

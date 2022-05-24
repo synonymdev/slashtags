@@ -18,6 +18,14 @@ declare module 'hyperbee' {
     createReadStream(options: any): Readable;
     createHistoryStream(options: any): Readable;
 
+    getBlock(
+      seq: number,
+      opts: any,
+    ): Promise<{
+      key: Uint8Array;
+      isDeletion(): boolean;
+    }>;
+
     feed: Hypercore;
     sep: Uint8Array;
   };
