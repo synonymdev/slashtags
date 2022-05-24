@@ -4,6 +4,7 @@ import Hyperblobs from 'hyperblobs'
 import b4a from 'b4a'
 import Debug from 'debug'
 import EventEmitter from 'events'
+import safetyCatch from 'safety-catch'
 
 import { ObjectMetadata } from './encoding.js'
 import { collect, hash } from './utils.js'
@@ -101,6 +102,10 @@ export class SlashDrive extends EventEmitter {
     )
   }
 
+  get peers () {
+    return this.metadataDB?.feed.peers
+  }
+
   async ready () {
     if (this._ready) return
     this._ready = true
@@ -154,11 +159,8 @@ export class SlashDrive extends EventEmitter {
     await this.ready()
     if (this.content) return
 
-    await validateRemote(this)
-    const contentHeader = await this.headersDB?.get(HeaderKeys.content)
-    if (!contentHeader?.value) {
-      throw new Error('Missing content key in headers')
-    }
+    const contentHeader = await getContentHeader(this)
+    if (!contentHeader?.value) return
 
     const contentCore = await this.store.get({
       key: contentHeader.value,
@@ -257,27 +259,21 @@ export class SlashDrive extends EventEmitter {
  *
  * @param {SlashDrive} drive
  */
-async function validateRemote (drive) {
-  const metadataCore = drive.metadataDB?.feed
-
-  await metadataCore?.update()
+async function getContentHeader (drive) {
+  const core = drive.metadataDB?.feed
+  await core?.update()
 
   // First block is hyperbee and the second is the content header
-  if (metadataCore && metadataCore.length < 2) {
-    throw new Error('Could not resolve remote drive')
+  if (core && core.length < 2) {
+    debug('validateRemote: Not enough data in metadata core', { core })
+    return
   }
 
-  try {
-    await drive.headersDB?.get(HeaderKeys.content)
-  } catch (error) {
-    debug(
-      'Corrupted remote drive',
-      'error:',
+  return await drive.headersDB?.get(HeaderKeys.content).catch((error) => {
+    safetyCatch(error)
+    debug('validateRemote: Encrypted or corrupt drive', {
       error,
-      '\ncontent header block:',
-      b4a.toString(await metadataCore?.get(1))
-    )
-
-    throw new Error('Encrypted or corrupt drive')
-  }
+      encryptionKey: drive.headersDB.feed.encryptionKey
+    })
+  })
 }

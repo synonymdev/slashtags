@@ -97,6 +97,72 @@ describe('attributes', () => {
     expect(remoteDrive.writable).to.be.false()
     expect(remoteDrive.readable).to.be.true()
   })
+
+  describe('readable', () => {
+    it('drives missing content key in headers should not be readable', async () => {
+      const store = new Corestore(RAM)
+      const localDrive = new SlashDrive({
+        keyPair: await store.createKeyPair('foo'),
+        store
+      })
+
+      // Corrupt the headers
+      await localDrive.headersDB.put('c', null)
+
+      const remoteDrive = new SlashDrive({
+        key: localDrive.key,
+        store: new Corestore(RAM)
+      })
+
+      await replicate(localDrive, remoteDrive)
+      await remoteDrive.update()
+
+      await expect(remoteDrive.readable).to.be.false()
+    })
+
+    it('remote drives that can not resolve the content core should not be readable', async () => {
+      const store = new Corestore(RAM)
+      const localDrive = new SlashDrive({
+        keyPair: await store.createKeyPair('foo'),
+        store,
+        encrypted: true
+      })
+      await localDrive.ready()
+
+      const remoteDrive = new SlashDrive({
+        store: new Corestore(RAM),
+        key: localDrive.key
+      })
+      await remoteDrive.ready()
+
+      expect(remoteDrive.peers.length).to.equal(0)
+      expect(remoteDrive.readable).to.be.false()
+    })
+
+    it('encrypted drives that can not be decrypted should not be readable', async () => {
+      const store = new Corestore(RAM)
+      const localDrive = new SlashDrive({
+        keyPair: await store.createKeyPair('foo'),
+        store,
+        encrypted: true
+      })
+      await localDrive.ready()
+
+      const localContent = b4a.from(JSON.stringify({ foo: 'bar' }))
+      await localDrive.put('/profile.json', localContent)
+
+      const remoteDrive = new SlashDrive({
+        store: new Corestore(RAM),
+        key: localDrive.key
+      })
+      await remoteDrive.ready()
+
+      await replicate(localDrive, remoteDrive)
+      await remoteDrive.update()
+
+      expect(remoteDrive.readable).to.be.false()
+    })
+  })
 })
 
 describe('put and get', async () => {
@@ -132,29 +198,6 @@ describe('put and get', async () => {
 
     expect(read).to.eql(content)
     expect(readOther).to.eql(other)
-  })
-
-  it('should throw an error for missing content key in headers', async () => {
-    const store = new Corestore(RAM)
-    const localDrive = new SlashDrive({
-      keyPair: await store.createKeyPair('foo'),
-      store
-    })
-
-    // Corrupt the headers
-    await localDrive.headersDB.put('c', null)
-
-    const remoteDrive = new SlashDrive({
-      key: localDrive.key,
-      store: new Corestore(RAM)
-    })
-    await remoteDrive.ready()
-
-    await replicate(localDrive, remoteDrive)
-
-    await expect(remoteDrive.update()).to.eventually.be.rejectedWith(
-      'Missing content key in headers'
-    )
   })
 
   it('should return null for not-found objects', async () => {
@@ -349,51 +392,6 @@ describe('replicate', () => {
     const remoteContent = await remoteDrive.get('/profile.json')
 
     expect(remoteContent).to.eql(localContent)
-  })
-
-  it('should throw an error for encrypted drives with no encryption key', async () => {
-    const store = new Corestore(RAM)
-    const localDrive = new SlashDrive({
-      keyPair: await store.createKeyPair('foo'),
-      store,
-      encrypted: true
-    })
-    await localDrive.ready()
-
-    const localContent = b4a.from(JSON.stringify({ foo: 'bar' }))
-    await localDrive.put('/profile.json', localContent)
-
-    const remoteDrive = new SlashDrive({
-      store: new Corestore(RAM),
-      key: localDrive.key
-    })
-    await remoteDrive.ready()
-
-    await replicate(localDrive, remoteDrive)
-
-    await expect(remoteDrive.update()).to.eventually.be.rejectedWith(
-      'Encrypted or corrupt drive'
-    )
-  })
-
-  it('should throw an error for unresolvable remote drives', async () => {
-    const store = new Corestore(RAM)
-    const localDrive = new SlashDrive({
-      keyPair: await store.createKeyPair('foo'),
-      store,
-      encrypted: true
-    })
-    await localDrive.ready()
-
-    const remoteDrive = new SlashDrive({
-      store: new Corestore(RAM),
-      key: localDrive.key
-    })
-    await remoteDrive.ready()
-
-    await expect(remoteDrive.update()).to.eventually.be.rejectedWith(
-      'Could not resolve remote drive'
-    )
   })
 })
 

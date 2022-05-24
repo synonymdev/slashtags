@@ -106,6 +106,22 @@ Returns true if the metadata core and the content core are both [readable](https
 
 Especially useful in remote drives to check if the drive got the content core already.
 
+Cases where the drive is not readable:
+
+- Metadata or Content core is not [readable](https://github.com/hypercore-protocol/hypercore-next#corereadable)
+
+- Metadata core in a remote Drive doesn't contain enough information to retrieve the content core.
+
+- Metadata core is encrypted so the content core can't be retrieved.
+
+- metadataDB is corrupt in some way that prevents the content from being retrieved.
+
+#### `drive.peers`
+
+An array of [Peer](https://github.com/hypercore-protocol/hypercore-next/blob/master/lib/replicator.js#L239) objects representing the peers that are sharing this drive.
+
+Useful in many cases, but most often to check if the drive is connected to other peers after trying to find peers through a discovery network like Hyperswarm. `drive.peers.length > 0`.
+
 #### `drive.replicate()`
 
 Creates a replication stream that is capable of replicating the metadata and content cores at the same time.
@@ -125,10 +141,6 @@ Wait for the drive to try and find a signed update to it's metadata core's lengt
 If the metadata's core length is updated it will return `true`.
 
 If the drive does not have a `drive.content` already (a clone), it will try to read the Content's core key from `drive.headers` to resolve the content as well.
-
-If it failed to find any peers, or couldn't retrieve the headers needed to find the Content's core, it will throw an error.
-
-If the remote drive is encrypted or corrupt, it will throw a different error for that case as well.
 
 #### `await drive.put(key, content, [options])`
 
