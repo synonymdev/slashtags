@@ -3,8 +3,7 @@
     "publish": {
       "message": "chore(release): publish",
       "createRelease": "github",
-      "conventionalCommits": true,
-      "contents": "dist"
+      "conventionalCommits": true
     },
     "run": {
       "stream": true
