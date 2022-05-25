@@ -1,6 +1,6 @@
 {
-  "name": "@synonymdev/slashtags-auth",
-  "version": "0.4.0-alpha.4",
+  "name": "@synonymdev/slashauth",
+  "version": "1.0.0-alpha.0",
   "description": "Authorization using slashtags",
   "license": "MIT",
   "homepage": "https://github.com/synonymdev/slashtags/tree/master/packages/auth/#readme",
@@ -45,6 +45,7 @@
     ]
   },
   "dependencies": {
+    "@synonymdev/slashtag": "^1.0.0-alpha.0",
     "compact-encoding": "^2.6.1",
     "compact-encoding-struct": "^1.2.1",
     "debug": "^4.3.4"

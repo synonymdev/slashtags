@@ -1,6 +1,6 @@
 {
   "name": "@synonymdev/slashdrive",
-  "version": "0.1.0-alpha.1",
+  "version": "1.0.0-alpha.0",
   "description": "simple, secure, realtime distributed Object-storage-like system optimized for p2p sharing",
   "license": "MIT",
   "homepage": "https://github.com/synonymdev/slashtags/tree/master/packages/drive/#readme",

@@ -1,6 +1,6 @@
 {
   "name": "@synonymdev/slashtag",
-  "version": "0.1.0-alpha.0",
+  "version": "1.0.0-alpha.0",
   "description": "",
   "license": "MIT",
   "homepage": "https://github.com/synonymdev/slashtags/tree/master/packages/slashtag/#readme",
@@ -44,6 +44,7 @@
     ]
   },
   "dependencies": {
+    "@synonymdev/slashdrive": "^1.0.0-alpha.0",
     "b4a": "^1.5.0",
     "compact-encoding": "^2.6.1",
     "corestore": "^6.0.1-alpha.17",
@@ -57,6 +58,7 @@
     "turbo-hash-map": "^1.0.3"
   },
   "devDependencies": {
+    "@types/debug": "^4.1.7",
     "aegir": "^37.0.15"
   }
 }
