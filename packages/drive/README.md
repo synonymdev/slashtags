@@ -122,6 +122,10 @@ An array of [Peer](https://github.com/hypercore-protocol/hypercore-next/blob/mas
 
 Useful in many cases, but most often to check if the drive is connected to other peers after trying to find peers through a discovery network like Hyperswarm. `drive.peers.length > 0`.
 
+#### `drive.online`
+
+Equivalent to `drive.peers.length > 0`. Useful to check if you are getting updates from other peers or working with cached data.
+
 #### `drive.replicate()`
 
 Creates a replication stream that is capable of replicating the metadata and content cores at the same time.
@@ -156,7 +160,7 @@ Put an object by a string key, Buffer content, and optionally metadata.
 
 #### `await drive.get(key)`
 
-Returns the object's content corresponding to a given key.
+Returns the object's content corresponding to a given key. If `drive.online` is false it will try to read the data from storage if it exists, otherwise it will return `null`
 
 #### `await drive.list(prefix)`
 

@@ -106,11 +106,16 @@ export class SlashDrive extends EventEmitter {
     return this.metadataDB?.feed.peers
   }
 
+  get online () {
+    return this.metadataDB?.feed.peers.length > 0
+  }
+
   async ready () {
     if (this._ready) return
     this._ready = true
 
     await this.metadataDB.feed.ready()
+    await this._setupRemoteContent()
     await this.content?.core.ready()
 
     if (this.metadataDB.feed.writable) {
@@ -125,8 +130,8 @@ export class SlashDrive extends EventEmitter {
   }
 
   /**
-   * Awaits for an updated length of the metdata core, and setup the content core if it doesn't already exist
-   *
+   * Awaits for an updated length of the metdata core,
+   * and setup the content core if it doesn't already exist
    */
   async update () {
     await this.ready()
@@ -156,7 +161,6 @@ export class SlashDrive extends EventEmitter {
   }
 
   async _setupRemoteContent () {
-    await this.ready()
     if (this.content) return
 
     const contentHeader = await getContentHeader(this)
@@ -201,7 +205,9 @@ export class SlashDrive extends EventEmitter {
   async get (key) {
     if (!this.content) await this.update()
 
-    const block = await this.metadataDB?.get(key)
+    const block = await this.metadataDB?.get(key, {
+      update: this.online
+    })
     if (!block) return null
 
     const metadata = c.decode(ObjectMetadata, block.value)
@@ -222,7 +228,8 @@ export class SlashDrive extends EventEmitter {
     const options = {
       gte: prefix,
       // TODO: works for ASCII, handle UTF-8
-      lt: prefix + '~'
+      lt: prefix + '~',
+      update: this.online
     }
     const stream = this.metadataDB?.createReadStream(options)
 
@@ -271,10 +278,10 @@ export class SlashDrive extends EventEmitter {
  */
 async function getContentHeader (drive) {
   const core = drive.metadataDB?.feed
-  await core?.update()
 
   // First block is hyperbee and the second is the content header
-  if (core && core.length < 2) {
+  core.length < 2 && (await core.update())
+  if (core.length < 2) {
     debug('validateRemote: Not enough data in metadata core', { core })
     return
   }

@@ -7,7 +7,12 @@ declare module 'hyperbee' {
     sub(prefix: string): Hyperbee;
 
     put(key: any, value: any): Promise<void>;
-    get(key: any): Promise<{ seq: number; key: any; value: any } | null>;
+    get(
+      key: any,
+      opts?: {
+        update: boolean;
+      },
+    ): Promise<{ seq: number; key: any; value: any } | null>;
 
     batch(): {
       put(key: any, value: any): Promise<void>;
