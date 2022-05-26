@@ -5,7 +5,6 @@ import b4a from 'b4a'
 import Corestore from 'corestore'
 import RAM from 'random-access-memory'
 import goodbye from 'graceful-goodbye'
-import HashMap from 'turbo-hash-map'
 import { SlashDrive } from '@synonymdev/slashdrive'
 import Debug from 'debug'
 import { SlashURL } from './url.js'
@@ -53,8 +52,6 @@ export class Slashtag extends EventEmitter {
     this.store = store.namespace(this.key)
 
     this.swarm = this.remote ? opts.swarm : undefined
-
-    this._drives = new HashMap()
 
     if (!this.remote) {
       this._protocols = new Map()
@@ -207,14 +204,9 @@ export class Slashtag extends EventEmitter {
     const drive = new SlashDrive({ ...opts, store: this.store })
     await drive.ready()
 
-    const existing = this._drives.get(drive.key)
-    if (existing) return existing
-    this._drives.set(drive.key, drive)
-
     // TODO enable customizing the discovery option
     this._setupDiscovery(drive)
 
-    await drive.update()
     return drive
   }
 
@@ -242,7 +234,9 @@ export class Slashtag extends EventEmitter {
    * @param {SlashDrive} drive
    * @param {*} opts
    */
-  _setupDiscovery (drive, opts = {}) {
+  async _setupDiscovery (drive, opts = {}) {
+    await drive.ready()
+
     this.swarm?.join(drive.discoveryKey, opts)
 
     const done = drive.findingPeers()

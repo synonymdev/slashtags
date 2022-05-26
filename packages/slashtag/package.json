@@ -54,8 +54,7 @@
     "hi-base32": "^0.5.1",
     "hyperswarm": "^3.0.4",
     "random-access-memory": "^4.1.0",
-    "sodium-universal": "^3.1.0",
-    "turbo-hash-map": "^1.0.3"
+    "sodium-universal": "^3.1.0"
   },
   "devDependencies": {
     "@types/debug": "^4.1.7",
