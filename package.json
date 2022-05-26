@@ -1,7 +1,7 @@
 {
   "name": "slashtags-js",
   "version": "0.0.0",
-  "description": "A practical and gradual exploration of Slashtags protocol design, through a mvp implementation",
+  "description": "JavaScript implementation of the Slashtags protocol",
   "private": true,
   "license": "MIT",
   "homepage": "https://github.com/synonymdev/slashtags/tree/master/#readme",
@@ -35,7 +35,8 @@
     "testnet:start": "pm2 start scripts/setup-testnet.js || echo 'Testnet already running'",
     "testnet:close": "pm2 delete scripts/setup-testnet.js || echo 'Testnet not running'",
     "relay": "node scripts/setup-relay.js",
-    "postinstall": "npm run link"
+    "postinstall": "npm run link",
+    "prepublishOnly": "npm run lint && npm run build && npm run depcheck && npm run test"
   },
   "devDependencies": {
     "@hyperswarm/testnet": "^2.0.0",
