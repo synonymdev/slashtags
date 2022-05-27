@@ -251,11 +251,7 @@ export class SlashDrive extends EventEmitter {
     if (!this.readable) return
     const seq = this.db.feed.length - 1
     if (seq === 0) return // Not part of the tree
-    const block = await this.db.getBlock(seq, {}).catch((error) => {
-      safetyCatch(error)
-      // TODO: investigate this further
-      debug('_onMetadataCoreAppend: TODO investigate this further')
-    })
+    const block = await this.db.getBlock(seq, {})
 
     if (!block || !block.key) return
     const [prefix, key] = b4a

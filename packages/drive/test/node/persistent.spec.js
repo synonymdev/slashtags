@@ -13,7 +13,7 @@ const storageDir = path.join(
 )
 
 describe('Persistent storage', () => {
-  it.skip('should open encrypted drives from storage with the correct encryptedKey', async () => {
+  it('should open encrypted drives from storage with the correct encryptedKey', async () => {
     const originContent = b4a.from(JSON.stringify({ foo: 'bar' }))
 
     // Create an encrypted drive
