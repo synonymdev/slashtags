@@ -508,8 +508,7 @@ describe('events', () => {
       })
     })
 
-    // TODO: test again emitting update event for multiple encrypted remote drives
-    it.skip('should allow emitting updates for multiple clones', async () => {
+    it('should allow emitting updates for multiple clones', async () => {
       const originStore = new Corestore(RAM)
       const origin = new SlashDrive({
         keyPair: await originStore.createKeyPair('foo'),
@@ -523,13 +522,11 @@ describe('events', () => {
         store: new Corestore(RAM),
         encryptionKey: origin.encryptionKey
       })
-      clone.name = 'clone1'
       await replicate(origin, clone)
       await clone.update()
 
       const result = new Promise((resolve) => {
         clone.on('update', (data) => {
-          console.log('update 1', data)
           resolve(data)
         })
       })
@@ -541,15 +538,9 @@ describe('events', () => {
       })
       await clone2.ready()
       await clone2.update()
-      console.log(clone2)
-      console.log({
-        clone: clone.encryptionKey,
-        clone2: clone2.encryptionKey
-      })
 
       const result2 = new Promise((resolve) => {
         clone2.on('update', (data) => {
-          console.log('update 2', data)
           resolve(data)
         })
       })
