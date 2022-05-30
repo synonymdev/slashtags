@@ -12,7 +12,7 @@ console.log('\nSeed:', seed)
 
 const root = await bip32(ecc).fromSeed(seed) // Network: bitcoin mainnet
 
-const primaryKey = root.derivePath("m/44'/123456'/0'/0/0").privateKey
+const primaryKey = root.derivePath(SDK.DERIVATION_PATH).privateKey
 
 const sdk = new SDK({ primaryKey })
 

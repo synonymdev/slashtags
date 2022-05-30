@@ -134,4 +134,8 @@ export class SDK {
   static get protocols () {
     return protocols
   }
+
+  static get DERIVATION_PATH () {
+    return "m/123456'"
+  }
 }

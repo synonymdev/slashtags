@@ -16,7 +16,7 @@ This document describes how Bitcoin wallets can use the same mnemonic seed phras
 
 ### From seed to PrimaryKey
 
-[BIP32](https://bips.xyz/32) is used to derive the path `m/44'/123456'/0'/0/0` (according to the Slashtags entry on [SLIP44](https://github.com/satoshilabs/slips/blob/master/slip-0044.md)).
+[BIP32](https://bips.xyz/32) is used to derive the path `m/123456'`.
 
 ### From PrimaryKey to Slashtag key
 
