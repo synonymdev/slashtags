@@ -7,6 +7,7 @@ import { Slashtag } from '@synonymdev/slashtag'
 
 import { storage } from './storage.js'
 import { protocolsList, protocols } from './protocols.js'
+import { hash } from './crypto.js'
 
 const debug = Debug('slashtags:sdk')
 
@@ -32,11 +33,15 @@ export class SDK {
 
     this.slashtags = new HashMap()
 
+    const store = new Corestore(this.storage, {
+      primaryKey: hash(this.primaryKey)
+    })
+
     this._root = new Slashtag({
       keyPair: this.createKeyPair(ROOT_SLASHTAG_NAME),
       swarmOpts: opts.swarmOpts || {},
       protocols: this._protocols,
-      store: new Corestore(this.storage)
+      store
     })
 
     // Gracefully shutdown
