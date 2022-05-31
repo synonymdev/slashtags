@@ -12,6 +12,7 @@ import { hash } from './crypto.js'
 const debug = Debug('slashtags:sdk')
 
 const ROOT_SLASHTAG_NAME = '@slashtags-sdk/root'
+const WELLKNOWN_PATH = '/.well-known/slashtags'
 export class SDK {
   /**
    *
@@ -137,5 +138,35 @@ export class SDK {
 
   static get DERIVATION_PATH () {
     return "m/123456'"
+  }
+
+  /**
+   *
+   * @param {string} address
+   * @param {object} [opts]
+   * @param {string} [opts.protocol]
+   * @param {import ('node-fetch').default} [opts.fetch]
+   * @returns {Promise<Slashtag | null>}
+   */
+  async fromDNS (address, opts) {
+    const split = address.split('@')
+    const domain = split.pop()
+    const name = split.pop() || '_'
+
+    const _fetch = opts?.fetch || fetch
+
+    const response = await _fetch(
+      (opts?.protocol || 'https://') +
+        domain +
+        WELLKNOWN_PATH +
+        '?name=' +
+        name
+    )
+    const names = await response.json()
+    const url = names[name]
+
+    if (!url) return null
+
+    return this.slashtag({ url })
   }
 }

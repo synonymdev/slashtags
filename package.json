@@ -44,6 +44,7 @@
     "dht-universal": "^0.4.1",
     "graceful-goodbye": "^1.0.0",
     "lerna": "^4.0.0",
+    "node-fetch": "^3.2.4",
     "pm2": "^5.2.0",
     "standard": "^17.0.0"
   },

@@ -98,6 +98,15 @@ Create a [Slashtag](../slashtag/) instance.
 
 Closes all Slahstags created by this SDK as well as any other resources managed by the SDK to enable graceful shutdown.
 
+#### `await sdk.fromDNS(address, [opts])`
+
+Create a [Slashtag](../slashtag/) from dns address like `alice@example.com`.
+
+`options` includes:
+
+- `fetch` [Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) compatible function, useful for testing, or passing `node-fetch` if necessary.
+- `protocol` `https://` by default. helpful to allow `http://` while testing.
+
 #### `SDK.protocols`
 
 A map of all the builtin [SlashProtocols](../slashtag/README.md#slashprotocol) that are available in the SDK by default.
