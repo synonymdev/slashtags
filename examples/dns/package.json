@@ -1,0 +1,7 @@
+{
+    "type": "module",
+    "scripts": {
+        "serve": "node server.js",
+        "fetch": "node client.js"
+    }
+}
