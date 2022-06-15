@@ -51,6 +51,7 @@ export class SlashProtocol extends EventEmitter {
     if (!channel) return null
 
     channel.peerInfo = peerInfo
+    channel.handshakeHash = mux.stream.handshakeHash
     channel.open()
 
     return channel

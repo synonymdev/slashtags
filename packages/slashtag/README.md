@@ -169,6 +169,7 @@ Where:
   `remoteSlashtag`: Slashtag instance for the remote peer.
 - `channel` extends the protomux's [channel]() with the following:
   - `channel.peerInfo` [peerInfo](#peerinfo-api)
+  - `channel.handshakeHash` unique secret handshake hash per connection's session.
 
 ### example
 

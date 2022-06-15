@@ -102,11 +102,15 @@ describe('protocol', () => {
     const foo = new Promise((resolve) => AliceFoo.on('message', resolve))
     const bar = new Promise((resolve) => AliceBar.on('message', resolve))
 
-    const channelFoo = await BobFoo.request(alice.key)
-    const channelBoo = await BobBar.request(alice.key)
+    const connFoo = await BobFoo.request(alice.key)
+    const connBar = await BobBar.request(alice.key)
 
-    expect(channelBoo.connection).to.eql(channelFoo.connection)
-    expect(channelBoo.peerInfo).to.eql(channelFoo.peerInfo)
+    expect(connFoo.connection).to.eql(connBar.connection)
+    expect(connFoo.channel).to.not.be.undefined()
+    expect(connFoo.channel.peerInfo).to.eql(connBar.channel.peerInfo)
+    expect(connFoo.channel.handshakeHash).to.eql(
+      connBar.channel._mux.stream.handshakeHash
+    )
 
     expect(await foo).to.eql('foo')
     expect(await bar).to.eql('bar')

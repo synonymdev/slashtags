@@ -320,4 +320,6 @@ export class Slashtag extends EventEmitter {
 /**
  * @typedef {import('./interfaces').PeerInfo } PeerInfo
  * @typedef {import('./interfaces').SecretStream } SecretStream
+ * @typedef {import('./interfaces').ProtomuxMessage } ProtomuxMessage
+ * @typedef {import('./interfaces').ProtomuxChannel } ProtomuxChannel
  */

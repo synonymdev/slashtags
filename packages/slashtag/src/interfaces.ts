@@ -38,6 +38,7 @@ export interface ProtomuxMessage {
 
 export interface ProtomuxChannel {
   peerInfo: PeerInfo;
+  handshakeHash: Uint8Array;
 
   open: () => void;
   messages: ProtomuxMessage[];
