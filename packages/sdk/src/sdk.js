@@ -28,7 +28,12 @@ export class SDK {
     this._opts = opts
     this._protocols = opts.protocols || protocolsList
 
-    this.storage = opts.persist === false ? RAM : storage(opts.storage)
+    this.storage =
+      opts.persist === false
+        ? RAM
+        : !opts.storage || typeof opts.storage === 'string'
+            ? storage(opts.storage)
+            : opts.storage
     this.primaryKey = opts.primaryKey || Slashtag.createKeyPair().publicKey
 
     this.slashtags = new HashMap()

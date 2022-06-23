@@ -74,7 +74,7 @@ Create a new SDK instance.
 
 - `storage`:
 
-  - A path to the storage directory, defaults to `${homedir()}/.slashtags/` in home directory
+  - A path to the storage directory, defaults to `${homedir()}/.slashtags/` in home directory, or a [Random Access Storage](https://github.com/random-access-storage/random-access-storage) instance.
 
 - `persist`:
 
