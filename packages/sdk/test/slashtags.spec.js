@@ -4,10 +4,10 @@ import { expect } from 'aegir/chai'
 import { sdk } from './helpers/setup-sdk.js'
 
 describe('slashtags', () => {
-  it('should throw an error if no key or url was given', async () => {
+  it('should return the default slashtag if no key, name or url were passed', async () => {
     const sdkA = await sdk()
 
-    expect(() => sdkA.slashtag({})).to.throw('Missing keyPair, key, or url')
+    expect(sdkA.slashtag({})).to.eql(sdkA._root)
 
     await sdkA.close()
   })

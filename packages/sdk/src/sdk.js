@@ -11,7 +11,6 @@ import { hash } from './crypto.js'
 
 const debug = Debug('slashtags:sdk')
 
-const ROOT_SLASHTAG_NAME = '@slashtags-sdk/root'
 export class SDK {
   /**
    *
@@ -38,15 +37,15 @@ export class SDK {
 
     this.slashtags = new HashMap()
 
-    const store = new Corestore(this.storage, {
+    this.store = new Corestore(this.storage, {
       primaryKey: hash(this.primaryKey)
     })
 
     this._root = new Slashtag({
-      keyPair: this.createKeyPair(ROOT_SLASHTAG_NAME),
+      keyPair: this.createKeyPair(undefined),
       swarmOpts: opts.swarmOpts || {},
       protocols: this._protocols,
-      store
+      store: this.store
     })
 
     // Gracefully shutdown
@@ -86,21 +85,23 @@ export class SDK {
 
   /**
    *
-   * @param {object} opts
+   * @param {object} [opts]
    * @param {string | Uint8Array} [opts.name]
    * @param {Uint8Array} [opts.key]
-   * @param {string} [opts.url]
+   * @param {string } [opts.url]
    * @returns {Slashtag}
    */
   slashtag (opts) {
-    if (opts.name) {
+    if (opts?.name) {
       // @ts-ignore
       opts.keyPair = this.createKeyPair(opts.name)
+    } else if (!opts?.key && !opts?.url) {
+      return this._root
     }
 
     const slashtag = new Slashtag({
       ...opts,
-      store: this._root.store,
+      store: this.store,
       swarmOpts: {
         ...this._opts.swarmOpts
       },

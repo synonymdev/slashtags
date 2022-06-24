@@ -84,7 +84,7 @@ Create a new SDK instance.
 
   - List of Slashtags [protocols](../slashtag/README.md#slashprotocol) to register on every Slashtag created by the SDK
 
-#### `sdk.slashtag(options)`
+#### `sdk.slashtag([options])`
 
 Create a [Slashtag](../slashtag/) instance.
 
@@ -93,6 +93,8 @@ Create a [Slashtag](../slashtag/) instance.
 - `name` Create a Slashtag with a name. see how the keyPairs are derived from that name and the SDK `primaryKey` [here](../../specs/slashtags-key-derivation.md)
 - `key` Create a remote Slashtag with a key.
 - `url` Create a remote Slashtag with a [SlashURL](../slashtag/README.md#slashurl).
+
+If neither `options`, `options.name`, `options.key`, nor `options.url` were provided it will return a default slashtag where the name used for derivation is an empty Buffer (no name).
 
 #### `await sdk.close()`
 
