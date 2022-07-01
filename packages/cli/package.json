@@ -1,0 +1,58 @@
+{
+  "name": "@synonymdev/slashtags-cli",
+  "version": "1.0.0-alpha.2",
+  "description": "",
+  "license": "MIT",
+  "homepage": "https://github.com/synonymdev/slashtags/tree/master/packages/cli/#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/synonymdev/slashtags.git"
+  },
+  "bin": {
+    "slash": "src/index.js"
+  },
+  "bugs": {
+    "url": "https://github.com/synonymdev/slashtags/issues"
+  },
+  "keywords": [],
+  "type": "module",
+  "types": "types/src/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "*": [
+        "types/*",
+        "types/src/*"
+      ],
+      "types/*": [
+        "types/*",
+        "types/src/*"
+      ]
+    }
+  },
+  "files": [
+    "*",
+    "!**/*.tsbuildinfo"
+  ],
+  "main": "src/index.js",
+  "scripts": {
+    "lint": "standard -i dist/ --fix",
+    "clean": "rimraf ./dist",
+    "depcheck": "npx aegir dep-check"
+  },
+  "standard": {
+    "env": [
+      "mocha"
+    ]
+  },
+  "dependencies": {
+    "chalk": "^5.0.1",
+    "commander": "^9.3.0",
+    "dht-universal": "^0.4.1",
+    "inquirer": "^9.0.0",
+    "pm2": "^5.2.0"
+  },
+  "devDependencies": {
+    "@types/inquirer": "^8.2.1",
+    "aegir": "^37.0.15"
+  }
+}
