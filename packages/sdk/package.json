@@ -1,6 +1,6 @@
 {
   "name": "@synonymdev/slashtags-sdk",
-  "version": "1.0.0-alpha.4",
+  "version": "1.0.0-alpha.6",
   "description": "slashtags development kit",
   "license": "MIT",
   "homepage": "https://github.com/synonymdev/slashtags/tree/master/packages/sdk/#readme",
@@ -51,7 +51,7 @@
   },
   "dependencies": {
     "@synonymdev/slashauth": "^1.0.0-alpha.0",
-    "@synonymdev/slashtag": "^1.0.0-alpha.0",
+    "@synonymdev/slashtag": "^1.0.0-alpha.3",
     "b4a": "^1.3.1",
     "corestore": "^6.0.1-alpha.16",
     "debug": "^4.3.4",

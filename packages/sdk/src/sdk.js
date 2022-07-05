@@ -42,7 +42,7 @@ export class SDK {
     })
 
     this._root = new Slashtag({
-      keyPair: this.createKeyPair(undefined),
+      keyPair: this.createKeyPair(),
       swarmOpts: opts.swarmOpts || {},
       protocols: this._protocols,
       store: this.store
@@ -77,7 +77,7 @@ export class SDK {
   /**
    * Generates a Slashtag keypair from a name, and the `SDK.primaryKey`.
    *
-   * @param {string | Uint8Array} name
+   * @param {string | Uint8Array} [name]
    */
   createKeyPair (name) {
     return Slashtag.createKeyPair(this.primaryKey, name)
