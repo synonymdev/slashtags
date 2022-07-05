@@ -14,7 +14,7 @@ describe('SlashURL', () => {
     expect(url.toString()).to.startWith('slash://')
     expect(url.protocol).to.equal('slash')
     expect(url.slashtag.base32).to.eql(
-      'brbk62w3uwenygs77rx4xxmekzhyxubch4x4ts4gpi67mlhmboga'
+      'btbk64s5wsrpag199tzhzzcrk38azwbn8hzhu1hgxe69cm8cbqgy'
     )
     expect(url.slashtag.key).to.eql(key)
   })
@@ -32,7 +32,7 @@ describe('SlashURL', () => {
     expect(url.toString()).to.startWith('slashauth://')
     expect(url.protocol).to.equal('slashauth')
     expect(url.slashtag.base32).to.eql(
-      'brbk62w3uwenygs77rx4xxmekzhyxubch4x4ts4gpi67mlhmboga'
+      'btbk64s5wsrpag199tzhzzcrk38azwbn8hzhu1hgxe69cm8cbqgy'
     )
     expect(url.slashtag.key).to.eql(key)
   })

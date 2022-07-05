@@ -9,6 +9,8 @@ declare module 'corestore' {
       },
     );
 
+    primaryKey: Uint8Array;
+
     replicate(socket: any);
     namespace(name: string | Uint8Array): Corestore;
     close(): Promise<void>;

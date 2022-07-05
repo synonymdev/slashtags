@@ -51,10 +51,10 @@
     "debug": "^4.3.4",
     "dht-universal": "^0.4.1",
     "graceful-goodbye": "^1.0.0",
-    "hi-base32": "^0.5.1",
     "hyperswarm": "^3.0.4",
     "random-access-memory": "^4.1.0",
-    "sodium-universal": "^3.1.0"
+    "sodium-universal": "^3.1.0",
+    "z32": "^1.0.0"
   },
   "devDependencies": {
     "@types/debug": "^4.1.7",

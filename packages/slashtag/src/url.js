@@ -1,16 +1,6 @@
-import b32 from 'hi-base32'
-import b4a from 'b4a'
+import z32 from 'z32'
 
 const DEFAULT_PROTOCOL = 'slash'
-
-/**
- *
- * @param {string} str
- * @returns {Uint8Array}
- */
-function fromBase32 (str) {
-  return b4a.from(b32.decode.asBytes(str.toUpperCase()))
-}
 
 export class SlashURL extends URL {
   /**
@@ -26,7 +16,7 @@ export class SlashURL extends URL {
       _protocol = protocol
       input = input.replace(_protocol, 'https')
     } else {
-      input = 'https://' + toBase32(input)
+      input = 'https://' + z32.encode(input)
     }
 
     // @ts-ignore
@@ -49,15 +39,7 @@ export class SlashURL extends URL {
   get slashtag () {
     return {
       base32: this.hostname,
-      key: fromBase32(this.hostname)
+      key: z32.decode(this.hostname)
     }
   }
-}
-
-/**
- *
- * @param {Uint8Array} buf
- */
-function toBase32 (buf) {
-  return b32.encode(b4a.from(buf)).replace(/[=]/g, '').toLowerCase()
 }
