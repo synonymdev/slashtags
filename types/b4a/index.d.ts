@@ -14,6 +14,6 @@ declare module 'b4a' {
     input: string | Buffer,
     encoding?: 'hex' | 'base64' | 'utf8' | 'utf16le' | 'ascii',
   ): number;
-  function concat(...args: Array<Buffer>): Buffer;
+  function concat(args: Array<Uint8Array>): Uint8Array;
   function equals(buf: Uint8Array, buf2: Uint8Array): boolean;
 }
