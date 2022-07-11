@@ -1,6 +1,6 @@
 {
   "name": "@synonymdev/slashtag",
-  "version": "1.0.0-alpha.3",
+  "version": "1.0.0-alpha.4",
   "description": "",
   "license": "MIT",
   "homepage": "https://github.com/synonymdev/slashtags/tree/master/packages/slashtag/#readme",
@@ -27,7 +27,8 @@
     }
   },
   "files": [
-    "*",
+    "dist",
+    "src",
     "!**/*.tsbuildinfo"
   ],
   "main": "src/index.js",
