@@ -4,11 +4,11 @@ import { SDK } from '@synonymdev/slashtags-sdk';
 
 const driveOpts = {
   key: b4a.from(
-    '106646d24bc3067fdc31ef88008eb0da8f3bc248cb6bdb4827c616ee4989b794',
+    'cd3aeb572d46ba89d179d2ef0380d7ad34ce7f0f2ad8f1246a5638f93160c056',
     'hex',
   ),
   encryptionKey: b4a.from(
-    '1ff1ba91fcb1a4794ea6f85ee1c48296edddaae731e7cbb444d4258070c24282',
+    'de5c4cc0a99fc2b818ad1100b2dbe7c316d821d329ce6448b0e0af3a748f812e',
     'hex',
   ),
 };
