@@ -30,7 +30,9 @@ const packagejson = (name, description) => `{
     }
   },
   "files": [
-    "*",
+    "dist",
+    "src",
+    "types",
     "!**/*.tsbuildinfo"
   ],
   "main": "src/index.js",
