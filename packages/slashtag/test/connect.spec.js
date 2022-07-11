@@ -112,19 +112,42 @@ describe('connect', () => {
     ).to.eventually.be.rejectedWith(/^Cannot connect from a remote slashtag$/)
   })
 
-  it('should be able to connect to a Slashtag url', async () => {
-    const alice = new Slashtag({
-      keyPair: Slashtag.createKeyPair(),
-      swarmOpts
-    })
+  it('should be able to connect to a Slashtag url', () =>
+    testconnect(swarmOpts))
 
-    await expect(alice.connect(alice.url)).to.be.eventually.rejectedWith(
-      'Cannot connect to self'
-    )
-    await expect(
-      alice.connect(alice.url.toString())
-    ).to.be.eventually.rejectedWith('Cannot connect to self')
-
-    await alice.close()
-  })
+  it('should be able to connect using a relay', () =>
+    testconnect(getSwarmOpts(true)))
 })
+
+async function testconnect (swarmOpts) {
+  const alice = new Slashtag({
+    keyPair: Slashtag.createKeyPair(),
+    swarmOpts
+  })
+
+  const gotConnection = new Promise((resolve, reject) => {
+    alice.on('connection', (conn, peerInfo) => {
+      conn.on('data', (data) => {
+        resolve(peerInfo.slashtag.url.toString())
+      })
+    })
+  })
+
+  await alice.listen()
+
+  if (swarmOpts.relays) expect(alice.swarm.dht._protocol).to.not.be.undefined()
+
+  const bob = new Slashtag({
+    keyPair: Slashtag.createKeyPair(),
+    swarmOpts
+  })
+
+  const { peerInfo } = await bob.connect(alice.url.toString())
+
+  expect(peerInfo.slashtag.url.toString()).to.eql(alice.url.toString())
+
+  expect(await gotConnection).to.eql(bob.url.toString())
+
+  alice.close()
+  bob.close()
+}

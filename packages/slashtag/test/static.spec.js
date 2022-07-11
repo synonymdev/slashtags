@@ -3,6 +3,7 @@ import b4a from 'b4a'
 
 import { createKeyPair } from '../src/crypto.js'
 import { Slashtag } from '../src/index.js'
+import { getSwarmOpts } from './helpers/swarmOpts.js'
 
 describe('static createKeyPair()', () => {
   it('should create random keypair', () => {
@@ -55,5 +56,17 @@ describe('initialize', () => {
 
     await alice.close()
     await aliceRemote.close()
+  })
+
+  it('should use relays in all environments if relays provided', async () => {
+    const alice = new Slashtag({
+      keyPair: Slashtag.createKeyPair(),
+      swarmOpts: getSwarmOpts(true)
+    })
+    await alice.ready()
+
+    expect(alice.swarm.dht._protocol).to.not.be.undefined()
+
+    alice.close()
   })
 })

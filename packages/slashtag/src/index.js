@@ -1,5 +1,6 @@
 import EventEmitter from 'events'
 import { DHT } from 'dht-universal'
+import { DHT as Relayed } from 'dht-universal/relay.js'
 import Hyperswarm from 'hyperswarm'
 import b4a from 'b4a'
 import Corestore from 'corestore'
@@ -76,7 +77,9 @@ export class Slashtag extends EventEmitter {
     debug('Opening slashtag: ' + this.url)
 
     if (!this.swarm) {
-      const dht = await DHT.create({ ...this._opts.swarmOpts })
+      const dht = this._opts.swarmOpts?.relays
+        ? await Relayed.create(this._opts.swarmOpts)
+        : await DHT.create(this._opts.swarmOpts || {})
       this.swarm = new Hyperswarm({
         ...this._opts.swarmOpts,
         keyPair: this.keyPair,
