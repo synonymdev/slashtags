@@ -2,7 +2,16 @@ import b4a from 'b4a'
 import EventEmitter from 'events'
 
 import { expect } from 'aegir/chai'
-import { catchConnection } from '../src/utils.js'
+import { catchConnection, fletcher16 } from '../src/utils.js'
+
+const checksumTestVectors = [
+  ['abcde', 'c8f0'],
+  ['abcdef', '2057'],
+  ['abcdefgh', '0627'],
+  ['cce18ed41101509ab171a0a9b54aaf67af1aa421597a139e5ffe5e4867f3b538', '28f6'],
+  ['ed4d3f0ee964def139562cc7fc349194131f9fefc59fc7e083b0eb2a0d354c44', '576f'],
+  ['67412cd16b4d9624018c4c4d17079c5db971d1c65b7a10382ea325d96a18f8a7', '372f']
+]
 
 describe('utils', () => {
   describe('catchConnection', () => {
@@ -18,6 +27,17 @@ describe('utils', () => {
       swarm.emit('connection', {}, { publicKey: target })
 
       expect((await result).peerInfo.publicKey).to.eql(target)
+    })
+  })
+
+  describe('fletcher16', () => {
+    checksumTestVectors.forEach(([input, checksum]) => {
+      it('should pass test vector: ' + input, () => {
+        const buf =
+          input.length === 64 ? b4a.from(input, 'hex') : b4a.from(input)
+
+        expect(fletcher16(buf)).to.eql(b4a.from(checksum, 'hex'))
+      })
     })
   })
 })
