@@ -98,9 +98,9 @@ Returns a promise of [Encrypted Connection](https://github.com/hyperswarm/secret
 
 #### `slashtag.protocol(Protocol)`
 
-Registers a protocol if it wasn't already. Returns the protocol instance registered for this instance of Slashtag.
+Returns an instance of the protocol registered on this slashtag's instance.
 
-`Protocol` has to bea class that extends [SlashProtocol](#slashprotocol).
+`Protocol` can be a class that extends [SlashProtocol](#slashprotocol), or a string representing the name of the protocol.
 
 #### `await slashtag.setProfile(profile)`
 

@@ -17,6 +17,12 @@ describe('SlashURL', () => {
       'btbk64s5wsrpag199tzhzzcrk38azwbn8hzhu1hgxe69cm8cbqgmghe'
     )
     expect(url.slashtag.key).to.eql(key)
+    expect(url.origin).to.eql(
+      'slash://btbk64s5wsrpag199tzhzzcrk38azwbn8hzhu1hgxe69cm8cbqgmghe'
+    )
+    expect(url.href).to.eql(
+      'slash://btbk64s5wsrpag199tzhzzcrk38azwbn8hzhu1hgxe69cm8cbqgmghe/'
+    )
   })
 
   it('should create a slash url object from a url string', () => {

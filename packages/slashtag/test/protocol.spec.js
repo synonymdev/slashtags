@@ -64,9 +64,20 @@ describe('protocol', () => {
       protocols: [Foo]
     })
 
-    expect(() => alice.protocol(Foo)).to.throw(
-      'Cannot register protocol on a remote slashtag'
-    )
+    expect(alice.protocol(Foo)).to.be.undefined()
+  })
+
+  it('should be able to get protocol by either string or SlashProtcol class', () => {
+    const alice = new Slashtag({
+      keyPair: Slashtag.createKeyPair(),
+      swarmOpts,
+      protocols: [Foo]
+    })
+
+    expect(alice.protocol(Foo)).to.be.instanceOf(Foo)
+    expect(alice.protocol('foo')).to.be.instanceOf(Foo)
+    expect(alice.protocol(Bar)).to.be.undefined()
+    expect(alice.protocol('bar')).to.be.undefined()
   })
 
   it('should register and multiplex multiple protocol over the same connection', async () => {

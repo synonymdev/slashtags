@@ -12,6 +12,7 @@ describe('SlashAuth', () => {
   it('should format a slashauth url from a Slashtag and a token', async () => {
     const responder = new Slashtag({
       keyPair: Slashtag.createKeyPair(),
+      protocols: [SlashAuth],
       swarmOpts
     })
 
@@ -30,6 +31,7 @@ describe('SlashAuth', () => {
     // responder side
     const responder = new Slashtag({
       keyPair: Slashtag.createKeyPair(),
+      protocols: [SlashAuth],
       swarmOpts
     })
 
@@ -45,6 +47,7 @@ describe('SlashAuth', () => {
 
     const initiator = new Slashtag({
       keyPair: Slashtag.createKeyPair(),
+      protocols: [SlashAuth],
       swarmOpts
     })
 
@@ -68,6 +71,7 @@ describe('SlashAuth', () => {
     // responder side
     const responder = new Slashtag({
       keyPair: Slashtag.createKeyPair(),
+      protocols: [SlashAuth],
       swarmOpts
     })
 
@@ -113,6 +117,7 @@ describe('SlashAuth', () => {
     // initiator side
     const initiator = new Slashtag({
       keyPair: Slashtag.createKeyPair(),
+      protocols: [SlashAuth],
       swarmOpts
     })
 

@@ -34,7 +34,7 @@ export class Slashtag extends EventEmitter {
    * @param {object} [opts.swarmOpts]
    * @param {string[]} [opts.swarmOpts.relays]
    * @param {Array<{host: string; port: number}>} [opts.swarmOpts.bootstrap]
-   * @param {Array<typeof import('./protocol').SlashProtocol>} [opts.protocols]
+   * @param {Array<typeof SlashProtocol>} [opts.protocols]
    */
   constructor (opts = {}) {
     super()
@@ -55,7 +55,7 @@ export class Slashtag extends EventEmitter {
 
     if (!this.remote) {
       this._protocols = new Map()
-      opts.protocols?.forEach((p) => this.protocol(p))
+      opts.protocols?.forEach((p) => registerProtocol(this, p))
     }
 
     this.closed = false
@@ -138,25 +138,16 @@ export class Slashtag extends EventEmitter {
   }
 
   /**
-   * Registers a protocol if it wasn't already, and get and instance of it for this Slashtag.
+   * Returns an instance of SlashProtocol for this Slashtag.
    *
-   * @template {typeof SlashProtocol} P
+   * @template {typeof SlashProtocol | string} P
    * @param {P} Protocol
    * @returns {InstanceType<P>}
    */
   protocol (Protocol) {
-    if (this.remote) {
-      throw new Error('Cannot register protocol on a remote slashtag')
-    }
-
-    // @ts-ignore
-    const name = Protocol.protocol
-
-    let protocol = this._protocols?.get(name)
-    if (protocol) return protocol
-    protocol = new Protocol({ slashtag: this })
-    this._protocols?.set(name, protocol)
-    return protocol
+    return this._protocols?.get(
+      typeof Protocol === 'string' ? Protocol : Protocol.protocol
+    )
   }
 
   /**
@@ -323,3 +314,19 @@ export class Slashtag extends EventEmitter {
  * @typedef {import('./interfaces').ProtomuxMessage } ProtomuxMessage
  * @typedef {import('./interfaces').ProtomuxChannel } ProtomuxChannel
  */
+
+/**
+ * Registers a SlashProtocol for a the Slashtags instance.
+ * @param {Slashtag} slashtag
+ * @param {typeof SlashProtocol} Protocol
+ */
+function registerProtocol (slashtag, Protocol) {
+  // @ts-ignore
+  const name = Protocol.protocol
+
+  let protocol = slashtag._protocols?.get(name)
+  if (protocol) return protocol
+  protocol = new Protocol({ slashtag })
+  slashtag._protocols?.set(name, protocol)
+  return protocol
+}
