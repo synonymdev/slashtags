@@ -101,16 +101,16 @@ describe('attributes', () => {
   describe('readable', () => {
     it('drives missing content key in headers should not be readable', async () => {
       const store = new Corestore(RAM)
+      const keyPair = await store.createKeyPair('foo')
+
       const localDrive = new SlashDrive({
-        keyPair: await store.createKeyPair('foo'),
+        keyPair,
         store
       })
-
-      // Corrupt the headers
-      await localDrive.headersDB.put('c', null)
+      // Didn't call ready
 
       const remoteDrive = new SlashDrive({
-        key: localDrive.key,
+        key: keyPair.publicKey,
         store: new Corestore(RAM)
       })
 
@@ -136,30 +136,6 @@ describe('attributes', () => {
       await remoteDrive.ready()
 
       expect(remoteDrive.peers.length).to.equal(0)
-      expect(remoteDrive.readable).to.be.false()
-    })
-
-    it('encrypted drives that can not be decrypted should not be readable', async () => {
-      const store = new Corestore(RAM)
-      const localDrive = new SlashDrive({
-        keyPair: await store.createKeyPair('foo'),
-        store,
-        encrypted: true
-      })
-      await localDrive.ready()
-
-      const localContent = b4a.from(JSON.stringify({ foo: 'bar' }))
-      await localDrive.put('/profile.json', localContent)
-
-      const remoteDrive = new SlashDrive({
-        store: new Corestore(RAM),
-        key: localDrive.key
-      })
-      await remoteDrive.ready()
-
-      await replicate(localDrive, remoteDrive)
-      await remoteDrive.update()
-
       expect(remoteDrive.readable).to.be.false()
     })
   })
@@ -318,12 +294,7 @@ describe('encryption', () => {
     })
     await drive.ready()
 
-    expect(drive.encryptionKey).to.not.be.null()
-    expect(drive.encryptionKey).to.eql(drive.metadataDB.feed.encryptionKey)
-    expect(drive.content.core.encryptionKey).to.eql(
-      drive.metadataDB.feed.encryptionKey
-    )
-    expect(drive.content).to.not.be.undefined()
+    await drive.put('foo', b4a.from('bar'))
 
     const drive2 = new SlashDrive({
       keyPair: await store.createKeyPair('foo'),
@@ -395,6 +366,57 @@ describe('replicate', () => {
   })
 })
 
+describe('download', () => {
+  it('should download both metatadata and contnent feeds', async () => {
+    const store = new Corestore(RAM)
+    const localDrive = new SlashDrive({
+      keyPair: await store.createKeyPair('foo'),
+      store: new Corestore(RAM)
+    })
+    await localDrive.ready()
+
+    const localContent = b4a.from(JSON.stringify({ foo: 'bar' }))
+    await localDrive.put('/profile.json', localContent)
+
+    const remoteDrive = new SlashDrive({
+      store: new Corestore(RAM),
+      key: localDrive.key,
+      encryptionKey: localDrive.encryptionKey
+    })
+
+    await replicate(localDrive, remoteDrive)
+
+    await remoteDrive.download()
+    expect(await remoteDrive.get('/profile.json')).to.eql(localContent)
+  })
+
+  it('should download encrypted drives without the encryptionKey', async () => {
+    const store = new Corestore(RAM)
+    const localDrive = new SlashDrive({
+      keyPair: await store.createKeyPair('foo'),
+      store: new Corestore(RAM),
+      encrypted: true
+    })
+    await localDrive.ready()
+
+    const localContent = b4a.from(JSON.stringify({ foo: 'bar' }))
+    await localDrive.put('/profile.json', localContent)
+
+    expect(localDrive.feed.length).to.eql(2)
+
+    const remoteDrive = new SlashDrive({
+      store: new Corestore(RAM),
+      key: localDrive.key
+    })
+
+    await replicate(localDrive, remoteDrive)
+
+    await remoteDrive.download()
+
+    expect(await remoteDrive.get('/profile.json')).to.not.eql(localContent)
+  })
+})
+
 describe('discovery', () => {
   async function swarm () {
     const { RELAY_URL, BOOTSTRAP, MAINNET } = process.env
@@ -462,16 +484,20 @@ describe('events', () => {
       await localDrive.ready()
 
       const result = new Promise((resolve) => {
-        localDrive.on('update', (data) => {
-          resolve(data)
-        })
+        localDrive.on(
+          'update',
+          /** @type {import('../src/index').EventsListeners['update']} */
+          (data) => {
+            resolve(data)
+          }
+        )
       })
 
       await localDrive.put('foo', b4a.from('foo data'))
 
       expect(await result).to.eql({
         key: 'foo',
-        seq: 3,
+        seq: 1,
         type: 'put'
       })
     })
@@ -503,7 +529,7 @@ describe('events', () => {
 
       expect(await result).to.eql({
         key: 'foo',
-        seq: 3,
+        seq: 1,
         type: 'put'
       })
     })
@@ -536,7 +562,6 @@ describe('events', () => {
         store: clone.store,
         encryptionKey: origin.encryptionKey
       })
-      await clone2.ready()
       await clone2.update()
 
       const result2 = new Promise((resolve) => {
@@ -549,13 +574,13 @@ describe('events', () => {
 
       expect(await result).to.eql({
         key: 'foo',
-        seq: 3,
+        seq: 1,
         type: 'put'
       })
 
       expect(await result2).to.eql({
         key: 'foo',
-        seq: 3,
+        seq: 1,
         type: 'put'
       })
     })

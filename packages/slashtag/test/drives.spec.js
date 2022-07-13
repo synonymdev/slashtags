@@ -83,7 +83,7 @@ describe('drive', () => {
       const content = b4a.from('hello world')
       await drive.put('/messages/1', content)
 
-      expect(drive.metadataDB.feed.length).to.be.greaterThan(3)
+      expect(drive.feed.length).to.be.greaterThan(1)
       expect(drive.encryptionKey.length).to.eql(32)
 
       // Bob loads the drive

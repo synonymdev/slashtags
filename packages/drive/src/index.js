@@ -4,22 +4,15 @@ import Hyperblobs from 'hyperblobs'
 import b4a from 'b4a'
 import Debug from 'debug'
 import EventEmitter from 'events'
-import safetyCatch from 'safety-catch'
+// @ts-ignore
+import { Header } from 'hyperbee/lib/messages.js'
 
 import { ObjectMetadata } from './encoding.js'
 import { collect, hash } from './utils.js'
 
 const debug = Debug('slashtags:slashdrive')
 
-const SEMVER = `${process.env.npm_package_version}`
-
-const HeaderKeys = {
-  content: 'c',
-  semver: 'v'
-}
-
 const SubPrefixes = {
-  headers: 'h',
   objects: 'o'
 }
 
@@ -42,91 +35,90 @@ export class SlashDrive extends EventEmitter {
 
     this.store = opts.store.namespace(opts.keyPair?.publicKey || opts.key)
 
-    /** @type {*} */
-    const metadataCoreOpts = {
-      key: opts.key,
-      encryptionKey: opts.encryptionKey
+    this.encryptionKey = opts.encryptionKey
+
+    if (opts.keyPair && opts.encrypted) {
+      this.encryptionKey = hash(opts.keyPair.secretKey)
     }
 
-    if (opts.keyPair) {
-      metadataCoreOpts.keyPair = opts.keyPair
-      metadataCoreOpts.encryptionKey =
-        opts.encrypted && hash(opts.keyPair.secretKey)
-    }
-
-    const metadataCore = this.store.get(metadataCoreOpts)
-
-    this.db = new Hyperbee(metadataCore)
-    this.metadataDB = this.db.sub(SubPrefixes.objects)
-    this.headersDB = this.db.sub(SubPrefixes.headers)
-
-    metadataCore.on('append', this._onMetadataCoreAppend.bind(this))
-
-    if (opts.keyPair) {
-      const contentCore = this.store.get({
-        name: 'content',
-        encryptionKey: metadataCoreOpts.encryptionKey
-      })
-
-      this.content = new Hyperblobs(contentCore)
-    }
+    // Initiate the drive with a non encrypted feed to read/write header block
+    this.feed = this.store.get({
+      keyPair: opts.keyPair,
+      key: opts.key
+    })
 
     this._ready = false
   }
 
   get key () {
-    return this.metadataDB?.feed.key
+    return this.feed.key
   }
 
   /** @type {Uint8Array} */
   get discoveryKey () {
-    // @ts-ignore
-    return this.metadataDB?.feed.discoveryKey
+    return this.feed.discoveryKey
   }
 
-  get encryptionKey () {
-    return this.metadataDB?.feed.encryptionKey
+  get contentKey () {
+    return this.content?.core.key
   }
 
   get writable () {
-    return (
-      Boolean(this.metadataDB?.feed.writable) &&
-      Boolean(this.content?.core.writable)
-    )
+    return Boolean(this.feed.writable) && Boolean(this.content?.core.writable)
   }
 
   get readable () {
-    return (
-      Boolean(this.metadataDB?.feed.readable) &&
-      Boolean(this.content?.core.readable)
-    )
+    return Boolean(this.feed.readable) && Boolean(this.content?.core.readable)
   }
 
   get peers () {
-    return this.metadataDB?.feed.peers
+    return this.feed.peers
   }
 
   get online () {
-    return this.metadataDB?.feed.peers.length > 0
+    return this.feed.peers.length > 0
   }
 
   async ready () {
     if (this._ready) return
     this._ready = true
 
-    await this.metadataDB.feed.ready()
-    await this._setupRemoteContent()
-    await this.content?.core.ready()
+    await _openContentFromHeader(this)
 
-    if (this.metadataDB.feed.writable) {
-      const header = await this.headersDB.get(HeaderKeys.content)
-      if (!header) {
-        const batch = this.headersDB.batch()
-        await batch.put(HeaderKeys.content, this.content?.core.key)
-        await batch.put(HeaderKeys.semver, b4a.from(SEMVER))
-        await batch.flush()
+    if (!this.content && this.feed.writable) {
+      // Setup content
+      const core = this.store.get({
+        name: 'content',
+        encryptionKey: this.encryptionKey
+      })
+      await core.ready()
+      this.content = new Hyperblobs(core)
+
+      if (this.feed.length === 0) {
+        const session = this.feed.session()
+        await session.ready()
+        await session.append(
+          Header.encode({
+            protocol: 'slashdrive',
+            metadata: { contentFeed: core.key }
+          })
+        )
+        session.close()
       }
     }
+
+    this.feed = this.store.get({
+      key: this.feed.key,
+      auth: this.feed.auth
+    })
+
+    this.feed.on('append', this._onAppend.bind(this))
+    this.db = new Hyperbee(this.feed)
+    this.objects = this.db.sub(SubPrefixes.objects)
+
+    await this.feed.ready()
+
+    debug('Opened drive')
   }
 
   /**
@@ -135,8 +127,8 @@ export class SlashDrive extends EventEmitter {
    */
   async update () {
     await this.ready()
-    const updated = await this.metadataDB?.feed.update()
-    await this._setupRemoteContent()
+    const updated = await this.feed.update()
+    await _openContentFromHeader(this)
     return updated
   }
 
@@ -147,7 +139,7 @@ export class SlashDrive extends EventEmitter {
    * @returns {()=>void}
    */
   findingPeers () {
-    return this.metadataDB.feed.findingPeers()
+    return this.feed.findingPeers()
   }
 
   /**
@@ -158,21 +150,6 @@ export class SlashDrive extends EventEmitter {
    */
   replicate (isInitiator, opts) {
     return this.store.replicate(isInitiator, opts)
-  }
-
-  async _setupRemoteContent () {
-    if (this.content) return
-
-    const contentHeader = await getContentHeader(this)
-    if (!contentHeader?.value) return
-
-    const contentCore = await this.store.get({
-      key: contentHeader.value,
-      encryptionKey: this.encryptionKey
-    })
-
-    await contentCore.ready()
-    this.content = new Hyperblobs(contentCore)
   }
 
   /**
@@ -188,7 +165,7 @@ export class SlashDrive extends EventEmitter {
     if (!this.writable) throw new Error('Drive is not writable')
 
     const blobIndex = await this.content?.put(content)
-    await this.metadataDB?.put(
+    await this.objects?.put(
       key,
       c.encode(ObjectMetadata, {
         blobIndex,
@@ -205,7 +182,7 @@ export class SlashDrive extends EventEmitter {
   async get (key) {
     if (!this.content) await this.update()
 
-    const block = await this.metadataDB?.get(key, {
+    const block = await this.objects?.get(key, {
       update: this.online
     })
     if (!block) return null
@@ -227,11 +204,10 @@ export class SlashDrive extends EventEmitter {
 
     const options = {
       gte: prefix,
-      // TODO: works for ASCII, handle UTF-8
       lt: prefix + '~',
       update: this.online
     }
-    const stream = this.metadataDB?.createReadStream(options)
+    const stream = this.objects?.createReadStream(options)
 
     // @ts-ignore
     return collect(stream, (entry) => {
@@ -247,11 +223,24 @@ export class SlashDrive extends EventEmitter {
     })
   }
 
-  async _onMetadataCoreAppend () {
+  /**
+   * @returns
+   */
+  async download () {
+    if (!this.content) await this.update()
+    const downloadedFeed = this.feed.download()
+    // process.title === 'node' && (await this.content?.core.update());
+    const contentDownloaded = this.content?.core.download()
+    return Promise.all([downloadedFeed, contentDownloaded])
+  }
+
+  async _onAppend () {
     if (!this.readable) return
-    const seq = this.db.feed.length - 1
+    if (!this.db?.feed.readable) return
+
+    const seq = this.feed.length - 1
     if (seq === 0) return // Not part of the tree
-    const block = await this.db.getBlock(seq, {})
+    const block = await this.db?.getBlock(seq, {})
 
     if (!block || !block.key) return
     const [prefix, key] = b4a
@@ -271,22 +260,29 @@ export class SlashDrive extends EventEmitter {
 /**
  *
  * @param {SlashDrive} drive
+ * @returns
  */
-async function getContentHeader (drive) {
-  const core = drive.metadataDB?.feed
+async function _openContentFromHeader (drive) {
+  if (drive.content) return
 
-  // First block is hyperbee and the second is the content header
-  core.length < 2 && (await core.update())
-  if (core.length < 2) {
-    debug('validateRemote: Not enough data in metadata core', { core })
-    return
-  }
+  await drive.feed.update()
+  if (drive.feed.length === 0) return
+  const session = drive.feed.session()
+  await session.ready()
+  const block = await session.get(0)
+  const header = Header.decode(block)
+  session.close()
 
-  return await drive.headersDB?.get(HeaderKeys.content).catch((error) => {
-    safetyCatch(error)
-    debug('validateRemote: Encrypted or corrupt drive', {
-      error,
-      encryptionKey: drive.headersDB.feed.encryptionKey
-    })
+  if (!header?.metadata?.contentFeed) return false
+
+  const core = await drive.store.get({
+    key: header.metadata.contentFeed,
+    encryptionKey: drive.encryptionKey
   })
+  await core.update()
+  drive.content = new Hyperblobs(core)
 }
+
+/**
+ * @typedef {import ('./interfaces').EventsListeners } EventsListeners
+ */

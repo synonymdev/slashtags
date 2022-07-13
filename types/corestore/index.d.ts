@@ -11,11 +11,22 @@ declare module 'corestore' {
 
     primaryKey: Uint8Array;
 
-    replicate(socket: any);
-    namespace(name: string | Uint8Array): Corestore;
+    replicate(socket: any, opts?: any);
+    namespace(name?: string | Uint8Array): Corestore;
     close(): Promise<void>;
 
     createKeyPair(name: string);
     findingPeers(): () => void;
+
+    get(opts: {
+      name?: string;
+      key?: Uint8Array;
+      encryptionKey?: Uint8Array;
+      keyPair?: {
+        secretKey: Uint8Array;
+        publicKey: Uint8Array;
+      };
+      cache?: boolean;
+    }): Hypercore;
   };
 }

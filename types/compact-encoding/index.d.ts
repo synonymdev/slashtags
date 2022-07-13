@@ -6,11 +6,18 @@ declare module 'compact-encoding' {
   let uint: Encoding;
   let fixed32: Encoding;
   let string: Encoding;
+  let raw: Encoding;
 
   interface Encoding {
-    preencode(): void;
-    encode(val: any): void;
-    decode(): any;
+    preencode(
+      state: { start: number; end: number; buffer: Uint8Array },
+      val: any,
+    ): void;
+    encode(
+      state: { start: number; end: number; buffer: Uint8Array },
+      val: any,
+    ): void;
+    decode(buffer): any;
   }
 }
 

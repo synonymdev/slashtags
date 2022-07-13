@@ -21,6 +21,7 @@ declare module 'hypercore' {
     keyPair: { foo: number };
     encryptionKey: Uint8Array;
     peers: Array<any>;
+    byteLength: number;
 
     ready(): Promise<void>;
     update(): Promise<void>;
@@ -28,5 +29,6 @@ declare module 'hypercore' {
     close(): Promise<void>;
     get(seq: nubmer): Promise<any>;
     findingPeers(): () => void;
+    download(range?: { start: number; end: number }): () => void;
   };
 }

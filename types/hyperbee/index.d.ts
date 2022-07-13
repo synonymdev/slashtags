@@ -3,7 +3,10 @@ declare module 'hyperbee' {
   import type { Readable } from 'stream';
 
   export = class Hyperbee {
-    constructor(core: any);
+    constructor(
+      core: any,
+      opts?: { metadata?: { contentFeed?: Uint8Array | null } },
+    );
     sub(prefix: string): Hyperbee;
 
     put(key: any, value: any): Promise<void>;
@@ -13,6 +16,7 @@ declare module 'hyperbee' {
         update: boolean;
       },
     ): Promise<{ seq: number; key: any; value: any } | null>;
+    del(key: any): Promise<any>;
 
     batch(): {
       put(key: any, value: any): Promise<void>;
@@ -31,7 +35,15 @@ declare module 'hyperbee' {
       isDeletion(): boolean;
     }>;
 
+    ready(): Promise<void>;
+
+    getHeader(opts?: any): Promise<{ metadata?: { contentFeed?: Uint8Array } }>;
+    getRoot(ensureHeader: boolean): Promise<any>;
+
     feed: Hypercore;
     sep: Uint8Array;
+    metadata: {
+      contentFeed?: Uint8Array | null;
+    };
   };
 }
