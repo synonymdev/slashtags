@@ -29,6 +29,8 @@ declare module 'hypercore' {
     close(): Promise<void>;
     get(seq: nubmer): Promise<any>;
     findingPeers(): () => void;
-    download(range?: { start: number; end: number }): () => void;
+    download(range?: { start: number; end: number }): {
+      downloaded: () => Promise<void>;
+    };
   };
 }

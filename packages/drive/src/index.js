@@ -8,13 +8,15 @@ import EventEmitter from 'events'
 import { Header } from 'hyperbee/lib/messages.js'
 
 import { ObjectMetadata } from './encoding.js'
-import { collect, hash } from './utils.js'
+import { hash } from './utils.js'
 
 const debug = Debug('slashtags:slashdrive')
 
 const SubPrefixes = {
   objects: 'o'
 }
+
+const HEX_FF = b4a.toString(b4a.from('ff', 'hex'))
 
 export class SlashDrive extends EventEmitter {
   /**
@@ -47,7 +49,14 @@ export class SlashDrive extends EventEmitter {
       key: opts.key
     })
 
+    this.db = new Hyperbee(this.feed)
+    this.objects = this.db.sub(SubPrefixes.objects)
+
     this._ready = false
+  }
+
+  [Symbol.asyncIterator] () {
+    return this.entries()[Symbol.asyncIterator]()
   }
 
   get key () {
@@ -113,8 +122,6 @@ export class SlashDrive extends EventEmitter {
     })
 
     this.feed.on('append', this._onAppend.bind(this))
-    this.db = new Hyperbee(this.feed)
-    this.objects = this.db.sub(SubPrefixes.objects)
 
     await this.feed.ready()
 
@@ -195,32 +202,64 @@ export class SlashDrive extends EventEmitter {
   }
 
   /**
-   *
-   * @param {string} prefix
-   * @returns {Promise<Array<{key:string, metadata: Object}>>}
+   * @param {object} [opts]
+   * @param {string} [opts.prefix]
+   * @param {string} [opts.gt]
+   * @param {string} [opts.gte]
+   * @param {string} [opts.lt]
+   * @param {string} [opts.lte]
+   * @param {string} [opts.reverse]
+   * @param {number} [opts.limit]
    */
-  async list (prefix) {
-    if (!this.content) await this.update()
-
+  entries (opts) {
     const options = {
-      gte: prefix,
-      lt: prefix + '~',
+      gte: opts?.prefix,
+      lt: opts?.prefix + HEX_FF,
+      ...opts,
       update: this.online
     }
-    const stream = this.objects?.createReadStream(options)
 
-    // @ts-ignore
-    return collect(stream, (entry) => {
-      const metadata = c.decode(ObjectMetadata, entry.value)
+    return this.objects.createReadStream(options)
+  }
 
-      return {
-        key: b4a.toString(entry.key),
-        metadata: {
+  /**
+   *
+   * @param {string} [prefix]
+   * @param {object} [opts]
+   * @param {boolean} [opts.content]
+   * @param {boolean} [opts.metadata]
+   */
+  async list (prefix, opts = { metadata: false, content: false }) {
+    const stream = this.entries({ prefix })
+
+    const result = []
+
+    for await (const entry of stream) {
+      const key = b4a.toString(entry.key)
+
+      /** @type {{key: string, metadata?: Object, content?: Uint8Array | null}} */
+      const item = { key }
+
+      let metadata
+
+      if (opts.metadata) {
+        metadata = c.decode(ObjectMetadata, entry.value)
+
+        item.metadata = {
           ...metadata.userMetadata,
           contentLength: metadata.blobIndex.byteLength
         }
       }
-    })
+
+      if (opts.content) {
+        metadata = metadata || c.decode(ObjectMetadata, entry.value)
+        item.content = await this.content?.get(metadata.blobIndex)
+      }
+
+      result.push(item)
+    }
+
+    return result
   }
 
   /**
@@ -229,9 +268,8 @@ export class SlashDrive extends EventEmitter {
   async download () {
     if (!this.content) await this.update()
     const downloadedFeed = this.feed.download()
-    // process.title === 'node' && (await this.content?.core.update());
     const contentDownloaded = this.content?.core.download()
-    return Promise.all([downloadedFeed, contentDownloaded])
+    return Promise.allSettled([downloadedFeed, contentDownloaded])
   }
 
   async _onAppend () {

@@ -205,6 +205,28 @@ describe('put and get', async () => {
   })
 })
 
+describe('asyncIterator', () => {
+  it('drive should be async iterable to list all objects', async () => {
+    const store = new Corestore(RAM)
+    const driveA = new SlashDrive({
+      keyPair: await store.createKeyPair('foo'),
+      store
+    })
+    await driveA.ready()
+
+    await driveA.put('/foo', b4a.from('foo'))
+    await driveA.put('/bar', b4a.from('bar'))
+
+    const result = []
+
+    for await (const entry of driveA) {
+      result.push(b4a.toString(entry.key))
+    }
+
+    expect(result).to.eql(['/bar', '/foo'])
+  })
+})
+
 describe('list', () => {
   it('should return an empty list for non existent prefix', async () => {
     const store = new Corestore(RAM)
@@ -233,23 +255,84 @@ describe('list', () => {
     await driveA.put('/foo/bara/zar.txt', b4a.from('bar'))
 
     expect(await driveA.list('/foo')).to.eql([
-      { key: '/foo.txt', metadata: { contentLength: 3 } },
-      { key: '/foo/bar.txt', metadata: { contentLength: 3 } },
-      { key: '/foo/bar/zar.txt', metadata: { contentLength: 3 } },
-      { key: '/foo/bara/zar.txt', metadata: { contentLength: 3 } }
+      { key: '/foo.txt' },
+      { key: '/foo/bar.txt' },
+      { key: '/foo/bar/zar.txt' },
+      { key: '/foo/bara/zar.txt' }
     ])
     expect(await driveA.list('/foo/')).to.eql([
-      { key: '/foo/bar.txt', metadata: { contentLength: 3 } },
-      { key: '/foo/bar/zar.txt', metadata: { contentLength: 3 } },
-      { key: '/foo/bara/zar.txt', metadata: { contentLength: 3 } }
+      { key: '/foo/bar.txt' },
+      { key: '/foo/bar/zar.txt' },
+      { key: '/foo/bara/zar.txt' }
     ])
 
     expect(await driveA.list('/foo/bar/')).to.eql([
-      { key: '/foo/bar/zar.txt', metadata: { contentLength: 3 } }
+      { key: '/foo/bar/zar.txt' }
     ])
 
     expect(await driveA.list('/foo/bar/zar.txt')).to.eql([
-      { key: '/foo/bar/zar.txt', metadata: { contentLength: 3 } }
+      { key: '/foo/bar/zar.txt' }
+    ])
+  })
+
+  it('should handle any utf8 character', async () => {
+    const store = new Corestore(RAM)
+    const driveA = new SlashDrive({
+      keyPair: await store.createKeyPair('foo'),
+      store
+    })
+    await driveA.ready()
+
+    await driveA.put('/foo', b4a.from('bar'))
+    await driveA.put('/foo11', b4a.from('bar'))
+    await driveA.put('/fooع', b4a.from('bar'))
+    await driveA.put('/fof', b4a.from('bar'))
+    await driveA.put('/foع', b4a.from('bar'))
+
+    expect(await driveA.list('/foo')).to.eql([
+      { key: '/foo' },
+      { key: '/foo11' },
+      { key: '/fooع' }
+    ])
+  })
+
+  it('should list everything when given no arguments', async () => {
+    const store = new Corestore(RAM)
+    const driveA = new SlashDrive({
+      keyPair: await store.createKeyPair('foo'),
+      store
+    })
+    await driveA.ready()
+
+    await driveA.put('/foo', b4a.from('bar'))
+    await driveA.put('/foo11', b4a.from('bar'))
+    await driveA.put('/fooع', b4a.from('bar'))
+    await driveA.put('/fof', b4a.from('bar'))
+    await driveA.put('/foع', b4a.from('bar'))
+
+    expect(await driveA.list()).to.eql([
+      { key: '/fof' },
+      { key: '/foo' },
+      { key: '/foo11' },
+      { key: '/fooع' },
+      { key: '/foع' }
+    ])
+  })
+
+  it('should optionally return content of objects', async () => {
+    const store = new Corestore(RAM)
+    const driveA = new SlashDrive({
+      keyPair: await store.createKeyPair('foo'),
+      store
+    })
+    await driveA.ready()
+
+    await driveA.put('/foo', b4a.from('foo'))
+    await driveA.put('/bar', b4a.from('bar'))
+
+    expect(await driveA.list('', { content: true })).to.eql([
+      { key: '/bar', content: b4a.from('bar') },
+      { key: '/foo', content: b4a.from('foo') }
     ])
   })
 })
@@ -272,7 +355,7 @@ describe('metadata', () => {
       metadata
     })
 
-    expect(await driveA.list('/foo.txt')).to.eql([
+    expect(await driveA.list('/foo.txt', { metadata: true })).to.eql([
       {
         key: '/foo.txt',
         metadata: {
@@ -386,8 +469,20 @@ describe('download', () => {
 
     await replicate(localDrive, remoteDrive)
 
-    await remoteDrive.download()
-    expect(await remoteDrive.get('/profile.json')).to.eql(localContent)
+    await new Promise((resolve) => setTimeout(resolve, 10))
+    expect(await remoteDrive.list()).to.eql([{ key: '/profile.json' }])
+
+    await new Promise((resolve) => setTimeout(resolve, 10))
+    expect(await remoteDrive.list('', { content: true })).to.eql([
+      { key: '/profile.json', content: undefined }
+    ])
+
+    remoteDrive.download()
+
+    await new Promise((resolve) => setTimeout(resolve, 10))
+    const list = await remoteDrive.list('', { content: true })
+    expect(list[0].content).to.not.be.undefined()
+    expect(list[0].content).to.eql(localContent)
   })
 
   it('should download encrypted drives without the encryptionKey', async () => {
@@ -411,9 +506,20 @@ describe('download', () => {
 
     await replicate(localDrive, remoteDrive)
 
-    await remoteDrive.download()
+    await new Promise((resolve) => setTimeout(resolve, 10))
+    expect(await remoteDrive.list()).to.eql([{ key: '/profile.json' }])
 
-    expect(await remoteDrive.get('/profile.json')).to.not.eql(localContent)
+    await new Promise((resolve) => setTimeout(resolve, 10))
+    expect(await remoteDrive.list('', { content: true })).to.eql([
+      { key: '/profile.json', content: undefined }
+    ])
+
+    remoteDrive.download()
+
+    await new Promise((resolve) => setTimeout(resolve, 10))
+    const list = await remoteDrive.list('', { content: true })
+    expect(list[0].content).to.not.be.undefined()
+    expect(list[0].content).to.not.eql(localContent)
   })
 })
 

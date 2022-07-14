@@ -162,17 +162,43 @@ Put an object by a string key, Buffer content, and optionally metadata.
 
 Returns the object's content corresponding to a given key. If `drive.online` is false it will try to read the data from storage if it exists, otherwise it will return `null`
 
-#### `await drive.list(prefix)`
+#### `await drive.entries([opts])`
+
+Get all entries as Hyperbee nodes. Takes Hyperbee createReadStream [options](https://github.com/hypercore-protocol/hyperbee#stream--dbcreatereadstreamoptions), plus `prefix` if you want entries that starts with a given string.
+
+#### `for await (const entry of drive) {}`
+
+SlashDrive is asyncIterator, you can use `for await` to asynchronusly get all the objects in the drive.
+
+#### `await drive.list([prefix, options])`
 
 Returns an array of the metadata of the objects with keys starting with a given prefix
 
 ```js
-[{ key: 'somekey', metadata: { contentLength, ...userMetadata } }];
+[
+  {
+    key: 'somekey',
+    metadata: { contentLength, ...userMetadata },
+    content: Uint8Array,
+  },
+];
 ```
 
-#### `drive.on('update', ({ key, type }) => {})
+`options` include:
+
+```
+{
+  metadata: false; // whether or not include object's metadata
+  content: false; // whether or not include content of the object (be careful with big content)
+}
+```
+
+#### `await drive.download()`
+
+Continously Download the drive's metadata and content.
+
+#### `drive.on('update', ({ key, type }) => {})`
 
 Emitted when the metadata or the content of an object is updated.
 
-- `key` is the key of the object.
 - `type` is the operation type, can be `'put'` or `'del'`.
