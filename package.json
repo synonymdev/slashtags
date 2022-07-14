@@ -36,7 +36,7 @@
     "testnet:close": "pm2 delete scripts/setup-testnet.js || echo 'Testnet not running'",
     "relay": "node scripts/setup-relay.js",
     "postinstall": "npm run link",
-    "prepublishOnly": "npm run lint && npm run build && npm run depcheck && npm run test"
+    "prepublishOnly": "npm run lint && npm run test && npm run depcheck"
   },
   "devDependencies": {
     "@hyperswarm/testnet": "^2.0.0",
