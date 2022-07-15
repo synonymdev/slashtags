@@ -46,11 +46,14 @@ export class SlashDrive extends EventEmitter {
     // Initiate the drive with a non encrypted feed to read/write header block
     this.feed = this.store.get({
       keyPair: opts.keyPair,
-      key: opts.key
+      key: opts.key,
+      encryptionKey: this.encryptionKey
     })
 
     this.db = new Hyperbee(this.feed)
     this.objects = this.db.sub(SubPrefixes.objects)
+
+    this.feed.on('append', this._onAppend.bind(this))
 
     this._ready = false
   }
@@ -92,38 +95,13 @@ export class SlashDrive extends EventEmitter {
     if (this._ready) return
     this._ready = true
 
-    await _openContentFromHeader(this)
-
-    if (!this.content && this.feed.writable) {
-      // Setup content
-      const core = this.store.get({
-        name: 'content',
-        encryptionKey: this.encryptionKey
-      })
-      await core.ready()
-      this.content = new Hyperblobs(core)
-
-      if (this.feed.length === 0) {
-        const session = this.feed.session()
-        await session.ready()
-        await session.append(
-          Header.encode({
-            protocol: 'slashdrive',
-            metadata: { contentFeed: core.key }
-          })
-        )
-        session.close()
-      }
-    }
-
-    this.feed = this.store.get({
-      key: this.feed.key,
-      auth: this.feed.auth
-    })
-
-    this.feed.on('append', this._onAppend.bind(this))
-
     await this.feed.ready()
+
+    if (this.feed.writable) {
+      await this._openContent()
+    } else {
+      await this._openContentFromHeader()
+    }
 
     debug('Opened drive')
   }
@@ -135,7 +113,7 @@ export class SlashDrive extends EventEmitter {
   async update () {
     await this.ready()
     const updated = await this.feed.update()
-    await _openContentFromHeader(this)
+    await this._openContentFromHeader()
     return updated
   }
 
@@ -262,9 +240,6 @@ export class SlashDrive extends EventEmitter {
     return result
   }
 
-  /**
-   * @returns
-   */
   async download () {
     if (!this.content) await this.update()
     const downloadedFeed = this.feed.download()
@@ -293,32 +268,45 @@ export class SlashDrive extends EventEmitter {
       })
     }
   }
-}
 
-/**
- *
- * @param {SlashDrive} drive
- * @returns
- */
-async function _openContentFromHeader (drive) {
-  if (drive.content) return
+  async _openContentFromHeader () {
+    if (this.content) return
 
-  await drive.feed.update()
-  if (drive.feed.length === 0) return
-  const session = drive.feed.session()
-  await session.ready()
-  const block = await session.get(0)
-  const header = Header.decode(block)
-  session.close()
+    await this.feed.update()
+    if (this.feed.length === 0) return
+    // TODO figure out a better solution that doesn't depend on private method
+    const block = await this.feed._get(0)
+    const header = Header.decode(block)
 
-  if (!header?.metadata?.contentFeed) return false
+    if (!header?.metadata?.contentFeed) return false
 
-  const core = await drive.store.get({
-    key: header.metadata.contentFeed,
-    encryptionKey: drive.encryptionKey
-  })
-  await core.update()
-  drive.content = new Hyperblobs(core)
+    const core = await this.store.get({
+      key: header.metadata.contentFeed,
+      encryptionKey: this.encryptionKey
+    })
+    await core.update()
+    this.content = new Hyperblobs(core)
+  }
+
+  async _openContent () {
+    if (this.content) return
+
+    const core = this.store.get({
+      name: 'content',
+      encryptionKey: this.encryptionKey
+    })
+    await core.ready()
+    this.content = new Hyperblobs(core)
+
+    if (this.feed.length === 0) {
+      const header = Header.encode({
+        protocol: 'slashdrive',
+        metadata: { contentFeed: core.key }
+      })
+      // TODO figure out a better solution that doesn't depend on private method
+      await this.feed.core.append([header], this.feed.auth)
+    }
+  }
 }
 
 /**

@@ -503,23 +503,20 @@ describe('download', () => {
       store: new Corestore(RAM),
       key: localDrive.key
     })
+    await remoteDrive.ready()
 
     await replicate(localDrive, remoteDrive)
 
-    await new Promise((resolve) => setTimeout(resolve, 10))
-    expect(await remoteDrive.list()).to.eql([{ key: '/profile.json' }])
+    await remoteDrive.update()
 
-    await new Promise((resolve) => setTimeout(resolve, 10))
-    expect(await remoteDrive.list('', { content: true })).to.eql([
-      { key: '/profile.json', content: undefined }
-    ])
+    expect(remoteDrive.readable).to.be.true()
+    expect(remoteDrive.feed.length).to.eql(localDrive.feed.length)
+    expect(remoteDrive.content.core.length).to.eql(
+      localDrive.content.core.length
+    )
 
-    remoteDrive.download()
-
-    await new Promise((resolve) => setTimeout(resolve, 10))
-    const list = await remoteDrive.list('', { content: true })
-    expect(list[0].content).to.not.be.undefined()
-    expect(list[0].content).to.not.eql(localContent)
+    await expect(remoteDrive.list()).to.eventually.be.rejected()
+    await expect(remoteDrive.get('profile.json')).to.eventually.be.rejected()
   })
 })
 
