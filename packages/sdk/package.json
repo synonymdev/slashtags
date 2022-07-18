@@ -1,6 +1,6 @@
 {
   "name": "@synonymdev/slashtags-sdk",
-  "version": "1.0.0-alpha.10",
+  "version": "1.0.0-alpha.11",
   "description": "slashtags development kit",
   "license": "MIT",
   "homepage": "https://github.com/synonymdev/slashtags/tree/master/packages/sdk/#readme",
@@ -37,14 +37,15 @@
     "./src/storage.js": "./src/storage.browser.js"
   },
   "scripts": {
-    "build": "aegir build && node scripts/rn-transform.js",
+    "build": "aegir build",
     "test": "c8 aegir test -f test/*.spec.js && npm run test:node && npm run test:browser",
     "test:node": "c8 aegir test -t node -f test/node/*",
     "test:browser": "aegir test -t browser -f test/browser/*",
     "ts-check": "aegir ts -p check",
     "lint": "standard -i dist/ --fix",
     "clean": "rimraf ./dist",
-    "depcheck": "aegir dep-check"
+    "depcheck": "aegir dep-check",
+    "prepublishOnly": "npm run lint && npm run test && npm run depcheck && node scripts/rn-transform.js"
   },
   "standard": {
     "env": [
