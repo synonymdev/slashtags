@@ -7,7 +7,10 @@ describe('slashtags', () => {
   it('should return the default slashtag if no key, name or url were passed', async () => {
     const sdkA = await sdk()
 
-    expect(sdkA.slashtag({})).to.eql(sdkA._root)
+    expect(sdkA.slashtag()).to.eql(sdkA._root)
+    expect(sdkA.slashtag({ url: sdkA._root.url.toString() })).to.eql(
+      sdkA._root
+    )
 
     await sdkA.close()
   })
@@ -42,11 +45,11 @@ describe('slashtags', () => {
 
     const alice = sdkA.slashtag({ name: 'alice' })
 
-    expect(sdkA.slashtags.get(alice.key)).to.eql(alice)
+    expect(sdkA.slashtags.get(alice.url.slashtag.toString())).to.eql(alice)
 
     await alice.close()
 
-    expect(sdkA.slashtags.get(alice.key)).to.be.undefined()
+    expect(sdkA.slashtags.get(alice.url.slashtag.toString())).to.be.undefined()
 
     await sdkA.close()
   })
@@ -57,15 +60,16 @@ describe('slashtags', () => {
     const alice = sdkA.slashtag({ name: 'alice' })
     const bob = sdkA.slashtag({ name: 'bob' })
 
-    const keys = [...sdkA.slashtags.keys()].map((key) => b4a.toString(key))
+    const keys = [...sdkA.slashtags.keys()]
 
-    expect(keys.length).to.eql(2)
-    expect(keys.includes(b4a.toString(alice.key))).to.be.true()
-    expect(keys.includes(b4a.toString(bob.key))).to.be.true()
+    expect(keys.length).to.eql(3)
+    expect(keys.includes(alice.url.slashtag.toString())).to.be.true()
+    expect(keys.includes(bob.url.slashtag.toString())).to.be.true()
 
     await sdkA.close()
 
     expect([...sdkA.slashtags.values()].map((s) => s.closed)).to.eql([
+      true,
       true,
       true
     ])
@@ -78,10 +82,10 @@ describe('slashtags', () => {
     sdkA.slashtag({ name: 'alice' })
     sdkA.slashtag({ name: 'alice' })
 
-    const keys = [...sdkA.slashtags.keys()].map((key) => b4a.toString(key))
+    const keys = [...sdkA.slashtags.keys()]
 
-    expect(keys.length).to.eql(1)
-    expect(keys.includes(b4a.toString(alice.key))).to.be.true()
+    expect(keys.length).to.eql(2)
+    expect(keys.includes(alice.url.slashtag.toString())).to.be.true()
 
     await sdkA.close()
   })
@@ -110,9 +114,14 @@ describe('slashtags', () => {
     expect(remoteBob.swarm).to.not.eql(alice.swarm)
     expect(remoteBob.swarm).to.eql(sdkA._root.swarm)
 
-    expect(sdkA.slashtags.size).to.eql(1, 'should not add remote slashtags to sdk.slashtags')
-    const urls = [...sdkA.slashtags.values()].map((s) => s.url.toString())
-    expect(urls).to.eql([alice.url.toString()])
+    expect(sdkA.slashtags.size).to.eql(
+      2,
+      'should not add remote slashtags to sdk.slashtags'
+    )
+    expect([...sdkA.slashtags.keys()]).to.eql([
+      sdkA._root.url.slashtag.toString(),
+      alice.url.slashtag.toString()
+    ])
 
     await sdkA.close()
     await sdkB.close()

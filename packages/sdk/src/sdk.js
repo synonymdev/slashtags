@@ -1,7 +1,6 @@
 import Corestore from 'corestore'
 import RAM from 'random-access-memory'
 import goodbye from 'graceful-goodbye'
-import HashMap from 'turbo-hash-map'
 import Debug from 'debug'
 import { Slashtag } from '@synonymdev/slashtag'
 
@@ -35,7 +34,7 @@ export class SDK {
             : opts.storage
     this.primaryKey = opts.primaryKey || Slashtag.createKeyPair().publicKey
 
-    this.slashtags = new HashMap()
+    this.slashtags = new Map()
 
     this.store = new Corestore(this.storage, {
       primaryKey: hash(this.primaryKey)
@@ -47,6 +46,8 @@ export class SDK {
       protocols: this._protocols,
       store: this.store
     })
+
+    this.slashtags.set(this._root.url.slashtag.toString(), this._root)
 
     // Gracefully shutdown
     goodbye(() => {
@@ -109,17 +110,17 @@ export class SDK {
       swarm: this._root.swarm
     })
 
-    const existing = this.slashtags.get(slashtag.key)
+    const existing = this.slashtags.get(slashtag.url.slashtag.toString())
     if (existing) return existing
 
     // Opening remote Slashtags doesn't involve expensive IO operations.
     // No need to keep it in memory.
     if (slashtag.remote) return slashtag
 
-    this.slashtags.set(slashtag.key, slashtag)
+    this.slashtags.set(slashtag.url.slashtag.toString(), slashtag)
 
     slashtag.on('close', () => {
-      if (!this.closed) this.slashtags.delete(slashtag.key)
+      if (!this.closed) this.slashtags.delete(slashtag.url.slashtag.toString())
     })
 
     debug('Created a slashtag ' + slashtag.url, { remote: slashtag.remote })
