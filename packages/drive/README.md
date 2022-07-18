@@ -144,7 +144,13 @@ Wait for the drive to try and find a signed update to it's metadata core's lengt
 
 If the metadata's core length is updated it will return `true`.
 
-If the drive does not have a `drive.content` already (a clone), it will try to read the Content's core key from `drive.headers` to resolve the content as well.
+#### `const getContent = await drive.getContent()`
+
+Returns the hyperblobs instance storing the blobs indexed by drive entries.
+
+If the drive does not have a `drive.content` already (a clone), it will try to read the blob's core key from `drive.headers` to resolve the content as well.
+
+In general you do NOT need to wait for it, unless checking a synchronus property like `readable`, as all internals await this themselves.
 
 #### `await drive.put(key, content, [options])`
 

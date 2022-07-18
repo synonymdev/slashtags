@@ -25,7 +25,7 @@ const watcher = sdk._root;
 process.stdin.once('data', async () => {
   console.time('resolved feed');
   const drive = await watcher.drive(driveOpts);
-  await drive.update();
+  await drive.getContent();
 
   console.log('Watching remote drive', drive.readable);
   console.timeEnd('resolved feed');

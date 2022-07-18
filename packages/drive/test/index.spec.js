@@ -69,7 +69,7 @@ describe('attributes', () => {
     expect(drive.readable).to.be.true()
   })
 
-  it('should set attributes for remote drive after update', async () => {
+  it('should set attributes for remote drive after ready', async () => {
     const store = new Corestore(RAM)
     const localDrive = new SlashDrive({
       keyPair: await store.createKeyPair('foo'),
@@ -89,11 +89,14 @@ describe('attributes', () => {
 
     expect(remoteDrive.readable).to.be.false()
 
-    await remoteDrive.update()
-
     expect(remoteDrive.key.length).to.eql(32)
     expect(remoteDrive.encryptionKey.length).to.eql(32)
     expect(remoteDrive.discoveryKey.length).to.eql(32)
+    expect(remoteDrive.writable).to.be.false()
+    expect(remoteDrive.readable).to.be.false()
+
+    await remoteDrive.getContent()
+
     expect(remoteDrive.writable).to.be.false()
     expect(remoteDrive.readable).to.be.true()
   })
@@ -409,8 +412,7 @@ describe('replicate', () => {
     await remoteDrive.ready()
 
     await replicate(localDrive, remoteDrive)
-
-    await remoteDrive.update()
+    await remoteDrive.getContent()
 
     expect(remoteDrive.readable).to.be.true()
 
@@ -439,12 +441,11 @@ describe('replicate', () => {
 
     await replicate(localDrive, remoteDrive)
 
-    await remoteDrive.update()
-
-    expect(remoteDrive.readable).to.be.true()
+    expect(remoteDrive.readable).to.be.false()
 
     const remoteContent = await remoteDrive.get('/profile.json')
 
+    expect(remoteDrive.readable).to.be.true()
     expect(remoteContent).to.eql(localContent)
   })
 })
@@ -507,9 +508,10 @@ describe('download', () => {
 
     await replicate(localDrive, remoteDrive)
 
-    await remoteDrive.update()
-
+    expect(remoteDrive.readable).to.be.false()
+    await remoteDrive.getContent()
     expect(remoteDrive.readable).to.be.true()
+
     expect(remoteDrive.feed.length).to.eql(localDrive.feed.length)
     expect(remoteDrive.content.core.length).to.eql(
       localDrive.content.core.length
@@ -561,10 +563,6 @@ describe('discovery', () => {
     const done = await remoteDrive.findingPeers()
     swarmB.join(remoteDrive.discoveryKey)
     swarmB.flush().then(done, done)
-
-    await remoteDrive.update()
-
-    expect(remoteDrive.readable).to.be.true()
 
     const remoteContent = await remoteDrive.get('/profile.json')
 
@@ -620,7 +618,7 @@ describe('events', () => {
         encryptionKey: origin.encryptionKey
       })
       await replicate(origin, clone)
-      await clone.update()
+      await clone.getContent()
 
       const result = new Promise((resolve) => {
         clone.on('update', (data) => {
@@ -652,7 +650,7 @@ describe('events', () => {
         encryptionKey: origin.encryptionKey
       })
       await replicate(origin, clone)
-      await clone.update()
+      await clone.getContent()
 
       const result = new Promise((resolve) => {
         clone.on('update', (data) => {
@@ -665,7 +663,7 @@ describe('events', () => {
         store: clone.store,
         encryptionKey: origin.encryptionKey
       })
-      await clone2.update()
+      await clone2.getContent()
 
       const result2 = new Promise((resolve) => {
         clone2.on('update', (data) => {

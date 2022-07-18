@@ -103,18 +103,14 @@ export class SlashDrive extends EventEmitter {
       await this._openContentFromHeader()
     }
 
-    debug('Opened drive')
+    debug('Opened drive', { remote: !this.writable })
   }
 
   /**
-   * Awaits for an updated length of the metdata core,
-   * and setup the content core if it doesn't already exist
+   * Awaits for an updated length of the objects feed
    */
   async update () {
-    await this.ready()
-    const updated = await this.feed.update()
-    await this._openContentFromHeader()
-    return updated
+    return this.feed.update()
   }
 
   /**
@@ -165,7 +161,7 @@ export class SlashDrive extends EventEmitter {
    * @returns
    */
   async get (key) {
-    if (!this.content) await this.update()
+    if (!this.content) await this.getContent()
 
     const block = await this.objects?.get(key, {
       update: this.online
@@ -241,10 +237,17 @@ export class SlashDrive extends EventEmitter {
   }
 
   async download () {
-    if (!this.content) await this.update()
+    if (!this.content) await this.getContent()
     const downloadedFeed = this.feed.download()
     const contentDownloaded = this.content?.core.download()
     return Promise.allSettled([downloadedFeed, contentDownloaded])
+  }
+
+  async getContent () {
+    if (this.content) return this.content
+    await this.ready()
+    await this._openContentFromHeader()
+    return this.content
   }
 
   async _onAppend () {
