@@ -1,6 +1,6 @@
 {
   "name": "@synonymdev/slashtag",
-  "version": "1.0.0-alpha.8",
+  "version": "1.0.0-alpha.9",
   "description": "",
   "license": "MIT",
   "homepage": "https://github.com/synonymdev/slashtags/tree/master/packages/slashtag/#readme",
@@ -38,7 +38,8 @@
     "test": "c8 aegir test",
     "lint": "standard -i dist/ --fix",
     "clean": "rimraf ./dist",
-    "depcheck": "npx aegir dep-check"
+    "depcheck": "npx aegir dep-check",
+    "prepublishOnly": "npm run lint && npm run test && npm run depcheck"
   },
   "standard": {
     "env": [
@@ -46,7 +47,7 @@
     ]
   },
   "dependencies": {
-    "@synonymdev/slashdrive": "^1.0.0-alpha.3",
+    "@synonymdev/slashdrive": "^1.0.0-alpha.4",
     "b4a": "^1.5.0",
     "compact-encoding": "^2.6.1",
     "corestore": "^6.0.1-alpha.17",
