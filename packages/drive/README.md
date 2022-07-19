@@ -108,13 +108,13 @@ Especially useful in remote drives to check if the drive got the content core al
 
 Cases where the drive is not readable:
 
-- Metadata or Content core is not [readable](https://github.com/hypercore-protocol/hypercore-next#corereadable)
+- Metadata or Content core are not [readable](https://github.com/hypercore-protocol/hypercore-next#corereadable)
 
-- Metadata core in a remote Drive doesn't contain enough information to retrieve the content core.
+- Content core couldn't be resolved from the header of the metadata feed.
 
-- Metadata core is encrypted so the content core can't be retrieved.
+#### `drive.version`
 
-- metadataDB is corrupt in some way that prevents the content from being retrieved.
+The version of the drive. Represents number of updates.
 
 #### `drive.peers`
 

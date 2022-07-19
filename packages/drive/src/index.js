@@ -91,6 +91,10 @@ export class SlashDrive extends EventEmitter {
     return this.feed.peers.length > 0
   }
 
+  get version () {
+    return this.objects.version
+  }
+
   async ready () {
     if (this._ready) return
     this._ready = true

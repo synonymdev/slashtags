@@ -40,6 +40,7 @@ declare module 'hyperbee' {
     getHeader(opts?: any): Promise<{ metadata?: { contentFeed?: Uint8Array } }>;
     getRoot(ensureHeader: boolean): Promise<any>;
 
+    version: number;
     feed: Hypercore;
     sep: Uint8Array;
     metadata: {

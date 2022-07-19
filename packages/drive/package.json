@@ -39,7 +39,8 @@
     "test:node": "c8 aegir test -t node -f test/node/*.spec.js",
     "lint": "standard -i dist/ --fix",
     "clean": "rimraf ./dist",
-    "depcheck": "aegir dep-check"
+    "depcheck": "aegir dep-check",
+    "prepublishOnly": "npm run lint && npm run test && npm run depcheck"
   },
   "standard": {
     "env": [
