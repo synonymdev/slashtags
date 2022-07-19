@@ -61,6 +61,12 @@ export class Slashtag extends EventEmitter {
 
     this.closed = false
 
+    this.publicDrive = new SlashDrive({
+      store: this.store,
+      key: this.key,
+      keyPair: this.keyPair
+    })
+
     // Gracefully shutdown
     goodbye(() => {
       !this.closed && debug('gracefully closing Slashtag')
@@ -90,12 +96,14 @@ export class Slashtag extends EventEmitter {
     }
     this.swarm?.on('connection', this._handleConnection.bind(this))
 
-    this.publicDrive = await this.drive({
-      key: this.key,
-      keyPair: this.keyPair
-    })
+    await this.publicDrive.ready()
+    this._setupDiscovery(this.publicDrive)
 
-    debug('Slashtag is ready: ' + this.url, { remote: this.remote })
+    debug('Slashtag is ready: ' + this.url, {
+      remote: this.remote,
+      writable: this.publicDrive.writable,
+      readable: this.publicDrive.readable
+    })
   }
 
   async listen () {
