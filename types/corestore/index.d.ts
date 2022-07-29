@@ -1,5 +1,6 @@
 declare module 'corestore' {
   import type Hypercore from 'hypercore';
+  import type { Encoding } from 'compact-encoding';
 
   export = class Corestore {
     constructor(
@@ -27,6 +28,9 @@ declare module 'corestore' {
         publicKey: Uint8Array;
       };
       cache?: boolean;
+      onwait?: Hypercore['onwait'];
+      keyEncoding?: string | Encoding;
+      _preready?: (core: Hypercore) => any;
     }): Hypercore;
   };
 }

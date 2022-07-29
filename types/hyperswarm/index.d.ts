@@ -8,6 +8,9 @@ declare module 'hyperswarm' {
 
   class Server extends EventEmitter {}
 
+  interface Discovery {
+    flushed(): Promise<void>;
+  }
   export = class hyperswarm extends EventEmitter {
     constructor(opts: any);
     server: Server;
@@ -19,7 +22,10 @@ declare module 'hyperswarm' {
     listen(): Promise<undefined>;
     destroy(): Promise<undefined>;
     joinPeer(key: Uint8Array): undefined;
-    join(discoveryKey?: Uint8Array, options?: object);
+    join(
+      discoveryKey?: Uint8Array,
+      options?: { server: boolean; client: boolean },
+    ): Discovery;
     flush(): Promise<undefined>;
   };
 }
