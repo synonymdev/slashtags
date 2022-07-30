@@ -93,8 +93,8 @@ export class Slashtag extends EventEmitter {
       })
       this._shouldDestroySwarm = true
       debug('Created Hyperswarm for: ' + this.url, { remote: this.remote })
+      this.swarm?.on('connection', this._handleConnection.bind(this))
     }
-    this.swarm?.on('connection', this._handleConnection.bind(this))
 
     await this.publicDrive.ready()
     this._setupDiscovery(this.publicDrive)
