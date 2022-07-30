@@ -37,7 +37,7 @@
     "./src/storage.js": "./src/storage.browser.js"
   },
   "scripts": {
-    "build": "aegir build && node scripts/rn-transform.js",
+    "build": "aegir build && node scripts/after-build.js",
     "test": "c8 aegir test -f test/*.spec.js && npm run test:node && npm run test:browser",
     "test:node": "c8 aegir test -t node -f test/node/*",
     "test:browser": "aegir test -t browser -f test/browser/*",

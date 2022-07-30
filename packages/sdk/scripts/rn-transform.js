@@ -1,7 +1,6 @@
-import fs from 'fs'
-import path from 'path'
+import { root, path, fs } from './common.js'
 
-const distPath = path.join(import.meta.url, '../../dist/').replace('file:', '')
+const distPath = path.join(root, 'dist').replace('file:', '')
 const filename = path.join(distPath, 'index.min.js')
 const src = fs.readFileSync(filename).toString()
 
