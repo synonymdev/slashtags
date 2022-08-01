@@ -139,6 +139,22 @@ export class SlashDrive extends EventEmitter {
 
   /**
    *
+   * @param {{blobIndex:import('hyperblobs').index, userMetadata:any}} node
+   */
+  encode (node) {
+    return c.encode(ObjectMetadata, node)
+  }
+
+  /**
+   *
+   * @param {Uint8Array} buf
+   */
+  decode (buf) {
+    return c.decode(ObjectMetadata, buf)
+  }
+
+  /**
+   *
    * @param {string} key
    * @param {Uint8Array} content
    * @param {object} [options]
@@ -150,9 +166,11 @@ export class SlashDrive extends EventEmitter {
     if (!this.writable) throw new Error('Drive is not writable')
 
     const blobIndex = await this.content?.put(content)
+    if (!blobIndex) return
+
     await this.objects?.put(
       key,
-      c.encode(ObjectMetadata, {
+      this.encode({
         blobIndex,
         userMetadata: options?.metadata
       })
@@ -172,7 +190,7 @@ export class SlashDrive extends EventEmitter {
     })
     if (!block) return null
 
-    const metadata = c.decode(ObjectMetadata, block.value)
+    const metadata = this.decode(block.value)
 
     const blob = await this.content?.get(metadata.blobIndex)
 
@@ -221,7 +239,7 @@ export class SlashDrive extends EventEmitter {
       let metadata
 
       if (opts.metadata) {
-        metadata = c.decode(ObjectMetadata, entry.value)
+        metadata = this.decode(entry.value)
 
         item.metadata = {
           ...metadata.userMetadata,
@@ -230,7 +248,7 @@ export class SlashDrive extends EventEmitter {
       }
 
       if (opts.content) {
-        metadata = metadata || c.decode(ObjectMetadata, entry.value)
+        metadata = metadata || this.decode(entry.value)
         item.content = await this.content?.get(metadata.blobIndex)
       }
 

@@ -1,2 +1,2 @@
-import './rn-transform.js';
-import './patch-types.js';
+import './rn-transform.js'
+import './patch-types.js'
