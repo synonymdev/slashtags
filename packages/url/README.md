@@ -1,0 +1,46 @@
+# slashtags-url
+
+Encodes and decodes Slashtags URLs
+
+## Installation
+
+```
+npm install @synonymdev/slashtags-url
+```
+
+## Usage
+
+```js
+import SlashURL from 'hypercore-id-encoder';
+
+const url = SlashURL.format(key, {
+  query: { foo: 'bar' },
+  fragment: { encryptionKey: '42' },
+});
+// url: slash://<z-base32 key>?foo=bar&#encryptionKey=42
+```
+
+## API
+
+#### const url = SlashURL.format(key, [opts])
+
+Creates a URL from a 32-bytes key:
+
+`key` must be a Buffer or an ArrayBuffer.
+`opts` includes:
+
+- `protocol` custom protocol, has to start with `slash`, defaults to `slash:`
+- `path` a string representing the path, defaults to `/`.
+- `query` a query string or a key-value object to format as the query part of the url.
+- `fragment` a fragment string or a key-value object to format as a private query in the fragment.
+
+#### const url = SlashURL.parse(url)
+
+Parses a url to return the following:
+
+`key` Uint8Array of the key parsed from the host part of the url.
+`protocol` the protocol part of the url.
+`path` the path part of the url.
+`query` the query parsed as a key value object.
+`fragment` string of the fragment part.
+`privateQuery`: parsed private query from the fragment part of the url.
