@@ -1,8 +1,8 @@
-import { expect } from 'aegir/chai';
-import b4a from 'b4a';
-import safe from 'safe-regex2';
+import { expect } from 'aegir/chai'
+import b4a from 'b4a'
+import safe from 'safe-regex2'
 
-import * as SlashURL from '../src/index.js';
+import * as SlashURL from '../src/index.js'
 
 const baseResult = {
   fragment: '',
@@ -10,35 +10,35 @@ const baseResult = {
   path: '',
   privateQuery: {},
   protocol: 'slash:',
-  query: {},
-};
+  query: {}
+}
 
 const testVectors = [
   {
     // Basic
     url: 'slash://3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswhy',
-    result: baseResult,
+    result: baseResult
   },
   {
     // Not checksummed + different protocol
     url: 'slash://3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswhn',
-    result: baseResult,
+    result: baseResult
   },
   {
     // Trailing slash
     url: 'slash://3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswhy/',
     result: {
       ...baseResult,
-      path: '/',
-    },
+      path: '/'
+    }
   },
   {
     // Basic query
     url: 'slash://3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswhy?foo=bar',
     result: {
       ...baseResult,
-      query: { foo: 'bar' },
-    },
+      query: { foo: 'bar' }
+    }
   },
   {
     // Multiple queries and trailing slash
@@ -46,8 +46,8 @@ const testVectors = [
     result: {
       ...baseResult,
       path: '/',
-      query: { foo: 'bar', bool: true, no: '42' },
-    },
+      query: { foo: 'bar', bool: true, no: '42' }
+    }
   },
   {
     // Fragment
@@ -55,8 +55,8 @@ const testVectors = [
     result: {
       ...baseResult,
       fragment: '#bool&foo=bar',
-      privateQuery: { foo: 'bar', bool: true },
-    },
+      privateQuery: { foo: 'bar', bool: true }
+    }
   },
   {
     // Path + query + fragment
@@ -66,8 +66,8 @@ const testVectors = [
       path: '/dir/file.json',
       query: { foo: 'bar', bool: true, no: '42' },
       fragment: '#bool&foo=bar',
-      privateQuery: { foo: 'bar', bool: true },
-    },
+      privateQuery: { foo: 'bar', bool: true }
+    }
   },
   {
     // Path + trailing slash + query + fragment
@@ -77,57 +77,57 @@ const testVectors = [
       path: '/first/second/',
       query: { foo: 'bar', bool: true, no: '42' },
       fragment: '#bool&foo=bar',
-      privateQuery: { foo: 'bar', bool: true },
-    },
+      privateQuery: { foo: 'bar', bool: true }
+    }
   },
   {
     // different protocol
     url: 'slashfoo://3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswhy',
     result: {
       ...baseResult,
-      protocol: 'slashfoo:',
-    },
+      protocol: 'slashfoo:'
+    }
   },
   {
     // one missing character
     url: 'slash://3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswh',
-    result: baseResult,
-  },
-];
+    result: baseResult
+  }
+]
 
 describe('parse', () => {
   it('should have a safe parsing pattern', () => {
-    expect(safe(SlashURL.PATTERN)).to.be.true();
-  });
+    expect(safe(SlashURL.PATTERN)).to.be.true()
+  })
 
   it('should throw an error for non string urls', () => {
-    expect(() => SlashURL.parse(32)).to.throw('url must be a string');
-  });
+    expect(() => SlashURL.parse(32)).to.throw('url must be a string')
+  })
 
   it('should throw an error for non invalid protocol', () => {
     expect(() => SlashURL.parse('not-slash://')).to.throw(
-      'url must starts with a "slash[...]:" protocol',
-    );
-  });
+      'url must starts with a "slash[...]:" protocol'
+    )
+  })
 
   it('should throw an error for non invalid key length', () => {
     expect(() =>
       SlashURL.parse(
-        'slash://3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39usw',
-      ),
-    ).to.throw('Invalid key bytelength');
-  });
+        'slash://3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39usw'
+      )
+    ).to.throw('Invalid key bytelength')
+  })
 
   testVectors.forEach((vector) => {
     it('should parse a url: ' + vector.url, () => {
-      const parsed = SlashURL.parse(vector.url);
+      const parsed = SlashURL.parse(vector.url)
 
-      expect(parsed.key).to.eql(b4a.from(vector.result.key, 'hex'));
-      expect(parsed.protocol).to.eql(vector.result.protocol);
-      expect(parsed.path).to.eql(vector.result.path);
-      expect(parsed.query).to.eql(vector.result.query);
-      expect(parsed.fragment).to.eql(vector.result.fragment);
-      expect(parsed.privateQuery).to.eql(vector.result.privateQuery);
-    });
-  });
-});
+      expect(parsed.key).to.eql(b4a.from(vector.result.key, 'hex'))
+      expect(parsed.protocol).to.eql(vector.result.protocol)
+      expect(parsed.path).to.eql(vector.result.path)
+      expect(parsed.query).to.eql(vector.result.query)
+      expect(parsed.fragment).to.eql(vector.result.fragment)
+      expect(parsed.privateQuery).to.eql(vector.result.privateQuery)
+    })
+  })
+})

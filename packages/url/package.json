@@ -48,5 +48,9 @@
   "devDependencies": {
     "aegir": "^37.0.15",
     "safe-regex2": "^3.0.0"
+  },
+  "dependencies": {
+    "b4a": "^1.6.0",
+    "z32": "^1.0.0"
   }
 }

@@ -1,18 +1,18 @@
-import z32 from 'z32';
-import b4a from 'b4a';
+import z32 from 'z32'
+import b4a from 'b4a'
 
 export const PATTERN =
-  /^(slash.*\:)\/\/([^#?\/]+)(\/?[^#?\s]*)\??([^#\s]*)#?([^\s]*)$/;
+  /^(slash.*:)\/\/([^#?/]+)(\/?[^#?\s]*)\??([^#\s]*)#?([^\s]*)$/
 
 /**
  * Encodes a 32-byte Slashtags key into a z-base32 id
  * @param {*} key
  */
 export const encode = (key) => {
-  if (!b4a.isBuffer(key)) throw new Error('Key must be a Buffer');
-  if (key.byteLength !== 32) throw new Error('Key must be 32-bytes long');
-  return z32.encode(key);
-};
+  if (!b4a.isBuffer(key)) throw new Error('Key must be a Buffer')
+  if (key.byteLength !== 32) throw new Error('Key must be 32-bytes long')
+  return z32.encode(key)
+}
 
 /**
  * Formats a Slashtags URL
@@ -25,25 +25,25 @@ export const encode = (key) => {
  * @returns {string}
  */
 export const format = function (key, opts = {}) {
-  const id = encode(key);
+  const id = encode(key)
 
   const protocol = opts.protocol
     ? opts.protocol.endsWith(':')
       ? opts.protocol
       : opts.protocol + ':'
-    : 'slash:';
+    : 'slash:'
 
   const path = opts?.path
     ? opts.path.startsWith('/')
       ? opts.path
       : '/' + opts.path
-    : '';
+    : ''
 
-  const query = stringify(opts?.query, '?');
-  const fragment = stringify(opts.fragment, '#');
+  const query = stringify(opts?.query, '?')
+  const fragment = stringify(opts.fragment, '#')
 
-  return protocol + '//' + id + path + query + fragment;
-};
+  return protocol + '//' + id + path + query + fragment
+}
 
 /**
  * Parses a Slashtag url
@@ -51,15 +51,16 @@ export const format = function (key, opts = {}) {
  * @returns
  */
 export const parse = (url) => {
-  if (typeof url !== 'string') throw new Error('url must be a string');
+  if (typeof url !== 'string') throw new Error('url must be a string')
 
-  const matched = url.match(PATTERN) || [];
-  const protocol = matched[1];
+  const matched = url.match(PATTERN) || []
+  const protocol = matched[1]
 
-  if (!protocol?.startsWith('slash'))
-    throw new Error('url must starts with a "slash[...]:" protocol');
+  if (!protocol?.startsWith('slash')) {
+    throw new Error('url must starts with a "slash[...]:" protocol')
+  }
 
-  const key = decode(matched?.[2]);
+  const key = decode(matched?.[2])
 
   return {
     protocol,
@@ -67,9 +68,9 @@ export const parse = (url) => {
     path: matched[3],
     query: toObject(matched[4]),
     fragment: matched[5] && '#' + matched[5],
-    privateQuery: toObject(matched[5]),
-  };
-};
+    privateQuery: toObject(matched[5])
+  }
+}
 
 /**
  * Decodes an id into a 32-bytes key.
@@ -77,24 +78,24 @@ export const parse = (url) => {
  * @returns
  */
 export const decode = (id) => {
-  const key = z32.decode(id);
-  if (key.byteLength !== 32) throw new Error('Invalid key bytelength');
-  return key;
-};
+  const key = z32.decode(id)
+  if (key.byteLength !== 32) throw new Error('Invalid key bytelength')
+  return key
+}
 
 /**
  *
  * @param {string} string
  * @returns
  */
-function toObject(string) {
-  if (!string || string.length === 0) return {};
+function toObject (string) {
+  if (!string || string.length === 0) return {}
   return Object.fromEntries(
     string?.split('&').map((str) => {
-      const [key, value] = str.split('=');
-      return [key, value || true];
-    }),
-  );
+      const [key, value] = str.split('=')
+      return [key, value || true]
+    })
+  )
 }
 
 /**
@@ -103,12 +104,12 @@ function toObject(string) {
  * @param {string} prefix
  * @returns
  */
-function stringify(object, prefix) {
-  if (!object) return '';
+function stringify (object, prefix) {
+  if (!object) return ''
   if (typeof object === 'string') {
-    return object.startsWith(prefix) ? object : prefix + object;
+    return object.startsWith(prefix) ? object : prefix + object
   }
   return (
     prefix + Object.entries(object).map((entry) => entry[0] + '=' + entry[1])
-  );
+  )
 }

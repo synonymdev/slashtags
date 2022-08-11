@@ -1,6 +1,6 @@
 {
   "extends": "aegir/src/config/tsconfig.aegir.json",
-  "compilerOptions": { "outDir": "types" },
+  "compilerOptions": { "outDir": "types", "emitDeclarationOnly": true },
   "include": ["src", "package.json", "../../types"],
   "references": []
 }
