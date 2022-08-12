@@ -8,13 +8,13 @@ import RAM from 'random-access-memory'
 import goodbye from 'graceful-goodbye'
 import { SlashDrive } from '@synonymdev/slashdrive'
 import Debug from 'debug'
-import { SlashURL } from './url.js'
+import { format, parse } from '@synonymdev/slashtags-url'
 
 import { SlashProtocol } from './protocol.js'
 import { randomBytes, createKeyPair } from './crypto.js'
 import { catchConnection } from './utils.js'
 
-export { SlashProtocol, SlashURL }
+export { SlashProtocol }
 
 export const DRIVE_KEYS = {
   profile: 'profile.json'
@@ -43,11 +43,11 @@ export class Slashtag extends EventEmitter {
 
     this.keyPair = opts.keyPair
     this.remote = !this.keyPair
-    this.url = opts.url ? new SlashURL(opts.url) : null
-    this.key = opts.keyPair?.publicKey || opts.key || this.url?.slashtag.key
+    this.key =
+      opts.keyPair?.publicKey || opts.key || (opts.url && parse(opts.url).key)
     if (!this.key) throw new Error('Missing keyPair, key, or url')
 
-    this.url = this.url || new SlashURL(this.key)
+    this.url = format(this.key)
 
     const store = opts.store || new Corestore(RAM)
     this.store = store.namespace(this.key)
@@ -117,19 +117,15 @@ export class Slashtag extends EventEmitter {
   /**
    * Connect to a remote Slashtag.
    *
-   * @param {Uint8Array | SlashURL | string} destination
+   * @param {Uint8Array | string} destination
    * @returns {Promise<{connection: SecretStream, peerInfo:PeerInfo}>}
    */
   async connect (destination) {
     if (this.remote) throw new Error('Cannot connect from a remote slashtag')
     const key =
-      typeof destination === 'string'
-        ? new SlashURL(destination).slashtag.key
-        : destination instanceof SlashURL
-          ? destination.slashtag.key
-          : destination
+      typeof destination === 'string' ? parse(destination).key : destination
 
-    debug('connecting to: ' + new SlashURL(key))
+    debug('connecting to: ' + format(key))
 
     if (b4a.equals(key, this.key)) throw new Error('Cannot connect to self')
     await this.ready()

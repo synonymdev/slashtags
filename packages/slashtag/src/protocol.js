@@ -60,7 +60,7 @@ export class SlashProtocol extends EventEmitter {
   /**
    * Connect to a slashtag supporting this protocol, and return the connection, and channel.
    *
-   * @param {Uint8Array | SlashURL | string} key
+   * @param {Uint8Array | string} key
    * @returns {Promise<{connection: SecretStream, channel:ProtomuxChannel}>}
    */
   async connect (key) {
@@ -104,5 +104,4 @@ function getProtocolMuxer (stream) {
  * @typedef {import('./interfaces').ProtomuxChannel } ProtomuxChannel
  * @typedef {import('./interfaces').PeerInfo } PeerInfo
  * @typedef {import('./interfaces').SecretStream } SecretStream
- * @typedef {import('./url').SlashURL } SlashURL
  */

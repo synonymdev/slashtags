@@ -48,6 +48,7 @@
   },
   "dependencies": {
     "@synonymdev/slashdrive": "^1.0.0-alpha.4",
+    "@synonymdev/slashtags-url": "^1.0.0-alpha.0",
     "b4a": "^1.5.0",
     "compact-encoding": "^2.6.1",
     "corestore": "^6.0.1-alpha.17",
