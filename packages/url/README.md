@@ -11,13 +11,24 @@ npm install @synonymdev/slashtags-url
 ## Usage
 
 ```js
-import SlashURL from 'hypercore-id-encoder';
+import { format, parse } from '@synonymdev/slashtags-url';
 
-const url = SlashURL.format(key, {
+const url = format(key, {
+  path: '/dir/file.json',
   query: { foo: 'bar' },
   fragment: { encryptionKey: '42' },
 });
-// url: slash://<z-base32 key>?foo=bar&#encryptionKey=42
+// url: slash://<z-base32 key>/dir/file.json?foo=bar#encryptionKey=42
+
+parse(url);
+// {
+//   protocol: 'slash:',
+//   key: key,
+//   path: '/dir/file.json',
+//   query: { foo: 'bar' },
+//   fragment: '#encryptionKey=42',
+//   privateQuery: { encryptionKey: '42' }
+// }
 ```
 
 ## API

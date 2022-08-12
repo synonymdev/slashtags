@@ -24,7 +24,7 @@ export const encode = (key) => {
  * @param {object | string} [opts.fragment]
  * @returns {string}
  */
-export const format = function (key, opts = {}) {
+export const format = (key, opts = {}) => {
   const id = encode(key)
 
   const protocol = opts.protocol
