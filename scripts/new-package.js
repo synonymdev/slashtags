@@ -1,65 +1,49 @@
 const path = require('path')
 const fs = require('fs')
 
-const packagejson = (name, description) => `{
+/** @param {string} name */
+const packagejson = (name) => `{
   "name": "@synonymdev/${name}",
   "version": "0.0.0",
-  "description": "${description}",
-  "license": "MIT",
-  "homepage": "https://github.com/synonymdev/slashtags/tree/master/packages/${name}/#readme",
+  "description": "${name}",
+  "type": "module",
+  "main": "index.js",
+  "types": "types/index.d.ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/synonymdev/slashtags.git"
   },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf types",
+    "lint": "standard --fix",
+    "test": "brittle test/**",
+    "depcheck": "npx depcheck",
+    "prepublishOnly": "npm run lint && npm run clean && npm run build && npm run test && npm run depcheck"
+  },
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/synonymdev/slashtags/issues"
   },
-  "keywords": [],
-  "type": "module",
-  "types": "types/src/index.d.ts",
-  "typesVersions": {
-    "*": {
-      "*": [
-        "types/*",
-        "types/src/*"
-      ],
-      "types/*": [
-        "types/*",
-        "types/src/*"
-      ]
-    }
-  },
+  "homepage": "https://github.com/synonymdev/slashtags/tree/master/packages/${name}/#readme",
   "files": [
-    "dist",
-    "src",
+    "index.js",
+    "lib/**.js",
     "types",
     "!**/*.tsbuildinfo"
   ],
-  "main": "src/index.js",
-  "scripts": {
-    "build": "aegir build",
-    "test": "c8 aegir test",
-    "lint": "standard -i dist/ --fix",
-    "clean": "rimraf ./dist",
-    "depcheck": "npx aegir dep-check"
-  },
-  "standard": {
-    "env": [
-      "mocha"
-    ]
-  },
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
-    "aegir": "^37.0.15"
+    "brittle": "^2.4.0"
   }
 }`
 
 const tsconfig = `{
-  "extends": "aegir/src/config/tsconfig.aegir.json",
-  "compilerOptions": { "outDir": "types" },
-  "include": ["src", "package.json", "../../types"],
-  "references": []
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "types"
+  },
+  "include": ["index.js", "../../types"]
 }`
 
 const defaultIndex = `/**
@@ -71,69 +55,45 @@ export const add = (a, b) => {
 }
 `
 
-const defaultAegir = `'use strict';
-'use strict';
-const path = require('path');
+const defaultTest = `import test from 'brittle'
 
-const { getTestnetConfig } = require('../../scripts/testnet-config.js');
+import { add } from '../index.js';
 
-const esbuild = {
-  inject: [path.join(__dirname, '../../scripts/node-globals.js')],
-};
-
-module.exports = {
-  test: {
-    browser: {
-      config: {
-        buildConfig: esbuild,
-      },
-    },
-    async before(options) {
-      const config = getTestnetConfig();
-      const bootstrap = config.bootstrap;
-
-      return {
-        env: {
-          BOOTSTRAP: JSON.stringify(bootstrap),
-          RELAY_URL: config.relay,
-        },
-      };
-    },
-  },
-  build: {
-    config: esbuild,
-  },
-};
-
+test('add', (t) => {
+  t.is(add(2, 2), 4)
+})
 `
 
-const defaultTest = `import { expect } from 'aegir/chai';
-import { add } from '../src/index.js';
+/** @param {string} name */
+const defaultReadme = (name) => `# ${name}
 
-describe('index', () => {
-  it('should add 2 + 2', async () => {
-    expect(add(2, 2)).to.equal(4);
-  });
-});
+...
+
+## Installation
+
+\`\`\`
+npm install @synonymdev/${name}
+\`\`\`
+
+## Usage
+
+## API
+
+#### const number = add(a, b)
 `
 
 const main = () => {
-  const name = process.argv[2]
-  const description = process.argv[3] || ''
-  if (!name) throw new Error('Package name is required')
+  const dir = process.argv[2]
+  if (!dir) throw new Error('Package name is required')
 
-  const _path = path.join(__dirname).replace(/scripts$/, 'packages/' + name)
+  const _path = path.join(__dirname).replace(/scripts$/, 'packages/' + dir)
   fs.mkdirSync(_path)
-  fs.writeFileSync(
-    path.join(_path, 'package.json'),
-    packagejson(name, description)
-  )
+  fs.writeFileSync(path.join(_path, 'package.json'), packagejson(dir))
   fs.writeFileSync(path.join(_path, 'tsconfig.json'), tsconfig)
-  fs.writeFileSync(path.join(_path, '.aegir.cjs'), defaultAegir)
-  fs.writeFileSync(path.join(_path, 'README.md'), '# slashtags-' + name)
-  fs.mkdirSync(path.join(_path, 'src'))
+  fs.writeFileSync(path.join(_path, 'README.md'), defaultReadme(dir))
+  fs.mkdirSync(path.join(_path, 'lib'))
   fs.mkdirSync(path.join(_path, 'test'))
-  fs.writeFileSync(path.join(_path, 'src/index.js'), defaultIndex)
+  fs.writeFileSync(path.join(_path, 'index.js'), defaultIndex)
   fs.writeFileSync(path.join(_path, 'test/index.spec.js'), defaultTest)
 }
 

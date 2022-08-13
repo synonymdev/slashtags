@@ -2,55 +2,38 @@
   "name": "@synonymdev/slashtags-url",
   "version": "1.0.0-alpha.0",
   "description": "Encodes and decodes Slashtags URLs",
-  "license": "MIT",
-  "homepage": "https://github.com/synonymdev/slashtags/tree/master/packages/url/#readme",
+  "type": "module",
+  "main": "index.js",
+  "types": "types/index.d.ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/synonymdev/slashtags.git"
   },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf types",
+    "lint": "standard --fix",
+    "test": "brittle test/**",
+    "depcheck": "npx depcheck",
+    "prepublishOnly": "npm run lint && npm run clean && npm run build && npm run test && npm run depcheck"
+  },
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/synonymdev/slashtags/issues"
   },
-  "keywords": [],
-  "type": "module",
-  "types": "types/src/index.d.ts",
-  "typesVersions": {
-    "*": {
-      "*": [
-        "types/*",
-        "types/src/*"
-      ],
-      "types/*": [
-        "types/*",
-        "types/src/*"
-      ]
-    }
-  },
+  "homepage": "https://github.com/synonymdev/slashtags/tree/master/packages/url/#readme",
   "files": [
-    "dist",
-    "src",
+    "index.js",
+    "lib/**.js",
     "types",
     "!**/*.tsbuildinfo"
   ],
-  "main": "src/index.js",
-  "scripts": {
-    "build": "aegir build",
-    "test": "c8 aegir test",
-    "lint": "standard -i dist/ --fix",
-    "clean": "rimraf ./dist",
-    "depcheck": "npx aegir dep-check"
-  },
-  "standard": {
-    "env": [
-      "mocha"
-    ]
-  },
-  "devDependencies": {
-    "aegir": "^37.0.15",
-    "safe-regex2": "^3.0.0"
-  },
   "dependencies": {
     "b4a": "^1.6.0",
     "z32": "^1.0.0"
+  },
+  "devDependencies": {
+    "brittle": "^2.4.0",
+    "safe-regex2": "^3.0.0"
   }
 }

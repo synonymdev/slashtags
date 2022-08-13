@@ -1,8 +1,8 @@
-import { expect } from 'aegir/chai'
 import b4a from 'b4a'
 import safe from 'safe-regex2'
+import test from 'brittle'
 
-import * as SlashURL from '../src/index.js'
+import * as SlashURL from '../index.js'
 
 const baseResult = {
   fragment: '',
@@ -13,19 +13,44 @@ const baseResult = {
   query: {}
 }
 
+test('should have a safe parsing pattern', (t) => {
+  t.ok(safe(SlashURL.PATTERN))
+})
+
+test('should throw an error for non string urls', (t) => {
+  t.exception(() => SlashURL.parse(32), 'url must be a string')
+})
+
+test('should throw an error for non invalid protocol', (t) => {
+  t.exception(
+    () => SlashURL.parse('not-slash://'),
+    'url must starts with a "slash[...]:" protocol'
+  )
+})
+
+test('should throw an error for non invalid key length', (t) => {
+  t.exception(
+    () =>
+      SlashURL.parse(
+        'slash://3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39usw'
+      ),
+    'Invalid key bytelength'
+  )
+})
+
 const testVectors = [
   {
-    // Basic
+    desc: 'Basic',
     url: 'slash://3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswhy',
     result: baseResult
   },
   {
-    // Not checksummed + different protocol
+    desc: 'Not checksummed + different protocol',
     url: 'slash://3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswhn',
     result: baseResult
   },
   {
-    // Trailing slash
+    desc: 'Trailing slash',
     url: 'slash://3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswhy/',
     result: {
       ...baseResult,
@@ -33,7 +58,7 @@ const testVectors = [
     }
   },
   {
-    // Basic query
+    desc: 'Basic query',
     url: 'slash://3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswhy?foo=bar',
     result: {
       ...baseResult,
@@ -41,7 +66,7 @@ const testVectors = [
     }
   },
   {
-    // Multiple queries and trailing slash
+    desc: 'Multiple queries and trailing slash',
     url: 'slash://3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswhy/?foo=bar&bool&no=42',
     result: {
       ...baseResult,
@@ -50,7 +75,7 @@ const testVectors = [
     }
   },
   {
-    // Fragment
+    desc: 'Fragment',
     url: 'slash://3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswhy#bool&foo=bar',
     result: {
       ...baseResult,
@@ -59,7 +84,7 @@ const testVectors = [
     }
   },
   {
-    // Path + query + fragment
+    desc: 'Path + query + fragment',
     url: 'slash://3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswhy/dir/file.json?foo=bar&bool&no=42#bool&foo=bar',
     result: {
       ...baseResult,
@@ -70,7 +95,7 @@ const testVectors = [
     }
   },
   {
-    // Path + trailing slash + query + fragment
+    desc: 'Path + trailing slash + query + fragment',
     url: 'slash://3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswhy/first/second/?foo=bar&bool&no=42#bool&foo=bar',
     result: {
       ...baseResult,
@@ -81,7 +106,7 @@ const testVectors = [
     }
   },
   {
-    // different protocol
+    desc: 'Different protocol',
     url: 'slashfoo://3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswhy',
     result: {
       ...baseResult,
@@ -89,45 +114,21 @@ const testVectors = [
     }
   },
   {
-    // one missing character
+    desc: 'One missing character',
     url: 'slash://3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswh',
     result: baseResult
   }
 ]
 
-describe('parse', () => {
-  it('should have a safe parsing pattern', () => {
-    expect(safe(SlashURL.PATTERN)).to.be.true()
-  })
+testVectors.forEach((vector) => {
+  test('test vector: ' + vector.desc, (t) => {
+    const parsed = SlashURL.parse(vector.url)
 
-  it('should throw an error for non string urls', () => {
-    expect(() => SlashURL.parse(32)).to.throw('url must be a string')
-  })
-
-  it('should throw an error for non invalid protocol', () => {
-    expect(() => SlashURL.parse('not-slash://')).to.throw(
-      'url must starts with a "slash[...]:" protocol'
-    )
-  })
-
-  it('should throw an error for non invalid key length', () => {
-    expect(() =>
-      SlashURL.parse(
-        'slash://3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39usw'
-      )
-    ).to.throw('Invalid key bytelength')
-  })
-
-  testVectors.forEach((vector) => {
-    it('should parse a url: ' + vector.url, () => {
-      const parsed = SlashURL.parse(vector.url)
-
-      expect(parsed.key).to.eql(b4a.from(vector.result.key, 'hex'))
-      expect(parsed.protocol).to.eql(vector.result.protocol)
-      expect(parsed.path).to.eql(vector.result.path)
-      expect(parsed.query).to.eql(vector.result.query)
-      expect(parsed.fragment).to.eql(vector.result.fragment)
-      expect(parsed.privateQuery).to.eql(vector.result.privateQuery)
-    })
+    t.alike(parsed.key, b4a.from(vector.result.key, 'hex'))
+    t.is(parsed.protocol, vector.result.protocol)
+    t.is(parsed.path, vector.result.path)
+    t.alike(parsed.query, vector.result.query)
+    t.is(parsed.fragment, vector.result.fragment)
+    t.alike(parsed.privateQuery, vector.result.privateQuery)
   })
 })
