@@ -3,5 +3,5 @@
   "compilerOptions": {
     "outDir": "types"
   },
-  "include": ["index.js", "../../types"]
+  "include": ["index.js", "../../declarations.d.ts"]
 }

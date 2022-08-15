@@ -1,5 +1,5 @@
-const path = require('path')
-const fs = require('fs')
+import path from 'path'
+import fs from 'fs'
 
 /** @param {string} name */
 const packagejson = (name) => `{
@@ -19,7 +19,8 @@ const packagejson = (name) => `{
     "lint": "standard --fix",
     "test": "brittle test/**",
     "depcheck": "npx depcheck",
-    "prepublishOnly": "npm run lint && npm run clean && npm run build && npm run test && npm run depcheck"
+    "fullcheck": "npx run lint && npm run clean && npm run build && npm run test && npm run depcheck",
+    "prepublishOnly": "npm run fullcheck"
   },
   "license": "MIT",
   "bugs": {

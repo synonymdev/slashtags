@@ -15,7 +15,8 @@
     "lint": "standard --fix",
     "test": "brittle test/**",
     "depcheck": "npx depcheck",
-    "prepublishOnly": "npm run lint && npm run clean && npm run build && npm run test && npm run depcheck"
+    "fullcheck": "npm run lint && npm run clean && npm run build && npm run test && npm run depcheck",
+    "prepublishOnly": "npm run fullcheck"
   },
   "license": "MIT",
   "bugs": {
