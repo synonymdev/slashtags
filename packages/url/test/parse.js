@@ -117,6 +117,11 @@ const testVectors = [
     desc: 'One missing character',
     url: 'slash://3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswh',
     result: baseResult
+  },
+  {
+    desc: 'Extra characters (possible checksum)',
+    url: 'slash://3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswhny7',
+    result: baseResult
   }
 ]
 

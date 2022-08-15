@@ -78,8 +78,8 @@ export const parse = (url) => {
  * @returns
  */
 export const decode = (id) => {
-  const key = z32.decode(id)
-  if (key.byteLength !== 32) throw new Error('Invalid key bytelength')
+  const key = z32.decode(id).subarray(0, 32)
+  if (key.byteLength < 32) throw new Error('Invalid key bytelength')
   return key
 }
 

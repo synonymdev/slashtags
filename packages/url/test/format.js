@@ -29,20 +29,39 @@ test('protocol - parth - query - fragment', (t) => {
 
   t.is(
     SlashURL.format(key, {
-      protocol: 'slashfoo',
+      protocol: 'slashfoo:',
+      path: '/',
       query: 'foo',
       fragment: 'fava'
     }),
-    'slashfoo://3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswhy?foo#fava'
+    'slashfoo://3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswhy/?foo#fava'
   )
 
   t.is(
     SlashURL.format(key, {
-      protocol: 'slashfoo',
-      path: 'dir/file.json',
+      protocol: 'slashfoo', // tolerate missing :
+      path: 'dir/file.json', // tolerate missing leading slash
       query: { foo: 'bar' },
       fragment: { foo: 'zar' }
     }),
     'slashfoo://3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswhy/dir/file.json?foo=bar#foo=zar'
+  )
+
+  t.is(
+    SlashURL.format(key, {
+      query: '?foo=bar',
+      fragment: '#foo=zar'
+    }),
+    'slash://3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswhy?foo=bar#foo=zar',
+    'handle string query and fragment'
+  )
+
+  t.is(
+    SlashURL.format(key, {
+      query: 'foo=bar',
+      fragment: 'foo=zar'
+    }),
+    'slash://3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswhy?foo=bar#foo=zar',
+    'tolerate missing leading ? and #'
   )
 })
