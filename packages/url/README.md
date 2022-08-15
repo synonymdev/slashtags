@@ -20,7 +20,7 @@ const url = format(key, {
 });
 // url: slash://<z-base32 key>/dir/file.json?foo=bar#encryptionKey=42
 
-parse(url);
+const parsed = parse(url);
 // {
 //   protocol: 'slash:',
 //   key: key,
@@ -29,9 +29,16 @@ parse(url);
 //   fragment: '#encryptionKey=42',
 //   privateQuery: { encryptionKey: '42' }
 // }
+
+const id = encode(parsed.key);
+// z-base32 key>
 ```
 
 ## API
+
+#### const id = SlashURL.encode(key)
+
+Encodes a 32-bytes key in z-base32.
 
 #### const url = SlashURL.format(key, [opts])
 
@@ -49,9 +56,10 @@ Creates a URL from a 32-bytes key:
 
 Parses a url to return the following:
 
-`key` Uint8Array of the key parsed from the host part of the url.
-`protocol` the protocol part of the url.
-`path` the path part of the url.
-`query` the query parsed as a key value object.
-`fragment` string of the fragment part.
-`privateQuery`: parsed private query from the fragment part of the url.
+- `key` Uint8Array of the key parsed from the host part of the url.
+- `id` z-base32 encoding of the key, useful as identifier wherever a URL is not suitable (file names).
+- `protocol` the protocol part of the url.
+- `path` the path part of the url.
+- `query` the query parsed as a key value object.
+- `fragment` string of the fragment part.
+- `privateQuery`: parsed private query from the fragment part of the url.

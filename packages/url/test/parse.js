@@ -5,6 +5,7 @@ import test from 'brittle'
 import * as SlashURL from '../index.js'
 
 const baseResult = {
+  id: '3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswhy',
   fragment: '',
   key: 'cce18ed41101509ab171a0a9b54aaf67af1aa421597a139e5ffe5e4867f3b538',
   path: '',
@@ -129,6 +130,7 @@ testVectors.forEach((vector) => {
   test('test vector: ' + vector.desc, (t) => {
     const parsed = SlashURL.parse(vector.url)
 
+    t.is(parsed.id, vector.result.id)
     t.alike(parsed.key, b4a.from(vector.result.key, 'hex'))
     t.is(parsed.protocol, vector.result.protocol)
     t.is(parsed.path, vector.result.path)

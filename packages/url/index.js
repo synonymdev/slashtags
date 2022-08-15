@@ -61,10 +61,12 @@ export const parse = (url) => {
   }
 
   const key = decode(matched?.[2])
+  const id = encode(key)
 
   return {
     protocol,
     key,
+    id,
     path: matched[3],
     query: toObject(matched[4]),
     fragment: matched[5] && '#' + matched[5],
