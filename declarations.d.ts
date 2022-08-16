@@ -9,14 +9,23 @@ declare module '@hyperswarm/testnet' {
 // file://./node_modules/hyperswarm/index.js
 declare module 'hyperswarm' {
   import EventEmitter from 'events';
+  import type { KeyPair } from '@hyperswarm/dht';
+  import type DHT from '@hyperswarm/dht';
 
-  export interface KeyPair {
+  export interface SecretStream extends Duplex {
     publicKey: Uint8Array;
-    secretKey: Uint8Array;
+    remotePublicKey: Uint8Array;
+
+    opened: Promise<boolean>;
   }
 
   class Server extends EventEmitter {
     listen: (keyPair: KeyPair) => Promise<void>;
+    address: () => {
+      publicKey: Uint8Array;
+      host: string;
+      port: number;
+    };
   }
 
   interface Discovery {
@@ -38,6 +47,7 @@ declare module 'hyperswarm' {
       options?: { server: boolean; client: boolean },
     ): Discovery;
     flush(): Promise<undefined>;
+    dht: DHT;
   };
 }
 
@@ -479,4 +489,16 @@ declare module 'compact-encoding' {
     ): void;
     decode(buffer): any;
   }
+}
+
+// file://./node_modules/@hyperswarm/dht/index.js
+declare module '@hyperswarm/dht' {
+  export interface KeyPair {
+    publicKey: Uint8Array;
+    secretKey: Uint8Array;
+  }
+
+  export = class DHT {
+    static keyPair(): KeyPair;
+  };
 }

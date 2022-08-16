@@ -34,7 +34,8 @@
     "z32": "^1.0.0"
   },
   "devDependencies": {
-    "brittle": "^2.4.0",
+    "brittle": "^3.0.2",
+    "standard": "^17.0.0",
     "safe-regex2": "^3.0.0"
   }
 }
