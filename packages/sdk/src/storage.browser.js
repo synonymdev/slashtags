@@ -1,6 +1,11 @@
 import RAW from 'random-access-web'
 import RAM from 'random-access-memory'
 
+if(typeof window !== "undefined"){
+  // @ts-ignore
+  global = window
+}
+
 const requestFileSystem =
   // @ts-ignore
   global.requestFileSystem || global.webkitRequestFileSystem
