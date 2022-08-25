@@ -11,13 +11,7 @@ declare module 'hyperswarm' {
   import EventEmitter from 'events';
   import type { KeyPair } from '@hyperswarm/dht';
   import type DHT from '@hyperswarm/dht';
-
-  export interface SecretStream extends Duplex {
-    publicKey: Uint8Array;
-    remotePublicKey: Uint8Array;
-
-    opened: Promise<boolean>;
-  }
+  import type SecretStream from '@hyperswarm/secret-stream';
 
   class Server extends EventEmitter {
     listen: (keyPair: KeyPair) => Promise<void>;
@@ -28,17 +22,21 @@ declare module 'hyperswarm' {
     };
   }
 
-  interface Discovery {
+export  interface Discovery {
     flushed(): Promise<void>;
   }
   export = class hyperswarm extends EventEmitter {
-    constructor(opts: any);
+    constructor(opts?: any);
     server: Server;
     connections: Iterable;
     _allConnections: Map<Uint8Array, any>;
     peers: Map<string, any>;
     keyPair: KeyPair;
+    dht: DHT;
+    listening?: Promise<void>;
+    destroyed: boolean;
 
+    topics(): IterableIterator<any>;
     listen(): Promise<undefined>;
     destroy(): Promise<undefined>;
     joinPeer(key: Uint8Array): undefined;
@@ -47,7 +45,6 @@ declare module 'hyperswarm' {
       options?: { server: boolean; client: boolean },
     ): Discovery;
     flush(): Promise<undefined>;
-    dht: DHT;
   };
 }
 
@@ -104,7 +101,7 @@ declare module 'corestore' {
       };
       cache?: boolean;
       onwait?: Hypercore['onwait'];
-      keyEncoding?: string | Encoding;
+      valueEncoding?: string | Encoding;
       _preready?: (core: Hypercore) => any;
     }): Hypercore;
   };
@@ -327,7 +324,7 @@ declare module 'hypercore' {
     verify: (message: Uint8Array, signature: Uint8Array) => boolean;
   }
   export = class Hypercore extends EventEmitter<'close'> {
-    constructor(opts: Opts);
+    constructor(storage: any, key?: Opts | Uint8Array, opts?: Opts);
 
     length: number;
     writable: boolean;
@@ -348,6 +345,7 @@ Populated after ready has been emitted. Will be null before the event.
 
     encryption: any;
 
+    replicate(socket: any, opts?: any);
     append(batch: any | any[]): Promise<number>;
     onwait: (seq: number, core: Hypercore) => any;
 
@@ -355,7 +353,7 @@ Populated after ready has been emitted. Will be null before the event.
     /**
      * Wait for the core to try and find a signed update to it's length. Does not download any data from peers except for a proof of the new core length.
      */
-    update(): Promise<void>;
+    update(opts?: {force?:boolean}): Promise<void>;
     session(opts: Opts): Hypercore;
     close(): Promise<void>;
     get(seq: nubmer): Promise<any>;
@@ -491,14 +489,171 @@ declare module 'compact-encoding' {
   }
 }
 
+// file://./node_modules/@hyperswarm/secret-stream/index.js
+declare module '@hyperswarm/secret-stream' {
+  export = class SecretStream extends EventEmitter, Duplex {
+    publicKey: Uint8Array;
+    remotePublicKey: Uint8Array;
+    handshakeHash: Uint8Array;
+
+    opened: Promise<boolean>;
+  }
+}
+
 // file://./node_modules/@hyperswarm/dht/index.js
 declare module '@hyperswarm/dht' {
+  import type SecretStream from '@hyperswarm/secret-stream';
   export interface KeyPair {
     publicKey: Uint8Array;
     secretKey: Uint8Array;
   }
 
   export = class DHT {
+    constructor(opts?:{bootstrap?:Array<{host:string,port:number}>})
     static keyPair(): KeyPair;
+
+    defaultKeyPair: KeyPair
+    destroyed: boolean
+
+    connect(publicKey: Uint8Array, opts?: {keyPair?:KeyPair}): SecretStream;
+    destroy():Promise<void>
   };
+}
+
+// file://./node_modules/protomux-rpc/index.js
+declare module 'protomux-rpc' {
+  import type SecretStream from '@hyperswarm/secret-stream';
+  import type { Encoding } from 'compact-encoding';
+  import EventEmitter from 'events';
+  import Protomux from 'protomux';
+  import SecretStream from '@hyperswarm/secret-stream';
+
+  export interface methodOpts {
+    valueEncoding?: Encoding,
+    // Optional encoding for requests
+    requestEncoding?: Encoding, 
+    // Optional encoding for responses
+    responseEncoding?: Encoding 
+  }
+
+  export = class ProtomuxRPC extends EventEmitter {
+    constructor(
+      stream: Duplex,
+      opts?: {
+        id?: Uint8Array;
+        valueEncoding?: Encoding;
+        /** First message on opening the protocol */
+        handshake?: Uint8Array | any;
+        handshakeEncoding?: Encoding;
+      },
+    );
+
+    stream: SecretStream
+    closed: boolean
+    mux: Protomux
+
+
+    /**
+     * Register a handler for an RPC method. The handler is passed the request value and must either return the response value or throw an error.
+     */
+    respond(metohd: string, options: methodOpts, handler: (req: any) => any): void;
+    respond(metohd: string, handler: (value: any) => any): void;
+
+    /**
+     * Perform an RPC request, returning a promise that will resolve with the value returned by the request handler or reject with an error.
+     */
+    request(method: string, value: any, options?: methodOpts)
+
+    /**
+     * Perform an RPC request but don't wait for a response.
+     */
+    event(method: string, value: any, options?: methodOpts)
+
+    on(event: string | symbol, listener: (...args: any[]) => void): this;
+    on(event: 'open', listener: (handshake: any) => any): this;
+    on(event: 'close', listener: () => any): this;
+    on(event: 'destroy', listener: () => any): this;
+
+    once(event: string | symbol, listener: (...args: any[]) => void): this;
+    once(event: 'open', listener: (handshake: any) => any): this;
+    once(event: 'close', listener: () => any): this;
+    once(event: 'destroy', listener: () => any): this;
+
+    off(event: string | symbol, listener: (...args: any[]) => void): this;
+    off(event: 'open', listener: (handshake: any) => any): this;
+    off(event: 'close', listener: () => any): this;
+    off(event: 'destroy', listener: () => any): this;
+  };
+}
+
+// file://./node_modules/protomux/index.js
+
+declare module 'protomux' {
+  import type SecretStream from '@hyperswarm/secret-stream';
+  export interface Channel {
+    peerInfo: PeerInfo;
+    handshakeHash: Uint8Array;
+
+    open: () => void;
+    messages: Message[];
+  }
+
+  export interface Message {
+    encoding: any;
+    onmessage: (message: any, channel: ProtomuxChannel) => void;
+    close?: () => void;
+    send?: (data: any) => void;
+  }
+
+  export = class Protomux implements Iterator<Channel> {
+    static from(Duplex): Protomux;
+
+    stream: SecretStream;
+
+    createChannel(
+      options: Partial<{
+        protocol: string;
+        aliases: string[];
+        id: string;
+        unique: boolean;
+        handshake: Uint8Array | null;
+        messages: Message[];
+        onopen: Function;
+        onclos: Function;
+        ondestroy: Function;
+      }>,
+    ): Channel | null;
+  };
+}
+
+
+declare module 'brittle' {
+  interface Test {
+    (name: string, fn?: (t: T)=> void) : T
+
+    solo: Test,
+    skip: Test
+  }
+
+  interface T {
+    test: Test
+
+    is: (a:any, b: any, message?: string)=>void
+    alike: (a:any, b: any, message?: string)=>void
+    unlike: (a:any, b: any, message?: string)=>void
+    exception: (a: Function, message?: string)=>void
+    ok: (value: any, message?: string)=>void
+    not: (value: any, message?: string)=>void
+    pass:(message?:string)=>void
+    plan:(number:Number)=>void
+
+    teardown: Function
+  }
+
+  export = test as Test
+}
+declare module 'safe-regex2' {
+  type T = (regex: RegExp) => boolean
+
+  export = t as T
 }
