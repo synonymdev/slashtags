@@ -62,7 +62,7 @@ export class SlashtagsRPC extends EventEmitter {
       handshakeEncoding: this.handshakeEncoding,
       handshake: this.handshake(socket)
     }
-    const rpc = new ProtomuxRPC(socket, options)
+    const rpc = new ProtomuxRPC(getMux(socket), options)
 
     // @ts-ignore
     if (!socket[RPCS_SYMBOL]) socket[RPCS_SYMBOL] = new Map()
@@ -71,11 +71,9 @@ export class SlashtagsRPC extends EventEmitter {
 
     rpc.on('open', (handshake) => this.onopen.bind(this)(handshake, socket))
 
-    this.methods.forEach(method => {
-      method.options
-        ? rpc.respond(method.name, method.options || {}, method.handler)
-        : rpc.respond(method.name, method.handler)
-    })
+    this.methods.forEach(method =>
+      rpc.respond(method.name, method.options || {}, method.handler)
+    )
   }
 
   /**
@@ -88,8 +86,16 @@ export class SlashtagsRPC extends EventEmitter {
     await socket.opened
     this.setup(socket)
 
+    // @ts-ignore
     return socket[RPCS_SYMBOL].get(this.id)
   }
+}
+
+/** @param {any} stream */
+function getMux (stream) {
+  // @ts-ignore TODO: temporary solution until Protomux is deduplicated
+  // https://github.com/mafintosh/protomux/pull/5
+  return stream.userData
 }
 
 export default SlashtagsRPC
@@ -104,4 +110,3 @@ export default SlashtagsRPC
  * @typedef {import('@synonymdev/slashtag').Slashtag}Slashtag
  * @typedef {import('@synonymdev/slashtag/lib/interfaces').SecretStream} SecretStream
  */
-
