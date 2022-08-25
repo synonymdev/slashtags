@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "target": "es2022",
     "strict": true,
     "allowJs": true,
     "checkJs": true,
@@ -11,6 +12,7 @@
     "declarationMap": true,
     // module resolution
     "esModuleInterop": true,
+    "moduleResolution": "node",
     // advanced
     "importsNotUsedAsValues": "error",
     "skipLibCheck": true,
