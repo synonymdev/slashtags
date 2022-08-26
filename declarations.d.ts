@@ -517,6 +517,7 @@ declare module '@hyperswarm/dht' {
 
     connect(publicKey: Uint8Array, opts?: {keyPair?:KeyPair}): SecretStream;
     destroy():Promise<void>
+    ready():Promise<void>
   };
 }
 
@@ -656,4 +657,28 @@ declare module 'safe-regex2' {
   type T = (regex: RegExp) => boolean
 
   export = t as T
+}
+
+declare module '@hyperswarm/dht-relay/ws' {
+  import _DHT from '@hyperswarm/dht';
+  import Websocket from 'ws'
+
+  class Stream {
+    constructor(isInitiator: boolean, socket: Websocket)
+  }
+
+  export = Stream
+}
+
+declare module '@hyperswarm/dht-relay' {
+  import _DHT from '@hyperswarm/dht';
+  import Stream from '@hyperswarm/dht-relay/ws'
+
+  class DHT extends _DHT {
+    constructor (stream: Stream)
+  }
+
+  export const relay = (dht:DHT, stream: Stream) => any
+
+  export = DHT
 }

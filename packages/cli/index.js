@@ -1,13 +1,13 @@
 #! /usr/bin/env node
 import { Argument, Command } from 'commander'
-import { version } from './utils.js'
-import { daemon } from './daemon/index.js'
+import { VERSION } from './lib/constants.js'
+import { daemon } from './lib/daemon/index.js'
 
 const program = new Command('slash')
 
 program
   .description('Command line interface for Slashtags')
-  .version(version, '-v, --version')
+  .version(VERSION, '-v, --version')
 
 program
   .command('daemon')
@@ -25,7 +25,7 @@ program.addHelpText(
   'after',
   `
 ${commands.map(
-  (c) => `
+  c => `
 ${c.name.slice(0, 1).toUpperCase() + c.name.slice(1)} commands:${c.usage}`
 )}`
 )

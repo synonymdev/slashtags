@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
-    "target": "es2022",
+    "target": "esnext",
+    "module": "esnext",
     "strict": true,
     "allowJs": true,
     "checkJs": true,
@@ -13,6 +14,7 @@
     // module resolution
     "esModuleInterop": true,
     "moduleResolution": "node",
+    "resolveJsonModule": true,
     // advanced
     "importsNotUsedAsValues": "error",
     "skipLibCheck": true,
