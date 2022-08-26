@@ -1,7 +1,7 @@
 #! /usr/bin/env node
 import { Argument, Command } from 'commander'
 import { VERSION } from './lib/constants.js'
-import { daemon } from './lib/daemon/index.js'
+import daemon from './lib/commands/daemon.js'
 
 const program = new Command('slash')
 

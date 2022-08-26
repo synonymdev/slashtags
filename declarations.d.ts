@@ -508,6 +508,10 @@ declare module '@hyperswarm/dht' {
     secretKey: Uint8Array;
   }
 
+  export interface Server {
+   listen : (keyPair?: KeyPair) => Promise<void>
+  }
+
   export = class DHT {
     constructor(opts?:{bootstrap?:Array<{host:string,port:number}>})
     static keyPair(): KeyPair;
@@ -518,6 +522,7 @@ declare module '@hyperswarm/dht' {
     connect(publicKey: Uint8Array, opts?: {keyPair?:KeyPair}): SecretStream;
     destroy():Promise<void>
     ready():Promise<void>
+    createServer(): Server
   };
 }
 
@@ -662,8 +667,9 @@ declare module 'safe-regex2' {
 declare module '@hyperswarm/dht-relay/ws' {
   import _DHT from '@hyperswarm/dht';
   import Websocket from 'ws'
+  import EventEmitter from 'events'
 
-  class Stream {
+  class Stream extends EventEmitter {
     constructor(isInitiator: boolean, socket: Websocket)
   }
 

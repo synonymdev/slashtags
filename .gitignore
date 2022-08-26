@@ -5,7 +5,6 @@ lerna-debug.log
 .vscode
 *.iml
 build
-lib
 yarn.lock
 packages/*/node_modules/
 packages/*/coverage/
