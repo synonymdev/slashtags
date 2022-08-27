@@ -2,17 +2,17 @@ import b4a from 'b4a'
 import * as SlashURL from '../index.js'
 import test from 'brittle'
 
-test('basic', (t) => {
+test('basic', t => {
   const key = b4a.from(
     'cce18ed41101509ab171a0a9b54aaf67af1aa421597a139e5ffe5e4867f3b538',
     'hex'
   )
   const url = SlashURL.format(key)
 
-  t.is(url, 'slash://3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswhy')
+  t.is(url, 'slash:3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswhy')
 })
 
-test('invalid key', (t) => {
+test('invalid key', t => {
   // @ts-ignore
   t.exception(() => SlashURL.format('foo'), 'Key must be a Buffer')
   t.exception(
@@ -21,7 +21,7 @@ test('invalid key', (t) => {
   )
 })
 
-test('protocol - parth - query - fragment', (t) => {
+test('protocol - path - query - fragment', t => {
   const key = b4a.from(
     'cce18ed41101509ab171a0a9b54aaf67af1aa421597a139e5ffe5e4867f3b538',
     'hex'
@@ -34,7 +34,7 @@ test('protocol - parth - query - fragment', (t) => {
       query: 'foo',
       fragment: 'fava'
     }),
-    'slashfoo://3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswhy/?foo#fava'
+    'slashfoo:3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswhy/?foo#fava'
   )
 
   t.is(
@@ -44,7 +44,7 @@ test('protocol - parth - query - fragment', (t) => {
       query: { foo: 'bar' },
       fragment: { foo: 'zar' }
     }),
-    'slashfoo://3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswhy/dir/file.json?foo=bar#foo=zar'
+    'slashfoo:3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswhy/dir/file.json?foo=bar#foo=zar'
   )
 
   t.is(
@@ -52,7 +52,7 @@ test('protocol - parth - query - fragment', (t) => {
       query: '?foo=bar',
       fragment: '#foo=zar'
     }),
-    'slash://3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswhy?foo=bar#foo=zar',
+    'slash:3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswhy?foo=bar#foo=zar',
     'handle string query and fragment'
   )
 
@@ -61,7 +61,7 @@ test('protocol - parth - query - fragment', (t) => {
       query: 'foo=bar',
       fragment: 'foo=zar'
     }),
-    'slash://3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswhy?foo=bar#foo=zar',
+    'slash:3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswhy?foo=bar#foo=zar',
     'tolerate missing leading ? and #'
   )
 })

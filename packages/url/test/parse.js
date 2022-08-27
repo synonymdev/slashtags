@@ -14,26 +14,26 @@ const baseResult = {
   query: {}
 }
 
-test('should have a safe parsing pattern', (t) => {
+test('should have a safe parsing pattern', t => {
   t.ok(safe(SlashURL.PATTERN))
 })
 
-test('should throw an error for non string urls', (t) => {
+test('should throw an error for non string urls', t => {
   t.exception(() => SlashURL.parse(32), 'url must be a string')
 })
 
-test('should throw an error for non invalid protocol', (t) => {
+test('should throw an error for non invalid protocol', t => {
   t.exception(
-    () => SlashURL.parse('not-slash://'),
+    () => SlashURL.parse('not-slash:'),
     'url must starts with a "slash[...]:" protocol'
   )
 })
 
-test('should throw an error for non invalid key length', (t) => {
+test('should throw an error for non invalid key length', t => {
   t.exception(
     () =>
       SlashURL.parse(
-        'slash://3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39usw'
+        'slash:3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39usw'
       ),
     'Invalid key bytelength'
   )
@@ -42,17 +42,17 @@ test('should throw an error for non invalid key length', (t) => {
 const testVectors = [
   {
     desc: 'Basic',
-    url: 'slash://3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswhy',
+    url: 'slash:3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswhy',
     result: baseResult
   },
   {
     desc: 'Not checksummed + different protocol',
-    url: 'slash://3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswhn',
+    url: 'slash:3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswhn',
     result: baseResult
   },
   {
     desc: 'Trailing slash',
-    url: 'slash://3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswhy/',
+    url: 'slash:3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswhy/',
     result: {
       ...baseResult,
       path: '/'
@@ -60,7 +60,7 @@ const testVectors = [
   },
   {
     desc: 'Basic query',
-    url: 'slash://3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswhy?foo=bar',
+    url: 'slash:3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswhy?foo=bar',
     result: {
       ...baseResult,
       query: { foo: 'bar' }
@@ -68,7 +68,8 @@ const testVectors = [
   },
   {
     desc: 'Multiple queries and trailing slash',
-    url: 'slash://3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswhy/?foo=bar&bool&no=42',
+    url:
+      'slash:3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswhy/?foo=bar&bool&no=42',
     result: {
       ...baseResult,
       path: '/',
@@ -77,7 +78,8 @@ const testVectors = [
   },
   {
     desc: 'Fragment',
-    url: 'slash://3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswhy#bool&foo=bar',
+    url:
+      'slash:3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswhy#bool&foo=bar',
     result: {
       ...baseResult,
       fragment: '#bool&foo=bar',
@@ -86,7 +88,8 @@ const testVectors = [
   },
   {
     desc: 'Path + query + fragment',
-    url: 'slash://3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswhy/dir/file.json?foo=bar&bool&no=42#bool&foo=bar',
+    url:
+      'slash:3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswhy/dir/file.json?foo=bar&bool&no=42#bool&foo=bar',
     result: {
       ...baseResult,
       path: '/dir/file.json',
@@ -97,7 +100,8 @@ const testVectors = [
   },
   {
     desc: 'Path + trailing slash + query + fragment',
-    url: 'slash://3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswhy/first/second/?foo=bar&bool&no=42#bool&foo=bar',
+    url:
+      'slash:3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswhy/first/second/?foo=bar&bool&no=42#bool&foo=bar',
     result: {
       ...baseResult,
       path: '/first/second/',
@@ -108,7 +112,7 @@ const testVectors = [
   },
   {
     desc: 'Different protocol',
-    url: 'slashfoo://3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswhy',
+    url: 'slashfoo:3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswhy',
     result: {
       ...baseResult,
       protocol: 'slashfoo:'
@@ -116,18 +120,18 @@ const testVectors = [
   },
   {
     desc: 'One missing character',
-    url: 'slash://3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswh',
+    url: 'slash:3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswh',
     result: baseResult
   },
   {
     desc: 'Extra characters (possible checksum)',
-    url: 'slash://3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswhny7',
+    url: 'slash:3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswhny7',
     result: baseResult
   }
 ]
 
-testVectors.forEach((vector) => {
-  test('test vector: ' + vector.desc, (t) => {
+testVectors.forEach(vector => {
+  test('test vector: ' + vector.desc, t => {
     const parsed = SlashURL.parse(vector.url)
 
     t.is(parsed.id, vector.result.id)

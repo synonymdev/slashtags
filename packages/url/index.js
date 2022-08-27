@@ -1,14 +1,13 @@
 import z32 from 'z32'
 import b4a from 'b4a'
 
-export const PATTERN =
-  /^(slash.*:)\/\/([^#?/]+)(\/?[^#?\s]*)\??([^#\s]*)#?([^\s]*)$/
+export const PATTERN = /^(slash.*:)([^#?/]+)(\/?[^#?\s]*)\??([^#\s]*)#?([^\s]*)$/
 
 /**
  * Encodes a 32-byte Slashtags key into a z-base32 id
  * @param {*} key
  */
-export const encode = (key) => {
+export const encode = key => {
   if (!b4a.isBuffer(key)) throw new Error('Key must be a Buffer')
   if (key.byteLength !== 32) throw new Error('Key must be 32-bytes long')
   return z32.encode(key)
@@ -42,7 +41,7 @@ export const format = (key, opts = {}) => {
   const query = stringify(opts?.query, '?')
   const fragment = stringify(opts.fragment, '#')
 
-  return protocol + '//' + id + path + query + fragment
+  return protocol + id + path + query + fragment
 }
 
 /**
@@ -50,7 +49,7 @@ export const format = (key, opts = {}) => {
  * @param {string} url
  * @returns
  */
-export const parse = (url) => {
+export const parse = url => {
   if (typeof url !== 'string') throw new Error('url must be a string')
 
   const matched = url.match(PATTERN) || []
@@ -79,7 +78,7 @@ export const parse = (url) => {
  * @param {string} id
  * @returns
  */
-export const decode = (id) => {
+export const decode = id => {
   const key = z32.decode(id).subarray(0, 32)
   if (key.byteLength < 32) throw new Error('Invalid key bytelength')
   return key
@@ -93,7 +92,7 @@ export const decode = (id) => {
 function toObject (string) {
   if (!string || string.length === 0) return {}
   return Object.fromEntries(
-    string?.split('&').map((str) => {
+    string?.split('&').map(str => {
       const [key, value] = str.split('=')
       return [key, value || true]
     })
@@ -111,7 +110,5 @@ function stringify (object, prefix) {
   if (typeof object === 'string') {
     return object.startsWith(prefix) ? object : prefix + object
   }
-  return (
-    prefix + Object.entries(object).map((entry) => entry[0] + '=' + entry[1])
-  )
+  return prefix + Object.entries(object).map(entry => entry[0] + '=' + entry[1])
 }
