@@ -165,11 +165,12 @@ declare module 'random-access-web' {
 
 // file://./node_modules/hyperdrive/index.js
 declare module 'hyperdrive' {
-  import type Hypercore from 'hypercore';
-  import type Hyperbee from 'hyperbee';
-  import type Corestore from 'corestore';
-  import type EventEmitter from 'events';
-  import type Hyperblobs from 'hyperblobs';
+  import Hypercore from 'hypercore';
+  import Hyperbee from 'hyperbee';
+  import Corestore from 'corestore';
+  import EventEmitter from 'events';
+  import Hyperblobs from 'hyperblobs';
+  import {Readable} from 'stream'
 
   export = class HyperDrive extends EventEmitter {
     constructor(
@@ -271,7 +272,7 @@ This allows drive.update to wait for either the findingPeers hook to finish or o
     put(
       path: string,
       buf: Uint8Array,
-      opts? = { executable: boolean, metadata: any },
+      opts? = { executable?: boolean, metadata?: any },
     ): ReturnType<Hyperbee['put']>;
     /**
      * Removes the entry at path from the drive. If a blob corresponding to the entry at path exists, it is not currently deleted.
@@ -286,6 +287,18 @@ This allows drive.update to wait for either the findingPeers hook to finish or o
      * Returns the entry at path in the drive. An entry holds metadata about a path.
      */
     entry(path: string): ReturnType<Hyperbee['get']> | Promise<void>;
+    /**
+     * Returns a read stream of entries in the drive.
+     */
+    entries: Hyperbee['createReadStream']
+    /**
+     * Returns a stream of all entries in the drive at paths prefixed with folder. 
+     */
+    list(folder:string, options?: {recursive: boolean}): ReturnType<Hyperbee['createReadStream']>
+    /**
+     * Returns a stream of all subpaths of entries in drive stored at paths prefixed by folder.
+    */
+    readdir(folder): Hyperbee.IteratorStream<string>
 
     _onwait: Hypercore['onwait'];
     _openBlobsFromHeader(opts?: { wait: boolean }): Promise<Hyperblobs>;
@@ -402,17 +415,43 @@ declare module 'hyperbee' {
   import type { Readable } from 'stream';
   import { Encoding } from 'compact-encoding';
 
-  export interface Node extends Block {
+  export interface Node {
     key: string;
     seq: number;
     value: Uint8Array;
   }
+  
+  export interface Operation extends Block {
+    type: 'del' | 'put'
+  }
+
+  export interface Iterator<T> {
+      next() : {
+        value: T;
+        done: boolean;
+      };
+  }
+  export interface IteratorStream<T> extends Readable {
+    [Symbol.asyncIterator]() : {
+      next() : {
+        value: T;
+        done: boolean;
+      };
+    };
+  }
+
+  export interface AbstractEncoding {
+    encodingLength: (m:any)=> number,
+    encode: (m:any) => Uint8Array,
+    decode: (buf:Uint8Array)=> Any
+  }
+
   export = class Hyperbee {
     constructor(
       core: any,
       opts?: {
-        keyEncoding?: string | Encoding;
-        valueEncoding?: string | Encoding;
+        keyEncoding?: string | AbstractEncoding;
+        valueEncoding?: string | AbstractEncoding;
         metadata?: {
           contentFeed?: Uint8Array | null;
         };
@@ -435,8 +474,9 @@ declare module 'hyperbee' {
       flush(): Promise<>;
     };
 
-    createReadStream(options: any): Readable;
-    createHistoryStream(options: any): Readable;
+    createRangeIterator(options?:any, active?: any): Iterator<Node>
+    createReadStream(options?: any): IteratorStream<Node>;
+    createHistoryStream(options?: any): IteratorStream<Operation>;
 
     getBlock(
       seq: number,
@@ -469,7 +509,7 @@ declare module 'graceful-goodbye' {
 declare module 'compact-encoding' {
   function from(opts: object): object;
   function decode(enc: Encoding, val: Uint8Array): any;
-  function encode(enc: Encoding, val: any);
+  function encode(enc: Encoding, val: any): Uint8Array;
 
   let uint: Encoding;
   let fixed32: Encoding;
@@ -479,7 +519,7 @@ declare module 'compact-encoding' {
   interface Encoding {
     preencode(
       state: { start: number; end: number; buffer: Uint8Array },
-      val: any,
+      val?: any,
     ): void;
     encode(
       state: { start: number; end: number; buffer: Uint8Array },
