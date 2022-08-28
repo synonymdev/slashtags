@@ -6,7 +6,6 @@ import RAM from 'random-access-memory'
 import Corestore from 'corestore'
 
 import { Slashtag } from '../index.js'
-import DHT from '@hyperswarm/dht'
 
 test('initiatlize - empty options', async t => {
   const alice = new Slashtag()
@@ -90,19 +89,17 @@ test('close', async t => {
 test('close - should not destroy passed DHT', async t => {
   const testnet = await createTestnet(3, t.teardown)
 
-  const dht = new DHT(testnet)
+  const swarm = new Hyperswarm(testnet)
 
-  const alice = new Slashtag({ dht })
+  const alice = new Slashtag({ _swarm: swarm })
   await alice.ready()
 
   await alice.close()
   t.ok(alice.closed)
 
-  t.not(alice.dht.destroyed)
-  t.not(dht.destroyed)
+  t.not(swarm.dht.destroyed)
 
-  await dht.destroy()
+  await swarm.destroy()
 
-  t.ok(alice.dht.destroyed)
-  t.ok(dht.destroyed)
+  t.ok(swarm.dht.destroyed)
 })

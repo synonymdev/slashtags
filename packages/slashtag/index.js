@@ -14,8 +14,8 @@ export class Slashtag extends EventEmitter {
    *
    * @param {object} [opts]
    * @param {import('@hyperswarm/dht').KeyPair} [opts.keyPair]
-   * @param {import('@hyperswarm/dht')} [opts.dht]
    * @param {import('./lib/interfaces').SwarmOpts['bootstrap']} [opts.bootstrap]
+   * @param {import('hyperswarm')} [opts._swarm]
    */
   constructor (opts = {}) {
     super()
@@ -25,15 +25,17 @@ export class Slashtag extends EventEmitter {
     this.id = encode(this.key)
     this.url = format(this.key)
 
-    this._shouldDestroyDHT = !opts.dht
-    this.dht = opts.dht || new DHT({ bootstrap: opts.bootstrap })
-
     /** Hyperswarm used for Discovery without exposing Slashtag keypair */
-    this.discoverySwarm = new Hyperswarm({ dht: this.dht })
+    this._shouldDestroyDiscoverySwarm = !opts._swarm
+    this.discoverySwarm =
+      opts._swarm || new Hyperswarm({ bootstrap: opts.bootstrap })
     this.discoverySwarm.on('connection', handleSwarmConnection.bind(this))
 
     /** Hyperswarm used for direct deliberate connections to a Slashtag */
-    this.swarm = new Hyperswarm({ dht: this.dht, keyPair: this.keyPair })
+    this.swarm = new Hyperswarm({
+      dht: this.discoverySwarm.dht,
+      keyPair: this.keyPair
+    })
     this.swarm.on('connection', handleSwarmConnection.bind(this))
 
     this.corestore = new Corestore(RAM)
@@ -53,7 +55,6 @@ export class Slashtag extends EventEmitter {
   async _open () {
     await this.core.ready()
     await this.join(this.core).flushed()
-    // TODO: Update writer core once Hypercore from Corestore is updated to ^10.2.0
 
     debug('Opened', this.url)
     this.opened = true
@@ -113,11 +114,9 @@ export class Slashtag extends EventEmitter {
     await this.corestore.close()
 
     // @ts-ignore Avoid destroying the DHT node.
-    this.discoverySwarm.dht = this.swarm.dht = { destroy: noop }
-    await this.discoverySwarm.destroy()
+    this.swarm.dht = { destroy: noop }
+    await (this._shouldDestroyDiscoverySwarm && this.discoverySwarm.destroy())
     await this.swarm.destroy()
-
-    await (this._shouldDestroyDHT && this.dht.destroy())
 
     this.closed = true
     this.emit('close')
