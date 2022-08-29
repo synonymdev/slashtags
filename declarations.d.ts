@@ -1,15 +1,17 @@
 // file://./node_modules/@hyperswarm/testnet/index.js
 declare module '@hyperswarm/testnet' {
+  import DHT from '@hyperswarm/dht'
+
   export default function createTestnet(
     nodes: number,
     teardown: Function,
-  ): { bootstrap: Array<{ host: string; port: number }> };
+  ): { bootstrap: Array<{ host: string; port: number }>, nodes:DHT[] };
 }
 
 // file://./node_modules/hyperswarm/index.js
 declare module 'hyperswarm' {
   import EventEmitter from 'events';
-  import type { KeyPair } from '@hyperswarm/dht';
+  import type { KeyPair, keyPair, KeyPair } from '@hyperswarm/dht';
   import type DHT from '@hyperswarm/dht';
   import type SecretStream from '@hyperswarm/secret-stream';
 
@@ -83,7 +85,9 @@ declare module 'corestore' {
     );
 
     primaryKey: Uint8Array;
+    _namespace: Uint8Array;
 
+    ready(): Promise<void>
     replicate(socket: any, opts?: any);
     namespace(name?: string | Uint8Array): Corestore;
     close(): Promise<void>;
@@ -153,8 +157,7 @@ declare module 'safety-catch' {
 
 // file://./node_modules/random-access-memory/index.js
 declare module 'random-access-memory' {
-  function foo(): any;
-  export = foo;
+  export = class RAM {};
 }
 
 // file://./node_modules/random-access-web/index.js
@@ -179,6 +182,7 @@ declare module 'hyperdrive' {
         _db?: Hyperbee;
         _files?: Hyperbee;
         onwait?: (seq: number, core: Hypercore) => any;
+        encryptionKey?: Uint8Array
       },
     );
     constructor(
@@ -188,6 +192,7 @@ declare module 'hyperdrive' {
         _db?: Hyperbee;
         _files?: Hyperbee;
         onwait?: (seq: number, core: Hypercore) => any;
+        encryptionKey?: Uint8Array
       },
     );
 
@@ -537,6 +542,8 @@ declare module '@hyperswarm/secret-stream' {
     handshakeHash: Uint8Array;
 
     opened: Promise<boolean>;
+
+    destroy(): Promise<any>
   }
 }
 
@@ -549,20 +556,28 @@ declare module '@hyperswarm/dht' {
   }
 
   export interface Server {
-   listen : (keyPair?: KeyPair) => Promise<void>
+    listen : (keyPair?: KeyPair) => Promise<void>
+    address(): {host:string, port:number, publicKey: Uint8Array}
+    close(): Promise<void>
+  }
+
+  export interface Node {
+    host:string,
+    port:number
   }
 
   export = class DHT {
-    constructor(opts?:{bootstrap?:Array<{host:string,port:number}>})
+    constructor(opts?:{ bootstrap?: Array<Node> })
     static keyPair(): KeyPair;
 
     defaultKeyPair: KeyPair
     destroyed: boolean
+    bootstrapNodes: Node[]
 
     connect(publicKey: Uint8Array, opts?: {keyPair?:KeyPair}): SecretStream;
     destroy():Promise<void>
     ready():Promise<void>
-    createServer(): Server
+    createServer(onconnection:(socket: SecretStream)=>void): Server
   };
 }
 
@@ -633,7 +648,6 @@ declare module 'protomux-rpc' {
 }
 
 // file://./node_modules/protomux/index.js
-
 declare module 'protomux' {
   import type SecretStream from '@hyperswarm/secret-stream';
   export interface Channel {
@@ -673,6 +687,7 @@ declare module 'protomux' {
 }
 
 
+// file://./node_modules/brittle/index.js
 declare module 'brittle' {
   interface Test {
     (name: string, fn?: (t: T)=> void) : T
@@ -689,6 +704,7 @@ declare module 'brittle' {
     unlike: (a:any, b: any, message?: string)=>void
     exception: (a: Function, message?: string)=>void
     ok: (value: any, message?: string)=>void
+    absent: (value: any, message?: string)=>void
     not: (value: any, message?: string)=>void
     pass:(message?:string)=>void
     plan:(number:Number)=>void
@@ -706,25 +722,36 @@ declare module 'safe-regex2' {
 
 declare module '@hyperswarm/dht-relay/ws' {
   import _DHT from '@hyperswarm/dht';
-  import Websocket from 'ws'
+  import ws from 'ws'
   import EventEmitter from 'events'
 
   class Stream extends EventEmitter {
-    constructor(isInitiator: boolean, socket: Websocket)
+    constructor(isInitiator: boolean, socket: ws.WebSocket)
   }
 
   export = Stream
 }
 
+// file://./node_modules/@hyperswarm/dht-relay/index.js
 declare module '@hyperswarm/dht-relay' {
   import _DHT from '@hyperswarm/dht';
   import Stream from '@hyperswarm/dht-relay/ws'
 
-  class DHT extends _DHT {
+  class Node extends _DHT {
     constructor (stream: Stream)
   }
 
   export const relay = (dht:DHT, stream: Stream) => any
 
-  export = DHT
+  export = Node
+}
+
+
+
+// file://./node_modules/hypercore-crypto/index.js
+declare module 'hypercore-crypto' {
+  import {KeyPair} from "@hyperswarm/dht"
+
+  export function randomBytes(n: number): Uint8Array
+  export function keyPair(seed?: Uint8Array): KeyPair
 }
