@@ -1,12 +1,11 @@
 import Hyperswarm from 'hyperswarm'
-import DHT from '@hyperswarm/dht'
+import { keyPair } from 'hypercore-crypto'
 import Corestore from 'corestore'
 import RAM from 'random-access-memory'
 import { format, encode, parse, decode } from '@synonymdev/slashtags-url'
-import Debug from 'debug'
 import EventEmitter from 'events'
-
-const debug = Debug('slashtags:slashtag')
+import HyperDrive from 'hyperdrive'
+import Protomux from 'protomux'
 
 // @ts-ignore
 export class Slashtag extends EventEmitter {
@@ -14,12 +13,12 @@ export class Slashtag extends EventEmitter {
    *
    * @param {object} [opts]
    * @param {import('@hyperswarm/dht').KeyPair} [opts.keyPair]
-   * @param {import('./lib/interfaces').SwarmOpts['bootstrap']} [opts.bootstrap]
+   * @param {import('@hyperswarm/dht').Node[]} [opts.bootstrap]
    * @param {import('hyperswarm')} [opts._swarm]
    */
   constructor (opts = {}) {
     super()
-    this.keyPair = opts.keyPair || DHT.keyPair()
+    this.keyPair = opts.keyPair || keyPair()
     this.key = this.keyPair.publicKey
 
     this.id = encode(this.key)
@@ -29,14 +28,14 @@ export class Slashtag extends EventEmitter {
     this._shouldDestroyDiscoverySwarm = !opts._swarm
     this.discoverySwarm =
       opts._swarm || new Hyperswarm({ bootstrap: opts.bootstrap })
-    this.discoverySwarm.on('connection', handleSwarmConnection.bind(this))
+    this.discoverySwarm.on('connection', this._handleConnection.bind(this))
 
     /** Hyperswarm used for direct deliberate connections to a Slashtag */
     this.swarm = new Hyperswarm({
       dht: this.discoverySwarm.dht,
       keyPair: this.keyPair
     })
-    this.swarm.on('connection', handleSwarmConnection.bind(this))
+    this.swarm.on('connection', this._handleConnection.bind(this))
 
     this.corestore = new Corestore(RAM)
     /** @type {Hypercore} */
@@ -56,7 +55,6 @@ export class Slashtag extends EventEmitter {
     await this.core.ready()
     await this.join(this.core).flushed()
 
-    debug('Opened', this.url)
     this.opened = true
     this.emit('ready')
   }
@@ -89,11 +87,11 @@ export class Slashtag extends EventEmitter {
 
   /**
    * Discover peers for a Hypercore, Hyperdrive, or a random topic.
-   * @param {Partial<Hypercore> | Uint8Array} core
+   * @param {HypercoreLike | Uint8Array} core
    * @param {Parameters<import('hyperswarm')['join']>[1]} [opts]
    */
   join (core, opts) {
-    /** @type {Partial<Hypercore>} */ // @ts-ignore
+    /** @type {HypercoreLike} */ // @ts-ignore
     const _core = core.discoveryKey ? core : { discoveryKey: core }
     const done = _core.findingPeers?.()
 
@@ -101,6 +99,17 @@ export class Slashtag extends EventEmitter {
 
     return this.discoverySwarm.join(_core.discoveryKey, opts)
   }
+
+  // /** @param {string} name */
+  // drive (name) {
+  //   const ns = this.corestore.namespace('drive::' + name)
+  //   const encryptionKey = hash(ns._namespace)
+  //   const drive = new HyperDrive(ns, { encryptionKey })
+
+  //   drive.ready().then(() => this.join(drive))
+
+  //   return drive
+  // }
 
   close () {
     if (this._closing) return this._closing
@@ -113,28 +122,24 @@ export class Slashtag extends EventEmitter {
   async _close () {
     await this.corestore.close()
 
-    // @ts-ignore Avoid destroying the DHT node.
-    this.swarm.dht = { destroy: noop }
-    await (this._shouldDestroyDiscoverySwarm && this.discoverySwarm.destroy())
+    this._shouldDestroyDiscoverySwarm
+      ? await this.discoverySwarm.destroy()
+      : // @ts-ignore Avoid destroying the DHT node.
+        (this.swarm.dht = { destroy: noop })
     await this.swarm.destroy()
 
     this.closed = true
     this.emit('close')
   }
-}
 
-/**
- * @this {Slashtag}
- * @param {SecretStream} connection
- * */
-function handleSwarmConnection (connection) {
-  const socket = connection
-  socket.remoteSlashtag = remoteSlashtag(socket.remotePublicKey)
-  debug('handling swarm connection', socket.remoteSlashtag.id)
+  /** @param {SecretStream} socket */
+  _handleConnection (socket) {
+    socket.remoteSlashtag = remoteSlashtag(socket.remotePublicKey)
 
-  this.corestore.replicate(socket)
+    this.corestore.replicate(socket)
 
-  this.emit('connection', socket, socket.remoteSlashtag)
+    this.emit('connection', socket, socket.remoteSlashtag)
+  }
 }
 
 /** @param {Uint8Array} publicKey */
@@ -147,6 +152,7 @@ function noop () {}
 /**
  * @typedef {import('./lib/interfaces').SecretStream } SecretStream
  * @typedef {import('./lib/interfaces').Emitter} Emitter
+ * @typedef {import('./lib/interfaces').HypercoreLike} HypercoreLike
  * @typedef {import('hypercore')} Hypercore
  */
 

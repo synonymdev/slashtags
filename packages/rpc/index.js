@@ -1,5 +1,6 @@
 import ProtomuxRPC from 'protomux-rpc'
 import EventEmitter from 'events'
+import Protomux from 'protomux'
 
 const RPCS_SYMBOL = Symbol.for('slashtags-rpcs')
 
@@ -55,6 +56,8 @@ export class SlashtagsRPC extends EventEmitter {
   setup (socket) {
     // @ts-ignore Deduplicate ProtomuxRPC instances on the same socket
     if (socket[RPCS_SYMBOL]?.get(this.id)) return
+    // @ts-ignore
+    if (!socket[RPCS_SYMBOL]) socket[RPCS_SYMBOL] = new Map()
 
     const options = {
       id: Buffer.from(this.id),
@@ -64,8 +67,6 @@ export class SlashtagsRPC extends EventEmitter {
     }
     const rpc = new ProtomuxRPC(getMux(socket), options)
 
-    // @ts-ignore
-    if (!socket[RPCS_SYMBOL]) socket[RPCS_SYMBOL] = new Map()
     // @ts-ignore
     socket[RPCS_SYMBOL].set(this.id, rpc)
 
@@ -84,6 +85,7 @@ export class SlashtagsRPC extends EventEmitter {
   async rpc (key) {
     const socket = this.slashtag.connect(key)
     await socket.opened
+    if (!socket) return
     this.setup(socket)
 
     // @ts-ignore
@@ -91,11 +93,12 @@ export class SlashtagsRPC extends EventEmitter {
   }
 }
 
-/** @param {any} stream */
-function getMux (stream) {
+/** @param {any} socket */
+function getMux (socket) {
   // @ts-ignore TODO: temporary solution until Protomux is deduplicated
   // https://github.com/mafintosh/protomux/pull/5
-  return stream.userData
+  socket.protomux = socket.protomux || socket.userData || Protomux.from(socket)
+  return socket.protomux
 }
 
 export default SlashtagsRPC

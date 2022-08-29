@@ -1,4 +1,6 @@
 import type _SecretStream from '@hyperswarm/secret-stream';
+import type Corestore from 'corestore';
+import type Protomux from 'protomux';
 
 export interface RemoteSlashtag {
   publicKey: Uint8Array;
@@ -10,10 +12,7 @@ export interface RemoteSlashtag {
 
 export interface SecretStream extends _SecretStream {
   remoteSlashtag: RemoteSlashtag;
-}
-
-export interface SwarmOpts {
-  bootstrap?: Array<{ host: string; port: number }>;
+  protomux: Protomux;
 }
 
 export interface Emitter {
@@ -23,13 +22,7 @@ export interface Emitter {
   on(event: string | symbol, listener: (...args: any[]) => void): this;
 }
 
-export interface KeyPair {
-  publicKey: Uint8Array;
-  secretKey: Uint8Array;
-  auth: Auth;
-}
-
-export interface Auth {
-  sign: (message: Uint8Array) => Uint8Array;
-  verify: (message: Uint8Array, signature: Uint8Array) => boolean;
+export interface HypercoreLike {
+  discoveryKey?: Uint8Array;
+  findingPeers: Corestore['findingPeers'];
 }

@@ -35,7 +35,9 @@
   },
   "devDependencies": {
     "brittle": "^3.0.2",
+    "depcheck": "^1.4.3",
+    "safe-regex2": "^3.0.0",
     "standard": "^17.0.0",
-    "safe-regex2": "^3.0.0"
+    "typescript": "^4.8.2"
   }
 }

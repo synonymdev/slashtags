@@ -7,24 +7,6 @@ import Corestore from 'corestore'
 
 import { Slashtag } from '../index.js'
 
-test('initiatlize - empty options', async t => {
-  const alice = new Slashtag()
-  t.pass()
-  alice.close()
-})
-
-test('initialize - keyPair', async t => {
-  const alice = new Slashtag()
-  t.pass()
-
-  const other = new Slashtag({ keyPair: alice.keyPair })
-
-  t.alike(other.keyPair, alice.keyPair)
-
-  alice.close()
-  other.close()
-})
-
 test('opening', async t => {
   const testnet = await createTestnet(3, t.teardown)
 
@@ -95,9 +77,9 @@ test('close - should not destroy passed DHT', async t => {
   await alice.ready()
 
   await alice.close()
-  t.ok(alice.closed)
 
-  t.not(swarm.dht.destroyed)
+  t.ok(alice.closed)
+  t.absent(swarm.dht.destroyed)
 
   await swarm.destroy()
 

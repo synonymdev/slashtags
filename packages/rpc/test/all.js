@@ -146,3 +146,23 @@ test('multiple rpcs', async t => {
   alice.close()
   bob.close()
 })
+
+test('one sided channel', async t => {
+  const testnet = await createTestnet(3, t.teardown)
+
+  t.plan(1)
+
+  const alice = new Slashtag(testnet)
+  const bob = new Slashtag(testnet)
+
+  await alice.listen()
+
+  const bobFoo = new Foo(bob)
+
+  bobFoo.echo(alice.key, 'foo').catch(error => {
+    t.is(error.message, 'channel closed')
+  })
+
+  alice.close()
+  bob.close()
+})
