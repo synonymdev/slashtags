@@ -46,19 +46,19 @@ async function start () {
   running
     ? console.log(RUNNING)
     : pm2.start(
-        {
-          name: PROCESS_NAME,
-          script: path.join(ROOT_DIR, './lib/daemon/run.js')
-        },
-        async err => {
-          err && console.error(err)
-          console.log('starting...')
-          setTimeout(() => {
-            status()
-            return pm2.disconnect()
-          }, 200)
-        }
-      )
+      {
+        name: PROCESS_NAME,
+        script: path.join(ROOT_DIR, './lib/daemon/run.js')
+      },
+      async err => {
+        err && console.error(err)
+        console.log('starting...')
+        setTimeout(() => {
+          status()
+          return pm2.disconnect()
+        }, 200)
+      }
+    )
 }
 
 async function stop () {
