@@ -28,7 +28,7 @@
   "homepage": "https://github.com/synonymdev/slashtags/tree/master/packages/cli/#readme",
   "files": [
     "index.js",
-    "lib/**.js",
+    "lib/**/*.js",
     "types",
     "!**/*.tsbuildinfo"
   ],

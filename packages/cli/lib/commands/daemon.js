@@ -4,6 +4,7 @@ import chalk from 'chalk'
 import WebSocket from 'ws'
 
 import { ROOT_DIR, DEFAULT_PORT } from '../constants.js'
+import { retry } from '../utils.js'
 
 const PROCESS_NAME = 'slashtags-daemon'
 
@@ -53,10 +54,11 @@ async function start () {
       async err => {
         err && console.error(err)
         console.log('starting...')
-        setTimeout(() => {
-          status()
-          return pm2.disconnect()
-        }, 200)
+
+        await retry(check, 1000)
+
+        status()
+        return pm2.disconnect()
       }
     )
 }
