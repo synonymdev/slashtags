@@ -31,7 +31,7 @@
     "lint": "npx standard scripts/* examples/**/*.js --fix && lerna run lint",
     "test": "lerna run test",
     "depcheck": "lerna run depcheck",
-    "fullcheck": "lerna fullcheck",
+    "fullcheck": "lerna run fullcheck",
     "create": "node ./scripts/new-package.cjs",
     "reset": "lerna run clean && rimraf packages/*/node_modules node_modules packages/*/package-lock.json"
   },

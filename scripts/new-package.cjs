@@ -29,7 +29,7 @@ const packagejson = name => `{
   "homepage": "https://github.com/synonymdev/slashtags/tree/master/packages/${name}/#readme",
   "files": [
     "index.js",
-    "lib/**.js",
+    "lib",
     "types",
     "!**/*.tsbuildinfo"
   ],
