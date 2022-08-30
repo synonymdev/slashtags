@@ -108,8 +108,8 @@ test('basic', async t => {
   aliceFoo.once('echo', req => t.is(req, 'foobar 2'))
   t.is(await bobFoo.echo(alice.key, 'foobar 2'), 'foobar 2')
 
-  alice.close()
-  bob.close()
+  await alice.close()
+  await bob.close()
 })
 
 test('multiple rpcs', async t => {
@@ -143,26 +143,6 @@ test('multiple rpcs', async t => {
   aliceBar.once('echo', req => t.is(req, 'bar'))
   t.is(await bobBar.echo(alice.key, 'bar'), 'bar')
 
-  alice.close()
-  bob.close()
-})
-
-test('one sided channel', async t => {
-  const testnet = await createTestnet(3, t.teardown)
-
-  t.plan(1)
-
-  const alice = new Slashtag(testnet)
-  const bob = new Slashtag(testnet)
-
-  await alice.listen()
-
-  const bobFoo = new Foo(bob)
-
-  bobFoo.echo(alice.key, 'foo').catch(error => {
-    t.is(error.message, 'channel closed')
-  })
-
-  alice.close()
-  bob.close()
+  await alice.close()
+  await bob.close()
 })

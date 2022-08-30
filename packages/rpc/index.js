@@ -72,8 +72,8 @@ export class SlashtagsRPC extends EventEmitter {
 
     rpc.on('open', (handshake) => this.onopen.bind(this)(handshake, socket))
 
-    this.methods.forEach(method =>
-      rpc.respond(method.name, method.options || {}, method.handler)
+    this.methods.forEach(m =>
+      rpc.respond(m.name, m.options || {}, req => m.handler(req, socket))
     )
   }
 
@@ -107,7 +107,7 @@ export default SlashtagsRPC
  * @typedef {{
  *  name: string,
  *  options?: import('protomux-rpc').methodOpts,
- *  handler: (req: any) => any
+ *  handler: (req: any, socket: SecretStream) => any
  * }} RPCMethod
  *
  * @typedef {import('@synonymdev/slashtag').Slashtag}Slashtag
