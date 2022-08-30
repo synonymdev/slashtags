@@ -520,6 +520,8 @@ declare module 'compact-encoding' {
   let fixed32: Encoding;
   let string: Encoding;
   let raw: Encoding;
+  let bool: Encoding;
+  let buffer: Encoding;
 
   interface Encoding {
     preencode(
@@ -702,7 +704,7 @@ declare module 'brittle' {
     is: (a:any, b: any, message?: string)=>void
     alike: (a:any, b: any, message?: string)=>void
     unlike: (a:any, b: any, message?: string)=>void
-    exception: (a: Function, message?: string)=>void
+    exception: (a: Function | Promise, error: RegExp, message?: string)=>void
     ok: (value: any, message?: string)=>void
     absent: (value: any, message?: string)=>void
     not: (value: any, message?: string)=>void
