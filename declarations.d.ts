@@ -538,6 +538,7 @@ declare module 'compact-encoding' {
 
 // file://./node_modules/@hyperswarm/secret-stream/index.js
 declare module '@hyperswarm/secret-stream' {
+  import EventEmitter from 'events'
   export = class SecretStream extends EventEmitter, Duplex {
     publicKey: Uint8Array;
     remotePublicKey: Uint8Array;

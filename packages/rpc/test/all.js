@@ -2,6 +2,7 @@ import test from 'brittle'
 import Slashtag from '@synonymdev/slashtag'
 import createTestnet from '@hyperswarm/testnet'
 import c from 'compact-encoding'
+import z32 from 'z32'
 
 import SlashtagsRPC from '../index.js'
 
@@ -19,11 +20,11 @@ class Foo extends SlashtagsRPC {
   }
 
   handshake (socket) {
-    return this.id + '-handshake:for:' + socket.remoteSlashtag.id
+    return this.id + '-handshake:for:' + z32.encode(socket.remotePublicKey)
   }
 
   onopen (handshake, socket) {
-    this.emit('handshake', handshake, socket.remoteSlashtag)
+    this.emit('handshake', handshake, z32.encode(socket.remotePublicKey))
   }
 
   get methods () {
@@ -76,8 +77,6 @@ test('missing id', async t => {
 test('basic', async t => {
   const testnet = await createTestnet(3, t.teardown)
 
-  t.plan(8)
-
   const alice = new Slashtag(testnet)
   await alice.ready()
   const bob = new Slashtag(testnet)
@@ -92,14 +91,17 @@ test('basic', async t => {
 
   await alice.listen()
 
-  aliceFoo.on('handshake', (handshake, remoteSlashtag) => {
-    t.is(handshake, 'foo-handshake:for:' + alice.id)
-    t.is(remoteSlashtag.id, bob.id)
+  const ht = t.test('handshake')
+  ht.plan(4)
+
+  aliceFoo.on('handshake', (handshake, remoteID) => {
+    ht.is(handshake, 'foo-handshake:for:' + alice.id, 'correct handshake')
+    ht.is(remoteID, bob.id, 'emit handshake event correctly')
   })
 
-  bobFoo.on('handshake', (handshake, remoteSlashtag) => {
-    t.is(handshake, 'foo-handshake:for:' + bob.id)
-    t.is(remoteSlashtag.id, alice.id)
+  bobFoo.on('handshake', (handshake, remoteID) => {
+    ht.is(handshake, 'foo-handshake:for:' + bob.id, 'correct handshake')
+    ht.is(remoteID, alice.id, 'emit handshake event correctly')
   })
 
   aliceFoo.once('echo', req => t.is(req, 'foobar'))
@@ -107,6 +109,8 @@ test('basic', async t => {
 
   aliceFoo.once('echo', req => t.is(req, 'foobar 2'))
   t.is(await bobFoo.echo(alice.key, 'foobar 2'), 'foobar 2')
+
+  await ht
 
   await alice.close()
   await bob.close()

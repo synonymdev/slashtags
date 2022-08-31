@@ -32,6 +32,7 @@ export class SlashtagsRPC extends EventEmitter {
   /**
    * Return a Handshake sent on channel opening.
    * @param {SecretStream} stream
+   * @returns {any}
    */
   handshake (stream) { return null }
 
@@ -101,5 +102,5 @@ export default SlashtagsRPC
  * }} RPCMethod
  *
  * @typedef {import('@synonymdev/slashtag').Slashtag}Slashtag
- * @typedef {import('@synonymdev/slashtag/lib/interfaces').SecretStream} SecretStream
+ * @typedef {import('@hyperswarm/secret-stream')} SecretStream
  */
