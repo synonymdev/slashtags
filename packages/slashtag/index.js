@@ -38,18 +38,20 @@ export class Slashtag extends EventEmitter {
     /** @type {Emitter['on']} */ this.off = super.off
   }
 
+  /** Listen for incoming connections on Slashtag's KeyPair */
   listen () {
     if (!this.listening) this.listening = this.server.listen(this.keyPair)
     return this.listening
   }
 
+  /** Stop listening for incoming connections on Slashtag's KeyPair */
   unlisten () {
     this.listening = false
     return this.server.close()
   }
 
   /**
-   * Connect to a remote Slashtag.
+   * Connect to a remote Slashtag by its key, z-base-32 id, or `slash:` url.
    * @param {Uint8Array | string} key
    * @returns {SecretStream}
    */
