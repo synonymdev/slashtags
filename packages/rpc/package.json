@@ -1,6 +1,6 @@
 {
   "name": "@synonymdev/slashtags-rpc",
-  "version": "1.0.0-alpha.0",
+  "version": "1.0.0-alpha.1",
   "description": "helper module for creating RPCs using Slashtags nodes",
   "type": "module",
   "main": "index.js",

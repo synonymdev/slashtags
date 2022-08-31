@@ -28,11 +28,11 @@ class Foo extends SlashtagsRPC {
   }
 
   handshake(socket) {
-    return this.id + '-handshake:for:' + socket.remoteSlashtag.id;
+    return this.id + '-handshake:for:' + socket.remotePublicKey.toString('hex');
   }
 
   onopen(handshake, socket) {
-    this.emit('handshake', handshake, socket.remoteSlashtag);
+    this.emit('handshake', handshake, socket.reomtePublicKey);
   }
 
   get methods() {
@@ -71,11 +71,11 @@ Default [compact encoding](https://github.com/compact-encoding/compact-encoding)
 
 #### `handshake(stream) => any`
 
-A callback function that should returns the handshake value. The stream is passed with all the information needed including `stream.remoteSlashtag`.
+A callback function that should returns the handshake value. `stream` is a [SecretStream](https://github.com/hyperswarm/secret-stream).
 
 #### `onopen(handshake, stream)`
 
-A callback on opening the rpc, passing the handshake value from the remote peer, as well as the stream including `stream.remoteSlashtag`
+A callback on opening the rpc. `handshake` is the value sent on opening the channel, `stream` is a [SecretStream](https://github.com/hyperswarm/secret-stream).
 
 #### `methods`
 
