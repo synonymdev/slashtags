@@ -78,9 +78,7 @@ test('basic', async t => {
   const testnet = await createTestnet(3, t.teardown)
 
   const alice = new Slashtag(testnet)
-  await alice.ready()
   const bob = new Slashtag(testnet)
-  await bob.ready()
 
   const aliceFoo = new Foo(alice)
   ;(() => {
@@ -122,12 +120,10 @@ test('multiple rpcs', async t => {
   t.plan(6)
 
   const alice = new Slashtag(testnet)
-  await alice.ready()
   const aliceFoo = new Foo(alice)
   const aliceBar = new Bar(alice)
 
   const bob = new Slashtag(testnet)
-  await bob.ready()
   const bobFoo = new Foo(bob)
   const bobBar = new Bar(bob)
 

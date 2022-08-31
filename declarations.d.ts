@@ -542,6 +542,7 @@ declare module '@hyperswarm/secret-stream' {
   export = class SecretStream extends EventEmitter, Duplex {
     publicKey: Uint8Array;
     remotePublicKey: Uint8Array;
+    /** Shared secret unique to each connection after noise handshake */
     handshakeHash: Uint8Array;
 
     opened: Promise<boolean>;
@@ -552,16 +553,18 @@ declare module '@hyperswarm/secret-stream' {
 
 // file://./node_modules/@hyperswarm/dht/index.js
 declare module '@hyperswarm/dht' {
+  import type EventEmitter  from 'events'
   import type SecretStream from '@hyperswarm/secret-stream';
   export interface KeyPair {
     publicKey: Uint8Array;
     secretKey: Uint8Array;
   }
 
-  export interface Server {
+  export interface Server extends EventEmitter {
     listen : (keyPair?: KeyPair) => Promise<void>
     address(): {host:string, port:number, publicKey: Uint8Array}
     close(): Promise<void>
+    closed: boolean
   }
 
   export interface Node {
@@ -577,10 +580,12 @@ declare module '@hyperswarm/dht' {
     destroyed: boolean
     bootstrapNodes: Node[]
 
+    listening: Set<Server>
+
     connect(publicKey: Uint8Array, opts?: {keyPair?:KeyPair}): SecretStream;
     destroy():Promise<void>
     ready():Promise<void>
-    createServer(onconnection:(socket: SecretStream)=>void): Server
+    createServer(onconnection?:(socket: SecretStream)=>void): Server
   };
 }
 
@@ -749,12 +754,15 @@ declare module '@hyperswarm/dht-relay' {
   export = Node
 }
 
-
-
 // file://./node_modules/hypercore-crypto/index.js
 declare module 'hypercore-crypto' {
   import {KeyPair} from "@hyperswarm/dht"
 
   export function randomBytes(n: number): Uint8Array
   export function keyPair(seed?: Uint8Array): KeyPair
+}
+
+// file://./node_modules/turbo-hash-map/index.js
+declare module 'turbo-hash-map' {
+  export = class HashMap<T> extends Map<Uint8Array, T> {}
 }

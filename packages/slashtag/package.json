@@ -32,18 +32,16 @@
   "dependencies": {
     "@hyperswarm/dht": "^6.2.1",
     "@synonymdev/slashtags-url": "^1.0.0-alpha.0",
-    "corestore": "^6.0.3",
+    "corestore": "^6.0.4",
     "hypercore-crypto": "^3.3.0",
-    "hyperdrive": "github:Nazeh/hyperdrive-next#pass-options",
-    "hyperswarm": "^4.2.0",
-    "random-access-memory": "^5.0.1"
+    "random-access-memory": "^5.0.1",
+    "turbo-hash-map": "^1.0.3"
   },
   "devDependencies": {
     "@hyperswarm/secret-stream": "^6.0.0",
     "@hyperswarm/testnet": "^3.1.0",
     "brittle": "^3.1.0",
     "depcheck": "^1.4.3",
-    "protomux": "^3.3.0",
     "standard": "^17.0.0",
     "typescript": "^4.8.2"
   }

@@ -1,59 +1,27 @@
 import test from 'brittle'
 import createTestnet from '@hyperswarm/testnet'
-import { format, encode } from '@synonymdev/slashtags-url'
-import Hyperswarm from 'hyperswarm'
-import RAM from 'random-access-memory'
-import Corestore from 'corestore'
+import DHT from '@hyperswarm/dht'
 
 import { Slashtag } from '../index.js'
 
-test('opening', async t => {
+test('open', async t => {
   const testnet = await createTestnet(3, t.teardown)
 
   const alice = new Slashtag(testnet)
+  await alice.dht.ready()
+  await alice.corestore.ready()
 
-  t.is(alice.id, encode(alice.key))
-  t.is(alice.url, format(alice.key))
+  t.is(alice.dht.listening.size, 0, 'it should not listen automatically')
 
-  alice.on('ready', () => t.pass('ready emitted'))
-
-  await alice.ready()
-  t.ok(alice.opened)
-
-  alice.close()
+  await alice.close()
 })
 
-test('opening - announce identity core', async t => {
+test('close - basic', async t => {
   const testnet = await createTestnet(3, t.teardown)
 
   const alice = new Slashtag(testnet)
-  await alice.ready()
 
-  await alice.core.append(['foo'])
-
-  const swarm = new Hyperswarm(testnet)
-  const corestore = new Corestore(RAM)
-  swarm.on('connection', socket => corestore.replicate(socket))
-
-  const clone = corestore.get({ key: alice.key })
-  await clone.ready()
-
-  swarm.join(clone.discoveryKey, { client: true, server: false })
-  const done = clone.findingPeers()
-  swarm.flush().then(done, done)
-  await clone.update()
-
-  t.is(clone.length, 1)
-
-  alice.close()
-  swarm.destroy()
-})
-
-test('close', async t => {
-  const testnet = await createTestnet(3, t.teardown)
-
-  const alice = new Slashtag(testnet)
-  await alice.ready()
+  await alice.listen()
 
   alice.on('close', () => t.pass('close emitted'))
   const closing = alice.close()
@@ -61,27 +29,55 @@ test('close', async t => {
   t.is(alice.close(), closing, "don't attempt closing twice")
   await closing
 
-  t.ok(alice.swarm.destroyed)
+  t.ok(alice.dht.destroyed)
   t.ok(alice.closed)
+  t.ok(alice.server.closed)
+  t.absent(alice.listening)
+  t.is(alice.dht.listening.size, 0)
 
   t.alike(alice.eventNames(), [], 'remove all event listeners on close')
   t.ok(alice.closed)
 })
 
+test('close - close all sockets', async t => {
+  const testnet = await createTestnet(3, t.teardown)
+
+  const alice = new Slashtag(testnet)
+  await alice.listen()
+
+  const st = t.test('server')
+  st.plan(1)
+  alice.on('connection', () => st.pass('got connection'))
+
+  const dht = new DHT(testnet)
+  const socket = dht.connect(alice.key)
+  t.ok(await socket.opened)
+
+  await st
+
+  t.is(alice.sockets.size, 1)
+
+  await alice.close()
+
+  t.is(alice.sockets.size, 0)
+
+  await socket.destroy()
+  await dht.destroy()
+})
+
 test('close - should not destroy passed DHT', async t => {
   const testnet = await createTestnet(3, t.teardown)
 
-  const swarm = new Hyperswarm(testnet)
+  const dht = new DHT(testnet)
 
-  const alice = new Slashtag({ _swarm: swarm })
-  await alice.ready()
+  const alice = new Slashtag({ dht })
 
   await alice.close()
 
   t.ok(alice.closed)
-  t.absent(swarm.dht.destroyed)
+  t.absent(dht.destroyed)
 
-  await swarm.destroy()
+  await dht.destroy()
 
-  t.ok(swarm.dht.destroyed)
+  t.ok(dht.destroyed)
 })

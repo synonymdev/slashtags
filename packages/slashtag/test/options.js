@@ -4,7 +4,7 @@ import { Slashtag } from '../index.js'
 test('initiatlize - empty options', async t => {
   const alice = new Slashtag()
   t.pass()
-  alice.close()
+  await alice.close()
 })
 
 test('initialize - keyPair', async t => {
@@ -15,6 +15,6 @@ test('initialize - keyPair', async t => {
 
   t.alike(other.keyPair, alice.keyPair)
 
-  alice.close()
-  other.close()
+  await alice.close()
+  await other.close()
 })
