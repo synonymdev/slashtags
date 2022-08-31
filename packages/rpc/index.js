@@ -1,6 +1,5 @@
 import ProtomuxRPC from 'protomux-rpc'
 import EventEmitter from 'events'
-import Protomux from 'protomux'
 
 const RPCS_SYMBOL = Symbol.for('slashtags-rpcs')
 
@@ -65,7 +64,7 @@ export class SlashtagsRPC extends EventEmitter {
       handshakeEncoding: this.handshakeEncoding,
       handshake: this.handshake(socket)
     }
-    const rpc = new ProtomuxRPC(getMux(socket), options)
+    const rpc = new ProtomuxRPC(socket, options)
 
     // @ts-ignore
     socket[RPCS_SYMBOL].set(this.id, rpc)
@@ -85,20 +84,11 @@ export class SlashtagsRPC extends EventEmitter {
   async rpc (key) {
     const socket = this.slashtag.connect(key)
     await socket.opened
-    if (!socket) return
     this.setup(socket)
 
     // @ts-ignore
     return socket[RPCS_SYMBOL].get(this.id)
   }
-}
-
-/** @param {any} socket */
-function getMux (socket) {
-  // @ts-ignore TODO: temporary solution until Protomux is deduplicated
-  // https://github.com/mafintosh/protomux/pull/5
-  socket.protomux = socket.protomux || socket.userData || Protomux.from(socket)
-  return socket.protomux
 }
 
 export default SlashtagsRPC

@@ -30,7 +30,6 @@
     "!**/*.tsbuildinfo"
   ],
   "dependencies": {
-    "protomux": "^3.3.0",
     "protomux-rpc": "^1.3.0"
   },
   "devDependencies": {
