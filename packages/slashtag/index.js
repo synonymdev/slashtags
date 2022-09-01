@@ -23,8 +23,9 @@ export class Slashtag extends EventEmitter {
     this.id = encode(this.key)
     this.url = format(this.key)
 
-    this._shouldDestroyDHT = !opts.dht
-    this.dht = opts.dht || new DHT({ bootstrap: opts.bootstrap })
+    this.dht =
+      opts.dht || new DHT({ bootstrap: opts.bootstrap, keyPair: this.keyPair })
+
     this.server = this.dht.createServer(this._handleConnection.bind(this))
     /** @type {HashMap<SecretStream>} */
     this.sockets = new HashMap()
@@ -40,7 +41,7 @@ export class Slashtag extends EventEmitter {
 
   /** Listen for incoming connections on Slashtag's KeyPair */
   listen () {
-    if (!this.listening) this.listening = this.server.listen(this.keyPair)
+    if (!this.listening) this.listening = this.server.listen()
     return this.listening
   }
 
@@ -67,7 +68,7 @@ export class Slashtag extends EventEmitter {
     const existing = this.sockets.get(_key)
     if (existing) return existing
 
-    const socket = this.dht.connect(_key, { keyPair: this.keyPair })
+    const socket = this.dht.connect(_key)
     return this._handleConnection(socket)
   }
 
@@ -99,7 +100,7 @@ export class Slashtag extends EventEmitter {
       await socket.destroy()
     }
 
-    await (this._shouldDestroyDHT && this.dht.destroy())
+    this.dht.defaultKeyPair === this.keyPair && (await this.dht.destroy())
 
     this.closed = true
     this.emit('close')
