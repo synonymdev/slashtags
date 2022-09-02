@@ -92,9 +92,10 @@ export class Slashtag extends EventEmitter {
   }
 
   async _close () {
-    await this.corestore.close()
-
-    await this.unlisten()
+    await Promis.all([
+      this.corestore.close(),
+      this.unlisten()
+    ])
 
     for (const socket of this.sockets.values()) {
       await socket.destroy()

@@ -1,69 +1,46 @@
 {
   "name": "@synonymdev/slashdrive",
   "version": "1.0.0-alpha.5",
-  "description": "simple, secure, realtime distributed Object-storage-like system optimized for p2p sharing",
-  "license": "MIT",
-  "homepage": "https://github.com/synonymdev/slashtags/tree/master/packages/drive/#readme",
+  "description": "drive",
+  "type": "module",
+  "main": "index.js",
+  "types": "types/index.d.ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/synonymdev/slashtags.git"
   },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf types",
+    "lint": "standard --fix",
+    "test": "brittle test/** -cov",
+    "depcheck": "npx depcheck",
+    "fullcheck": "npm run lint && npm run clean && npm run build && npm run test && npm run depcheck",
+    "prepublishOnly": "npm run fullcheck"
+  },
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/synonymdev/slashtags/issues"
   },
-  "keywords": [],
-  "type": "module",
-  "types": "index.d.ts",
-  "typesVersions": {
-    "*": {
-      "*": [
-        "types/*",
-        "types/src/*"
-      ],
-      "types/*": [
-        "types/*",
-        "types/src/*"
-      ]
-    }
-  },
+  "homepage": "https://github.com/synonymdev/slashtags/tree/master/packages/drive/#readme",
   "files": [
-    "dist",
-    "src",
+    "index.js",
+    "lib",
     "types",
     "!**/*.tsbuildinfo"
   ],
-  "main": "src/index.js",
-  "scripts": {
-    "build": "aegir build",
-    "test": "c8 aegir test -f test/*.spec.js && npm run test:node",
-    "test:node": "c8 aegir test -t node -f test/node/*.spec.js",
-    "lint": "standard -i dist/ --fix",
-    "clean": "rimraf ./dist",
-    "depcheck": "aegir dep-check",
-    "prepublishOnly": "npm run lint && npm run test && npm run depcheck"
-  },
-  "standard": {
-    "env": [
-      "mocha"
-    ]
-  },
   "dependencies": {
-    "b4a": "^1.5.0",
-    "compact-encoding": "^2.6.1",
-    "compact-encoding-struct": "^1.2.1",
-    "debug": "^4.3.4",
-    "hyperbee": "^1.10.1",
-    "hyperblobs": "^2.0.0-rc.0",
-    "hypercore": "^10.0.0-alpha.42",
-    "safety-catch": "^1.0.2",
-    "sodium-universal": "^3.1.0"
+    "corestore": "^6.0.4",
+    "hyperbee": "^2.0.0",
+    "hyperdrive": "github:Nazeh/hyperdrive-next#pass-options",
+    "unix-path-resolve": "^1.0.2"
   },
   "devDependencies": {
-    "@hyperswarm/testnet": "^2.0.0",
-    "aegir": "^37.0.15",
-    "corestore": "^6.0.1-alpha.17",
-    "dht-universal": "^0.4.1",
-    "hyperswarm": "^3.0.4",
-    "random-access-memory": "^4.1.0"
+    "brittle": "^3.0.2",
+    "depcheck": "^1.4.3",
+    "hypercore-crypto": "^3.3.0",
+    "random-access-memory": "^5.0.1",
+    "standard": "^17.0.0",
+    "typescript": "^4.8.2"
   }
 }

@@ -74,13 +74,14 @@ declare module 'b4a' {
 // file://./node_modules/corestore/index.js
 declare module 'corestore' {
   import type Hypercore from 'hypercore';
-  import type { Encoding } from 'compact-encoding';
+  import type { Encoding, string } from 'compact-encoding';
 
   export = class Corestore {
     constructor(
       storage: any,
       opts?: {
         primaryKey?: Uint8Array;
+        [key:string]: any
       },
     );
 
@@ -573,7 +574,7 @@ declare module '@hyperswarm/dht' {
   }
 
   export = class DHT {
-    constructor(opts?:{ bootstrap?: Array<Node> })
+    constructor(opts?:{ bootstrap?: Array<Node>, keyPair: KeyPair })
     static keyPair(): KeyPair;
 
     defaultKeyPair: KeyPair
@@ -765,4 +766,9 @@ declare module 'hypercore-crypto' {
 // file://./node_modules/turbo-hash-map/index.js
 declare module 'turbo-hash-map' {
   export = class HashMap<T> extends Map<Uint8Array, T> {}
+}
+
+// file://./node_modules/unix-path-resolve/index.js
+declare module 'unix-path-resolve' {
+  export = (...paths : string[]) => string
 }
