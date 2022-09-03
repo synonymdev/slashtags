@@ -47,7 +47,7 @@ Creates a URL from a 32-bytes key:
 `key` must be a Buffer or an ArrayBuffer.
 `opts` includes:
 
-- `protocol` custom protocol, has to start with `slash`, defaults to `slash:`
+- `protocol` custom protocol, defaults to `slash:`
 - `path` a string representing the path, defaults to `/`.
 - `query` a query string or a key-value object to format as the query part of the url.
 - `fragment` a fragment string or a key-value object to format as a private query in the fragment.

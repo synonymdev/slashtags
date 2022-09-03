@@ -30,8 +30,8 @@ test('get - public drive', async (t) => {
 
   t.alike(publicA.key, publicB.key)
   t.alike(publicA.key, keyPair.publicKey)
-  t.absent(publicA.core.encrytionKey)
-  t.absent(publicB.core.encrytionKey)
+  t.absent(publicA.core.encryptionKey)
+  t.absent(publicB.core.encryptionKey)
 })
 
 test('get - private drive basic', async (t) => {
@@ -43,8 +43,8 @@ test('get - private drive basic', async (t) => {
 
   await Promise.all([foo.ready(), bar.ready()])
 
-  t.unlike(foo.key, keyPair.key)
-  t.unlike(bar.key, keyPair.key)
+  t.unlike(foo.key, keyPair.publicKey)
+  t.unlike(bar.key, keyPair.publicKey)
   t.unlike(bar.key, foo.key)
 
   t.ok(foo.core.encryptionKey)
@@ -55,8 +55,8 @@ test('get - private drive basic', async (t) => {
   await foo.getBlobs()
   await bar.getBlobs()
 
-  t.alike(foo.core.encryptionKey, foo.blobs.core.encryptionKey)
-  t.alike(bar.core.encryptionKey, bar.blobs.core.encryptionKey)
+  t.alike(foo.core.encryptionKey, foo.blobs?.core.encryptionKey)
+  t.alike(bar.core.encryptionKey, bar.blobs?.core.encryptionKey)
 })
 
 test('flush', async (t) => {
@@ -67,7 +67,7 @@ test('flush', async (t) => {
 
   const listBeforeFlush = []
   for await (const entry of drivestore) {
-    listBeforeFlush.push(entry.path)
+    listBeforeFlush.push(entry?.path)
   }
   t.alike(listBeforeFlush, [])
 
@@ -75,7 +75,7 @@ test('flush', async (t) => {
 
   const list = []
   for await (const entry of drivestore) {
-    list.push(entry.path)
+    list.push(entry?.path)
   }
   t.alike(list, ['/bar', '/foo', '/public'])
 })
@@ -96,7 +96,7 @@ test('close', async (t) => {
 
   const list = []
   for await (const entry of reopened) {
-    list.push(entry.path)
+    list.push(entry?.path)
   }
   t.alike(list, ['/bar', '/foo', '/public'], 'reopend metadata from storage')
 })

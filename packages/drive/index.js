@@ -1,4 +1,3 @@
-import EventEmitter from 'events'
 import Corestore from 'corestore'
 import Hyperdrive from 'hyperdrive'
 import Hyperbee from 'hyperbee'
@@ -6,13 +5,12 @@ import resolve from 'unix-path-resolve'
 
 const METADATA_KEY = 'slashtags-drivestore-metadata'
 
-export class Drivestore extends EventEmitter {
+export class Drivestore {
   /**
    * @param {import('corestore')} corestore
-   * @param {import('hypercore').KeyPair} keyPair
+   * @param {import('@hyperswarm/dht').KeyPair} keyPair
    */
   constructor (corestore, keyPair) {
-    super()
     this.keyPair = keyPair
     this.corestore = fromcorestore(corestore, keyPair)
 
@@ -27,8 +25,9 @@ export class Drivestore extends EventEmitter {
     this._opening = this._open()
   }
 
+  /** @returns {import('hyperbee').Iterator<{path: string}>} */
   [Symbol.asyncIterator] () {
-    if (!this.opened) return { async next () { return { done: true } } }
+    if (!this.opened) return { async next () { return { done: true, value: null } } }
     const iterator = this._drives.createReadStream()[Symbol.asyncIterator]()
     return {
       async next () {
@@ -96,7 +95,7 @@ export default Drivestore
 
 /**
  * @param {any} corestore
- * @param {import('hypercore').KeyPair} keyPair
+ * @param {import('@hyperswarm/dht').KeyPair} keyPair
  */
 function fromcorestore (corestore, keyPair) {
   return new Corestore(corestore.storage, {
@@ -111,7 +110,7 @@ function fromcorestore (corestore, keyPair) {
 
 /**
  * @param {import('corestore')} corestore
- * @param {import('hypercore').KeyPair} keyPair
+ * @param {import('@hyperswarm/dht').KeyPair} keyPair
  */
 function makePublicDrive (corestore, keyPair) {
   const core = corestore.get({ keyPair })

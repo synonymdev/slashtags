@@ -14,10 +14,10 @@ test('basic', t => {
 
 test('invalid key', t => {
   // @ts-ignore
-  t.exception(() => SlashURL.format('foo'), 'Key must be a Buffer')
+  t.exception(() => SlashURL.format('foo'), /Key must be a Buffer/)
   t.exception(
     () => SlashURL.format(b4a.from('cce18ed41101509ab171a0a9b54aaf67a', 'hex')),
-    'Key must be 32-bytes long'
+    /Key must be 32-bytes long/
   )
 })
 

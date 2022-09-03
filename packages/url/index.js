@@ -1,7 +1,7 @@
 import z32 from 'z32'
 import b4a from 'b4a'
 
-export const PATTERN = /^(slash.*:)([^#?/]+)(\/?[^#?\s]*)\??([^#\s]*)#?([^\s]*)$/
+export const PATTERN = /^(.*:)([^#?/]+)(\/?[^#?\s]*)\??([^#\s]*)#?([^\s]*)$/
 
 /**
  * Encodes a 32-byte Slashtags key into a z-base32 id
@@ -50,15 +50,12 @@ export const format = (key, opts = {}) => {
  * @returns
  */
 export const parse = url => {
-  if (typeof url !== 'string') throw new Error('url must be a string')
+  if (typeof url !== 'string') throw new Error('URL must be a string')
 
-  const matched = url.match(PATTERN) || []
+  const matched = url.match(PATTERN)
+  if (!matched) throw new Error('Invalid url')
+
   const protocol = matched[1]
-
-  if (!protocol?.startsWith('slash')) {
-    throw new Error('url must starts with a "slash[...]:" protocol')
-  }
-
   const key = decode(matched?.[2])
   const id = encode(key)
 

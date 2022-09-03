@@ -5,7 +5,7 @@ declare module '@hyperswarm/testnet' {
   export default function createTestnet(
     nodes: number,
     teardown: Function,
-  ): { bootstrap: Array<{ host: string; port: number }>, nodes:DHT[] };
+  ): Promise<{ bootstrap: Array<{ host: string; port: number }>, nodes:DHT[] }>
 }
 
 // file://./node_modules/hyperswarm/index.js
@@ -323,9 +323,9 @@ This allows drive.update to wait for either the findingPeers hook to finish or o
 // file://./node_modules/hypercore/index.js
 declare module 'hypercore' {
   import type { EventEmitter } from 'events';
-  export interface KeyPair {
-    publicKey: Uint8Array;
-    secretKey: Uint8Array;
+  import type { KeyPair as _KeyPair } from '@hyperswarm/dht';
+
+  export interface KeyPair extends _KeyPair{
     auth: Auth;
   }
 
@@ -433,17 +433,15 @@ declare module 'hyperbee' {
 
   export interface Iterator<T> {
       next() : {
-        value: T;
+        value: T | null;
         done: boolean;
-      };
+      } | Promise<{
+        value: T | null;
+        done: boolean;
+      }>;
   }
   export interface IteratorStream<T> extends Readable {
-    [Symbol.asyncIterator]() : {
-      next() : {
-        value: T;
-        done: boolean;
-      };
-    };
+    [Symbol.asyncIterator]() : Iterator<T>
   }
 
   export interface AbstractEncoding {
@@ -706,12 +704,12 @@ declare module 'brittle' {
   }
 
   interface T {
-    test: Test
+    test: PromsieLike<Test>
 
     is: (a:any, b: any, message?: string)=>void
     alike: (a:any, b: any, message?: string)=>void
     unlike: (a:any, b: any, message?: string)=>void
-    exception: (a: Function | Promise, error: RegExp, message?: string)=>void
+    exception: (a: Function | Promise, error?: RegExp, message?: string)=>void | Promise<void>
     ok: (value: any, message?: string)=>void
     absent: (value: any, message?: string)=>void
     not: (value: any, message?: string)=>void
@@ -757,7 +755,7 @@ declare module '@hyperswarm/dht-relay' {
 
 // file://./node_modules/hypercore-crypto/index.js
 declare module 'hypercore-crypto' {
-  import {KeyPair} from "@hyperswarm/dht"
+  import {KeyPair} from "hypercore"
 
   export function randomBytes(n: number): Uint8Array
   export function keyPair(seed?: Uint8Array): KeyPair

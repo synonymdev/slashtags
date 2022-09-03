@@ -18,15 +18,11 @@ test('should have a safe parsing pattern', t => {
   t.ok(safe(SlashURL.PATTERN))
 })
 
-test('should throw an error for non string urls', t => {
-  t.exception(() => SlashURL.parse(32), 'url must be a string')
-})
+test('invalid url', (t) => {
+  t.exception(() => SlashURL.parse(''), /Invalid url/)
 
-test('should throw an error for non invalid protocol', t => {
-  t.exception(
-    () => SlashURL.parse('not-slash:'),
-    'url must starts with a "slash[...]:" protocol'
-  )
+  // @ts-ignore
+  t.exception(() => SlashURL.parse(32), /URL must be a string/)
 })
 
 test('should throw an error for non invalid key length', t => {
@@ -35,7 +31,7 @@ test('should throw an error for non invalid key length', t => {
       SlashURL.parse(
         'slash:3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39usw'
       ),
-    'Invalid key bytelength'
+    /Invalid key bytelength/
   )
 })
 

@@ -19,10 +19,15 @@ class Foo extends SlashtagsRPC {
     return c.string
   }
 
+  /** @param {import('@hyperswarm/secret-stream')} socket */
   handshake (socket) {
     return this.id + '-handshake:for:' + z32.encode(socket.remotePublicKey)
   }
 
+  /**
+   * @param {string} handshake
+   * @param {import('@hyperswarm/secret-stream')} socket
+   */
   onopen (handshake, socket) {
     this.emit('handshake', handshake, z32.encode(socket.remotePublicKey))
   }

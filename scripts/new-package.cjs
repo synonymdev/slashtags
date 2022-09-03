@@ -47,7 +47,7 @@ const tsconfig = `{
   "compilerOptions": {
     "outDir": "types"
   },
-  "include": ["index.js", "lib", "../../declarations.d.ts"]
+  "include": ["index.js", "lib", "test", "../../declarations.d.ts"]
 }`
 
 const defaultIndex = `/**
@@ -83,7 +83,7 @@ npm install @synonymdev/${name}
 
 ## API
 
-#### const number = add(a, b)
+#### \`const number = add(a, b)\`
 `
 
 const main = () => {
