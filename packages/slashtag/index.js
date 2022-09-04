@@ -39,7 +39,7 @@ export class Slashtag extends EventEmitter {
 
   /** Listen for incoming connections on Slashtag's KeyPair */
   listen () {
-    if (!this.listening) this.listening = this.server.listen()
+    if (!this.listening) this.listening = this.server.listen(this.keyPair)
     return this.listening
   }
 
@@ -66,7 +66,7 @@ export class Slashtag extends EventEmitter {
     const existing = this.sockets.get(_key)
     if (existing) return existing
 
-    const socket = this.dht.connect(_key)
+    const socket = this.dht.connect(_key, { keyPair: this.keyPair })
     return this._handleConnection(socket)
   }
 

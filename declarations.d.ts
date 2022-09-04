@@ -104,6 +104,7 @@ declare module 'corestore' {
         secretKey: Uint8Array;
         publicKey: Uint8Array;
       };
+      secretKey?: Uint8Array;
       cache?: boolean;
       onwait?: Hypercore['onwait'];
       valueEncoding?: string | Encoding;
@@ -572,7 +573,7 @@ declare module '@hyperswarm/dht' {
   }
 
   export = class DHT {
-    constructor(opts?:{ bootstrap?: Array<Node>, keyPair: KeyPair })
+    constructor(opts?:{ bootstrap?: Array<Node>, keyPair?: KeyPair })
     static keyPair(): KeyPair;
 
     defaultKeyPair: KeyPair
@@ -755,7 +756,7 @@ declare module '@hyperswarm/dht-relay' {
 
 // file://./node_modules/hypercore-crypto/index.js
 declare module 'hypercore-crypto' {
-  import {KeyPair} from "hypercore"
+  import { KeyPair } from "hypercore"
 
   export function randomBytes(n: number): Uint8Array
   export function keyPair(seed?: Uint8Array): KeyPair
