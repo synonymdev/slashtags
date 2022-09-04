@@ -16,7 +16,7 @@ npm install @synonymdev/slashdrive
 ## Usage
 
 ```js
-const store = new DriveStore({ corestore, keyPair });
+const store = new DriveStore(corestore, keyPair)
 
 const publicDrive = store.get('/public'); // or store.get()
 
@@ -25,18 +25,15 @@ const privateDrive = store.get('/foo'); // returns an encrypted Hyperdrive
 
 ## API
 
-#### `const drivestore = new DriveStore(opts)`
+#### `const drivestore = new DriveStore(corestore, keyPair)`
 
-Create new store.
+Create new Drivestore. 
 
-`opts` are:
+- `corestore` must be an instance of [Corestore](https://github.com/hypercore-protocol/corestore).
+    
+  If the instance is a [namespace](https://github.com/hypercore-protocol/corestore#const-store--storenamespacename), the internal corestore will reset its namespace to the `DEFAULT_NAMESPACE` (32 0-bytes).
 
-```
-{
-  corestore, // Corestore instance
-  keyPair, // Hypercore keyPair
-}
-```
+- `keyPair` public and secret keys to create the public Hyperdrive, the secret key will be used as the `primaryKey` for the internal corestore.
 
 #### `await drivestore.ready()`
 
@@ -60,6 +57,6 @@ Awaits writing all metadata updates to the underlying storage.
 
 Closes the drivestore after flushing.
 
-#### `for await (let {path} of drivestore)`
+#### `for await (let { path } of drivestore)`
 
 Iterate over created drives from the metadata hyperbee.

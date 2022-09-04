@@ -31,9 +31,9 @@
   ],
   "dependencies": {
     "@hyperswarm/dht": "^6.2.1",
+    "@synonymdev/slashdrive": "^1.0.0-alpha.5",
     "@synonymdev/slashtags-url": "^1.0.0-alpha.0",
     "corestore": "^6.0.4",
-    "hypercore-crypto": "^3.3.0",
     "random-access-memory": "^5.0.1",
     "turbo-hash-map": "^1.0.3"
   },

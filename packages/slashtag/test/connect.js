@@ -128,7 +128,7 @@ test('replicate corestore on direct connections', async t => {
   const alice = new Slashtag(testnet)
   const bob = new Slashtag(testnet)
 
-  const core = alice.corestore.get({ name: 'foo' })
+  const core = alice.drivestore.corestore.get({ name: 'foo' })
   await core.append(['foo'])
 
   await alice.listen()
@@ -136,7 +136,7 @@ test('replicate corestore on direct connections', async t => {
   const socket = bob.connect(alice.key)
   t.ok(await socket.opened)
 
-  const clone = bob.corestore.get({ key: core.key })
+  const clone = bob.drivestore.corestore.get({ key: core.key })
   await clone.update()
 
   t.is(clone.length, 1)

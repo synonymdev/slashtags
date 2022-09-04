@@ -9,7 +9,7 @@ test('open', async t => {
 
   const alice = new Slashtag(testnet)
   await alice.dht.ready()
-  await alice.corestore.ready()
+  await alice.drivestore.ready()
 
   t.is(alice.dht.listening.size, 0, 'it should not listen automatically')
 

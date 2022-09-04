@@ -18,7 +18,7 @@ test('server - listen', async t => {
   })
   await alice.listen()
 
-  const socket = await dht.connect(alice.key)
+  const socket = dht.connect(alice.key)
   t.ok(await socket.opened)
 
   await s
@@ -43,7 +43,7 @@ test('server - unlisten', async t => {
   alice.on('connection', () => s.pass('server connection opened'))
   await alice.listen()
 
-  const socket = await dht.connect(alice.key)
+  const socket = dht.connect(alice.key)
   t.ok(await socket.opened)
 
   await s

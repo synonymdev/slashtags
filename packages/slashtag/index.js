@@ -1,38 +1,36 @@
-import { keyPair } from 'hypercore-crypto'
 import Corestore from 'corestore'
 import RAM from 'random-access-memory'
 import { format, encode, parse, decode } from '@synonymdev/slashtags-url'
 import EventEmitter from 'events'
 import DHT from '@hyperswarm/dht'
 import HashMap from 'turbo-hash-map'
+import Drivestore from '@synonymdev/slashdrive'
 
 // @ts-ignore
 export class Slashtag extends EventEmitter {
   /**
-   *
    * @param {object} [opts]
+   * @param {import('corestore')} [opts.corestore]
+   * @param {import('@hyperswarm/dht')} [opts.dht]
    * @param {import('@hyperswarm/dht').KeyPair} [opts.keyPair]
    * @param {import('@hyperswarm/dht').Node[]} [opts.bootstrap]
-   * @param {import('@hyperswarm/dht')} [opts.dht]
    */
   constructor (opts = {}) {
     super()
-    this.keyPair = opts.keyPair || keyPair()
+    this.keyPair = opts.keyPair || DHT.keyPair()
     this.key = this.keyPair.publicKey
 
     this.id = encode(this.key)
     this.url = format(this.key)
 
     this.dht =
-      opts.dht || new DHT({ bootstrap: opts.bootstrap, keyPair: this.keyPair })
+      opts.dht || new DHT({ bootstrap: opts?.bootstrap, keyPair: this.keyPair })
 
     this.server = this.dht.createServer(this._handleConnection.bind(this))
     /** @type {HashMap<SecretStream>} */
     this.sockets = new HashMap()
 
-    this.corestore = new Corestore(RAM)
-    /** @type {Hypercore} */
-    this.core = this.corestore.get({ keyPair: this.keyPair })
+    this.drivestore = new Drivestore(opts?.corestore || new Corestore(RAM), this.keyPair)
 
     /** @type {Emitter['on']} */ this.on = super.on
     /** @type {Emitter['on']} */ this.once = super.once
@@ -72,17 +70,6 @@ export class Slashtag extends EventEmitter {
     return this._handleConnection(socket)
   }
 
-  // /** @param {string} name */
-  // drive (name) {
-  //   const ns = this.corestore.namespace('drive::' + name)
-  //   const encryptionKey = hash(ns._namespace)
-  //   const drive = new HyperDrive(ns, { encryptionKey })
-
-  //   drive.ready().then(() => this.join(drive))
-
-  //   return drive
-  // }
-
   close () {
     if (this._closing) return this._closing
     this._closing = this._close()
@@ -92,14 +79,8 @@ export class Slashtag extends EventEmitter {
   }
 
   async _close () {
-    await Promis.all([
-      this.corestore.close(),
-      this.unlisten()
-    ])
-
-    for (const socket of this.sockets.values()) {
-      await socket.destroy()
-    }
+    await Promise.all([this.drivestore.close(), this.unlisten()])
+    await Promise.all([...this.sockets.values()].map(socket => socket.destroy()))
 
     this.dht.defaultKeyPair === this.keyPair && (await this.dht.destroy())
 
@@ -111,7 +92,7 @@ export class Slashtag extends EventEmitter {
    * @param {SecretStream} socket
    */
   _handleConnection (socket) {
-    this.corestore.replicate(socket)
+    this.drivestore.replicate(socket)
 
     socket.on('error', noop)
     socket.on('close', () => {
@@ -133,8 +114,6 @@ function noop () {}
 
 /**
  * @typedef {import('./lib/interfaces').Emitter} Emitter
- * @typedef {import('./lib/interfaces').HypercoreLike} HypercoreLike
- * @typedef {import('hypercore')} Hypercore
  * @typedef {import('@hyperswarm/secret-stream')} SecretStream
  */
 
