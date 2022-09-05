@@ -30,6 +30,7 @@
     "!**/*.tsbuildinfo"
   ],
   "dependencies": {
+    "b4a": "^1.6.0",
     "corestore": "^6.0.4",
     "hyperbee": "^2.0.0",
     "hyperdrive": "github:Nazeh/hyperdrive-next#pass-options",

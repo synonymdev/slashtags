@@ -2,6 +2,7 @@ import Corestore from 'corestore'
 import Hyperdrive from 'hyperdrive'
 import Hyperbee from 'hyperbee'
 import resolve from 'unix-path-resolve'
+import b4a from 'b4a'
 
 const METADATA_KEY = 'slashtags-drivestore-metadata'
 
@@ -14,12 +15,16 @@ export class Drivestore {
     this.keyPair = keyPair
     this.corestore = fromcorestore(corestore, keyPair)
 
-    this._metadata = new Hyperbee(corestore.get({ name: METADATA_KEY }), {
-      keyEncoding: 'utf8'
+    const metadataCore = this.corestore.get({
+      name: METADATA_KEY,
+      encryptionKey: this.keyPair.secretKey
     })
+    this._metadata = new Hyperbee(metadataCore, { keyEncoding: 'utf8' })
     this._drives = this._metadata.sub('drives')
 
-    this._public = makePublicDrive(corestore, keyPair)
+    this._public = makePublicDrive(this.corestore, keyPair)
+
+    this._pending = Promise.resolve()
     this._handleDrive('/public')
 
     this._opening = this._open()
@@ -74,20 +79,19 @@ export class Drivestore {
   }
 
   /** @param {string} path */
-  _handleDrive (path) {
-    this._pending = Promise.all([this._pending, this._saveMaybe(path)])
+  async _handleDrive (path) {
+    this._pending = this._pending.then(() => this._saveMaybe(path))
   }
 
   /** @param {string} path */
   async _saveMaybe (path) {
     await this._drives.ready()
     if (await this._drives.get(path)) return
-    return this._drives.put(path, '')
+    return this._drives.put(path, b4a.from(''))
   }
 
   async close () {
     await this.flush()
-    return this.corestore.close()
   }
 }
 

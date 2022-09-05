@@ -4,6 +4,7 @@ import RAM from 'random-access-memory'
 import crypto from 'hypercore-crypto'
 import path from 'path'
 import os from 'os'
+import b4a from 'b4a'
 
 import Drivestore from '../index.js'
 
@@ -13,10 +14,11 @@ test('constructor', async (t) => {
   await corestore.ready()
 
   const drivestore = new Drivestore(corestore, keyPair)
-  await drivestore.corestore.ready()
+  await drivestore.ready()
 
   t.alike(drivestore.corestore.primaryKey, keyPair.secretKey)
   t.unlike(drivestore.corestore.primaryKey, corestore.primaryKey)
+  t.ok(drivestore._metadata.feed.encryptionKey)
 })
 
 test('get - public drive', async (t) => {
@@ -32,6 +34,13 @@ test('get - public drive', async (t) => {
   t.alike(publicA.key, keyPair.publicKey)
   t.absent(publicA.core.encryptionKey)
   t.absent(publicB.core.encryptionKey)
+  t.ok(publicA.core.writable)
+  await publicA.getBlobs()
+  t.ok(publicA.blobs?.core.writable)
+
+  const buf = b4a.from('bar')
+  await publicA.put('/foo', buf)
+  t.alike(await publicA.get('/foo'), buf)
 })
 
 test('get - private drive basic', async (t) => {
@@ -57,6 +66,10 @@ test('get - private drive basic', async (t) => {
 
   t.alike(foo.core.encryptionKey, foo.blobs?.core.encryptionKey)
   t.alike(bar.core.encryptionKey, bar.blobs?.core.encryptionKey)
+
+  t.ok(foo.core.writable)
+  await foo.getBlobs()
+  t.ok(foo.blobs?.core.writable)
 })
 
 test('flush', async (t) => {
@@ -109,6 +122,27 @@ test('replicate', async (t) => {
   const s2 = drivestore.replicate(s1)
 
   t.is(s2, s1)
+})
+
+test('multiple drivestores', async (t) => {
+  const ns = new Corestore(RAM)
+  await ns.ready()
+
+  const a = new Drivestore(ns, crypto.keyPair())
+  await a.ready()
+  const b = new Drivestore(ns, crypto.keyPair())
+  await b.ready()
+
+  t.alike(a.corestore._namespace, b4a.alloc(32))
+  t.alike(b.corestore._namespace, b4a.alloc(32))
+  t.ok(a.corestore.primaryKey)
+  t.unlike(a.corestore.primaryKey, b.corestore.primaryKey)
+  t.unlike(a._metadata.feed.key, b._metadata.feed.key)
+
+  await a.close()
+  await b.close()
+
+  t.pass('does not close corestore in drivestore')
 })
 
 function tmpdir () {
