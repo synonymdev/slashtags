@@ -3,5 +3,8 @@
     "scripts": {
         "serve": "node ./server.js",
         "watch": "node ./watcher.js"
+    },
+    "dependencies": {
+        "log-update": "^5.0.1"
     }
 }

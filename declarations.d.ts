@@ -24,7 +24,7 @@ declare module 'hyperswarm' {
     };
   }
 
-export  interface Discovery {
+  export interface Discovery {
     flushed(): Promise<void>;
   }
   export = class hyperswarm extends EventEmitter {
@@ -38,13 +38,13 @@ export  interface Discovery {
     listening?: Promise<void>;
     destroyed: boolean;
 
-    topics(): IterableIterator<any>;
+    topics(): IterableIterator<{topic: Uint8Array, isClient: boolean, isServer: boolean}>;
     listen(): Promise<undefined>;
     destroy(): Promise<undefined>;
     joinPeer(key: Uint8Array): undefined;
     join(
       discoveryKey?: Uint8Array,
-      options?: { server: boolean; client: boolean },
+      options?: { server?: boolean; client?: boolean },
     ): Discovery;
     flush(): Promise<undefined>;
   };
@@ -244,7 +244,7 @@ This allows drive.update to wait for either the findingPeers hook to finish or o
     /**
      * Wait for the drive's core to try and find a signed update to it's length. Does not download any data from peers except for a proof of the new core length.
      */
-    update(): Hypercore['update'];
+    update: Hypercore['update'];
     /**
      * Wait for the drive to fully open. In general, you do NOT need to wait for ready unless checking a synchronous property on drive since internals await this themselves.
      */
@@ -522,6 +522,7 @@ declare module 'compact-encoding' {
   let raw: Encoding;
   let bool: Encoding;
   let buffer: Encoding;
+  let json: Encoding;
 
   interface Encoding {
     preencode(
@@ -760,6 +761,7 @@ declare module 'hypercore-crypto' {
 
   export function randomBytes(n: number): Uint8Array
   export function keyPair(seed?: Uint8Array): KeyPair
+  export function discoveryKey(key?: Uint8Array): Uint8Array
 }
 
 // file://./node_modules/turbo-hash-map/index.js

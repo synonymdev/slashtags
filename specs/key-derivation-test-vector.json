@@ -1,0 +1,32 @@
+{
+    "mnemonic-to-primaryKey": [
+        {
+            "mnemonic": "village behave language three milk aisle together story similar cat dust claw",
+            "primaryKeyHex": "673dea0c9d2ae8b9276c28f410d2a7a17c281de6a66f1e3436ceded0410280b6"
+        },
+        {
+            "mnemonic": "promote assist jacket exhibit cheese film survey omit march joke museum october",
+            "primaryKeyHex": "640a11b9c2e35e0b7f165dac4258723c32d81f72454b75e4f9ecef09b7233344"
+        }
+    ],
+    "primaryKey-to-keyPair": [
+        {
+            "primaryKey": "0000000000000000000000000000000000000000000000000000000000000000",
+            "default": "5400e38e349c6c48fbf8c527c9bc88b9db8aa26e96828560bcfc27951ea3d37c",
+            "name": "Alice",
+            "publicKeyHex": "5732d4dceee1eabea6e21983313e4c45c48d1f7c26bb22106e2f2395ce6f379c"
+        },
+        {
+            "primaryKey": "0000000000000000000000000000000000000000000000000000000000000000",
+            "default": "5400e38e349c6c48fbf8c527c9bc88b9db8aa26e96828560bcfc27951ea3d37c",
+            "name": "Bob",
+            "publicKeyHex": "afe22905140e41d2c03aab0595d1a63555eae3258b321c77d6c66bb6ff1e6a3b"
+        },
+        {
+            "primaryKey": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            "default": "c0e8a73aba8b4c6e9d10964064e8f4dc0ee31e16f2ba681f964ce3d7a163dcd3",
+            "name": "Alice",
+            "publicKeyHex": "b87b3c477dfb02bcb75aaa9ad658f6c01063b4e18ed2265a8b4d786684744b62"
+        }
+    ]
+}
