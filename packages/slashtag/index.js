@@ -1,10 +1,10 @@
 import Corestore from 'corestore'
 import RAM from 'random-access-memory'
-import { format, encode, parse, decode } from '@synonymdev/slashtags-url'
 import EventEmitter from 'events'
 import DHT from '@hyperswarm/dht'
 import HashMap from 'turbo-hash-map'
 import Drivestore from '@synonymdev/slashdrive'
+import { format, encode, parse, decode } from '@synonymdev/slashtags-url'
 
 // @ts-ignore
 export class Slashtag extends EventEmitter {
@@ -73,14 +73,15 @@ export class Slashtag extends EventEmitter {
   close () {
     if (this._closing) return this._closing
     this._closing = this._close()
-
-    this.removeAllListeners()
     return this._closing
   }
 
   async _close () {
-    await Promise.all([this.drivestore.close(), this.unlisten()])
-    await Promise.all([...this.sockets.values()].map(socket => socket.destroy()))
+    await this.drivestore.close()
+    await this.unlisten()
+    for await (const socket of this.sockets.values()) {
+      await socket.destroy()
+    }
 
     this.dht.defaultKeyPair === this.keyPair && (await this.dht.destroy())
 
