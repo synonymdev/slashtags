@@ -1,6 +1,6 @@
 {
   "name": "@synonymdev/slashdrive",
-  "version": "1.0.0-alpha.6",
+  "version": "1.0.0-alpha.7",
   "description": "drive",
   "type": "module",
   "main": "index.js",
