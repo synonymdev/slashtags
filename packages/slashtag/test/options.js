@@ -27,13 +27,13 @@ test('options - keyPair', async t => {
 
 test('options - corestore', async t => {
   const alice = new Slashtag()
-  const other = new Slashtag({ corestore: alice.drivestore.corestore.namespace('foo'), keyPair: alice.keyPair })
+  const other = new Slashtag({ corestore: alice.drivestore.corestore.namespace('foo') })
 
   const a = alice.drivestore.get()
   const b = other.drivestore.get()
   await Promise.all([a.ready(), b.ready()])
 
-  t.alike(a.key, b.key)
+  t.unlike(a.key, b.key)
 
   await alice.close()
   await other.close()

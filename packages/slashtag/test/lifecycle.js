@@ -35,7 +35,6 @@ test('close - basic', async t => {
   t.absent(alice.listening)
   t.is(alice.dht.listening.size, 0)
 
-  t.alike(alice.eventNames(), [], 'remove all event listeners on close')
   t.ok(alice.closed)
 })
 
