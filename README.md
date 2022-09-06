@@ -14,7 +14,7 @@
 
 ## Overview
 
-Slashtags aims to enable self-sovereign identity, reputation and web-of-trust on the web.
+Slashtags aims to enable self-sovereign identity, local first applications, reputation and web-of-trust.
 
 ### The problem
 
@@ -30,7 +30,7 @@ Slashtags solution is to use keyPairs to identify and address peers and attach m
 
 A [Slashtag](./packages/slashtag/README.md) is a keyPair indirectly [derived](./specs/slashtags-key-derivation.md) from the same seed that backs up your digital assets.
 
-You can publish metadata about your Slashtag using [SlashDrive](./packages/drive/README.md) identified by the same public key, for anyone to read.
+You can publish metadata about your Slashtag using a [Hyperdrive](./packages/drive/README.md) identified by the same public key, for anyone to read.
 
 That is deceivingly simple, but very powerful. For example you can publish your current Email address, Website URL, Twitter handle, Facebook profile, etc. And your contacts who identify you through a Slashtags compatible wallet can always find and reach you, making your identity and reputation censorship resistant.
 
@@ -53,13 +53,13 @@ npm install @synonymdev/slashtags-sdk
 Then start a node in your app:
 
 ```javascript
-import { SDK } from '@synonymdev/slashtags-sdk';
+import SDK from '@synonymdev/slashtags-sdk';
 
-const sdk = await SDK.init();
-const alice = sdk.slashtag({ name: 'alice' });
+const sdk = new SDK();
+const alice = sdk.slashtag('alice');
 
 console.log(alice.url.toString());
-// slash://abc...xyz
+// slash:abc...xyz
 ```
 
 ## Documentation
@@ -76,10 +76,12 @@ Look into the [examples](./examples/) to learn how to see Slashtags in action.
 
 This project is broken into several modules, their purposes are:
 
-- [`/packages/drive`](./packages/drive): Object-storage built over Hypercore.
 - [`/packages/slashtag`](./packages/slashtag): Identity layer of Slashtags protocol.
-- [`/packages/auth`](./packages/auth): Authorization using Slashtags.
+- [`/packages/drive`](./packages/drive): Hyperdrive manager for each Slashtag.
 - [`/packages/sdk`](./packages/sdk): Batteries-included Software development kit.
+- [`/packages/cli`](./packages/cli): Provides a daemon with DHT relay for Slashtags SDK.
+- [`/packages/rpc`](./packages/rpc): Helper class to create RPC server/clients on top of slashtags.
+- [`/packages/url`](./packages/url): Helper functions for encoding/decoding slashtags urls
 
 ## Development
 
@@ -89,7 +91,3 @@ Requires Node LTS (v16.5.0).
 ```
 npm install
 ```
-
-### Testing
-
-Make sure you have a running testnet, by running `testnet:start`. Once you are done you can close it by running `testnet:close`.
