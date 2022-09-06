@@ -1,17 +1,17 @@
 import b4a from 'b4a';
 import logUpdate from 'log-update';
-import { SDK } from '@synonymdev/slashtags-sdk';
+import SDK from '@synonymdev/slashtags-sdk';
+import RAM from 'random-access-memory'
 
 console.log('Setting up slashtag...');
-const sdk = await SDK.init({
-  persist: false,
+const sdk = new SDK({
+  storage: RAM,
   primaryKey: b4a.from('a'.repeat(64), 'hex'),
 });
 
-const server = sdk.slashtag({ name: 'server' });
-await server.ready();
-
-const drive = await server.drive({ name: 'feed', encrypted: true });
+const alice = sdk.slashtag('alice');
+const drive = alice.drivestore.get()
+await drive.ready()
 console.log('Serving feed...');
 
 setInterval(() => {
@@ -23,5 +23,5 @@ setInterval(() => {
   const tradeString = JSON.stringify(trade, null, 2);
   logUpdate('Latest trade:', tradeString);
 
-  drive.put('feeds/bitfinex/latest-trade', b4a.from(tradeString));
+  drive.put('/feeds/bitfinex/latest-trade', b4a.from(tradeString));
 }, 500);

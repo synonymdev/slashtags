@@ -1,0 +1,45 @@
+{
+  "name": "@synonymdev/slashtags-rpc",
+  "version": "1.0.0-alpha.1",
+  "description": "helper module for creating RPCs using Slashtags nodes",
+  "type": "module",
+  "main": "index.js",
+  "types": "types/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/synonymdev/slashtags.git"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf types",
+    "lint": "standard --fix",
+    "test": "brittle test/** -cov",
+    "depcheck": "npx depcheck",
+    "fullcheck": "npm run lint && npm run clean && npm run build && npm run test && npm run depcheck",
+    "prepublishOnly": "npm run fullcheck"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/synonymdev/slashtags/issues"
+  },
+  "homepage": "https://github.com/synonymdev/slashtags/tree/master/packages/rpc/#readme",
+  "files": [
+    "index.js",
+    "lib",
+    "types",
+    "!**/*.tsbuildinfo"
+  ],
+  "dependencies": {
+    "protomux-rpc": "^1.3.0"
+  },
+  "devDependencies": {
+    "@hyperswarm/testnet": "^3.1.0",
+    "@synonymdev/slashtag": "^1.0.0-alpha.10",
+    "brittle": "^3.0.2",
+    "compact-encoding": "^2.11.0",
+    "depcheck": "^1.4.3",
+    "standard": "^17.0.0",
+    "typescript": "^4.8.2",
+    "z32": "^1.0.0"
+  }
+}

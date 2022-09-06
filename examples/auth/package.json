@@ -1,8 +1,0 @@
-{
-    "type": "module",
-    "scripts": {
-        "listen": "node ./responder.js",
-        "request": "node ./initiator.js",
-        "clean": "node ../clean.js"
-    }
-}

@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "description": "JavaScript implementation of the Slashtags protocol",
   "private": true,
+  "type": "module",
   "license": "MIT",
   "homepage": "https://github.com/synonymdev/slashtags/tree/master/#readme",
   "repository": {
@@ -23,29 +24,19 @@
     "npm": ">=8.5.5"
   },
   "scripts": {
+    "postinstall": "npm run link && npm run build",
     "link": "lerna link",
-    "lint": "npx standard scripts/*.js examples/**/*.js --fix && lerna run lint",
-    "test": "lerna run test",
-    "ts-check": "lerna run test",
     "build": "lerna run build",
     "clean": "lerna run clean",
+    "lint": "npx standard scripts/* examples/**/*.js --fix && lerna run lint",
+    "test": "lerna run test",
     "depcheck": "lerna run depcheck",
-    "create": "node ./scripts/new-package.js",
-    "reset": "lerna run clean && rimraf packages/*/node_modules node_modules packages/*/package-lock.json",
-    "testnet:start": "pm2 start scripts/setup-testnet.js || echo 'Testnet already running'",
-    "testnet:close": "pm2 delete scripts/setup-testnet.js || echo 'Testnet not running'",
-    "relay": "node scripts/setup-relay.js",
-    "postinstall": "npm run link",
-    "prepublishOnly": "npm run lint && npm run test && npm run depcheck"
+    "fullcheck": "lerna run fullcheck",
+    "create": "node ./scripts/new-package.cjs",
+    "reset": "lerna run clean && rimraf packages/*/node_modules node_modules packages/*/package-lock.json"
   },
   "devDependencies": {
-    "@hyperswarm/testnet": "^2.0.0",
-    "c8": "^7.11.0",
-    "dht-universal": "^0.4.1",
-    "graceful-goodbye": "^1.0.0",
-    "lerna": "^4.0.0",
-    "pm2": "^5.2.0",
-    "standard": "^17.0.0"
+    "lerna": "^5.4.3"
   },
   "workspaces": [
     "./packages/*"

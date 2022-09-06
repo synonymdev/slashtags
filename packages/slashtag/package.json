@@ -1,66 +1,48 @@
 {
   "name": "@synonymdev/slashtag",
-  "version": "1.0.0-alpha.10",
-  "description": "",
-  "license": "MIT",
-  "homepage": "https://github.com/synonymdev/slashtags/tree/master/packages/slashtag/#readme",
+  "version": "1.0.0-alpha.13",
+  "description": "Identity, discovery, and p2p communication for Slashtags protocol.",
+  "type": "module",
+  "main": "index.js",
+  "types": "types/index.d.ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/synonymdev/slashtags.git"
   },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf types",
+    "lint": "standard --fix",
+    "test": "brittle test/** -cov",
+    "depcheck": "npx depcheck",
+    "fullcheck": "npm run lint && npm run clean && npm run build && npm run test && npm run depcheck",
+    "prepublishOnly": "npm run fullcheck"
+  },
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/synonymdev/slashtags/issues"
   },
-  "keywords": [],
-  "type": "module",
-  "types": "types/src/index.d.ts",
-  "typesVersions": {
-    "*": {
-      "*": [
-        "types/*",
-        "types/src/*"
-      ],
-      "types/*": [
-        "types/*",
-        "types/src/*"
-      ]
-    }
-  },
+  "homepage": "https://github.com/synonymdev/slashtags/tree/master/packages/slashtag/#readme",
   "files": [
-    "dist",
-    "src",
+    "index.js",
+    "lib",
     "types",
     "!**/*.tsbuildinfo"
   ],
-  "main": "src/index.js",
-  "scripts": {
-    "build": "aegir build",
-    "test": "c8 aegir test",
-    "lint": "standard -i dist/ --fix",
-    "clean": "rimraf ./dist",
-    "depcheck": "npx aegir dep-check",
-    "prepublishOnly": "npm run lint && npm run test && npm run depcheck"
-  },
-  "standard": {
-    "env": [
-      "mocha"
-    ]
-  },
   "dependencies": {
-    "@synonymdev/slashdrive": "^1.0.0-alpha.4",
-    "b4a": "^1.5.0",
-    "compact-encoding": "^2.6.1",
-    "corestore": "^6.0.1-alpha.17",
-    "debug": "^4.3.4",
-    "dht-universal": "^0.4.1",
-    "graceful-goodbye": "^1.0.0",
-    "hyperswarm": "^3.0.4",
-    "random-access-memory": "^4.1.0",
-    "sodium-universal": "^3.1.0",
-    "z32": "^1.0.0"
+    "@hyperswarm/dht": "^6.2.1",
+    "@synonymdev/slashdrive": "^1.0.0-alpha.7",
+    "@synonymdev/slashtags-url": "^1.0.0-alpha.0",
+    "corestore": "^6.0.4",
+    "random-access-memory": "^5.0.1",
+    "turbo-hash-map": "^1.0.3"
   },
   "devDependencies": {
-    "@types/debug": "^4.1.7",
-    "aegir": "^37.0.15"
+    "@hyperswarm/secret-stream": "^6.0.0",
+    "@hyperswarm/testnet": "^3.1.0",
+    "brittle": "^3.1.0",
+    "depcheck": "^1.4.3",
+    "standard": "^17.0.0",
+    "typescript": "^4.8.2"
   }
 }

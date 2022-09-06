@@ -1,29 +1,12 @@
 {
+  "version": "independent",
+  "useWorkspaces": true,
   "command": {
-    "publish": {
-      "message": "chore(release): publish",
-      "createRelease": "github",
-      "conventionalCommits": true
-    },
     "run": {
-      "stream": true
-    },
-    "version": {
-      "allowBranch": [
-        "master",
-        "release/*"
-      ]
+      "stream": false
     }
   },
-  "ignore-changes": [
-    ".github/**",
-    "demo/**",
-    "*.md",
-    "tsconfig.json",
-    "*.spec.js"
-  ],
   "packages": [
     "packages/*"
-  ],
-  "version": "independent"
+  ]
 }

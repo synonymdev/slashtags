@@ -1,210 +1,62 @@
-# SlashDrive
+# slashdrive
 
-SlashDrive is a simple, secure, realtime distributed Object-storage system optimized for p2p sharing.
+DriveStore is a Hyperdrive factory that makes it easier to manage large collections of named Hyperdrives.
 
-SlashDrive consists of two Append-only logs, one for storing objects metadata, and the other holds the blobs of data, allowing p2p sharing of metadata without the overhead of sharing the contents as well.
+## Features
 
-SlashDrive is based on Hypercore and is designed with Hyperswarm p2p discovery in mind.
+- Public unencrypted drive
+- Creates and keep track of all created encrypted private drives
 
 ## Installation
 
 ```
-npm install @synonymdev/slashdrive corestore@^6.0.0
+npm install @synonymdev/slashdrive
 ```
 
 ## Usage
 
 ```js
-import Corestore from 'corestore';
-import b4a from 'b4a';
-import { SlashDrive } from './src/index.js';
+const store = new DriveStore(corestore, keyPair)
 
-// Create a local drive using a name and Corestore instance
-const originStore = new Corestore('./path/to/storage/origin/');
-const origin = new SlashDrive({
-  keyPair: await originStore.createKeyPair('foo'),
-  store: originStore,
-  encrypted: true,
-});
+const publicDrive = store.get('/public'); // or store.get()
 
-// Write an object
-await origin.put('foo', b4a.from(JSON.stringify({ name: 'Alice' })));
-
-// Share your drive data
-const driveDetails = {
-  key: origin.key,
-  encryptionKey: origin.encryptionKey,
-};
-
-// Peers trying to read your drive now can use the drive details you shared with them
-const clone = new SlashDrive({
-  store: new Corestore('./path/to/storage/clone/'),
-  ...driveDetails,
-});
-
-// Replicate the two drives over any duplex stream
-const s = clone.replicate(true);
-s.pipe(origin.replicate(false)).pipe(s);
-
-// Read the object from the cloned drive
-const object = await clone.get('foo');
-console.log(object.toString()); //=> '{"name":"Alice"}'
+const privateDrive = store.get('/foo'); // returns an encrypted Hyperdrive
 ```
 
 ## API
 
-#### `const drive = new SlashDrive(options)`
+#### `const drivestore = new DriveStore(corestore, keyPair)`
 
-Make a new SlashDrive instance.
+Create new Drivestore. 
 
-`options` include:
+- `corestore` must be an instance of [Corestore](https://github.com/hypercore-protocol/corestore).
+    
+  If the instance is a [namespace](https://github.com/hypercore-protocol/corestore#const-store--storenamespacename), the internal corestore will reset its namespace to the `DEFAULT_NAMESPACE` (32 0-bytes).
 
-```js
-{
-  store: store, // corestore@^6.0.0 instance
-  name: string, //
-  keyPair: kp, // optionally pass the public key and secret key as a key pair
-  keyPair: k, // optionally pass the public key of a remote drive.
-  encrypted: true, // Generate an encryptionKey and encrypt metadata and content cores with it
-  encryptionKey: k // optionally pass an encryption key for remote encrypted drives, if it is a writable drive, this will be ignored.
-}
-```
+- `keyPair` public and secret keys to create the public Hyperdrive, the secret key will be used as the `primaryKey` for the internal corestore.
 
-_NOTE_ `drive.store` is replaced with the a namespaced instance, so `drive.store.close()` won't close the parent store you passed to the drive options.
+#### `await drivestore.ready()`
 
-#### `await drive.ready()`
+Awaits opening metadata hypercore. Useful before [async iterating](#for-await-let-path-of-drivestore) over all created drives.
 
-Wait for the drive to fully open.
+#### `const hyperdrive = drivestore.get([path])`
 
-After `ready()` has been called, the `this.discoveryKey` and other properties have been set.
+Returns an encrypted [Hyperdrive](https://github.com/hypercore-protocol/hyperdrive-next) for a given path.
 
-In general you do NOT need to wait for ready, unless checking a synchronous property, as all internals await this themselves.
+If `path` is undefined or equal to `/public` it will return a public unencrypted drive, by the same keypair passed to the contsructor.
 
-#### `drive.key`
+#### `const stream = drivestore.replicate(stream)`
 
-Buffer containing the public key identifying this core.
+Same as [drivestore.corestore.replicate(stream)](https://github.com/hypercore-protocol/corestore#const-stream--storereplicateoptsorstream)
 
-#### `drive.keyPair`
+#### `await flush()`
 
-Object containing the publicKey, secretKey and auth object for this core.
+Awaits writing all metadata updates to the underlying storage.
 
-#### `drive.discoveryKey`
+#### `await drivestore.close()`
 
-Buffer containing a key derived from the metadata's core's public key. In contrast to core.key this key does not allow you to verify the data but can be used to announce or look for peers that are sharing the same drive, without leaking the core key.
+Closes the drivestore after flushing.
 
-#### `drive.encryptionKey`
+#### `for await (let { path } of drivestore)`
 
-Buffer containing the optional encryption key for this drive.
-
-#### `drive.writable`
-
-Returns true if the metadata core and the content core are both [writable](https://github.com/hypercore-protocol/hypercore-next/#corewritable)
-
-#### `drive.readable`
-
-Returns true if the metadata core and the content core are both [readable](https://github.com/hypercore-protocol/hypercore-next/#corereadable).
-
-Especially useful in remote drives to check if the drive got the content core already.
-
-Cases where the drive is not readable:
-
-- Metadata or Content core are not [readable](https://github.com/hypercore-protocol/hypercore-next#corereadable)
-
-- Content core couldn't be resolved from the header of the metadata feed.
-
-#### `drive.version`
-
-The version of the drive. Represents number of updates.
-
-#### `drive.peers`
-
-An array of [Peer](https://github.com/hypercore-protocol/hypercore-next/blob/master/lib/replicator.js#L239) objects representing the peers that are sharing this drive.
-
-Useful in many cases, but most often to check if the drive is connected to other peers after trying to find peers through a discovery network like Hyperswarm. `drive.peers.length > 0`.
-
-#### `drive.online`
-
-Equivalent to `drive.peers.length > 0`. Useful to check if you are getting updates from other peers or working with cached data.
-
-#### `drive.replicate()`
-
-Creates a replication stream that is capable of replicating the metadata and content cores at the same time.
-
-Available before the drive is ready.
-
-Same as `drive.store.replicate()`, more about [corestore.replicate](https://github.com/hypercore-protocol/corestore-next#const-stream--storereplicateopts)
-
-#### `drive.findingPeers()`
-
-Returns a callback that informs this.update() that peer discovery is done, more at [Hypercore.findingPeers](https://github.com/hypercore-protocol/hypercore-next/#const-done--corefindingpeers).
-
-#### `const updated = await drive.update()`
-
-Wait for the drive to try and find a signed update to it's metadata core's length. Does not download any data from peers except for a proof of the new metadata's core length.
-
-If the metadata's core length is updated it will return `true`.
-
-#### `const getContent = await drive.getContent()`
-
-Returns the hyperblobs instance storing the blobs indexed by drive entries.
-
-If the drive does not have a `drive.content` already (a clone), it will try to read the blob's core key from `drive.headers` to resolve the content as well.
-
-In general you do NOT need to wait for it, unless checking a synchronus property like `readable`, as all internals await this themselves.
-
-#### `await drive.put(key, content, [options])`
-
-Put an object by a string key, Buffer content, and optionally metadata.
-
-`options` include:
-
-```js
-{
-  metadata: {...} // By default metadata is a json object.
-}
-```
-
-#### `await drive.get(key)`
-
-Returns the object's content corresponding to a given key. If `drive.online` is false it will try to read the data from storage if it exists, otherwise it will return `null`
-
-#### `await drive.entries([opts])`
-
-Get all entries as Hyperbee nodes. Takes Hyperbee createReadStream [options](https://github.com/hypercore-protocol/hyperbee#stream--dbcreatereadstreamoptions), plus `prefix` if you want entries that starts with a given string.
-
-#### `for await (const entry of drive) {}`
-
-SlashDrive is asyncIterator, you can use `for await` to asynchronusly get all the objects in the drive.
-
-#### `await drive.list([prefix, options])`
-
-Returns an array of the metadata of the objects with keys starting with a given prefix
-
-```js
-[
-  {
-    key: 'somekey',
-    metadata: { contentLength, ...userMetadata },
-    content: Uint8Array,
-  },
-];
-```
-
-`options` include:
-
-```
-{
-  metadata: false; // whether or not include object's metadata
-  content: false; // whether or not include content of the object (be careful with big content)
-}
-```
-
-#### `await drive.download()`
-
-Continously Download the drive's metadata and content.
-
-#### `drive.on('update', ({ key, type }) => {})`
-
-Emitted when the metadata or the content of an object is updated.
-
-- `type` is the operation type, can be `'put'` or `'del'`.
+Iterate over created drives from the metadata hyperbee.
