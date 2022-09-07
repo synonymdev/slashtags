@@ -33,7 +33,7 @@
     "b4a": "^1.6.0",
     "corestore": "^6.0.4",
     "hyperbee": "^2.0.0",
-    "hyperdrive": "github:Nazeh/hyperdrive-next#pass-options",
+    "hyperdrive": "github:Nazeh/hyperdrive-next#next",
     "unix-path-resolve": "^1.0.2"
   },
   "devDependencies": {

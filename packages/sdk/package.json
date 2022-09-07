@@ -1,6 +1,6 @@
 {
   "name": "@synonymdev/slashtags-sdk",
-  "version": "1.0.0-alpha.14",
+  "version": "1.0.0-alpha.15",
   "description": "slashtags development kit",
   "type": "module",
   "main": "index.js",
@@ -29,6 +29,10 @@
     "types",
     "!**/*.tsbuildinfo"
   ],
+  "browser": {
+    "./lib/storage.js": "./lib/storage.browser.js",
+    "ws": "./lib/ws.browser.js"
+  },
   "dependencies": {
     "@hyperswarm/dht": "^6.2.1",
     "@hyperswarm/dht-relay": "^0.3.0",
@@ -39,7 +43,7 @@
     "corestore": "^6.0.3",
     "graceful-goodbye": "^1.1.0",
     "hypercore-crypto": "^3.3.0",
-    "hyperdrive": "github:Nazeh/hyperdrive-next#pass-options",
+    "hyperdrive": "github:Nazeh/hyperdrive-next#next",
     "hyperswarm": "^4.2.0",
     "random-access-memory": "^5.0.1",
     "sodium-universal": "^3.1.0",
