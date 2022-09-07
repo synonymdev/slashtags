@@ -3,8 +3,8 @@ declare module '@hyperswarm/testnet' {
   import DHT from '@hyperswarm/dht'
 
   export default function createTestnet(
-    nodes: number,
-    teardown: Function,
+    nodes?: number,
+    teardown?: Function,
   ): Promise<{ bootstrap: Array<{ host: string; port: number }>, nodes:DHT[] }>
 }
 
