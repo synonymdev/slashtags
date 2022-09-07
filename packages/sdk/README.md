@@ -51,6 +51,24 @@ await clone.ready()
 const profile = await clone.get('/profile.json').then(b => b && c.decode(c.json, b))
 ```
 
+## Browser support
+
+Browsers don't allow for raw sockets, so you will need to run a [DHT Relay](https://github.com/hyperswarm/dht-relay) somewhere and connect it to the SDK.
+
+Easiest way to run a local relay is through the [CLI](../cli/) module:
+
+```bash
+npm i -g @synonymdev/slasthags-cli
+
+slash daemon start
+```
+Then in browser:
+
+```js
+const sdk = new SDK({ relay: 'ws://localhost:45475'});
+```
+
+See [browser example](../../examples/browser)
 
 ## API
 
