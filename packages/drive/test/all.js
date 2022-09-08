@@ -30,6 +30,7 @@ test('get - public drive', async (t) => {
 
   await Promise.all([publicA.ready(), publicB.ready()])
 
+  t.not(publicA, publicB, 'should return a session')
   t.alike(publicA.key, publicB.key)
   t.alike(publicA.key, keyPair.publicKey)
   t.absent(publicA.core.encryptionKey)

@@ -22,8 +22,6 @@ export class Drivestore {
     this._metadata = new Hyperbee(metadataCore, { keyEncoding: 'utf8' })
     this._drives = this._metadata.sub('drives')
 
-    this._public = makePublicDrive(this.corestore, keyPair)
-
     this._pending = Promise.resolve()
     this._handleDrive('/public')
 
@@ -67,7 +65,7 @@ export class Drivestore {
    * @param {string} path
    */
   get (path = '/public') {
-    if (path === '/public') return this._public
+    if (path === '/public') return makePublicDrive(this.corestore, this.keyPair)
 
     path = resolve(path)
     const ns = this.corestore.namespace(path)
