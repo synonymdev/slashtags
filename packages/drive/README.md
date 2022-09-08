@@ -18,9 +18,9 @@ npm install @synonymdev/slashdrive
 ```js
 const store = new DriveStore(corestore, keyPair)
 
-const publicDrive = store.get('/public'); // or store.get()
+const publicDrive = store.get('public'); // or store.get()
 
-const privateDrive = store.get('/foo'); // returns an encrypted Hyperdrive
+const privateDrive = store.get('foo'); // returns an encrypted Hyperdrive
 ```
 
 ## API
@@ -37,18 +37,14 @@ Create new Drivestore.
 
 #### `await drivestore.ready()`
 
-Awaits opening metadata hypercore. Useful before [async iterating](#for-await-let-path-of-drivestore) over all created drives.
+Awaits opening metadata hypercore. Useful before [async iterating](#for-await-let-name-of-drivestore) over all created drives.
 
-#### `const hyperdrive = drivestore.get([path])`
+#### `const hyperdrive = drivestore.get([name])`
 
-Returns an encrypted [Hyperdrive](https://github.com/hypercore-protocol/hyperdrive-next) for a given path.
+Returns an encrypted [Hyperdrive](https://github.com/hypercore-protocol/hyperdrive-next) for a given name.
 
-If `path` is undefined or equal to `/public` it will return a public unencrypted drive, by the same keypair passed to the contsructor.
+If `name` is undefined or equal to `/public` it will return a public unencrypted drive, by the same keypair passed to the contsructor.
 
 #### `const stream = drivestore.replicate(stream)`
 
 Same as [drivestore.corestore.replicate(stream)](https://github.com/hypercore-protocol/corestore#const-stream--storereplicateoptsorstream)
-
-#### `for await (let { path } of drivestore)`
-
-Iterate over created drives from the metadata hyperbee.

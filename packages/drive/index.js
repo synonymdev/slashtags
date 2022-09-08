@@ -1,7 +1,6 @@
 import Corestore from 'corestore'
 import Hyperdrive from 'hyperdrive'
 import Hyperbee from 'hyperbee'
-import resolve from 'unix-path-resolve'
 import b4a from 'b4a'
 
 const METADATA_KEY = 'slashtags-drivestore-metadata'
@@ -25,15 +24,15 @@ export class Drivestore {
     this._opening = this._open()
   }
 
-  /** @returns {import('hyperbee').Iterator<{path: string}>} */
+  /** @returns {import('hyperbee').Iterator<{name: string}>} */
   [Symbol.asyncIterator] () {
-    if (!this.opened) return { async next () { return { done: true, value: null } } }
+    if (!this.opened) return emptyIterator
     const iterator = this._drives.createReadStream()[Symbol.asyncIterator]()
     return {
       async next () {
         const node = await iterator.next()
         const value = node.value
-        return { done: node.done, value: value && { path: value.key } }
+        return { done: node.done, value: value && { name: value.key } }
       }
     }
   }
@@ -52,40 +51,46 @@ export class Drivestore {
     return this.corestore.replicate(socket)
   }
 
-  get (path = '/public') {
-    path = resolve(path)
-    const ns = this.corestore.namespace(path)
-    const drivestore = this
+  /**
+   * Get a Hyperdrive by its name.
+   */
+  get (name = 'public') {
+    validateName(name)
+    const ns = this.corestore.namespace(name)
     const _preload = ns._preload.bind(ns)
-    ns._preload = preload.bind(ns)
-
+    ns._preload = (opts) => this._preload.bind(this)(opts, _preload, ns, name)
     return new Hyperdrive(ns)
-
-    /**
-     * @this {import('corestore')}
-     * @param {Parameters<import('corestore')['get']>[0]} opts
-     */
-    async function preload (opts) {
-      const isPublic = path === '/public'
-      const { from } = await _preload(opts)
-
-      await drivestore._saveMaybe(path)
-
-      if (isPublic && opts.name === 'db') {
-        return {
-          from: drivestore.corestore.get({ keyPair: drivestore.keyPair })
-        }
-      }
-
-      return { from, encryptionKey: !isPublic && this._namespace }
-    }
   }
 
-  /** @param {string} path */
-  async _saveMaybe (path) {
-    await this._drives.ready()
-    if (await this._drives.get(path)) return
-    return this._drives.put(path, b4a.from(''))
+  /**
+   * @param {Parameters<import('corestore')['get']>[0]} opts
+   * @param {*} _preload
+   * @param {import('corestore')} ns
+   * @param {string} name
+   */
+  async _preload (opts, _preload, ns, name) {
+    const isPublic = name === 'public'
+
+    // Get keyPair programatically from name
+    const options = await _preload(opts)
+
+    if (!isPublic) {
+      // Public drive cores should not be encrypted
+      options.encryptionKey = ns._namespace
+
+      // No need currently to save a record about the public drive
+      await this._drives.ready()
+      const saved = await this._drives.get(name)
+      if (!saved) await this._drives.put(name, b4a.from(''))
+      // TODO enable key rotation, where we overwrite keys, or use saved ones.
+    }
+
+    // Public drive files core should have the same keyPair as drivestore.keyPair
+    if (isPublic && opts.name === 'db') {
+      options.from = this.corestore.get({ keyPair: this.keyPair })
+    }
+
+    return options
   }
 }
 
@@ -105,3 +110,10 @@ function fromcorestore (corestore, keyPair) {
     _streamSessions: corestore._streamSessions
   })
 }
+
+/** @param {string} name */
+function validateName (name) {
+  if (!/^[0-9a-zA-Z-._ ]*$/.test(name)) throw new Error('Invalid drive name')
+}
+
+const emptyIterator = { async next () { return { done: true, value: null } } }

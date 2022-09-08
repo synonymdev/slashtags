@@ -73,8 +73,8 @@ declare module 'b4a' {
 
 // file://./node_modules/corestore/index.js
 declare module 'corestore' {
-  import type Hypercore from 'hypercore';
-  import type { Encoding, string } from 'compact-encoding';
+  import Hypercore, { KeyPair } from 'hypercore';
+  import { Encoding, string } from 'compact-encoding';
 
   export = class Corestore {
     constructor(
@@ -87,14 +87,18 @@ declare module 'corestore' {
 
     primaryKey: Uint8Array;
     _namespace: Uint8Array;
-    _preload: any
+    _preload: (opts: any) => Promise<{ 
+      from: Hypercore, 
+      keyPair: KeyPair, 
+      encryptionKey?: Uint8Array 
+    }>
 
     ready(): Promise<void>
     replicate(socket: any, opts?: any);
     namespace(name?: string | Uint8Array): Corestore;
     close(): Promise<void>;
 
-    createKeyPair(name: string);
+    createKeyPair(name: string): Promise<KeyPair>;
     findingPeers(): () => void;
 
     get(opts: {

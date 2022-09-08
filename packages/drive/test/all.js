@@ -25,7 +25,7 @@ test('get - public drive', async (t) => {
   const keyPair = crypto.keyPair()
   const drivestore = new Drivestore(new Corestore(RAM), keyPair)
 
-  const publicA = drivestore.get('/public')
+  const publicA = drivestore.get('public')
   const publicB = drivestore.get()
 
   await Promise.all([publicA.ready(), publicB.ready()])
@@ -40,16 +40,16 @@ test('get - public drive', async (t) => {
   t.ok(publicA.blobs?.core.writable)
 
   const buf = b4a.from('bar')
-  await publicA.put('/foo', buf)
-  t.alike(await publicA.get('/foo'), buf)
+  await publicA.put('foo', buf)
+  t.alike(await publicA.get('foo'), buf)
 })
 
 test('get - private drive basic', async (t) => {
   const keyPair = crypto.keyPair()
   const drivestore = new Drivestore(new Corestore(RAM), keyPair)
 
-  const foo = drivestore.get('/foo')
-  const bar = drivestore.get('/bar')
+  const foo = drivestore.get('foo')
+  const bar = drivestore.get('bar')
 
   await Promise.all([foo.ready(), bar.ready()])
 
@@ -76,23 +76,22 @@ test('get - private drive basic', async (t) => {
 test('save metadata on ready', async (t) => {
   const drivestore = new Drivestore(new Corestore(RAM), crypto.keyPair())
 
-  const pub = drivestore.get('/public')
-  const foo = drivestore.get('/foo')
-  const bar = drivestore.get('/bar')
+  const foo = drivestore.get('foo')
+  const bar = drivestore.get('bar')
 
   const listBeforeFlush = []
   for await (const entry of drivestore) {
-    listBeforeFlush.push(entry?.path)
+    listBeforeFlush.push(entry?.name)
   }
   t.alike(listBeforeFlush, [])
 
-  await Promise.all([pub.ready(), foo.ready(), bar.ready()])
+  await Promise.all([foo.ready(), bar.ready()])
 
   const list = []
   for await (const entry of drivestore) {
-    list.push(entry?.path)
+    list.push(entry?.name)
   }
-  t.alike(list, ['/bar', '/foo', '/public'])
+  t.alike(list, ['bar', 'foo'])
 })
 
 test('reopen', async (t) => {
@@ -101,8 +100,8 @@ test('reopen', async (t) => {
   const drivestore = new Drivestore(corestore, crypto.keyPair())
 
   await drivestore.get().ready()
-  await drivestore.get('/foo').ready()
-  await drivestore.get('/bar').ready()
+  await drivestore.get('foo').ready()
+  await drivestore.get('bar').ready()
 
   await corestore.close()
 
@@ -111,9 +110,9 @@ test('reopen', async (t) => {
 
   const list = []
   for await (const entry of reopened) {
-    list.push(entry?.path)
+    list.push(entry?.name)
   }
-  t.alike(list, ['/bar', '/foo', '/public'], 'reopend metadata from storage')
+  t.alike(list, ['bar', 'foo'], 'reopend metadata from storage')
 })
 
 test('replicate', async (t) => {
@@ -142,6 +141,11 @@ test('multiple drivestores', async (t) => {
   t.unlike(a._metadata.feed.key, b._metadata.feed.key)
 
   t.pass('does not close corestore in drivestore')
+})
+
+test('get - validate drive name', (t) => {
+  const drivestore = new Drivestore(new Corestore(RAM), crypto.keyPair())
+  t.exception(() => drivestore.get('foo:'), /Invalid drive name/)
 })
 
 function tmpdir () {
