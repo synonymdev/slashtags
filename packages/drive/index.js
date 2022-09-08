@@ -22,9 +22,6 @@ export class Drivestore {
     this._metadata = new Hyperbee(metadataCore, { keyEncoding: 'utf8' })
     this._drives = this._metadata.sub('drives')
 
-    this._pending = Promise.resolve()
-    this._handleDrive('/public')
-
     this._opening = this._open()
   }
 
@@ -50,35 +47,38 @@ export class Drivestore {
     return this._opening
   }
 
-  async flush () {
-    await this.ready()
-    return this._pending
-  }
-
   /** @param {import('@hyperswarm/secret-stream')} socket */
   replicate (socket) {
     return this.corestore.replicate(socket)
   }
 
-  /**
-   * Return a Hyperdrive session for the given path.
-   * @param {string} path
-   */
   get (path = '/public') {
-    if (path === '/public') return makePublicDrive(this.corestore, this.keyPair)
-
     path = resolve(path)
     const ns = this.corestore.namespace(path)
-    const encryptionKey = ns._namespace
-    const drive = new Hyperdrive(ns, { encryptionKey })
+    const drivestore = this
+    const _preload = ns._preload.bind(ns)
+    ns._preload = preload.bind(ns)
 
-    this._handleDrive(path)
-    return drive
-  }
+    return new Hyperdrive(ns)
 
-  /** @param {string} path */
-  async _handleDrive (path) {
-    this._pending = this._pending.then(() => this._saveMaybe(path))
+    /**
+     * @this {import('corestore')}
+     * @param {Parameters<import('corestore')['get']>[0]} opts
+     */
+    async function preload (opts) {
+      const isPublic = path === '/public'
+      const { from } = await _preload(opts)
+
+      await drivestore._saveMaybe(path)
+
+      if (isPublic && opts.name === 'db') {
+        return {
+          from: drivestore.corestore.get({ keyPair: drivestore.keyPair })
+        }
+      }
+
+      return { from, encryptionKey: !isPublic && this._namespace }
+    }
   }
 
   /** @param {string} path */
@@ -86,10 +86,6 @@ export class Drivestore {
     await this._drives.ready()
     if (await this._drives.get(path)) return
     return this._drives.put(path, b4a.from(''))
-  }
-
-  async close () {
-    await this.flush()
   }
 }
 
@@ -108,18 +104,4 @@ function fromcorestore (corestore, keyPair) {
     _streams: corestore._replicationStreams,
     _streamSessions: corestore._streamSessions
   })
-}
-
-/**
- * @param {import('corestore')} corestore
- * @param {import('@hyperswarm/dht').KeyPair} keyPair
- */
-function makePublicDrive (corestore, keyPair) {
-  const core = corestore.get({ keyPair })
-  const db = new Hyperbee(core, {
-    keyEncoding: 'utf8',
-    valueEncoding: 'json',
-    metadata: {}
-  })
-  return new Hyperdrive(corestore, { _db: db })
 }

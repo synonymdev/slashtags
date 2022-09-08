@@ -87,6 +87,7 @@ declare module 'corestore' {
 
     primaryKey: Uint8Array;
     _namespace: Uint8Array;
+    _preload: any
 
     ready(): Promise<void>
     replicate(socket: any, opts?: any);
@@ -103,11 +104,13 @@ declare module 'corestore' {
       keyPair?: {
         secretKey: Uint8Array;
         publicKey: Uint8Array;
+        auth?: Hypercore['auth']
       };
       secretKey?: Uint8Array;
       cache?: boolean;
       onwait?: Hypercore['onwait'];
       valueEncoding?: string | Encoding;
+      preload?: () => any;
       _preready?: (core: Hypercore) => any;
     }): Hypercore;
   };
@@ -709,12 +712,12 @@ declare module 'brittle' {
     test: PromsieLike<Test>
 
     is: (a:any, b: any, message?: string)=>void
+    not: (a:any, b: any, message?: string)=>void
     alike: (a:any, b: any, message?: string)=>void
     unlike: (a:any, b: any, message?: string)=>void
     exception: (a: Function | Promise, error?: RegExp, message?: string)=>void | Promise<void>
     ok: (value: any, message?: string)=>void
     absent: (value: any, message?: string)=>void
-    not: (value: any, message?: string)=>void
     pass:(message?:string)=>void
     plan:(number:Number)=>void
 

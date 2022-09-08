@@ -49,14 +49,6 @@ If `path` is undefined or equal to `/public` it will return a public unencrypted
 
 Same as [drivestore.corestore.replicate(stream)](https://github.com/hypercore-protocol/corestore#const-stream--storereplicateoptsorstream)
 
-#### `await flush()`
-
-Awaits writing all metadata updates to the underlying storage.
-
-#### `await drivestore.close()`
-
-Closes the drivestore after flushing.
-
 #### `for await (let { path } of drivestore)`
 
 Iterate over created drives from the metadata hyperbee.

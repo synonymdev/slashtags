@@ -73,11 +73,12 @@ test('get - private drive basic', async (t) => {
   t.ok(foo.blobs?.core.writable)
 })
 
-test('flush', async (t) => {
+test('save metadata on ready', async (t) => {
   const drivestore = new Drivestore(new Corestore(RAM), crypto.keyPair())
 
-  drivestore.get('/foo')
-  drivestore.get('/bar')
+  const pub = drivestore.get('/public')
+  const foo = drivestore.get('/foo')
+  const bar = drivestore.get('/bar')
 
   const listBeforeFlush = []
   for await (const entry of drivestore) {
@@ -85,7 +86,7 @@ test('flush', async (t) => {
   }
   t.alike(listBeforeFlush, [])
 
-  await drivestore.flush()
+  await Promise.all([pub.ready(), foo.ready(), bar.ready()])
 
   const list = []
   for await (const entry of drivestore) {
@@ -94,15 +95,15 @@ test('flush', async (t) => {
   t.alike(list, ['/bar', '/foo', '/public'])
 })
 
-test('close', async (t) => {
+test('reopen', async (t) => {
   const dir = tmpdir()
   const corestore = new Corestore(dir)
   const drivestore = new Drivestore(corestore, crypto.keyPair())
 
-  drivestore.get('/foo')
-  drivestore.get('/bar')
+  await drivestore.get().ready()
+  await drivestore.get('/foo').ready()
+  await drivestore.get('/bar').ready()
 
-  await drivestore.close()
   await corestore.close()
 
   const reopened = new Drivestore(new Corestore(dir), drivestore.keyPair)
@@ -139,9 +140,6 @@ test('multiple drivestores', async (t) => {
   t.ok(a.corestore.primaryKey)
   t.unlike(a.corestore.primaryKey, b.corestore.primaryKey)
   t.unlike(a._metadata.feed.key, b._metadata.feed.key)
-
-  await a.close()
-  await b.close()
 
   t.pass('does not close corestore in drivestore')
 })
