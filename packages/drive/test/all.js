@@ -26,18 +26,22 @@ test('get - public drive', async (t) => {
   const drivestore = new Drivestore(new Corestore(RAM), keyPair)
 
   const publicA = drivestore.get('public')
-  const publicB = drivestore.get()
+  await publicA.ready()
+  t.alike(publicA.key, keyPair.publicKey)
 
-  await Promise.all([publicA.ready(), publicB.ready()])
+  const publicB = drivestore.get()
+  await publicB.ready()
+  t.alike(publicB.key, keyPair.publicKey)
 
   t.not(publicA, publicB, 'should return a session')
   t.alike(publicA.key, publicB.key)
-  t.alike(publicA.key, keyPair.publicKey)
   t.absent(publicA.core.encryptionKey)
   t.absent(publicB.core.encryptionKey)
   t.ok(publicA.core.writable)
   await publicA.getBlobs()
   t.ok(publicA.blobs?.core.writable)
+  t.unlike(publicA.blobs?.core.key, publicA.key)
+  t.unlike(publicB.blobs?.core.key, publicB.key)
 
   const buf = b4a.from('bar')
   await publicA.put('foo', buf)
@@ -71,6 +75,8 @@ test('get - private drive basic', async (t) => {
   t.ok(foo.core.writable)
   await foo.getBlobs()
   t.ok(foo.blobs?.core.writable)
+  t.unlike(foo.blobs?.core.key, foo.key)
+  t.unlike(bar.blobs?.core.key, foo.key)
 })
 
 test('save metadata on ready', async (t) => {
@@ -118,11 +124,30 @@ test('reopen', async (t) => {
 test('replicate', async (t) => {
   const corestore = new Corestore(RAM)
   const drivestore = new Drivestore(corestore, crypto.keyPair())
+  const remote = new Corestore(RAM)
 
-  const s1 = corestore.replicate(true)
-  const s2 = drivestore.replicate(s1)
+  const s3 = remote.replicate(true)
+  s3.pipe(drivestore.replicate(false)).pipe(s3)
 
-  t.is(s2, s1)
+  {
+    const drive = drivestore.get('private')
+    await drive.ready()
+    await drive.put('/foo', b4a.from('bar'))
+
+    const clone = remote.get({ key: drive.key })
+    await clone.update()
+    t.is(clone.length, 2)
+  }
+
+  {
+    const drive = drivestore.get('public')
+    await drive.ready()
+    await drive.put('/foo', b4a.from('bar'))
+
+    const clone = remote.get({ key: drive.key })
+    await clone.update()
+    t.is(clone.length, 2)
+  }
 })
 
 test('multiple drivestores', async (t) => {

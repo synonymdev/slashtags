@@ -46,9 +46,9 @@ export class Drivestore {
     return this._opening
   }
 
-  /** @param {import('@hyperswarm/secret-stream')} socket */
-  replicate (socket) {
-    return this.corestore.replicate(socket)
+  /** @param {Parameters<import('corestore')['replicate']>} args */
+  replicate (...args) {
+    return this.corestore.replicate(...args)
   }
 
   /**
@@ -63,34 +63,37 @@ export class Drivestore {
   }
 
   /**
+   * Set the correct and current key and encryption Key (enables future key rotation)
    * @param {Parameters<import('corestore')['get']>[0]} opts
-   * @param {*} _preload
+   * @param {*} preload orginal ns._preload
    * @param {import('corestore')} ns
    * @param {string} name
+   * @returns {Promise<any>}
    */
-  async _preload (opts, _preload, ns, name) {
+  async _preload (opts, preload, ns, name) {
     const isPublic = name === 'public'
 
     // Get keyPair programatically from name
-    const options = await _preload(opts)
+    const { from } = await preload(opts)
 
-    if (!isPublic) {
-      // Public drive cores should not be encrypted
-      options.encryptionKey = ns._namespace
-
-      // No need currently to save a record about the public drive
-      await this._drives.ready()
-      const saved = await this._drives.get(name)
-      if (!saved) await this._drives.put(name, b4a.from(''))
-      // TODO enable key rotation, where we overwrite keys, or use saved ones.
+    // public drive needs no encryption
+    // No need currently to save a record about the public drive
+    if (isPublic) {
+      if (opts.name !== 'db') return { from }
+      const session = this.corestore.get({ keyPair: this.keyPair })
+      await session.ready()
+      return { from: session }
     }
 
-    // Public drive files core should have the same keyPair as drivestore.keyPair
-    if (isPublic && opts.name === 'db') {
-      options.from = this.corestore.get({ keyPair: this.keyPair })
-    }
+    // Add encryption keys for non public drives
+    const encryptionKey = ns._namespace
 
-    return options
+    await this._drives.ready()
+    const saved = await this._drives.get(name)
+    if (!saved) await this._drives.put(name, b4a.from(''))
+    // TODO enable key rotation, where we overwrite keys, or use saved ones.
+
+    return { from, encryptionKey }
   }
 }
 

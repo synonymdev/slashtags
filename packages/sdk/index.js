@@ -84,12 +84,13 @@ export class SDK extends EventEmitter {
   }
 
   /**
+   * Creates a Hyperdrive and announce the SDK's swarm as a client looking up for peers for it.
    * @param {Uint8Array} key
    */
   drive (key) {
     // TODO read encrypted drives!
     const drive = new HyperDrive(this.corestore, key)
-    drive.ready().then(() => this.join(drive.discoveryKey, { server: false, client: true }))
+    this.join(crypto.discoveryKey(key), { server: false, client: true })
     return drive
   }
 
@@ -111,8 +112,6 @@ export class SDK extends EventEmitter {
     await Promise.all([...this.slashtags.values()].map(s => s.close()))
 
     await this.swarm.destroy()
-
-    await this.corestore.close()
 
     this.closed = true
     this.emit('close')

@@ -46,7 +46,6 @@ await sdk.swarm.flush() // await for the public drive to be announced
 const sdk2 = new SDK()
 
 const clone = sdk2.drive(drive.key) 
-await clone.ready()
 
 const profile = await clone.get('/profile.json').then(b => b && c.decode(c.json, b))
 ```

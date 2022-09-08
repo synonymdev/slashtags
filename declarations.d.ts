@@ -89,12 +89,13 @@ declare module 'corestore' {
     _namespace: Uint8Array;
     _preload: (opts: any) => Promise<{ 
       from: Hypercore, 
-      keyPair: KeyPair, 
-      encryptionKey?: Uint8Array 
+      keyPair?: KeyPair, 
+      encryptionKey?: Uint8Array | undefined
     }>
+    _preready: (core: Hypercore) => Promise<void>
 
     ready(): Promise<void>
-    replicate(socket: any, opts?: any);
+    replicate(socket: Duplex, opts?: any);
     namespace(name?: string | Uint8Array): Corestore;
     close(): Promise<void>;
 
@@ -115,7 +116,6 @@ declare module 'corestore' {
       onwait?: Hypercore['onwait'];
       valueEncoding?: string | Encoding;
       preload?: () => any;
-      _preready?: (core: Hypercore) => any;
     }): Hypercore;
   };
 }

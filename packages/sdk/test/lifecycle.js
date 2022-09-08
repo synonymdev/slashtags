@@ -31,8 +31,6 @@ test('close - close all opened resources', async t => {
   const alice = sdk.slashtag('alice')
   const bob = sdk.slashtag('bob')
 
-  await alice.drivestore.close()
-
   await sdk.close()
 
   t.ok(alice.closed)

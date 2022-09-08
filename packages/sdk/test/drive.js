@@ -15,14 +15,14 @@ test('drive - resolve public drive', async (t) => {
   await sdk.swarm.flush()
 
   const profile = { name: 'alice' }
-  await drive.put('profile.json', c.encode(c.json, profile))
+  await drive.put('/profile.json', c.encode(c.json, profile))
 
   // other side
   const remote = new SDK({ ...testnet, storage: RAM })
   const clone = remote.drive(drive.key)
   await clone.ready()
 
-  const buf = await clone.get('profile.json')
+  const buf = await clone.get('/profile.json')
   const resolved = buf && c.decode(c.json, buf)
 
   t.alike(resolved, profile)
@@ -37,10 +37,8 @@ test('drive - blind seeder resolve private drive', async (t) => {
 
   const alice = sdk.slashtag('alice')
   const publicDrive = alice.drivestore.get()
-  await publicDrive.ready()
 
-  const drive = alice.drivestore.get('/contacts')
-  await drive.ready()
+  const drive = alice.drivestore.get('contacts')
   await sdk.swarm.flush()
 
   const contact = { name: 'alice' }
@@ -50,7 +48,6 @@ test('drive - blind seeder resolve private drive', async (t) => {
   const seeder = new SDK({ ...testnet, storage: RAM })
 
   const clone = seeder.drive(drive.key)
-  await clone.ready()
 
   seeder.join(publicDrive.discoveryKey)
 
