@@ -77,7 +77,6 @@ export class Slashtag extends EventEmitter {
   }
 
   async _close () {
-    await this.drivestore.close()
     await this.unlisten()
     for await (const socket of this.sockets.values()) {
       await socket.destroy()
