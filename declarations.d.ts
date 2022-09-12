@@ -736,6 +736,7 @@ declare module 'safe-regex2' {
   export = t as T
 }
 
+declare module '@hyperswarm/dht-relay/lib/transport/ws.js'
 declare module '@hyperswarm/dht-relay/ws' {
   import _DHT from '@hyperswarm/dht';
   import ws from 'ws'

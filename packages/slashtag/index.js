@@ -78,7 +78,7 @@ export class Slashtag extends EventEmitter {
 
   async _close () {
     await this.unlisten()
-    for await (const socket of this.sockets.values()) {
+    for (const socket of this.sockets.values()) {
       await socket.destroy()
     }
 
