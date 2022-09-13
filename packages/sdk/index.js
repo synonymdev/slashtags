@@ -28,7 +28,7 @@ export class SDK extends EventEmitter {
   constructor (opts = {}) {
     super()
 
-    this.storage = opts.storage || defaultStorage;
+    this.storage = opts.storage || defaultStorage
     this.primaryKey = opts.primaryKey || randomBytes(32)
 
     this.corestore = new Corestore(this.storage, { primaryKey: this.primaryKey })
