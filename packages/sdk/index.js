@@ -13,7 +13,7 @@ import HyperDrive from 'hyperdrive'
 import HashMap from 'turbo-hash-map'
 
 import * as constants from './lib/constants.js'
-import { storage } from './lib/storage.js'
+import { defaultStorage } from './lib/storage.js'
 import { generateSeed } from './lib/crypto.js'
 
 export class SDK extends EventEmitter {
@@ -28,7 +28,7 @@ export class SDK extends EventEmitter {
   constructor (opts = {}) {
     super()
 
-    this.storage = storage(opts.storage)
+    this.storage = opts.storage || defaultStorage;
     this.primaryKey = opts.primaryKey || randomBytes(32)
 
     this.corestore = new Corestore(this.storage, { primaryKey: this.primaryKey })

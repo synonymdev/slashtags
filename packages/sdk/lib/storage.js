@@ -4,10 +4,6 @@ const DEFAULT_DIRECTORY = '.slashtags'
 const DEFAULT_DIRECTORY_PATH = homedir() + '/' + DEFAULT_DIRECTORY
 
 /**
- * Storage in Nodejs environment.
- * Returns the default: `${homedir()}/.slashtags/` or echos the passed storage
- * @param {*} [storage]
+ * Default storage in Nodejs environment.
  */
-export const storage = storage => {
-  return storage || DEFAULT_DIRECTORY_PATH
-}
+export const defaultStorage = DEFAULT_DIRECTORY_PATH
