@@ -1,6 +1,6 @@
 {
   "name": "@synonymdev/slashdrive",
-  "version": "1.0.0-alpha.10",
+  "version": "1.0.0-alpha.11",
   "description": "drive",
   "type": "module",
   "main": "index.js",
@@ -31,9 +31,9 @@
   ],
   "dependencies": {
     "b4a": "^1.6.0",
-    "corestore": "^6.0.5",
-    "hyperbee": "^2.0.0",
-    "hyperdrive": "^11.0.0-alpha.3"
+    "corestore": "<6.1.6",
+    "hyperbee": "^2.0.1",
+    "hyperdrive": "^11.0.0-alpha.5"
   },
   "devDependencies": {
     "brittle": "^3.0.2",

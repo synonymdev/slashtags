@@ -100,6 +100,7 @@ test('save metadata on ready', async (t) => {
   t.alike(list, ['bar', 'foo'])
 })
 
+// TODO (corestore): closing corestore should unlock file
 test('reopen', async (t) => {
   const dir = tmpdir()
   const corestore = new Corestore(dir)
@@ -131,7 +132,6 @@ test('replicate', async (t) => {
 
   {
     const drive = drivestore.get('private')
-    await drive.ready()
     await drive.put('/foo', b4a.from('bar'))
 
     const clone = remote.get({ key: drive.key })
@@ -141,7 +141,6 @@ test('replicate', async (t) => {
 
   {
     const drive = drivestore.get('public')
-    await drive.ready()
     await drive.put('/foo', b4a.from('bar'))
 
     const clone = remote.get({ key: drive.key })
@@ -166,6 +165,33 @@ test('multiple drivestores', async (t) => {
   t.unlike(a._metadata.feed.key, b._metadata.feed.key)
 
   t.pass('does not close corestore in drivestore')
+})
+
+test('replicate through passed corestore', async (t) => {
+  const corestore = new Corestore(RAM)
+  const drivestore = new Drivestore(corestore, crypto.keyPair())
+  const remote = new Corestore(RAM)
+
+  const s3 = remote.replicate(true)
+  s3.pipe(corestore.replicate(false)).pipe(s3)
+
+  {
+    const drive = drivestore.get('private')
+    await drive.put('/foo', b4a.from('bar'))
+
+    const clone = remote.get({ key: drive.key })
+    await clone.update()
+    t.is(clone.length, 2)
+  }
+
+  {
+    const drive = drivestore.get('public')
+    await drive.put('/foo', b4a.from('bar'))
+
+    const clone = remote.get({ key: drive.key })
+    await clone.update()
+    t.is(clone.length, 2)
+  }
 })
 
 test('get - validate drive name', (t) => {
