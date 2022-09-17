@@ -639,6 +639,8 @@ declare module 'protomux-rpc' {
     closed: boolean
     mux: Protomux
 
+    destroy(): Promise<void>;
+
 
     /**
      * Register a handler for an RPC method. The handler is passed the request value and must either return the response value or throw an error.
