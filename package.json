@@ -36,7 +36,7 @@
     "reset": "lerna run clean && rimraf packages/*/node_modules node_modules packages/*/package-lock.json"
   },
   "devDependencies": {
-    "lerna": "^5.4.3"
+    "lerna": "^5.5.1"
   },
   "workspaces": [
     "./packages/*"

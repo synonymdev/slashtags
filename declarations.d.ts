@@ -26,11 +26,19 @@ declare module 'hyperswarm' {
 
   export interface Discovery {
     flushed(): Promise<void>;
+    topic: Uint8Array;
+    isClient: boolean;
+    isServer: boolean;
+
+    _clientSessions: number;
+    _serverSessions: number;
   }
+
   export = class hyperswarm extends EventEmitter {
     constructor(opts?: any);
     server: Server;
     connections: Iterable;
+    _discovery: Map<string, Discovery>;
     _allConnections: Map<Uint8Array, any>;
     peers: Map<string, any>;
     keyPair: KeyPair;
@@ -38,7 +46,8 @@ declare module 'hyperswarm' {
     listening?: Promise<void>;
     destroyed: boolean;
 
-    topics(): IterableIterator<{topic: Uint8Array, isClient: boolean, isServer: boolean}>;
+
+    topics(): IterableIterator<Discovery>;
     listen(): Promise<undefined>;
     destroy(): Promise<undefined>;
     joinPeer(key: Uint8Array): undefined;
@@ -93,6 +102,7 @@ declare module 'corestore' {
       encryptionKey?: Uint8Array | undefined
     }>
     _preready: (core: Hypercore) => Promise<void>
+    storage: any;
 
     ready(): Promise<void>
     replicate(socket: Duplex, opts?: any);

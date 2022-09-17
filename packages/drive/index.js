@@ -104,14 +104,15 @@ export default Drivestore
  * @param {import('@hyperswarm/dht').KeyPair} keyPair
  */
 function fromcorestore (corestore, keyPair) {
-  return new Corestore(corestore.storage, {
+  const store = new Corestore(corestore.storage, {
     primaryKey: keyPair.secretKey,
     cache: corestore.cache,
-    _opening: corestore._opening,
-    _cores: corestore.cores,
-    _streams: corestore._replicationStreams,
-    _streamSessions: corestore._streamSessions
+    _root: corestore._root
   })
+  // TODO use corestore.sesison() after merging https://github.com/hypercore-protocol/corestore/pull/31
+  // @ts-ignore
+  store._opening.then(() => { store.primaryKey = keyPair.secretKey })
+  return store
 }
 
 /** @param {string} name */

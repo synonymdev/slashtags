@@ -12,7 +12,6 @@ test('drive - resolve public drive', async (t) => {
 
   const alice = sdk.slashtag('alice')
   const drive = alice.drivestore.get()
-  await drive.ready()
   await sdk.swarm.flush()
 
   const profile = { name: 'alice' }
@@ -21,7 +20,6 @@ test('drive - resolve public drive', async (t) => {
   // other side
   const remote = new SDK({ ...testnet, storage: RAM })
   const clone = remote.drive(drive.key)
-  await clone.ready()
 
   const buf = await clone.get('/profile.json')
   const resolved = buf && c.decode(c.json, buf)
@@ -67,17 +65,15 @@ test('drive - internal hyperdrive', async (t) => {
 
   const alice = sdk.slashtag('alice')
   const drive = alice.drivestore.get()
-  await drive.ready()
 
   const profile = { name: 'alice' }
   await drive.put('/profile.json', c.encode(c.json, profile))
 
   const readonly = sdk.drive(alice.key)
-  await readonly.ready()
 
   t.alike(
     await readonly.get('/profile.json')
-      .then(buf => buf && c.decode(c.json, buf)), 
+      .then(buf => buf && c.decode(c.json, buf)),
     profile,
     'correctly open a readonly drive session of local drive'
   )
@@ -99,14 +95,13 @@ test('drive - no unnecessary discovery sessions', async (t) => {
   const sdk = new SDK({ ...testnet, storage: RAM })
   const alice = sdk.slashtag('alice')
   const drive = alice.drivestore.get()
-  await drive.ready()
   await sdk.swarm.flush()
 
   const remote = new SDK({ ...testnet, storage: RAM })
   const clone = remote.drive(drive.key)
   await clone.ready()
 
-  for (let i = 0; i < 10; i ++) {
+  for (let i = 0; i < 10; i++) {
     await remote.drive(alice.key).ready()
   }
 
