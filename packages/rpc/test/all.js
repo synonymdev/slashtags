@@ -3,6 +3,8 @@ import Slashtag from '@synonymdev/slashtag'
 import createTestnet from '@hyperswarm/testnet'
 import c from 'compact-encoding'
 import z32 from 'z32'
+import DHT from '@hyperswarm/dht'
+import b4a from 'b4a'
 
 import SlashtagsRPC from '../index.js'
 
@@ -74,7 +76,7 @@ test('missing id', async t => {
 
   const instance = new MissingID(alice)
   // @ts-ignore
-  await t.exception(() => instance.setup({}))
+  await t.exception(() => instance.setup({}), /id should be defined/)
 
   alice.close()
 })
@@ -150,4 +152,42 @@ test('multiple rpcs', async t => {
 
   await alice.close()
   await bob.close()
+})
+
+test('rpc - missing slashtag', async t => {
+  const foo = new Foo()
+  await t.exception(() => foo.rpc(b4a.from('a'.repeat(64), 'hex')), /Can not call rpc\(\) if not initialized with a Slashtag instance/)
+})
+
+test('use without slashtags', async t => {
+  t.plan(2)
+
+  const alice = new DHT()
+  const server = alice.createServer()
+  await server.listen()
+
+  const aliceFoo = new Foo()
+
+  server.on('connection', (stream) => {
+    aliceFoo.setup(stream)
+  })
+
+  aliceFoo.on('echo', (req) => {
+    t.is(req, 'hello world')
+  })
+
+  const bob = new DHT()
+  const bobFoo = new Foo()
+
+  const stream = bob.connect(server.address().publicKey)
+  await stream.opened
+
+  const rpc = bobFoo.setup(stream)
+  const response = await rpc?.request('echo', 'hello world')
+  t.is(response, 'hello world')
+
+  await alice.destroy()
+  await server.close()
+  await bob.destroy()
+  await stream.destroy()
 })

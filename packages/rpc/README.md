@@ -27,11 +27,11 @@ class Foo extends SlashtagsRPC {
     return c.string;
   }
 
-  handshake(socket) {
+  handshake(stream) {
     return this.id + '-handshake:for:' + socket.remotePublicKey.toString('hex');
   }
 
-  onopen(handshake, socket) {
+  onopen(handshake, stream) {
     this.emit('handshake', handshake, socket.reomtePublicKey);
   }
 
@@ -40,19 +40,58 @@ class Foo extends SlashtagsRPC {
     return [
       {
         name: 'echo',
-        handler: (req) => req,
-      },
-    ];
+        handler: self._onEcho.bind(self)
+      }
+    ]
   }
 
-  async echo(key, message) {
-    const rpc = await this.rpc(key);
-    return rpc?.request('echo', message);
+  _onEcho (req) {
+    this.emit('echo', req)
+    return req
+  }
+
+  async echo (key, message) {
+    const rpc = await this.rpc(key)
+    return rpc?.request('echo', message)
   }
 }
 
 const alice = new Slashtag();
+await alice.listen();
+
 const aliceFoo = new Foo(alice);
+aliceFoo.on('echo', (req) => { // req should equal 'hello world' })
+
+const bob = new Slashtag();
+const bobFoo = new Foo(bob);
+
+const response = await bobFoo.echo(alice.key, 'hello world');
+// response should equal 'hello world'
+```
+
+#### Use without Slashtag
+
+If the RPC doesn't reuqire Slashtag for anything other than establish a connection, you can pass your own stream:
+
+```js
+const alice = new DHT();
+const server = alice.createServer()
+await server.listen();
+
+const aliceFoo = new Foo();
+server.on('connection', (stream) => aliceFoo.setup(stream))
+aliceFoo.on('echo', (req) => {
+  // req = 'hello world'
+})
+
+const bob = new DHT();
+const bobFoo = new Foo();
+const stream = bob.connect(server.address().publicKey)
+await stream.opened
+
+const rpc = bobFoo.setup(stream)
+const response = await rpc?.request('echo', 'hello world')
+// response = 'hello world'
 ```
 
 ## API
@@ -101,8 +140,8 @@ An array of methods objects that should be as following:
 
 Returns a [ProtomuxRPC](https://www.npmjs.com/package/protomux-rpc) instance after connecting to a Slashtag by its key, id or url. If connection is already opened, the same RPC instance is returned.
 
-Internally, it uses `Slashtags.connect(key)` then sets up the RPC instance using `setup(socket)`
+Internally, it uses `Slashtags.connect(key)` then sets up the RPC instance using `setup(stream)`
 
-#### `setup(socket)`
+#### `setup(stream)`
 
-Create a new [ProtomuxRPC](https://www.npmjs.com/package/protomux-rpc) instance on any stream if doesn't already exist.
+Create a new [ProtomuxRPC](https://www.npmjs.com/package/protomux-rpc) instance on any stream if doesn't already exist, otherwise it will return the existing RPC.

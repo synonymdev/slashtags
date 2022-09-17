@@ -1,14 +1,15 @@
 import ProtomuxRPC from 'protomux-rpc'
 import EventEmitter from 'events'
+import b4a from 'b4a'
 
 const RPCS_SYMBOL = Symbol.for('slashtags-rpcs')
 
 export class SlashtagsRPC extends EventEmitter {
-  /** @param {Slashtag} slashtag */
+  /** @param {Slashtag} [slashtag] */
   constructor (slashtag) {
     super()
     this.slashtag = slashtag
-    this.slashtag.on('connection', this.setup.bind(this))
+    this.slashtag?.on('connection', this.setup.bind(this))
   }
 
   /**
@@ -51,30 +52,32 @@ export class SlashtagsRPC extends EventEmitter {
 
   /**
    * Create a new RPC instance on the stream if doesn't already exist
-   * @param {SecretStream} socket
+   * @param {SecretStream} stream
+   * @returns {ProtomuxRPC}
    */
-  setup (socket) {
-    // @ts-ignore Deduplicate ProtomuxRPC instances on the same socket
-    if (socket[RPCS_SYMBOL]?.get(this.id)) return
+  setup (stream) {
     // @ts-ignore
-    if (!socket[RPCS_SYMBOL]) socket[RPCS_SYMBOL] = new Map()
+    const map = stream[RPCS_SYMBOL] = stream[RPCS_SYMBOL] || new Map()
+    const existing = map.get(this.id)
+    if (existing) return existing
 
     const options = {
-      id: Buffer.from(this.id),
+      id: b4a.from(this.id),
       valueEncoding: this.valueEncoding,
       handshakeEncoding: this.handshakeEncoding,
-      handshake: this.handshake(socket)
+      handshake: this.handshake(stream)
     }
-    const rpc = new ProtomuxRPC(socket, options)
+    const rpc = new ProtomuxRPC(stream, options)
 
-    // @ts-ignore
-    socket[RPCS_SYMBOL].set(this.id, rpc)
+    map.set(this.id, rpc)
 
-    rpc.on('open', (handshake) => this.onopen.bind(this)(handshake, socket))
+    rpc.on('open', (handshake) => this.onopen.bind(this)(handshake, stream))
 
     this.methods.forEach(m =>
-      rpc.respond(m.name, m.options || {}, req => m.handler(req, socket))
+      rpc.respond(m.name, m.options || {}, req => m.handler(req, stream))
     )
+
+    return rpc
   }
 
   /**
@@ -83,12 +86,10 @@ export class SlashtagsRPC extends EventEmitter {
    * @returns {Promise<ProtomuxRPC | undefined>}
    */
   async rpc (key) {
+    if (!this.slashtag) throw new Error('Can not call rpc() if not initialized with a Slashtag instance')
     const socket = this.slashtag.connect(key)
     await socket.opened
-    this.setup(socket)
-
-    // @ts-ignore
-    return socket[RPCS_SYMBOL].get(this.id)
+    return this.setup(socket)
   }
 }
 
