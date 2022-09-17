@@ -88,7 +88,7 @@ Creates a slasthag instance using a name. If no name is given it returns the [de
 
 #### `const drive = new sdk.drive(key)`
 
-Creates a Hyperdrive session, and internally joining its discovery key as a client.
+Creates a readonly Hyperdrive session, and internally joining its discovery key as a client if not already joined.
 
 #### `await sdk.close()`
 

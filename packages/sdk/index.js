@@ -11,6 +11,7 @@ import Slashtag from '@synonymdev/slashtag'
 import * as SlashURL from '@synonymdev/slashtags-url'
 import HyperDrive from 'hyperdrive'
 import HashMap from 'turbo-hash-map'
+import b4a from 'b4a'
 
 import * as constants from './lib/constants.js'
 import { defaultStorage } from './lib/storage.js'
@@ -88,9 +89,14 @@ export class SDK extends EventEmitter {
    * @param {Uint8Array} key
    */
   drive (key) {
+    // Announce the drive as a client
+    const topic = crypto.discoveryKey(key)
+    const existing = this.swarm._discovery.get(b4a.toString(topic, 'hex'))
+    // Avoid allocating memory for peer discovery sessions
+    if (!existing?._clientSessions) this.join(topic, { server: false, client: true })
+
     // TODO read encrypted drives!
     const drive = new HyperDrive(this.corestore, key)
-    this.join(crypto.discoveryKey(key), { server: false, client: true })
     return drive
   }
 
