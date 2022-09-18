@@ -34,14 +34,19 @@ test('get - public drive', async (t) => {
   t.alike(publicB.key, keyPair.publicKey)
 
   t.not(publicA, publicB, 'should return a session')
-  t.alike(publicA.key, publicB.key)
-  t.absent(publicA.core.encryptionKey)
-  t.absent(publicB.core.encryptionKey)
+  t.alike(publicA.key, publicB.key, 'same public key')
+  t.absent(publicA.core.encryptionKey, 'do not encrypet public drive')
+  t.absent(publicB.core.encryptionKey, 'do not encrypet public drive')
   t.ok(publicA.core.writable)
   await publicA.getBlobs()
   t.ok(publicA.blobs?.core.writable)
   t.unlike(publicA.blobs?.core.key, publicA.key)
   t.unlike(publicB.blobs?.core.key, publicB.key)
+  t.absent(publicA.blobs?.core.encryptionKey, 'do not encrypet public drive')
+  t.absent(publicB.blobs?.core.encryptionKey, 'do not encrypet public drive')
+
+  t.ok(publicA.discoveryKey)
+  t.alike(publicA.discoveryKey, publicB.discoveryKey)
 
   const buf = b4a.from('bar')
   await publicA.put('foo', buf)

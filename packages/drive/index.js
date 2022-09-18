@@ -11,6 +11,7 @@ export class Drivestore {
    * @param {import('@hyperswarm/dht').KeyPair} keyPair
    */
   constructor (corestore, keyPair) {
+    this.fava = Math.random()
     this.keyPair = keyPair
     this.corestore = fromcorestore(corestore, keyPair)
 
@@ -57,6 +58,10 @@ export class Drivestore {
   get (name = 'public') {
     validateName(name)
     const ns = this.corestore.namespace(name)
+    // TODO use corestore.sesison() after merging https://github.com/hypercore-protocol/corestore/pull/31
+    // same in fromcorestore
+    // @ts-ignore
+    ns._opening.then(() => { ns.primaryKey = this.keyPair.secretKey })
     const _preload = ns._preload.bind(ns)
     ns._preload = (opts) => this._preload.bind(this)(opts, _preload, ns, name)
     return new Hyperdrive(ns)
@@ -105,13 +110,11 @@ export default Drivestore
  */
 function fromcorestore (corestore, keyPair) {
   const store = new Corestore(corestore.storage, {
-    primaryKey: keyPair.secretKey,
     cache: corestore.cache,
     _root: corestore._root
   })
-  // TODO use corestore.sesison() after merging https://github.com/hypercore-protocol/corestore/pull/31
   // @ts-ignore
-  store._opening.then(() => { store.primaryKey = keyPair.secretKey })
+  store._opening.then(function () { store.primaryKey = keyPair.secretKey })
   return store
 }
 
