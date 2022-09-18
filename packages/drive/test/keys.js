@@ -18,7 +18,6 @@ test('dont store secretKey at rest', async (t) => {
   t.ok(drivestore.corestore.primaryKey)
 
   const stored = fs.readFileSync(path.join(dir, 'primary-key'))
-
   t.unlike(stored, drivestore.corestore.primaryKey)
 })
 
@@ -36,16 +35,10 @@ test('unique private drives for unique keyPairs', async (t) => {
   const kp2 = crypto.keyPair()
   const ds2 = new Drivestore(corestore, kp2)
   await ds2.ready()
-  const ds2Public = ds2.get()
+  const ds2Public = ds2.get('contacts')
   const ds2Private = ds2.get('contacts')
 
   await Promise.all([ds1Public, ds2Public, ds1Private, ds2Private].map(d => d.ready()))
-
-  t.ok(ds1.corestore.primaryKey)
-  t.alike(ds1.corestore.primaryKey, ds1.keyPair.secretKey)
-
-  t.ok(ds2.keyPair.secretKey)
-  t.alike(ds2.corestore.primaryKey, ds2.keyPair.secretKey)
 
   t.unlike(ds1.keyPair.secretKey, ds2.keyPair.secretKey)
 

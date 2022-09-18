@@ -124,3 +124,29 @@ test('drive - no unnecessary discovery sessions', async (t) => {
   await remote.close()
   await sdk.close()
 })
+
+test.solo('drive - get from local if offline', async (t) => {
+  const testnet = await createTestnet(3, t.teardown)
+  const sdk = new SDK({ ...testnet, storage: RAM })
+
+  const alice = sdk.slashtag('alice')
+  const drive = alice.drivestore.get()
+  await sdk.swarm.flush()
+
+  const profile = { name: 'alice' }
+  await drive.put('/profile.json', c.encode(c.json, profile))
+
+  await sdk.close()
+
+  // other side
+  const remote = new SDK({ ...testnet, storage: RAM })
+  const clone = remote.drive(drive.key)
+
+  const buf = await clone.get('/profile.json')
+  const resolved = buf && c.decode(c.json, buf)
+
+  t.alike(resolved, profile)
+
+  await sdk.close()
+  await remote.close()
+})
