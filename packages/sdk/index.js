@@ -32,7 +32,7 @@ export class SDK extends EventEmitter {
     this.storage = opts.storage || defaultStorage
     this.primaryKey = opts.primaryKey || randomBytes(32)
 
-    this.corestore = new Corestore(this.storage, { primaryKey: this.primaryKey })
+    this.corestore = new Corestore(this.storage)
 
     this.dht = opts?.relay
       ? new Node(new Stream(true, new WebSocket(opts.relay)))

@@ -100,7 +100,6 @@ test('save metadata on ready', async (t) => {
   t.alike(list, ['bar', 'foo'])
 })
 
-// TODO (corestore): closing corestore should unlock file
 test('reopen', async (t) => {
   const dir = tmpdir()
   const corestore = new Corestore(dir)

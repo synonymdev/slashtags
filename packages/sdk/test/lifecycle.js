@@ -38,6 +38,19 @@ test('close - close all opened resources', async t => {
   t.ok(sdk.swarm.destroyed)
 })
 
+test('not store primary key in rest', async t => {
+  const dir = tmpdir()
+  const sdk = new SDK({ storage: dir })
+
+  await sdk.ready()
+
+  const stored = fs.readFileSync(path.join(dir, 'primary-key'))
+
+  t.unlike(stored, sdk.primaryKey)
+
+  await sdk.close()
+})
+
 function tmpdir () {
   return path.join(os.tmpdir(), 'drivestore-' + Math.random().toString(16).slice(2))
 }
