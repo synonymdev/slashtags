@@ -63,4 +63,4 @@ test('read and write to drives despite failing relay', async (t) => {
   await sdk.close()
 })
 
-function noop() {}
+function noop () {}
