@@ -96,6 +96,7 @@ declare module 'corestore' {
 
     primaryKey: Uint8Array;
     _namespace: Uint8Array;
+    _preready: (core?: Hypercore) => any
     _preload: (opts: any) => Promise<{ 
       from: Hypercore, 
       keyPair?: KeyPair, 

@@ -1,10 +1,10 @@
 import test from 'brittle'
-import path from 'path'
-import os from 'os'
-import fs from 'fs'
 import RAM from 'random-access-memory'
+import fs from 'fs'
+import path from 'path'
 
 import SDK from '../index.js'
+import { tmpdir } from './helpers/index.js'
 
 test('close - close all opened resources', async t => {
   const sdk = new SDK({ storage: RAM })
@@ -31,7 +31,3 @@ test('not store primary key in rest', async t => {
 
   await sdk.close()
 })
-
-function tmpdir () {
-  return path.join(os.tmpdir(), 'drivestore-' + Math.random().toString(16).slice(2))
-}
