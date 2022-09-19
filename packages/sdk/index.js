@@ -64,6 +64,14 @@ export class SDK extends EventEmitter {
   }
 
   /**
+   * Swarm destroyed
+   * cannot join, announce or lookup any drives on the DHT
+   */
+  get destroyed () {
+    return this.swarm.destroyed || this.swarm.dht.destroyed
+  }
+
+  /**
    * Generates a Slashtag keypair from a `name`, and the internal `primaryKey`.
    * @param {string} [name]
    */
@@ -103,14 +111,18 @@ export class SDK extends EventEmitter {
    */
   drive (key) {
     if (this.closed) throw new Error('SDK is closed')
+
+    // TODO read encrypted drives!
+    const drive = new HyperDrive(this.corestore, key)
+    // If swarm is destroyed, just read locally without waiting for peers
+    if (this.destroyed) return drive
+
     // Announce the drive as a client
     const topic = crypto.discoveryKey(key)
     const existing = this.swarm._discovery.get(b4a.toString(topic, 'hex'))
     // Avoid allocating memory for peer discovery sessions
     if (!existing?._clientSessions) this.join(topic, { server: false, client: true })
 
-    // TODO read encrypted drives!
-    const drive = new HyperDrive(this.corestore, key)
     return drive
   }
 
