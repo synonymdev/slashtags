@@ -56,6 +56,14 @@ export class SDK extends EventEmitter {
   }
 
   /**
+   * Corestore is closed
+   * cannot create new writable or readable drives
+   */
+  get closed () {
+    return this.corestore._closing || this._closing
+  }
+
+  /**
    * Generates a Slashtag keypair from a `name`, and the internal `primaryKey`.
    * @param {string} [name]
    */
@@ -66,8 +74,10 @@ export class SDK extends EventEmitter {
   /**
    * Creates a Slashtag by name.
    * @param {string} [name] utf8 encoded string
+   * @throws {Error} throws an error if the SDK or its corestore is closing
    */
   slashtag (name) {
+    if (this.closed) throw new Error('SDK is closed')
     const key = this.createKeyPair(name).publicKey
     const existing = this.slashtags.get(key)
     if (existing) return existing
@@ -89,8 +99,10 @@ export class SDK extends EventEmitter {
   /**
    * Creates a Hyperdrive and announce the SDK's swarm as a client looking up for peers for it.
    * @param {Uint8Array} key
+   * @throws {Error} throws an error if the SDK or its corestore is closing
    */
   drive (key) {
+    if (this.closed) throw new Error('SDK is closed')
     // Announce the drive as a client
     const topic = crypto.discoveryKey(key)
     const existing = this.swarm._discovery.get(b4a.toString(topic, 'hex'))
@@ -110,6 +122,7 @@ export class SDK extends EventEmitter {
     return discovery
   }
 
+  /** Close corestore and destroy swarm and dht node */
   close () {
     if (this._closing) return this._closing
     this._closing = this._close()
@@ -119,9 +132,11 @@ export class SDK extends EventEmitter {
   async _close () {
     await Promise.all([...this.slashtags.values()].map(s => s.close()))
 
-    await this.swarm.destroy()
+    await Promise.all([
+      this.corestore.close(),
+      this.swarm.destroy()
+    ])
 
-    this.closed = true
     this.emit('close')
   }
 }
