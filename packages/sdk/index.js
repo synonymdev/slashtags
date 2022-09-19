@@ -33,6 +33,8 @@ export class SDK extends EventEmitter {
     this.primaryKey = opts.primaryKey || randomBytes(32)
 
     this.corestore = new Corestore(this.storage)
+    // Disable _preready to avoid 'Stored core key does not match the provided name' error
+    this.corestore._preready = noop
 
     this.dht = opts?.relay
       ? new Node(new Stream(true, new WebSocket(opts.relay)))
@@ -131,3 +133,5 @@ export {
   SlashURL,
   Slashtag
 }
+
+function noop () {}
