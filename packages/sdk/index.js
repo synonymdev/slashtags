@@ -43,6 +43,9 @@ export class SDK extends EventEmitter {
     this.swarm = new Hyperswarm({ dht: this.dht })
     this.swarm.on('connection', (socket) => this.corestore.replicate(socket))
 
+    /** Help skip swarm discovery if starting the DHT node failed */
+    this.swarm.dht.ready().catch(() => { this.swarm.destroyed = true })
+
     /** @type {HashMap<Slashtag>} */
     this.slashtags = new HashMap()
 
