@@ -2,10 +2,10 @@ import test from 'brittle'
 import Corestore from 'corestore'
 import crypto from 'hypercore-crypto'
 import path from 'path'
-import os from 'os'
 import fs from 'fs'
 
 import Drivestore from '../index.js'
+import { tmpdir } from './helpers/index.js'
 
 test('dont store secretKey at rest', async (t) => {
   const dir = tmpdir()
@@ -48,7 +48,3 @@ test('unique private drives for unique keyPairs', async (t) => {
   t.ok(ds1Private.key)
   t.unlike(ds2Private.key, ds1Private.key)
 })
-
-function tmpdir () {
-  return path.join(os.tmpdir(), 'drivestore-' + Math.random().toString(16).slice(2))
-}

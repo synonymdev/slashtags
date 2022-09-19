@@ -2,6 +2,7 @@ import Corestore from 'corestore'
 import Hyperdrive from 'hyperdrive'
 import Hyperbee from 'hyperbee'
 import b4a from 'b4a'
+import safetyCatch from 'safety-catch'
 
 const METADATA_KEY = 'slashtags-drivestore-metadata'
 
@@ -22,7 +23,7 @@ export class Drivestore {
     this._metadata = new Hyperbee(metadataCore, { keyEncoding: 'utf8' })
     this._drives = this._metadata.sub('drives')
 
-    this._opening = this._open()
+    this._opening = this._open().catch(safetyCatch)
   }
 
   /** @returns {import('hyperbee').Iterator<{name: string}>} */

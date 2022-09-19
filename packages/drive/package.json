@@ -13,7 +13,7 @@
     "build": "tsc",
     "clean": "rimraf types",
     "lint": "standard --fix",
-    "test": "brittle test/** -cov",
+    "test": "brittle test/*.js -cov",
     "depcheck": "npx depcheck",
     "fullcheck": "npm run lint && npm run clean && npm run build && npm run test && npm run depcheck",
     "prepublishOnly": "npm run fullcheck"
@@ -33,7 +33,8 @@
     "b4a": "^1.6.0",
     "corestore": "6.1.1",
     "hyperbee": "^2.0.1",
-    "hyperdrive": "^11.0.0-alpha.5"
+    "hyperdrive": "^11.0.0-alpha.5",
+    "safety-catch": "^1.0.2"
   },
   "devDependencies": {
     "brittle": "^3.0.2",
