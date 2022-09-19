@@ -157,3 +157,97 @@ test('read only created first', async (t) => {
 
   await sdk.close()
 })
+
+test('replicate on closed corestore', async (t) => {
+  const testnet = await createTestnet(3, t.teardown)
+  const sdk = new SDK({ ...testnet, storage: tmpdir() })
+
+  const alice = sdk.slashtag('alice')
+  const drive = alice.drivestore.get()
+  await sdk.swarm.flush()
+
+  const profile = { name: 'alice' }
+  await drive.put('/profile.json', c.encode(c.json, profile))
+
+  // other side
+  const remote = new SDK({ ...testnet, storage: tmpdir() })
+  const clone = remote.drive(drive.key)
+
+  remote.close()
+
+  await t.exception(() => clone.get('/profile.json'), /The corestore is closed/)
+  await clone.get('/profile.json').catch(noop)
+  t.pass('catch caught error on clone.get()')
+
+  await sdk.close()
+  await remote.close()
+})
+
+test('replicate after swarm destroyed', async (t) => {
+  const testnet = await createTestnet(3, t.teardown)
+  const sdk = new SDK({ ...testnet, storage: tmpdir() })
+
+  const alice = sdk.slashtag('alice')
+  const drive = alice.drivestore.get()
+  await sdk.swarm.flush()
+
+  const profile = { name: 'alice' }
+  await drive.put('/profile.json', c.encode(c.json, profile))
+
+  // other side
+  const remote = new SDK({ ...testnet, storage: tmpdir() })
+  const clone = remote.drive(drive.key)
+
+  await remote.close()
+
+  await t.exception(() => clone.get('/profile.json'))
+  await clone.get('/profile.json').catch(noop)
+  t.pass('catch caught error on clone.get()')
+
+  await sdk.close()
+  await remote.close()
+})
+
+test('swarm destroying before creating a drive', async (t) => {
+  const testnet = await createTestnet(3, t.teardown)
+  const sdk = new SDK({ ...testnet, storage: tmpdir() })
+
+  const alice = sdk.slashtag('alice')
+  const drive = alice.drivestore.get()
+  await sdk.swarm.flush()
+
+  const profile = { name: 'alice' }
+  await drive.put('/profile.json', c.encode(c.json, profile))
+
+  // other side
+  const dir = tmpdir()
+  const remote = new SDK({ ...testnet, storage: dir })
+  {
+    const clone = remote.drive(drive.key)
+    await clone.ready()
+
+    const buf = await clone.get('/profile.json')
+    const resolved = buf && c.decode(c.json, buf)
+
+    t.alike(resolved, profile)
+  }
+
+  remote.swarm.destroy()
+
+  {
+    const clone = remote.drive(drive.key)
+    await clone.ready()
+
+    const buf = await clone.get('/profile.json')
+    const resolved = buf && c.decode(c.json, buf)
+
+    t.alike(resolved, profile)
+  }
+
+  t.pass('should not hang forever')
+
+  await sdk.close()
+  await remote.close()
+})
+
+function noop () {}

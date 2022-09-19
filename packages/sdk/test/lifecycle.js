@@ -57,8 +57,22 @@ test('closed - corestore is closing', async (t) => {
   await t.exception(() => writableInflight.ready())
   await t.exception(() => readbleInflight.ready())
 
+  writableInflight.ready().catch(noop)
+  readbleInflight.ready().catch(noop)
+
+  t.pass('catch ready is enouhg to catch inflight errors')
+
   t.exception(() => sdk.slashtag('foo'), /SDK is closed/)
   t.exception(() => sdk.drive(key), /SDK is closed/)
 
+  if (!sdk.closed) {
+    sdk.slashtag()
+    sdk.drive(key)
+  }
+
+  t.pass('checking sdk.closed is enought to avoid sync errors')
+
   await sdk.close()
 })
+
+function noop () {}
