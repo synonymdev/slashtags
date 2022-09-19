@@ -208,7 +208,7 @@ test('replicate after swarm destroyed', async (t) => {
   await remote.close()
 })
 
-test('swarm destroying before creating a drive', async (t) => {
+test('swarm destroying before reading saved remote drive', async (t) => {
   const testnet = await createTestnet(3, t.teardown)
   const sdk = new SDK({ ...testnet, storage: tmpdir() })
 
@@ -221,8 +221,8 @@ test('swarm destroying before creating a drive', async (t) => {
 
   // other side
   const dir = tmpdir()
-  const remote = new SDK({ ...testnet, storage: dir })
   {
+    const remote = new SDK({ ...testnet, storage: dir })
     const clone = remote.drive(drive.key)
     await clone.ready()
 
@@ -230,23 +230,54 @@ test('swarm destroying before creating a drive', async (t) => {
     const resolved = buf && c.decode(c.json, buf)
 
     t.alike(resolved, profile)
+    await remote.close()
   }
 
+  const remote = new SDK({ ...testnet, storage: dir })
   remote.swarm.destroy()
 
-  {
-    const clone = remote.drive(drive.key)
-    await clone.ready()
+  const clone = remote.drive(drive.key)
+  await clone.ready()
 
-    const buf = await clone.get('/profile.json')
-    const resolved = buf && c.decode(c.json, buf)
+  const buf = await clone.get('/profile.json')
+  const resolved = buf && c.decode(c.json, buf)
 
-    t.alike(resolved, profile)
-  }
+  t.alike(resolved, profile)
 
   t.pass('should not hang forever')
 
   await sdk.close()
+  await remote.close()
+})
+
+test('swarm destroying before reading local drive', async (t) => {
+  const testnet = await createTestnet(3, t.teardown)
+
+  const dir = tmpdir()
+  let primaryKey
+  {
+    const remote = new SDK({ ...testnet, storage: dir })
+    const drive = remote.slashtag().drivestore.get()
+    await drive.ready()
+
+    primaryKey = remote.primaryKey
+
+    await drive.put('/profile.json', b4a.from('..'))
+    await remote.close()
+  }
+
+  const remote = new SDK({ ...testnet, storage: dir, primaryKey })
+  remote.swarm.destroy()
+
+  const drive = remote.slashtag().drivestore.get()
+  await drive.ready()
+
+  const buf = await drive.get('/profile.json')
+
+  t.ok(buf)
+
+  t.pass('should not hang forever')
+
   await remote.close()
 })
 
