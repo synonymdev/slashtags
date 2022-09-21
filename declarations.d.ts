@@ -29,7 +29,9 @@ declare module 'hyperswarm' {
     topic: Uint8Array;
     isClient: boolean;
     isServer: boolean;
+    destroy(): Promise<any>
 
+    _sessions: Discovery[]
     _clientSessions: number;
     _serverSessions: number;
   }
@@ -47,6 +49,7 @@ declare module 'hyperswarm' {
     destroyed: boolean;
 
 
+    status(topic: Uint8Array): Discovery;
     topics(): IterableIterator<Discovery>;
     listen(): Promise<undefined>;
     destroy(): Promise<undefined>;
