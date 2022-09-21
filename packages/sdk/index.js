@@ -9,7 +9,7 @@ import WebSocket from 'ws'
 import DHT from '@hyperswarm/dht'
 import Slashtag from '@synonymdev/slashtag'
 import * as SlashURL from '@synonymdev/slashtags-url'
-import HyperDrive from 'hyperdrive'
+import Hyperdrive from 'hyperdrive'
 import HashMap from 'turbo-hash-map'
 import b4a from 'b4a'
 
@@ -122,7 +122,7 @@ export class SDK extends EventEmitter {
     if (!existing?._clientSessions) this.join(topic, { server: false, client: true })
 
     // TODO read encrypted drives!
-    return new HyperDrive(this.corestore, key)
+    return new Hyperdrive(this.corestore, key)
   }
 
   /**
@@ -163,7 +163,8 @@ export default SDK
 export {
   constants,
   SlashURL,
-  Slashtag
+  Slashtag,
+  Hyperdrive
 }
 
 function noop () {}
