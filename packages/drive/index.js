@@ -1,4 +1,3 @@
-import Corestore from 'corestore'
 import Hyperdrive from 'hyperdrive'
 import Hyperbee from 'hyperbee'
 import b4a from 'b4a'
@@ -14,7 +13,8 @@ export class Drivestore {
   constructor (corestore, keyPair) {
     this.fava = Math.random()
     this.keyPair = keyPair
-    this.corestore = fromcorestore(corestore, keyPair)
+    /** @type {import('corestore')} */
+    this.corestore = corestore.session({ primaryKey: this.keyPair.secretKey, namespace: null })
 
     const metadataCore = this.corestore.get({
       name: METADATA_KEY,
@@ -62,11 +62,7 @@ export class Drivestore {
    */
   get (name = 'public') {
     validateName(name)
-    const ns = this.corestore.namespace(name)
-    // TODO use corestore.sesison() after merging https://github.com/hypercore-protocol/corestore/pull/31
-    // same in fromcorestore
-    // @ts-ignore
-    ns._opening.then(() => { ns.primaryKey = this.keyPair.secretKey })
+    const ns = this.corestore.namespace(name).session({ primaryKey: this.keyPair.secretKey })
     const _preload = ns._preload.bind(ns)
     ns._preload = (opts) => this._preload.bind(this)(opts, _preload, ns, name)
     return new Hyperdrive(ns)
@@ -107,25 +103,11 @@ export class Drivestore {
   }
 }
 
-export default Drivestore
-
-/**
- * @param {any} corestore
- * @param {import('@hyperswarm/dht').KeyPair} keyPair
- */
-function fromcorestore (corestore, keyPair) {
-  const store = new Corestore(corestore.storage, {
-    cache: corestore.cache,
-    _root: corestore._root
-  })
-  // @ts-ignore
-  store._opening.then(function () { store.primaryKey = keyPair.secretKey })
-  return store
-}
-
 /** @param {string} name */
 function validateName (name) {
   if (!/^[0-9a-zA-Z-._ ]*$/.test(name)) throw new Error('Invalid drive name')
 }
 
 const emptyIterator = { async next () { return { done: true, value: null } } }
+
+export default Drivestore

@@ -11,7 +11,7 @@ import c from 'compact-encoding'
     await drive.put('/profile.json', c.encode(c.json, { name: 'Alice' }))
 
     console.log("Announcing Alice's public drive...")
-    await sdk.join(drive.discoveryKey).flushed()
+    await sdk.join(drive.discoveryKey)?.flushed()
 
     key = alice.key
   }
@@ -22,7 +22,6 @@ import c from 'compact-encoding'
     console.log({bob: bob.url})
     const drive = sdk.drive(key)
     console.log("Resolving Alice's public drive...")
-    await drive.ready()
     const profile = await drive.get('/profile.json')
       .then(b => b && c.decode(c.json, b))
     console.log("Profile:", profile)

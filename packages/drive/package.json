@@ -31,7 +31,7 @@
   ],
   "dependencies": {
     "b4a": "^1.6.0",
-    "corestore": "6.1.1",
+    "corestore": "6.2.0",
     "hyperbee": "^2.0.1",
     "hyperdrive": "^11.0.0-alpha.5",
     "safety-catch": "^1.0.2"

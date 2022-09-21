@@ -111,6 +111,7 @@ declare module 'corestore' {
     replicate(socket: Duplex, opts?: any);
     namespace(name?: string | Uint8Array): Corestore;
     close(): Promise<void>;
+    session(opts?: { primaryKey?: Uint8Array, namespace?: string|null }): Corestore
 
     createKeyPair(name: string): Promise<KeyPair>;
     findingPeers(): () => void;
