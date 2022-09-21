@@ -33,6 +33,10 @@ test('should throw an error for non invalid key length', t => {
       ),
     /Invalid key bytelength/
   )
+  t.exception(
+    () => SlashURL.parse('slash:slash:3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39usw'),
+    /Invalid key bytelength/
+  )
 })
 
 const testVectors = [

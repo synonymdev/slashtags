@@ -1,7 +1,7 @@
 import z32 from 'z32'
 import b4a from 'b4a'
 
-export const PATTERN = /^(.*:)([^#?/]+)(\/?[^#?\s]*)\??([^#\s]*)#?([^\s]*)$/
+export const PATTERN = /^([a-z-]*:)([ybndrfg8ejkmcpqxot1uwisza345h769]+)(\/?[^#?\s]*)\??([^#\s]*)#?([^\s]*)$/
 
 /**
  * Encodes a 32-byte Slashtags key into a z-base32 id
@@ -77,7 +77,7 @@ export const parse = url => {
  */
 export const decode = id => {
   const key = z32.decode(id).subarray(0, 32)
-  if (key.byteLength < 32) throw new Error('Invalid key bytelength')
+  if (key.byteLength < 32) throw new Error('Invalid key bytelength, got:' + id)
   return key
 }
 
