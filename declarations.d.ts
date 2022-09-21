@@ -95,6 +95,7 @@ declare module 'corestore' {
     );
 
     primaryKey: Uint8Array;
+    _root: Corestore;
     _namespace: Uint8Array;
     _preready: (core?: Hypercore) => any
     _preload: (opts: any) => Promise<{ 

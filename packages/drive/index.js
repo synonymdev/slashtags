@@ -39,6 +39,10 @@ export class Drivestore {
     }
   }
 
+  get closed () {
+    return this.corestore._root._closing
+  }
+
   async _open () {
     await this._drives.feed.ready()
     this.opened = true

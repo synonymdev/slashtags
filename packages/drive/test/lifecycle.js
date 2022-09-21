@@ -51,6 +51,7 @@ test('reopen', async (t) => {
   await drivestore.get('bar').ready()
 
   await corestore.close()
+  t.ok(drivestore.closed, 'drivestore.closed true after corestore is closing')
 
   const reopened = new Drivestore(new Corestore(dir), drivestore.keyPair)
   await reopened.ready()
