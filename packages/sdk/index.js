@@ -22,7 +22,7 @@ export class SDK extends EventEmitter {
    * @param {object} opts
    * @param {any} [opts.storage]
    * @param {Uint8Array} [opts.primaryKey]
-   * @param {string} [opts.relay]
+   * @param {string | WebSocket} [opts.relay]
    * @param {import('@hyperswarm/dht').Node[]} [opts.bootstrap]
    */
   constructor (opts = {}) {
@@ -35,8 +35,10 @@ export class SDK extends EventEmitter {
     // Disable _preready to avoid 'Stored core key does not match the provided name' error
     this.corestore._preready = noop
 
-    this.dht = opts?.relay
-      ? new Node(new Stream(true, new WebSocket(opts.relay)))
+    this._relaySocket = typeof opts.relay === 'string' ? new WebSocket(opts.relay) : opts.relay
+
+    this.dht = this._relaySocket
+      ? new Node(new Stream(true, this._relaySocket))
       : new DHT({ bootstrap: opts.bootstrap })
 
     this.swarm = new Hyperswarm({ dht: this.dht })
@@ -70,7 +72,8 @@ export class SDK extends EventEmitter {
    * cannot join, announce or lookup any drives on the DHT
    */
   get destroyed () {
-    return this.swarm.destroyed
+    const relayClosed = this._relaySocket && this._relaySocket.readyState > 1
+    return this.swarm.destroyed || relayClosed
   }
 
   /**
