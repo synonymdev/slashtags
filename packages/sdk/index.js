@@ -112,12 +112,26 @@ export class SDK extends EventEmitter {
   /**
    * Creates a Hyperdrive and announce the SDK's swarm as a client looking up for peers for it.
    * @param {Uint8Array} key
+   * @param {object} [opts]
+   * @param {Uint8Array} [opts.encryptionKey]
    * @throws {Error} throws an error if the SDK or its corestore is closing
    */
-  drive (key) {
+  drive (key, opts = {}) {
     if (this.closed) throw new Error('SDK is closed')
 
-    const drive = new Hyperdrive(this.corestore, key)
+    // Temporary solution to handle encrypted hyperdrives!
+    // TODO: remove this once Hyperdrive next accept encryption keys
+    const corestore = opts.encryptionKey ? this.corestore.session() : this.corestore
+    if (opts.encryptionKey) {
+      const preload = this.corestore._preload.bind(this.corestore)
+      corestore._preload = _preload.bind(corestore)
+      async function _preload (/** @type {any} */ _opts) {
+        const { from } = await preload(_opts)
+        return { from, encryptionKey: opts.encryptionKey }
+      }
+    }
+
+    const drive = new Hyperdrive(corestore, key)
 
     // Announce the drive as a client
     const discovery = this.join(crypto.discoveryKey(key), { server: false, client: true })

@@ -1,6 +1,5 @@
 import test from 'brittle'
 import createTestnet from '@hyperswarm/testnet'
-import c from 'compact-encoding'
 import b4a from 'b4a'
 
 import SDK from '../index.js'
@@ -15,14 +14,14 @@ test('drive - resolve public drive', async (t) => {
   await sdk.swarm.flush()
 
   const profile = { name: 'alice' }
-  await drive.put('/profile.json', c.encode(c.json, profile))
+  await drive.put('/profile.json', b4a.from(JSON.stringify(profile)))
 
   // other side
   const remote = new SDK({ ...testnet, storage: tmpdir() })
   const clone = remote.drive(drive.key)
 
-  const buf = await clone.get('/profile.json')
-  const resolved = buf && c.decode(c.json, buf)
+  const resolved = await clone.get('/profile.json')
+    .then(b => b && JSON.parse(b4a.toString(b)))
 
   t.alike(resolved, profile)
 
@@ -41,7 +40,7 @@ test('drive - blind seeder resolve private drive', async (t) => {
   await sdk.swarm.flush()
 
   const contact = { name: 'alice' }
-  await drive.put('/foo', c.encode(c.json, contact))
+  await drive.put('/foo', b4a.from(JSON.stringify(contact)))
 
   // other side
   const seeder = new SDK({ ...testnet, storage: tmpdir() })
@@ -54,9 +53,37 @@ test('drive - blind seeder resolve private drive', async (t) => {
   t.is(clone.core.length, 2, 'still can replicate')
 
   await sdk.close()
+  await seeder.close()
+})
+
+test('drive - read encrypted drives', async (t) => {
+  const testnet = await createTestnet(3, t.teardown)
+  const sdk = new SDK({ ...testnet, storage: tmpdir() })
+
+  const alice = sdk.slashtag('alice')
+  const drive = alice.drivestore.get('contacts')
+  await drive.ready()
+  sdk.join(drive.discoveryKey)?.flushed()
+
+  const contact = { name: 'alice' }
+  await drive.put('/foo', b4a.from(JSON.stringify(contact)))
+
+  const key = drive.key
+  const encryptionKey = drive.core.encryptionKey
+
+  // other side
+  const reader = new SDK({ ...testnet, storage: tmpdir() })
+
+  const clone = reader.drive(key, { encryptionKey })
+  const done = clone.findingPeers()
+  reader.swarm.flush().then(done, done)
+
+  await clone.update()
+
+  t.alike(await clone.get('/foo').then(buf => buf && JSON.parse(buf.toString())), contact)
 
   await sdk.close()
-  await seeder.close()
+  await reader.close()
 })
 
 test('drive - internal hyperdrive', async (t) => {
@@ -67,13 +94,13 @@ test('drive - internal hyperdrive', async (t) => {
   const drive = alice.drivestore.get()
 
   const profile = { name: 'alice' }
-  await drive.put('/profile.json', c.encode(c.json, profile))
+  await drive.put('/profile.json', b4a.from(JSON.stringify(profile)))
 
   const readonly = sdk.drive(alice.key)
 
   t.alike(
     await readonly.get('/profile.json')
-      .then(buf => buf && c.decode(c.json, buf)),
+      .then(b => b && JSON.parse(b4a.toString(b))),
     profile,
     'correctly open a readonly drive session of local drive'
   )
@@ -162,7 +189,7 @@ test('replicate on closed corestore', async (t) => {
   await sdk.swarm.flush()
 
   const profile = { name: 'alice' }
-  await drive.put('/profile.json', c.encode(c.json, profile))
+  await drive.put('/profile.json', b4a.from(JSON.stringify(profile)))
 
   // other side
   const remote = new SDK({ ...testnet, storage: tmpdir() })
@@ -187,7 +214,7 @@ test('replicate after swarm destroyed', async (t) => {
   await sdk.swarm.flush()
 
   const profile = { name: 'alice' }
-  await drive.put('/profile.json', c.encode(c.json, profile))
+  await drive.put('/profile.json', b4a.from(JSON.stringify(profile)))
 
   // other side
   const remote = new SDK({ ...testnet, storage: tmpdir() })
@@ -212,7 +239,7 @@ test('swarm destroying before reading saved remote drive', async (t) => {
   await sdk.swarm.flush()
 
   const profile = { name: 'alice' }
-  await drive.put('/profile.json', c.encode(c.json, profile))
+  await drive.put('/profile.json', b4a.from(JSON.stringify(profile)))
 
   // other side
   const dir = tmpdir()
@@ -221,8 +248,8 @@ test('swarm destroying before reading saved remote drive', async (t) => {
     const clone = remote.drive(drive.key)
     await clone.ready()
 
-    const buf = await clone.get('/profile.json')
-    const resolved = buf && c.decode(c.json, buf)
+    const resolved = await clone.get('/profile.json')
+      .then(b => b && JSON.parse(b4a.toString(b)))
 
     t.alike(resolved, profile)
     await remote.close()
@@ -234,8 +261,8 @@ test('swarm destroying before reading saved remote drive', async (t) => {
   const clone = remote.drive(drive.key)
   await clone.ready()
 
-  const buf = await clone.get('/profile.json')
-  const resolved = buf && c.decode(c.json, buf)
+  const resolved = await clone.get('/profile.json')
+    .then(b => b && JSON.parse(b4a.toString(b)))
 
   t.alike(resolved, profile)
 

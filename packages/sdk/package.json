@@ -39,7 +39,6 @@
     "@synonymdev/slashtag": "^1.0.0-alpha.18",
     "@synonymdev/slashtags-url": "^1.0.0-alpha.0",
     "b4a": "^1.6.0",
-    "compact-encoding": "^2.11.0",
     "corestore": "6.2.0",
     "graceful-goodbye": "^1.1.0",
     "hypercore-crypto": "^3.3.0",

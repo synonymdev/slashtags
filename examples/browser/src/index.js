@@ -1,5 +1,5 @@
 import SDK from '@synonymdev/slashtags-sdk'
-import c from 'compact-encoding'
+import b4a from 'b4a'
 
 (async () => {
   let key;
@@ -8,7 +8,7 @@ import c from 'compact-encoding'
     const alice = sdk.slashtag()
     console.log({alice: alice.url})
     const drive = alice.drivestore.get()
-    await drive.put('/profile.json', c.encode(c.json, { name: 'Alice' }))
+    await drive.put('/profile.json', b4a.from(JSON.stringify({ name: 'Alice' })))
 
     console.log("Announcing Alice's public drive...")
     await sdk.join(drive.discoveryKey)?.flushed()
@@ -23,7 +23,7 @@ import c from 'compact-encoding'
     const drive = sdk.drive(key)
     console.log("Resolving Alice's public drive...")
     const profile = await drive.get('/profile.json')
-      .then(b => b && c.decode(c.json, b))
+      .then(buf => buf && JSON.parse(b4a.toString(buf)))
     console.log("Profile:", profile)
   }
 })()
