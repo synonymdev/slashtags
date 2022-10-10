@@ -1,34 +1,43 @@
 import Hyperdrive from 'hyperdrive'
 import Hyperbee from 'hyperbee'
-import b4a from 'b4a'
 import safetyCatch from 'safety-catch'
+import Keychain from 'keypear'
+import b4a from 'b4a'
 
-const METADATA_KEY = 'slashtags-drivestore-metadata'
+const NAMESPACE = 'slashdrive'
+const METADATA_NAME = 'metadata'
 
 export class Drivestore {
   /**
    * @param {import('corestore')} corestore
-   * @param {import('@hyperswarm/dht').KeyPair} keyPair
+   * @param {import('keypear') | Uint8Array} [keychain]
    */
-  constructor (corestore, keyPair) {
-    this.fava = Math.random()
-    this.keyPair = keyPair
+  constructor (corestore, keychain) {
     /** @type {import('corestore')} */
-    this.corestore = corestore.session({ primaryKey: this.keyPair.secretKey, namespace: null })
+    this.corestore = corestore
 
-    const metadataCore = this.corestore.get({
-      name: METADATA_KEY,
-      encryptionKey: this.keyPair.secretKey
-    })
-    this._metadata = new Hyperbee(metadataCore, { keyEncoding: 'utf8' })
-    this._drives = this._metadata.sub('drives')
+    keychain = Keychain.from(keychain)
+    this.signer = keychain.get()
+    this.keychain = keychain.sub(NAMESPACE)
+
+    if (this.writable) {
+      const metadataSigner = this.keychain.get(METADATA_NAME)
+      /** @type {import('hypercore')} */
+      const metadataCore = this.corestore.get({
+        ...metadataSigner,
+        encryptionKey: metadataSigner.scalar
+      })
+      this._metadata = new Hyperbee(metadataCore, { keyEncoding: 'utf8' })
+      this._drives = this._metadata.sub('drives')
+    }
 
     this._opening = this._open().catch(safetyCatch)
+    this._pending = Promise.resolve()
   }
 
   /** @returns {import('hyperbee').Iterator<{name: string}>} */
   [Symbol.asyncIterator] () {
-    if (!this.opened) return emptyIterator
+    if (!this._drives || !this.opened) return emptyIterator
     const iterator = this._drives.createReadStream()[Symbol.asyncIterator]()
     return {
       async next () {
@@ -39,12 +48,20 @@ export class Drivestore {
     }
   }
 
+  get key () {
+    return this.signer.publicKey
+  }
+
+  get writable () {
+    return !!this.keychain.get().scalar
+  }
+
   get closed () {
     return this.corestore._root._closing
   }
 
   async _open () {
-    await this._drives.feed.ready()
+    await this._metadata?.feed.ready()
     this.opened = true
   }
 
@@ -57,49 +74,31 @@ export class Drivestore {
     return this.corestore.replicate(...args)
   }
 
+  flush () {
+    return this._pending
+  }
+
   /**
    * Get a Hyperdrive by its name.
+   * By default it returns the public unencrypted drive
    */
   get (name = 'public') {
     validateName(name)
-    const ns = this.corestore.namespace(name).session({ primaryKey: this.keyPair.secretKey })
-    const _preload = ns._preload.bind(ns)
-    ns._preload = (opts) => this._preload.bind(this)(opts, _preload, ns, name)
-    return new Hyperdrive(ns)
+    const drive = new Hyperdrive(this.corestore, this.keychain.sub(name), { encrypted: name !== 'public' })
+    this._pending = this._pending.then(() => this._ondrive(name))
+    return drive
   }
 
   /**
    * Set the correct and current key and encryption Key (enables future key rotation)
-   * @param {Parameters<import('corestore')['get']>[0]} opts
-   * @param {*} preload orginal ns._preload
-   * @param {import('corestore')} ns
    * @param {string} name
-   * @returns {Promise<any>}
    */
-  async _preload (opts, preload, ns, name) {
-    const isPublic = name === 'public'
-
-    // Get keyPair programatically from name
-    const { from } = await preload(opts)
-
-    // public drive needs no encryption
-    // No need currently to save a record about the public drive
-    if (isPublic) {
-      if (opts.name !== 'db') return { from }
-      const session = this.corestore.get({ keyPair: this.keyPair })
-      await session.ready()
-      return { from: session }
+  async _ondrive (name) {
+    if (this._drives) {
+      await this.ready()
+      const saved = await this._drives.get(name)
+      if (!saved) await this._drives.put(name, b4a.from(''))
     }
-
-    // Add encryption keys for non public drives
-    const encryptionKey = ns._namespace
-
-    await this._drives.ready()
-    const saved = await this._drives.get(name)
-    if (!saved) await this._drives.put(name, b4a.from(''))
-    // TODO enable key rotation, where we overwrite keys, or use saved ones.
-
-    return { from, encryptionKey }
   }
 }
 

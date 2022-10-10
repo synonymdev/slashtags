@@ -85,7 +85,7 @@ declare module 'b4a' {
 
 // file://./node_modules/corestore/index.js
 declare module 'corestore' {
-  import Hypercore, { KeyPair } from 'hypercore';
+  import type Hypercore, { KeyPair } from 'hypercore';
   import { Encoding, string } from 'compact-encoding';
 
   export = class Corestore {
@@ -200,6 +200,7 @@ declare module 'hyperdrive' {
   import EventEmitter from 'events';
   import Hyperblobs from 'hyperblobs';
   import {Readable} from 'stream'
+  import Keychain from 'keypear';
 
   export = class HyperDrive extends EventEmitter {
     constructor(
@@ -208,17 +209,19 @@ declare module 'hyperdrive' {
         _db?: Hyperbee;
         _files?: Hyperbee;
         onwait?: (seq: number, core: Hypercore) => any;
-        encryptionKey?: Uint8Array
+        encryptionKey?: Uint8Array;
+        encrypted: boolean;
       },
     );
     constructor(
       store: Corestore,
-      key: Uint8Array,
+      keychain: Uint8Array | Keychain,
       options?: {
         _db?: Hyperbee;
         _files?: Hyperbee;
         onwait?: (seq: number, core: Hypercore) => any;
-        encryptionKey?: Uint8Array
+        encryptionKey?: Uint8Array;
+        encrypted: boolean;
       },
     );
 
@@ -237,7 +240,6 @@ declare module 'hyperdrive' {
      * Boolean set to true once 'ready' is emitted.
      */
     opened: boolean;
-
     /**
      * The public key of the Hypercore backing the drive.
      */
@@ -246,6 +248,10 @@ declare module 'hyperdrive' {
      * The hash of the public key of the Hypercore backing the drive, can be used to seed the drive using Hyperswarm.
      */
     discoveryKey: Hypercore['discoveryKey'];
+    /**
+     * Encryption key for both db and blobs cores
+     */
+    encryptionKey: Uint8Array;
     /**
      * The public key of the Hyperblobs instance holding blobs associated with entries in the drive.
      */
@@ -498,9 +504,11 @@ declare module 'hyperbee' {
     del(key: any): Promise<any>;
 
     batch(): {
+      tree: Hyperbee,
       put(key: any, value: any): Promise<void>;
       get(key: any): Promise<Node | null>;
       flush(): Promise<>;
+      createReadStream(options?: any): IteratorStream<Node>;
     };
 
     createRangeIterator(options?:any, active?: any): Iterator<Node>
@@ -799,4 +807,31 @@ declare module 'turbo-hash-map' {
 // file://./node_modules/unix-path-resolve/index.js
 declare module 'unix-path-resolve' {
   export = (...paths : string[]) => string
+}
+
+// file://./node_modules/keypear/index.js
+declare module 'keypear' {
+  import type { KeyPair as DHT_KeyPair } from '@hyperswarm/dht';
+
+  export interface KeyPair {
+    publicKey: Uint8Array;
+    scalar: Uint8Array
+  }
+
+  export interface Signer extends KeyPair {
+      writable: true;
+      dh (publicKey: Uint8Array): Uint8Array;
+      sign (signable: Uint8Array): Uint8Array;
+      verify (signable: Uint8Array, signature: Uint8Array): Boolean
+  }
+
+  class Keychain {
+    constructor(home?: Uint8Array | KeyPair | DHT_KeyPair): Keychain
+    static from (keychain?: Keychain | Uint8Array): Keychain
+
+    get (name?: string | Uint8Array | KeyPair): Signer 
+    sub (name?:  string | Uint8Array | KeyPair): Keychain
+  }
+
+  export = Keychain
 }
