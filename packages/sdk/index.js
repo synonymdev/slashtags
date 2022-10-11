@@ -1,6 +1,6 @@
 import Corestore from 'corestore'
 import goodbye from 'graceful-goodbye'
-import crypto, { randomBytes, discoveryKey } from 'hypercore-crypto'
+import crypto, { discoveryKey, randomBytes } from 'hypercore-crypto'
 import EventEmitter from 'events'
 import Hyperswarm from 'hyperswarm'
 import Stream from '@hyperswarm/dht-relay/ws'
@@ -11,6 +11,7 @@ import Slashtag from '@synonymdev/slashtag'
 import * as SlashURL from '@synonymdev/slashtags-url'
 import Hyperdrive from 'hyperdrive'
 import HashMap from 'turbo-hash-map'
+import Drivestore from '@synonymdev/slashdrive'
 
 import * as constants from './lib/constants.js'
 import { defaultStorage } from './lib/storage.js'
@@ -31,9 +32,8 @@ export class SDK extends EventEmitter {
     this.storage = opts.storage || defaultStorage
     this.primaryKey = opts.primaryKey || randomBytes(32)
 
-    this.corestore = new Corestore(this.storage)
-    // Disable _preready to avoid 'Stored core key does not match the provided name' error
-    this.corestore._preready = noop
+    // Avoid closing corestore on closing hyperdrives
+    this.corestore = new Corestore(this.storage).session()
 
     this._relaySocket = typeof opts.relay === 'string' ? new WebSocket(opts.relay) : opts.relay
 
@@ -64,7 +64,7 @@ export class SDK extends EventEmitter {
    * cannot create new writable or readable drives
    */
   get closed () {
-    return this.corestore._closing || this._closing
+    return this.corestore._root._closing || this._closing
   }
 
   /**
@@ -104,14 +104,18 @@ export class SDK extends EventEmitter {
     this.slashtags.set(key, slashtag)
     slashtag.once('close', () => this.slashtags.delete(key))
 
-    this.join(discoveryKey(key))
+    // Automatically announce public drive.
+    const publicDrive = slashtag.drivestore.get()
+    publicDrive.ready()
+      .then(() => this.join(publicDrive.discoveryKey))
+      .catch(noop)
 
     return slashtag
   }
 
   /**
-   * Creates a Hyperdrive and announce the SDK's swarm as a client looking up for peers for it.
-   * @param {Uint8Array} key
+   * Creates a readonly Hyperdrive and announce the SDK's swarm as a client looking up for peers for it.
+   * @param {Uint8Array | string} key
    * @param {object} [opts]
    * @param {Uint8Array} [opts.encryptionKey]
    * @throws {Error} throws an error if the SDK or its corestore is closing
@@ -119,31 +123,32 @@ export class SDK extends EventEmitter {
   drive (key, opts = {}) {
     if (this.closed) throw new Error('SDK is closed')
 
-    // Temporary solution to handle encrypted hyperdrives!
-    // TODO: remove this once Hyperdrive next accept encryption keys
-    const corestore = opts.encryptionKey ? this.corestore.session() : this.corestore
-    if (opts.encryptionKey) {
-      const preload = this.corestore._preload.bind(this.corestore)
-      corestore._preload = _preload.bind(corestore)
-      async function _preload (/** @type {any} */ _opts) {
-        const { from } = await preload(_opts)
-        return { from, encryptionKey: opts.encryptionKey }
+    if (typeof key === 'string') {
+      const parsed = SlashURL.parse(key)
+      if (parsed.protocol === 'slash:') {
+        // Get pulbic drive key!
+        key = new Drivestore(this.corestore, parsed.key).keychain.get('public').publicKey
+      } else {
+        // Parse keys for an encrypted drive
+        key = parsed.key
+        opts.encryptionKey = typeof parsed.privateQuery.encryptionKey === 'string'
+          ? SlashURL.decode(parsed.privateQuery.encryptionKey)
+          : undefined
       }
     }
 
-    const drive = new Hyperdrive(corestore, key)
+    const drive = new Hyperdrive(this.corestore, key, opts)
 
     // Announce the drive as a client
-    const discovery = this.join(crypto.discoveryKey(key), { server: false, client: true })
-    drive.on('close', () => discovery?.destroy())
+    const discovery = this.join(discoveryKey(key), { server: false, client: true })
+    drive.on('close', () => destroyDiscoveryMaybe(discovery))
 
-    // TODO read encrypted drives!
     return drive
   }
 
   /**
    * @type {import("hyperswarm")['join']}
-   * @returns {import('hyperswarm').Discovery | undefined}
+   * @returns {import('hyperswarm').DiscoverySession | undefined}
    *
    * Returns discovery object or undefined if the swarm is destroyed
    * */
@@ -166,7 +171,7 @@ export class SDK extends EventEmitter {
     await Promise.all([...this.slashtags.values()].map(s => s.close()))
 
     await Promise.all([
-      this.corestore.close(),
+      this.corestore._root.close(),
       this.swarm.destroy()
     ])
 
@@ -180,7 +185,16 @@ export {
   constants,
   SlashURL,
   Slashtag,
-  Hyperdrive
+  Hyperdrive,
+  Drivestore
 }
 
 function noop () {}
+
+/**
+ * Destroy discovery session if one or more sessions are left
+ * @param {import('hyperswarm').DiscoverySession | undefined} discovery
+ */
+function destroyDiscoveryMaybe (discovery) {
+  if (discovery && discovery.discovery._sessions.length > 1) discovery.destroy()
+}

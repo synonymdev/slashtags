@@ -19,7 +19,7 @@ test('options - keyPair', async t => {
 
   const drive = other.drivestore.get()
   await drive.ready()
-  t.alike(drive.key, alice.key)
+  t.alike(alice.drivestore.key, alice.key)
 
   await alice.close()
   await other.close()
