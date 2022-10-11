@@ -2,10 +2,12 @@
 declare module '@hyperswarm/testnet' {
   import DHT from '@hyperswarm/dht'
 
-  export default function createTestnet(
+  function createTestnet(
     nodes?: number,
     teardown?: Function,
   ): Promise<{ bootstrap: Array<{ host: string; port: number }>, nodes:DHT[] }>
+
+  export = createTestnet
 }
 
 // file://./node_modules/hyperswarm/index.js
@@ -36,6 +38,13 @@ declare module 'hyperswarm' {
     _serverSessions: number;
   }
 
+  export interface DiscoverySession {
+    discovery: Discovery
+    destroy(): Promise<any>
+    topic: Uint8Array;
+    flushed(): boolean
+  }
+
   export = class hyperswarm extends EventEmitter {
     constructor(opts?: any);
     server: Server;
@@ -57,7 +66,7 @@ declare module 'hyperswarm' {
     join(
       discoveryKey?: Uint8Array,
       options?: { server?: boolean; client?: boolean },
-    ): Discovery;
+    ): DiscoverySession;
     flush(): Promise<undefined>;
   };
 }
@@ -210,7 +219,7 @@ declare module 'hyperdrive' {
         _files?: Hyperbee;
         onwait?: (seq: number, core: Hypercore) => any;
         encryptionKey?: Uint8Array;
-        encrypted: boolean;
+        encrypted?: boolean;
       },
     );
     constructor(
@@ -221,7 +230,7 @@ declare module 'hyperdrive' {
         _files?: Hyperbee;
         onwait?: (seq: number, core: Hypercore) => any;
         encryptionKey?: Uint8Array;
-        encrypted: boolean;
+        encrypted?: boolean;
       },
     );
 
@@ -336,9 +345,6 @@ This allows drive.update to wait for either the findingPeers hook to finish or o
      * Returns a stream of all subpaths of entries in drive stored at paths prefixed by folder.
     */
     readdir(folder): Hyperbee.IteratorStream<string>
-
-    _onwait: Hypercore['onwait'];
-    _openBlobsFromHeader(opts?: { wait: boolean }): Promise<Hyperblobs>;
 
     on(event: 'close', listener: () => any): this;
     on(event: 'blobs', listener: (blobs: Hyperblobs) => any): this;

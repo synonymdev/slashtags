@@ -19,8 +19,8 @@ test('constructor - readonly', async (t) => {
 test('save metadata on flush', async (t) => {
   const drivestore = new Drivestore(new Corestore(RAM))
 
-  drivestore.get('foo')
-  drivestore.get('bar')
+  const foo = drivestore.get('foo')
+  const bar = drivestore.get('bar')
 
   const listBeforeFlush = []
   for await (const entry of drivestore) {
@@ -28,7 +28,7 @@ test('save metadata on flush', async (t) => {
   }
   t.alike(listBeforeFlush, [])
 
-  await drivestore.flush()
+  await Promise.all([foo.ready(), bar.ready()])
 
   const list = []
   for await (const entry of drivestore) {
@@ -48,7 +48,6 @@ test('reopen', async (t) => {
   await drivestore.get('foo').ready()
   await drivestore.get('bar').ready()
 
-  await drivestore.flush()
   await corestore.close()
   t.ok(drivestore.closed, 'drivestore.closed true after corestore is closing')
 

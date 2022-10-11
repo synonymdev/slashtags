@@ -96,7 +96,7 @@ test('drive - internal hyperdrive', async (t) => {
   const profile = { name: 'alice' }
   await drive.put('/profile.json', b4a.from(JSON.stringify(profile)))
 
-  const readonly = sdk.drive(alice.key)
+  const readonly = sdk.drive(drive.key)
 
   t.alike(
     await readonly.get('/profile.json')
@@ -135,7 +135,7 @@ test('drive - close discovery sessions on closing drive', async (t) => {
   await sdk.swarm.flush()
 
   for (let i = 0; i < 10; i++) {
-    const driveSession = remote.drive(alice.key)
+    const driveSession = remote.drive(drive.key)
     await driveSession.close()
   }
 
@@ -162,8 +162,6 @@ test('read only created first', async (t) => {
     primaryKey = sdk.primaryKey
 
     await sdk.close()
-    // TODO move this to sdk.close?
-    await sdk.corestore.close()
   }
 
   const sdk = new SDK({ ...testnet, storage: dir, primaryKey })

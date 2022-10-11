@@ -42,7 +42,7 @@
     "corestore": "6.2.0",
     "graceful-goodbye": "^1.1.0",
     "hypercore-crypto": "^3.3.0",
-    "hyperdrive": "^11.0.0-alpha.3",
+    "hyperdrive": "github:Nazeh/hyperdrive-next#keychain",
     "hyperswarm": "=4.3.3",
     "random-access-memory": "^5.0.1",
     "sodium-universal": "^3.1.0",
