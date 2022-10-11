@@ -1,6 +1,6 @@
 import Corestore from 'corestore'
 import goodbye from 'graceful-goodbye'
-import crypto, { randomBytes } from 'hypercore-crypto'
+import crypto, { discoveryKey, randomBytes } from 'hypercore-crypto'
 import EventEmitter from 'events'
 import Hyperswarm from 'hyperswarm'
 import Stream from '@hyperswarm/dht-relay/ws'
@@ -11,6 +11,7 @@ import Slashtag from '@synonymdev/slashtag'
 import * as SlashURL from '@synonymdev/slashtags-url'
 import Hyperdrive from 'hyperdrive'
 import HashMap from 'turbo-hash-map'
+import Drivestore from '@synonymdev/slashdrive'
 
 import * as constants from './lib/constants.js'
 import { defaultStorage } from './lib/storage.js'
@@ -113,8 +114,8 @@ export class SDK extends EventEmitter {
   }
 
   /**
-   * Creates a Hyperdrive and announce the SDK's swarm as a client looking up for peers for it.
-   * @param {Uint8Array} key
+   * Creates a readonly Hyperdrive and announce the SDK's swarm as a client looking up for peers for it.
+   * @param {Uint8Array | string} key
    * @param {object} [opts]
    * @param {Uint8Array} [opts.encryptionKey]
    * @throws {Error} throws an error if the SDK or its corestore is closing
@@ -122,10 +123,24 @@ export class SDK extends EventEmitter {
   drive (key, opts = {}) {
     if (this.closed) throw new Error('SDK is closed')
 
+    if (typeof key === 'string') {
+      const parsed = SlashURL.parse(key)
+      if (parsed.protocol === 'slash:') {
+        // Get pulbic drive key!
+        key = new Drivestore(this.corestore, parsed.key).keychain.get('public').publicKey
+      } else {
+        // Parse keys for an encrypted drive
+        key = parsed.key
+        opts.encryptionKey = typeof parsed.privateQuery.encryptionKey === 'string'
+          ? SlashURL.decode(parsed.privateQuery.encryptionKey)
+          : undefined
+      }
+    }
+
     const drive = new Hyperdrive(this.corestore, key, opts)
 
     // Announce the drive as a client
-    const discovery = this.join(crypto.discoveryKey(key), { server: false, client: true })
+    const discovery = this.join(discoveryKey(key), { server: false, client: true })
     drive.on('close', () => destroyDiscoveryMaybe(discovery))
 
     return drive
@@ -170,7 +185,8 @@ export {
   constants,
   SlashURL,
   Slashtag,
-  Hyperdrive
+  Hyperdrive,
+  Drivestore
 }
 
 function noop () {}

@@ -36,6 +36,7 @@
   "dependencies": {
     "@hyperswarm/dht": "^6.2.1",
     "@hyperswarm/dht-relay": "^0.3.0",
+    "@synonymdev/slashdrive": "^1.0.0-alpha.15",
     "@synonymdev/slashtag": "^1.0.0-alpha.18",
     "@synonymdev/slashtags-url": "^1.0.0-alpha.0",
     "b4a": "^1.6.0",

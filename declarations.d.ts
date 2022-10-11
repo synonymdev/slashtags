@@ -42,7 +42,7 @@ declare module 'hyperswarm' {
     discovery: Discovery
     destroy(): Promise<any>
     topic: Uint8Array;
-    flushed(): boolean
+    flushed(): Promise<void>
   }
 
   export = class hyperswarm extends EventEmitter {
