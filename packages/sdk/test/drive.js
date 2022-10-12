@@ -2,10 +2,10 @@ import test from 'brittle'
 import createTestnet from '@hyperswarm/testnet'
 import b4a from 'b4a'
 
-import SDK, { SlashURL } from '../index.js'
+import SDK from '../index.js'
 import { tmpdir } from './helpers/index.js'
 
-test('drive - resolve public drive (support url)', async (t) => {
+test('drive - resolve public drive', async (t) => {
   const testnet = await createTestnet(3, t.teardown)
   const sdk = new SDK({ ...testnet, storage: tmpdir() })
 
@@ -18,9 +18,7 @@ test('drive - resolve public drive (support url)', async (t) => {
 
   // other side
   const remote = new SDK({ ...testnet, storage: tmpdir() })
-  const clone = remote.drive(alice.url)
-
-  await clone.ready()
+  const clone = remote.drive(drive.key)
 
   const resolved = await clone.get('/profile.json')
     .then(b => b && JSON.parse(b4a.toString(b)))
@@ -98,7 +96,7 @@ test('drive - internal hyperdrive', async (t) => {
   const profile = { name: 'alice' }
   await drive.put('/profile.json', b4a.from(JSON.stringify(profile)))
 
-  const readonly = sdk.drive(drive.key)
+  const readonly = sdk.drive(alice.key)
 
   t.alike(
     await readonly.get('/profile.json')
@@ -137,7 +135,7 @@ test('drive - close discovery sessions on closing drive', async (t) => {
   await sdk.swarm.flush()
 
   for (let i = 0; i < 10; i++) {
-    const driveSession = remote.drive(drive.key)
+    const driveSession = remote.drive(alice.key)
     await driveSession.close()
   }
 
@@ -164,6 +162,8 @@ test('read only created first', async (t) => {
     primaryKey = sdk.primaryKey
 
     await sdk.close()
+    // TODO move this to sdk.close?
+    await sdk.corestore.close()
   }
 
   const sdk = new SDK({ ...testnet, storage: dir, primaryKey })
@@ -300,38 +300,6 @@ test('swarm destroying before reading local drive', async (t) => {
 
   t.pass('should not hang forever')
 
-  await remote.close()
-})
-
-test('open encrypted drive from url', async (t) => {
-  const testnet = await createTestnet(3, t.teardown)
-  const sdk = new SDK({ ...testnet, storage: tmpdir() })
-
-  const alice = sdk.slashtag('alice')
-  const drive = alice.drivestore.get('private')
-  await drive.ready()
-  await sdk.join(drive.discoveryKey)?.flushed()
-
-  const profile = { name: 'alice' }
-  await drive.put('/profile.json', b4a.from(JSON.stringify(profile)))
-
-  const url = SlashURL.format(drive.key, {
-    protocol: 'slashdrive',
-    fragment: { encryptionKey: SlashURL.encode(drive.encryptionKey) }
-  })
-
-  // other side
-  const remote = new SDK({ ...testnet, storage: tmpdir() })
-  const clone = remote.drive(url)
-
-  await clone.ready()
-
-  const resolved = await clone.get('/profile.json')
-    .then(b => b && JSON.parse(b4a.toString(b)))
-
-  t.alike(resolved, profile)
-
-  await sdk.close()
   await remote.close()
 })
 

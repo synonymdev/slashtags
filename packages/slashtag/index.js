@@ -3,7 +3,6 @@ import RAM from 'random-access-memory'
 import EventEmitter from 'events'
 import DHT from '@hyperswarm/dht'
 import HashMap from 'turbo-hash-map'
-import Keychain from 'keypear'
 import Drivestore from '@synonymdev/slashdrive'
 import { format, encode, parse, decode } from '@synonymdev/slashtags-url'
 
@@ -19,7 +18,6 @@ export class Slashtag extends EventEmitter {
   constructor (opts = {}) {
     super()
     this.keyPair = opts.keyPair || DHT.keyPair()
-    this.keychain = new Keychain(this.keyPair)
     this.key = this.keyPair.publicKey
 
     this.id = encode(this.key)
@@ -32,8 +30,7 @@ export class Slashtag extends EventEmitter {
     /** @type {HashMap<SecretStream>} */
     this.sockets = new HashMap()
 
-    const corestore = opts?.corestore || new Corestore(RAM)
-    this.drivestore = new Drivestore(corestore, this.keychain)
+    this.drivestore = new Drivestore(opts?.corestore || new Corestore(RAM), this.keyPair)
 
     /** @type {Emitter['on']} */ this.on = super.on
     /** @type {Emitter['on']} */ this.once = super.once

@@ -18,7 +18,7 @@ test('close - close all opened resources', async t => {
   t.ok(alice.closed)
   t.ok(bob.closed)
   t.ok(sdk.swarm.destroyed)
-  t.ok(sdk.corestore._root._closing)
+  t.ok(sdk.corestore._closing)
 })
 
 test('not store primary key in rest', async t => {
@@ -54,8 +54,11 @@ test('closed - corestore is closing', async (t) => {
 
   t.ok(sdk.closed)
 
-  writableInflight.ready()
-  readbleInflight.ready()
+  await t.exception(() => writableInflight.ready())
+  await t.exception(() => readbleInflight.ready())
+
+  writableInflight.ready().catch(noop)
+  readbleInflight.ready().catch(noop)
 
   t.pass('catch ready is enouhg to catch inflight errors')
 
@@ -71,3 +74,5 @@ test('closed - corestore is closing', async (t) => {
 
   await sdk.close()
 })
+
+function noop () {}

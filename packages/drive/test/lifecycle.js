@@ -1,23 +1,27 @@
 import test from 'brittle'
 import Corestore from 'corestore'
 import RAM from 'random-access-memory'
+import crypto from 'hypercore-crypto'
 import b4a from 'b4a'
-import Keychain from 'keypear'
 
 import Drivestore from '../index.js'
 import { tmpdir } from './helpers/index.js'
 
-test('constructor - readonly', async (t) => {
-  const readonly = new Drivestore(new Corestore(RAM), b4a.alloc(32))
-  // get public drive to ensure it does not throw attempting saving metadata
-  readonly.get()
-  await readonly.ready()
+test('constructor', async (t) => {
+  const keyPair = crypto.keyPair()
+  const corestore = new Corestore(RAM)
+  await corestore.ready()
 
-  t.absent(readonly.writable)
+  const drivestore = new Drivestore(corestore, keyPair)
+  await drivestore.ready()
+
+  t.alike(drivestore.corestore.primaryKey, keyPair.secretKey)
+  t.unlike(drivestore.corestore.primaryKey, corestore.primaryKey)
+  t.ok(drivestore._metadata.feed.encryptionKey)
 })
 
-test('save metadata on flush', async (t) => {
-  const drivestore = new Drivestore(new Corestore(RAM))
+test('save metadata on ready', async (t) => {
+  const drivestore = new Drivestore(new Corestore(RAM), crypto.keyPair())
 
   const foo = drivestore.get('foo')
   const bar = drivestore.get('bar')
@@ -40,9 +44,7 @@ test('save metadata on flush', async (t) => {
 test('reopen', async (t) => {
   const dir = tmpdir()
   const corestore = new Corestore(dir)
-
-  const keychain = new Keychain()
-  const drivestore = new Drivestore(corestore, keychain)
+  const drivestore = new Drivestore(corestore, crypto.keyPair())
 
   await drivestore.get().ready()
   await drivestore.get('foo').ready()
@@ -51,36 +53,37 @@ test('reopen', async (t) => {
   await corestore.close()
   t.ok(drivestore.closed, 'drivestore.closed true after corestore is closing')
 
-  const reopened = new Drivestore(new Corestore(dir), keychain)
+  const reopened = new Drivestore(new Corestore(dir), drivestore.keyPair)
   await reopened.ready()
 
   const list = []
   for await (const entry of reopened) {
     list.push(entry?.name)
   }
-  t.alike(list, ['bar', 'foo', 'public'], 'reopend metadata from storage')
+  t.alike(list, ['bar', 'foo'], 'reopend metadata from storage')
 })
 
 test('multiple drivestores', async (t) => {
-  const corestore = new Corestore(RAM)
-  await corestore.ready()
+  const ns = new Corestore(RAM)
+  await ns.ready()
 
-  const a = new Drivestore(corestore)
+  const a = new Drivestore(ns, crypto.keyPair())
   await a.ready()
-  const b = new Drivestore(corestore)
+  const b = new Drivestore(ns, crypto.keyPair())
   await b.ready()
 
-  const pubA = a.get()
-  await pubA.ready()
-  const privA = a.get('foo')
-  await privA.ready()
+  t.alike(a.corestore._namespace, b4a.alloc(32))
+  t.alike(b.corestore._namespace, b4a.alloc(32))
+  t.ok(a.corestore.primaryKey)
+  t.unlike(a.corestore.primaryKey, b.corestore.primaryKey)
+  t.unlike(a._metadata.feed.key, b._metadata.feed.key)
 
-  const pubB = b.get()
-  await pubB.ready()
-  const privB = b.get('foo')
-  await privB.ready()
+  t.pass('does not close corestore in drivestore')
+})
 
-  t.unlike(pubA.key, pubB.key)
-  t.unlike(privA.key, privB.key)
-  t.unlike(a._metadata?.feed.key, b._metadata?.feed.key)
+test('open on closing corestore', async (t) => {
+  const corestore = new Corestore(RAM)
+  const drive = new Drivestore(corestore, crypto.keyPair())
+  corestore.close()
+  t.pass(await drive.ready())
 })

@@ -34,7 +34,6 @@
     "@synonymdev/slashdrive": "^1.0.0-alpha.15",
     "@synonymdev/slashtags-url": "^1.0.0-alpha.1",
     "corestore": "6.2.0",
-    "keypear": "^1.1.1",
     "random-access-memory": "^5.0.1",
     "turbo-hash-map": "^1.0.3"
   },
