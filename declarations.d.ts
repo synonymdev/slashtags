@@ -201,6 +201,11 @@ declare module 'random-access-web' {
   export = foo;
 }
 
+declare module '@synonymdev/hyperdrive' {
+  import Hyperdrive from 'hyperdrive';
+  export = Hyperdrive
+}
+
 // file://./node_modules/hyperdrive/index.js
 declare module 'hyperdrive' {
   import Hypercore from 'hypercore';
@@ -832,8 +837,17 @@ declare module 'keypear' {
   }
 
   class Keychain {
-    constructor(home?: Uint8Array | KeyPair | DHT_KeyPair): Keychain
+    constructor(
+      home?: Uint8Array | KeyPair | DHT_KeyPair,
+      base?: Uint8Array | KeyPair | DHT_KeyPair | null,
+      tweak?: Uint8Array | KeyPair | DHT_KeyPair | null
+    ): Keychain
     static from (keychain?: Keychain | Uint8Array): Keychain
+
+    tweak: KeyPair;
+    head: KeyPair;
+    home: KeyPair;
+    base: KeyPair;
 
     get (name?: string | Uint8Array | KeyPair): Signer 
     sub (name?:  string | Uint8Array | KeyPair): Keychain

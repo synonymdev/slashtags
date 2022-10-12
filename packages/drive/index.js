@@ -1,29 +1,13 @@
-import Hyperdrive from 'hyperdrive'
+import Hyperdrive from '@synonymdev/hyperdrive'
 import Hyperbee from 'hyperbee'
 import safetyCatch from 'safety-catch'
 import Keychain from 'keypear'
 import b4a from 'b4a'
 
 const NAMESPACE = 'slashdrive'
+const PUBLIC_DRIVE_NAME = 'public-drive'
 const METADATA_NAME = 'metadata'
-
-// TODO: Remove if Hyperdrive added support for preready
-// https://github.com/hypercore-protocol/hyperdrive-next/pull/19
-class WithPrereadyDrive extends Hyperdrive {
-  /** @param {any[]} args */
-  constructor (...args) {
-    // @ts-ignore
-    super(...args)
-    this.opening = this._open(args[2]._preready)
-  }
-
-  /** @param {(drive: Hyperdrive)=> Promise<void>} preready */
-  async _open (preready) {
-    // @ts-ignore
-    await super._open()
-    await preready?.(this)
-  }
-}
+const DRIVES_NAME = 'drives'
 
 export class Drivestore {
   /**
@@ -33,13 +17,24 @@ export class Drivestore {
   constructor (corestore, keychain) {
     /** @type {import('corestore')} */
     this.corestore = corestore
-
     keychain = Keychain.from(keychain)
+
+    /** Original signer (representing the identity keys) */
     this.signer = keychain.get()
+
+    /** namespaced chain (segregates drivestore keys for other domains) */
     this.keychain = keychain.sub(NAMESPACE)
 
+    /** private keychain that prevents discovering child keys from root signer */
+    this.privatechain = this.signer.scalar
+      ? this.keychain.sub(this.signer.scalar)
+      : undefined
+
+    this.driveschain = this.privatechain?.sub(DRIVES_NAME)
+
     if (this.writable) {
-      const metadataSigner = this.keychain.get(METADATA_NAME)
+      const hardenedchain = this.keychain.sub(this.signer.scalar)
+      const metadataSigner = hardenedchain.get(METADATA_NAME)
       /** @type {import('hypercore')} */
       const metadataCore = this.corestore.get({
         ...metadataSigner,
@@ -71,7 +66,7 @@ export class Drivestore {
   }
 
   get writable () {
-    return !!this.keychain.get().scalar
+    return !!this.signer.scalar
   }
 
   get closed () {
@@ -102,7 +97,14 @@ export class Drivestore {
     /** @param {Hyperdrive} drive */
     const _preready = (drive) => this._preready(name, drive).catch(safetyCatch)
     const opts = { encrypted: name !== 'public', _preready }
-    return new WithPrereadyDrive(this.corestore, this.keychain.sub(name), opts)
+
+    const keychain = name === 'public'
+      ? this.keychain.sub(PUBLIC_DRIVE_NAME)
+      : this.driveschain ? this.driveschain.sub(name) : undefined
+
+    if (!keychain) throw new Error('Can not derive private drives in readonly drivestore')
+
+    return new Hyperdrive(this.corestore, keychain, opts)
   }
 
   /**

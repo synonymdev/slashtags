@@ -1,6 +1,6 @@
 {
   "name": "@synonymdev/slashdrive",
-  "version": "1.0.0-alpha.15",
+  "version": "1.0.0-alpha.18",
   "description": "drive",
   "type": "module",
   "main": "index.js",
@@ -30,9 +30,9 @@
     "!**/*.tsbuildinfo"
   ],
   "dependencies": {
+    "@synonymdev/hyperdrive": "^11.0.0-alpha.13",
     "corestore": "6.2.0",
     "hyperbee": "^2.0.1",
-    "hyperdrive": "github:Nazeh/hyperdrive-next#keychain",
     "keypear": "^1.1.1",
     "safety-catch": "^1.0.2"
   },
