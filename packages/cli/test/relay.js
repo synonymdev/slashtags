@@ -7,7 +7,7 @@ import Stream from '@hyperswarm/dht-relay/ws'
 
 import run from '../lib/daemon/index.js'
 
-test('basic', async t => {
+test.skip('basic', async t => {
   const testnet = await createTestnet(4, t.teardown)
 
   const relay = await run({ dhtOpts: testnet })
