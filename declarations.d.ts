@@ -2,12 +2,10 @@
 declare module '@hyperswarm/testnet' {
   import DHT from '@hyperswarm/dht'
 
-  function createTestnet(
+  export default function createTestnet(
     nodes?: number,
     teardown?: Function,
   ): Promise<{ bootstrap: Array<{ host: string; port: number }>, nodes:DHT[] }>
-
-  export = createTestnet
 }
 
 // file://./node_modules/hyperswarm/index.js
@@ -38,13 +36,6 @@ declare module 'hyperswarm' {
     _serverSessions: number;
   }
 
-  export interface DiscoverySession {
-    discovery: Discovery
-    destroy(): Promise<any>
-    topic: Uint8Array;
-    flushed(): Promise<void>
-  }
-
   export = class hyperswarm extends EventEmitter {
     constructor(opts?: any);
     server: Server;
@@ -66,7 +57,7 @@ declare module 'hyperswarm' {
     join(
       discoveryKey?: Uint8Array,
       options?: { server?: boolean; client?: boolean },
-    ): DiscoverySession;
+    ): Discovery;
     flush(): Promise<undefined>;
   };
 }
@@ -94,7 +85,7 @@ declare module 'b4a' {
 
 // file://./node_modules/corestore/index.js
 declare module 'corestore' {
-  import type Hypercore, { KeyPair } from 'hypercore';
+  import Hypercore, { KeyPair } from 'hypercore';
   import { Encoding, string } from 'compact-encoding';
 
   export = class Corestore {
@@ -209,7 +200,6 @@ declare module 'hyperdrive' {
   import EventEmitter from 'events';
   import Hyperblobs from 'hyperblobs';
   import {Readable} from 'stream'
-  import Keychain from 'keypear';
 
   export = class HyperDrive extends EventEmitter {
     constructor(
@@ -218,19 +208,17 @@ declare module 'hyperdrive' {
         _db?: Hyperbee;
         _files?: Hyperbee;
         onwait?: (seq: number, core: Hypercore) => any;
-        encryptionKey?: Uint8Array;
-        encrypted?: boolean;
+        encryptionKey?: Uint8Array
       },
     );
     constructor(
       store: Corestore,
-      keychain: Uint8Array | Keychain,
+      key: Uint8Array,
       options?: {
         _db?: Hyperbee;
         _files?: Hyperbee;
         onwait?: (seq: number, core: Hypercore) => any;
-        encryptionKey?: Uint8Array;
-        encrypted?: boolean;
+        encryptionKey?: Uint8Array
       },
     );
 
@@ -249,6 +237,7 @@ declare module 'hyperdrive' {
      * Boolean set to true once 'ready' is emitted.
      */
     opened: boolean;
+
     /**
      * The public key of the Hypercore backing the drive.
      */
@@ -257,10 +246,6 @@ declare module 'hyperdrive' {
      * The hash of the public key of the Hypercore backing the drive, can be used to seed the drive using Hyperswarm.
      */
     discoveryKey: Hypercore['discoveryKey'];
-    /**
-     * Encryption key for both db and blobs cores
-     */
-    encryptionKey: Uint8Array;
     /**
      * The public key of the Hyperblobs instance holding blobs associated with entries in the drive.
      */
@@ -345,6 +330,9 @@ This allows drive.update to wait for either the findingPeers hook to finish or o
      * Returns a stream of all subpaths of entries in drive stored at paths prefixed by folder.
     */
     readdir(folder): Hyperbee.IteratorStream<string>
+
+    _onwait: Hypercore['onwait'];
+    _openBlobsFromHeader(opts?: { wait: boolean }): Promise<Hyperblobs>;
 
     on(event: 'close', listener: () => any): this;
     on(event: 'blobs', listener: (blobs: Hyperblobs) => any): this;
@@ -510,11 +498,9 @@ declare module 'hyperbee' {
     del(key: any): Promise<any>;
 
     batch(): {
-      tree: Hyperbee,
       put(key: any, value: any): Promise<void>;
       get(key: any): Promise<Node | null>;
       flush(): Promise<>;
-      createReadStream(options?: any): IteratorStream<Node>;
     };
 
     createRangeIterator(options?:any, active?: any): Iterator<Node>
@@ -813,31 +799,4 @@ declare module 'turbo-hash-map' {
 // file://./node_modules/unix-path-resolve/index.js
 declare module 'unix-path-resolve' {
   export = (...paths : string[]) => string
-}
-
-// file://./node_modules/keypear/index.js
-declare module 'keypear' {
-  import type { KeyPair as DHT_KeyPair } from '@hyperswarm/dht';
-
-  export interface KeyPair {
-    publicKey: Uint8Array;
-    scalar: Uint8Array
-  }
-
-  export interface Signer extends KeyPair {
-      writable: true;
-      dh (publicKey: Uint8Array): Uint8Array;
-      sign (signable: Uint8Array): Uint8Array;
-      verify (signable: Uint8Array, signature: Uint8Array): Boolean
-  }
-
-  class Keychain {
-    constructor(home?: Uint8Array | KeyPair | DHT_KeyPair): Keychain
-    static from (keychain?: Keychain | Uint8Array): Keychain
-
-    get (name?: string | Uint8Array | KeyPair): Signer 
-    sub (name?:  string | Uint8Array | KeyPair): Keychain
-  }
-
-  export = Keychain
 }

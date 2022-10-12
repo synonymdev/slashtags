@@ -1,60 +1,34 @@
 import Hyperdrive from 'hyperdrive'
 import Hyperbee from 'hyperbee'
-import safetyCatch from 'safety-catch'
-import Keychain from 'keypear'
 import b4a from 'b4a'
+import safetyCatch from 'safety-catch'
 
-const NAMESPACE = 'slashdrive'
-const METADATA_NAME = 'metadata'
-
-// TODO: Remove if Hyperdrive added support for preready
-// https://github.com/hypercore-protocol/hyperdrive-next/pull/19
-class WithPrereadyDrive extends Hyperdrive {
-  /** @param {any[]} args */
-  constructor (...args) {
-    // @ts-ignore
-    super(...args)
-    this.opening = this._open(args[2]._preready)
-  }
-
-  /** @param {(drive: Hyperdrive)=> Promise<void>} preready */
-  async _open (preready) {
-    // @ts-ignore
-    await super._open()
-    await preready?.(this)
-  }
-}
+const METADATA_KEY = 'slashtags-drivestore-metadata'
 
 export class Drivestore {
   /**
    * @param {import('corestore')} corestore
-   * @param {import('keypear') | Uint8Array} [keychain]
+   * @param {import('@hyperswarm/dht').KeyPair} keyPair
    */
-  constructor (corestore, keychain) {
+  constructor (corestore, keyPair) {
+    this.fava = Math.random()
+    this.keyPair = keyPair
     /** @type {import('corestore')} */
-    this.corestore = corestore
+    this.corestore = corestore.session({ primaryKey: this.keyPair.secretKey, namespace: null })
 
-    keychain = Keychain.from(keychain)
-    this.signer = keychain.get()
-    this.keychain = keychain.sub(NAMESPACE)
-
-    if (this.writable) {
-      const metadataSigner = this.keychain.get(METADATA_NAME)
-      /** @type {import('hypercore')} */
-      const metadataCore = this.corestore.get({
-        ...metadataSigner,
-        encryptionKey: metadataSigner.scalar
-      })
-      this._metadata = new Hyperbee(metadataCore, { keyEncoding: 'utf8' })
-      this._drives = this._metadata.sub('drives')
-    }
+    const metadataCore = this.corestore.get({
+      name: METADATA_KEY,
+      encryptionKey: this.keyPair.secretKey
+    })
+    this._metadata = new Hyperbee(metadataCore, { keyEncoding: 'utf8' })
+    this._drives = this._metadata.sub('drives')
 
     this._opening = this._open().catch(safetyCatch)
   }
 
   /** @returns {import('hyperbee').Iterator<{name: string}>} */
   [Symbol.asyncIterator] () {
-    if (!this._drives || !this.opened) return emptyIterator
+    if (!this.opened) return emptyIterator
     const iterator = this._drives.createReadStream()[Symbol.asyncIterator]()
     return {
       async next () {
@@ -65,21 +39,12 @@ export class Drivestore {
     }
   }
 
-  /** Key of the root signer helpful in creating readonly drivestore */
-  get key () {
-    return this.signer.publicKey
-  }
-
-  get writable () {
-    return !!this.keychain.get().scalar
-  }
-
   get closed () {
     return this.corestore._root._closing
   }
 
   async _open () {
-    await this._metadata?.feed.ready()
+    await this._drives.feed.ready()
     this.opened = true
   }
 
@@ -94,28 +59,47 @@ export class Drivestore {
 
   /**
    * Get a Hyperdrive by its name.
-   * By default it returns the public unencrypted drive
-   * @returns {Hyperdrive}
    */
   get (name = 'public') {
     validateName(name)
-    /** @param {Hyperdrive} drive */
-    const _preready = (drive) => this._preready(name, drive).catch(safetyCatch)
-    const opts = { encrypted: name !== 'public', _preready }
-    return new WithPrereadyDrive(this.corestore, this.keychain.sub(name), opts)
+    const ns = this.corestore.namespace(name).session({ primaryKey: this.keyPair.secretKey })
+    const _preload = ns._preload.bind(ns)
+    ns._preload = (opts) => this._preload.bind(this)(opts, _preload, ns, name)
+    return new Hyperdrive(ns)
   }
 
   /**
    * Set the correct and current key and encryption Key (enables future key rotation)
+   * @param {Parameters<import('corestore')['get']>[0]} opts
+   * @param {*} preload orginal ns._preload
+   * @param {import('corestore')} ns
    * @param {string} name
-   * @param {Hyperdrive} _
+   * @returns {Promise<any>}
    */
-  async _preready (name, _) {
-    if (this._drives) {
-      await this.ready()
-      const saved = await this._drives.get(name)
-      if (!saved) await this._drives.put(name, b4a.from(''))
+  async _preload (opts, preload, ns, name) {
+    const isPublic = name === 'public'
+
+    // Get keyPair programatically from name
+    const { from } = await preload(opts)
+
+    // public drive needs no encryption
+    // No need currently to save a record about the public drive
+    if (isPublic) {
+      if (opts.name !== 'db') return { from }
+      const session = this.corestore.get({ keyPair: this.keyPair })
+      await session.ready()
+      return { from: session }
     }
+
+    // Add encryption keys for non public drives
+    const encryptionKey = ns._namespace
+
+    await this._drives.ready()
+    const saved = await this._drives.get(name)
+    if (!saved) await this._drives.put(name, b4a.from(''))
+    // TODO enable key rotation, where we overwrite keys, or use saved ones.
+
+    return { from, encryptionKey }
   }
 }
 

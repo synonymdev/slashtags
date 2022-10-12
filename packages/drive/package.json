@@ -30,14 +30,13 @@
     "!**/*.tsbuildinfo"
   ],
   "dependencies": {
+    "b4a": "^1.6.0",
     "corestore": "6.2.0",
     "hyperbee": "^2.0.1",
-    "hyperdrive": "github:Nazeh/hyperdrive-next#keychain",
-    "keypear": "^1.1.1",
+    "hyperdrive": "^11.0.0-alpha.5",
     "safety-catch": "^1.0.2"
   },
   "devDependencies": {
-    "b4a": "^1.6.0",
     "brittle": "^3.0.2",
     "depcheck": "^1.4.3",
     "hypercore-crypto": "^3.3.0",

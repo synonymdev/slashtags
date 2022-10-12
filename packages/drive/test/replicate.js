@@ -1,29 +1,18 @@
 import test from 'brittle'
 import Corestore from 'corestore'
 import RAM from 'random-access-memory'
+import crypto from 'hypercore-crypto'
 import b4a from 'b4a'
 
 import Drivestore from '../index.js'
 
-test('replicate - public', async (t) => {
-  const drivestore = new Drivestore(new Corestore(RAM))
-  const clone = new Drivestore(new Corestore(RAM), drivestore.key)
-
-  const s1 = clone.replicate(true)
-  s1.pipe(drivestore.replicate(false)).pipe(s1)
-
-  const buf = b4a.from('bar')
-  await drivestore.get().put('/foo', buf)
-  t.alike(await clone.get().get('/foo'), buf)
-})
-
-test('replicate - private', async (t) => {
+test('replicate', async (t) => {
   const corestore = new Corestore(RAM)
-  const drivestore = new Drivestore(corestore)
+  const drivestore = new Drivestore(corestore, crypto.keyPair())
   const remote = new Corestore(RAM)
 
-  const s1 = remote.replicate(true)
-  s1.pipe(drivestore.replicate(false)).pipe(s1)
+  const s3 = remote.replicate(true)
+  s3.pipe(drivestore.replicate(false)).pipe(s3)
 
   {
     const drive = drivestore.get('private')
@@ -46,11 +35,11 @@ test('replicate - private', async (t) => {
 
 test('replicate through passed corestore', async (t) => {
   const corestore = new Corestore(RAM)
-  const drivestore = new Drivestore(corestore)
+  const drivestore = new Drivestore(corestore, crypto.keyPair())
   const remote = new Corestore(RAM)
 
-  const s1 = remote.replicate(true)
-  s1.pipe(corestore.replicate(false)).pipe(s1)
+  const s3 = remote.replicate(true)
+  s3.pipe(corestore.replicate(false)).pipe(s3)
 
   {
     const drive = drivestore.get('private')
@@ -72,6 +61,6 @@ test('replicate through passed corestore', async (t) => {
 })
 
 test('get - validate drive name', (t) => {
-  const drivestore = new Drivestore(new Corestore(RAM))
+  const drivestore = new Drivestore(new Corestore(RAM), crypto.keyPair())
   t.exception(() => drivestore.get('foo:'), /Invalid drive name/)
 })
