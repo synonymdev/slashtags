@@ -1,6 +1,6 @@
 {
   "name": "@synonymdev/slashtag",
-  "version": "1.0.0-alpha.19",
+  "version": "1.0.0-alpha.22",
   "description": "Identity, discovery, and p2p communication for Slashtags protocol.",
   "type": "module",
   "main": "index.js",
@@ -31,7 +31,7 @@
   ],
   "dependencies": {
     "@hyperswarm/dht": "^6.2.1",
-    "@synonymdev/slashdrive": "^1.0.0-alpha.15",
+    "@synonymdev/slashdrive": "^1.0.0-alpha.18",
     "@synonymdev/slashtags-url": "^1.0.0-alpha.1",
     "corestore": "6.2.0",
     "keypear": "^1.1.1",

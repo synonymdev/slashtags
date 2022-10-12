@@ -9,7 +9,7 @@ import WebSocket from 'ws'
 import DHT from '@hyperswarm/dht'
 import Slashtag from '@synonymdev/slashtag'
 import * as SlashURL from '@synonymdev/slashtags-url'
-import Hyperdrive from 'hyperdrive'
+import Hyperdrive from '@synonymdev/hyperdrive'
 import HashMap from 'turbo-hash-map'
 import Drivestore from '@synonymdev/slashdrive'
 
@@ -127,7 +127,7 @@ export class SDK extends EventEmitter {
       const parsed = SlashURL.parse(key)
       if (parsed.protocol === 'slash:') {
         // Get pulbic drive key!
-        key = new Drivestore(this.corestore, parsed.key).keychain.get('public').publicKey
+        key = new Drivestore(this.corestore, parsed.key).keychain.get('public-drive').publicKey
       } else {
         // Parse keys for an encrypted drive
         key = parsed.key

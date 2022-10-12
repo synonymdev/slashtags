@@ -68,17 +68,3 @@ test('get - public drive (readonly)', async (t) => {
   t.absent(clonedPublicDrive.encryptionKey)
   t.absent(clonedPublicDrive.core.writable)
 })
-
-test('get - private drives should not be discoverable', async (t) => {
-  const drivestore = new Drivestore(new Corestore(tmpdir()), new Keychain())
-  const publicDrive = drivestore.get()
-
-  const clone = new Drivestore(new Corestore(tmpdir()), drivestore.key)
-  const clonedPublicDrive = clone.get()
-
-  await Promise.all([publicDrive, clonedPublicDrive].map(d => d.ready()))
-
-  t.alike(clonedPublicDrive.key, publicDrive.key)
-  t.absent(clone.driveschain)
-  t.exception(() => clone.get('foo'), /Can not derive private drives in readonly drivestore/)
-})

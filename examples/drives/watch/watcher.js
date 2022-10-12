@@ -3,20 +3,12 @@ import logUpdate from 'log-update';
 import SDK from '@synonymdev/slashtags-sdk';
 import RAM from 'random-access-memory'
 
-const driveOpts = {
-  key: b4a.from(
-    '69b04ea6e3b62245048a8efe8c17c6affb91e07ea1e28c911c2acdfd4d851f5c',
-    'hex',
-  )
-};
+const url = 'slashfeed:xetgp4u9hrhdbzhfkmmc6goe96754of4jxhzqcpdtecbq5ykj3py#encryptionKey=6fq36pb1657x33cbzkg56zpxqpo76xqby8jgnixnztrte86kphbo'
 
-console.log('Setting up slashtag...');
-const sdk = new SDK({
-  storage: RAM,
-  primaryKey: b4a.from('b'.repeat(64), 'hex'),
-});
-const watcher = sdk.drive(driveOpts.key)
-await watcher.update()
+const sdk = new SDK({ storage: RAM });
+const watcher = sdk.drive(url)
+await watcher.ready()
+console.log("Watching: ", url)
 
 watcher.core.on('append', async () => {
   const trade = await watcher.get('/feeds/bitfinex/latest-trade')

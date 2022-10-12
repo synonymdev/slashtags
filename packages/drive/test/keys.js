@@ -76,7 +76,8 @@ test('prove ownership of private drive by exposing tweak', async (t) => {
   t.alike(fooKeychain?.head.publicKey, foo.key)
 
   const readonly = new Drivestore(new Corestore(RAM), drivestore.key)
+  t.exception(() => readonly.get('foo'), /Can not derive private drives in readonly drivestore/)
 
-  const suggested = new Keychain(readonly.keychain.home, null, fooKeychain?.tweak)
-  t.alike(suggested.head.publicKey, foo.key)
+  const withTweak = new Keychain(readonly.keychain.home, null, fooKeychain?.tweak)
+  t.alike(withTweak.head.publicKey, foo.key)
 })
