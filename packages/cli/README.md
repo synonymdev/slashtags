@@ -1,14 +1,14 @@
 # Slashtags CLI
 
-Command line interface for Slashtags
+Provides a daemon with a DHT relay for Slashtags SDK.
 
-# Install
+# Installation
 
 ```bash
 npm install -g @synonymdev/slashtags-cli
 ```
 
-## Usag
+## Usage
 
 ```bash
 slash help
