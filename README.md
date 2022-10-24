@@ -58,7 +58,7 @@ While much of the power of Slashtags comes via these hyperdrives, the key pairs 
 
 ### Slashtags in action
 
-The first showcase for Slashtags is the [Bitkit wallet](https://github.com/synonymdev/bitkit). The following features are powered by Slashtags: profiles, contacts, payment preferences, authentication, private feeds, and public feeds. You can also find a playground with widgets on our [website](https://www.slashtags.to/#playground). 
+The first showcase for Slashtags is the [Bitkit wallet](https://github.com/synonymdev/bitkit). The following features are powered by Slashtags: profiles, contacts, payment preferences, authentication, private feeds, and public feeds. You can also find a playground with widgets on our [website](https://www.slashtags.to/#playground). Finally, we also have an [authentication demo](https://github.com/synonymdev/slashtags-auth-demo). 
 
 We are currently developing various other applications that implement Slashtags and are actively supporting others with their own Slashtags projects. 
 
