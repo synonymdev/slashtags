@@ -4,7 +4,7 @@ Demonstrates the SDK's usage in the browser.
 
 ## Usage
 
-First you need to run a DHT relay. Execute the following commands: 
+First you need to run a realy: 
 
 ```bash
 npm i -g @synonymdev/slashtags-cli
@@ -12,13 +12,13 @@ npm i -g @synonymdev/slashtags-cli
 slash daemon start
 ```
 
-Then start serving the simple html.
+Then start serving the simple html:
 
 ```js
 npm start
 ```
 
-Finally check console, you should see the following:
+Finally check console, you should see:
 
 ```js
 {alice: 'slash:9shucowxq7gikckzeij1qnpmazexzst5cg9x75fd9fmu6nc8t4gy'}
