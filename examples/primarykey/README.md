@@ -1,10 +1,9 @@
 # Slashtags primaryKey derivation
 
-Demonstrate deriving the primaryKey from a mnemonic seed phrase.
+Demonstrates how the primaryKey is derrived from a series of BIP-39 mnemonic words. 
 
-Read more about the [Key Derivation](../../specs/slashtags-key-derivation.md) spec.
+Read more about the specifications of key derivation [here](../../specs/slashtags-key-derivation.md).
 
-Uses `bip39` to generate a mnemonic phrase, and `bip32` to derive the primary key.
 
 ## Usage
 
