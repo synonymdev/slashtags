@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://github.com/synonymdev/slashtags" title="Slashtags">
-    <img alt="slashtags" src="./docs/_img/slashtags_brand_mark.png" width="150"></img>
+    <img alt="slashtags" src="./docs/_img/slashtags-logo.png" width="150"></img>
   </a>
 </p>
 
