@@ -14,30 +14,17 @@
 
 ## Overview
 
-Reboot the Web with Slashtags.
-
-Slashtags is an open-source protocol for creating scalable and secure P2P applications. What Bitcoin has done for money and payments, Slashtags seeks to achieve for the rest of our digital data and interactions. 
-
-Slashtags enables you to build applications and websites that give users control over their social profiles, contacts, payment preferences, and other data; allow them to find your server in a p2p fashion and authenticate with just a key; stream account data from slashtag-enabled services; and more. 
-
-All the [keypairs](./specs/slashtags-key-derivation.md) generated within Slashtags are based on a BIP-39 series of mnemonic words. 
-
+Slashtags aims to enable self-sovereign identity, local first applications, reputation and web-of-trust.
 
 ### The problem
 
-The modern Web is commonly called the Web 2.0. As the term was originally intended, it refers to a Web with services that are marked by interactive, personalized, easy, and engaging user experiences, interoperability, and scalability. This in contrast to Web 1.0 services, which were instead much more static, isolated, and less scalable. Think your personal website on Geocities from 1997.
-
-While the Web 2.0 has brought a vastly enriched user experience, it has also become synonymous with the oppressive dominance of a few large tech companies—such as Google, Facebook, Youtube, and Twitter—and governments, particularly those with pronounced authoritarian leanings. The modern Web is increasingly marked by censorship, including financial censorship; active, passive, and analytical data collection, which harms our privacy and security; centralized chokepoints for key services against which users are relatively powerless (e.g., drastic changes in a service's policies, interface, or even sunsetting the service) and which form central points of failure; and a highly inefficient use of our communication infrastructure.
-
-At the core of these problems is that regular Web users cannot easily identify themselves in a trustworthy manner online, and that the machines of ordinary users cannot easily communicate directly.
-
-
-### Slashtags' solution
+IPs (Internet Protocol address) identifies where your machine exists both geographically and topologically. But you yourself (or your machine for that matter) can't be identified or addressed regardless of its location or the network it is using.
 
 A [slashtag](./packages/slashtag/README.md) is a key pair [derived](./specs/slashtags-key-derivation.md) from a standard BIP-39 series of mnemonic words, which is also used to generate Bitcoin addresses in practically all modern hardware and software wallets. Typically slashtags are associated with [hyperdrives](./packages/drive/README.md), personal drives for storing data that can be shared within a peer to peer network.
 
-Just as Bitcoin was able to decentralize money and payments with the clever use of cryptographic keys, Slashtags can potentially decentralize much of the rest of our digital data and interactions. It's a simple, yet powerful idea.
+### Slashtag's solution
 
+Slashtags solution is to use keyPairs to identify and address peers and attach metadata about them, giving rise to reputation, and private yet interoperable webs-of-trust.
 
 ### How it works
 
@@ -64,27 +51,26 @@ We currently support three public data widgets that can be displayed within the 
 
 Finally, we also have an [authentication demo](https://github.com/synonymdev/slashtags-auth-demo).
 
-We are currently developing various other applications that implement Slashtags and are actively supporting others with their own Slashtags projects. 
+That is deceivingly simple, but very powerful. For example you can publish your current Email address, Website URL, Twitter handle, Facebook profile, etc. And your contacts who identify you through a Slashtags compatible wallet can always find and reach you, making your identity and reputation censorship resistant.
 
+But you can also directly contact a Slashtag owner if they are listening on their public key, independently from their IP address, thanks to [Hyperswarm](https://github.com/hyperswarm/hyperswarm)'s Distributed Hash Table (DHT).
 
-## Structure
+Slashtags can also create private encrypted drives and share it with one or many peers, serving as either a private feed, or a one-to-one asynchronous communication channel.
 
 The SDK is offered as a single module in the [sdk package](./packages/sdk). The other packages contain components of the SDK. These include the following: 
 
-- [`/packages/slashtag`](./packages/slashtag): Identity layer of Slashtags protocol.
-- [`/packages/drive`](./packages/drive): Hyperdrive manager for each Slashtag.
-- [`/packages/sdk`](./packages/sdk): Batteries-included Software development kit.
-- [`/packages/cli`](./packages/cli): Provides a daemon with DHT relay for Slashtags SDK.
-- [`/packages/rpc`](./packages/rpc): Helper class to create RPC server/clients on top of slashtags.
-- [`/packages/url`](./packages/url): Helper functions for encoding/decoding slashtags urls.
 
+We realize the existing primitives are not enough on their own to give rise to a web-of-trust and a scalable digital economy that can't be held hostage to the same problems as the current one.
+
+But we will build applications that demonstrate that future, to learn what is missing, and build the missing parts as we go.
 
 ## Installation
 
 ```bash
-npm install @synonymdev/slashtags-sdk,
+npm install @synonymdev/slashtags-sdk
 ```
-To create a slashtag with the name 'alice' and to output the url, proceed as follows:
+
+Then start a node in your app:
 
 ```javascript
 import SDK from '@synonymdev/slashtags-sdk';
@@ -98,8 +84,7 @@ console.log(alice.url.toString());
 
 ## Documentation
 
-Documentation is a still work in progress. But you can start by reading the available [specs](./specs/), checking out the [examples](./examples/) and read through the API documentation of any subpackage in its README.md.
-
+Documentation is a still work in progress. But you can start by reading the available [specs](./specs/), check out the [examples](./examples/) and read through the API documentation of any package in its README.md.
 
 ## Examples
 
@@ -107,6 +92,16 @@ Run `npm install` in the root directory first.
 
 Look into the [examples](./examples/) to learn how to see Slashtags in action.
 
+## Structure
+
+This project is broken into several modules, their purposes are:
+
+- [`/packages/slashtag`](./packages/slashtag): Identity layer of Slashtags protocol.
+- [`/packages/drive`](./packages/drive): Hyperdrive manager for each Slashtag.
+- [`/packages/sdk`](./packages/sdk): Batteries-included Software development kit.
+- [`/packages/cli`](./packages/cli): Provides a daemon with DHT relay for Slashtags SDK.
+- [`/packages/rpc`](./packages/rpc): Helper class to create RPC server/clients on top of slashtags.
+- [`/packages/url`](./packages/url): Helper functions for encoding/decoding slashtags urls
 
 ## Development
 
