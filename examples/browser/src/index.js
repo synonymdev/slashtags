@@ -24,8 +24,8 @@ import b4a from 'b4a'
     console.log({ bob: bob.url })
     const drive = sdk.drive(key)
     console.log("Resolving Alice's public drive...")
-    const profile = await drive.get('/profile.json')
-      .then(buf => buf && JSON.parse(b4a.toString(buf)))
+    const buf = await drive.get('/profile.json')
+    const profile = JSON.parse(b4a.toString(buf))
     console.log("Profile:", profile)
   }
 })()
