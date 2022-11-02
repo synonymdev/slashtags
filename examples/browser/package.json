@@ -11,6 +11,6 @@
   },
   "dependencies": {
     "@synonymdev/slashtags-sdk": "^1.0.0-alpha.31",
-    "compact-encoding": "^2.11.0"
+    "b4a": "^1.6.1"
   }
 }
