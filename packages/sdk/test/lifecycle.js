@@ -7,6 +7,16 @@ import b4a from 'b4a'
 import SDK from '../index.js'
 import { tmpdir } from './helpers/index.js'
 
+test('open - use the same hyperswarm keypair', async (t) => {
+  const sdk = new SDK({ primaryKey: b4a.alloc(32), storage: RAM })
+
+  t.is(
+    b4a.toString(sdk.swarm.keyPair.publicKey, 'hex'), 
+    '5a769551c9485b330d47ca2361e5760763c5c7349f3d5b1bacb0bdc403b9e14b'
+  )
+  await sdk.close()
+})
+
 test('close - close all opened resources', async t => {
   const sdk = new SDK({ storage: RAM })
 

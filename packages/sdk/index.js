@@ -14,7 +14,7 @@ import HashMap from 'turbo-hash-map'
 
 import * as constants from './lib/constants.js'
 import { defaultStorage } from './lib/storage.js'
-import { generateSeed } from './lib/crypto.js'
+import { hash, generateSeed } from './lib/crypto.js'
 
 export class SDK extends EventEmitter {
   /**
@@ -41,7 +41,7 @@ export class SDK extends EventEmitter {
       ? new Node(new Stream(true, this._relaySocket))
       : new DHT({ bootstrap: opts.bootstrap })
 
-    this.swarm = new Hyperswarm({ dht: this.dht })
+    this.swarm = new Hyperswarm({ dht: this.dht, seed: hash(this.primaryKey) })
     this.swarm.on('connection', (socket) => this.corestore.replicate(socket))
 
     /** Help skip swarm discovery if starting the DHT node failed */
@@ -104,7 +104,7 @@ export class SDK extends EventEmitter {
     this.slashtags.set(key, slashtag)
     slashtag.once('close', () => this.slashtags.delete(key))
 
-    this.join(discoveryKey(key))
+    this.join(discoveryKey(key), { server: true, client: false })
 
     return slashtag
   }
