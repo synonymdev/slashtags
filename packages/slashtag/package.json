@@ -13,7 +13,7 @@
     "build": "tsc",
     "clean": "rimraf types",
     "lint": "standard --fix",
-    "test": "brittle test/** -cov",
+    "test": "brittle test/*.js -cov",
     "depcheck": "npx depcheck",
     "fullcheck": "npm run lint && npm run clean && npm run build && npm run test && npm run depcheck",
     "prepublishOnly": "npm run fullcheck"
