@@ -27,6 +27,7 @@ test('not store primary key in rest', async t => {
 
   await sdk.ready()
 
+  await sdk.corestore.close()
   const stored = fs.readFileSync(path.join(dir, 'primary-key'))
 
   t.unlike(stored, sdk.primaryKey)

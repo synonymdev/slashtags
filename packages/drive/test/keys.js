@@ -17,6 +17,7 @@ test('dont store secretKey at rest', async (t) => {
 
   t.ok(drivestore.corestore.primaryKey)
 
+  await corestore.close()
   const stored = fs.readFileSync(path.join(dir, 'primary-key'))
   t.unlike(stored, drivestore.corestore.primaryKey)
 })

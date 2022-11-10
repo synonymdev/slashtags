@@ -7,7 +7,7 @@ import Stream from '@hyperswarm/dht-relay/ws'
 
 import run from '../lib/daemon/index.js'
 
-test.skip('basic', async t => {
+test('basic', async t => {
   const testnet = await createTestnet(4, t.teardown)
 
   const relay = await run({ dhtOpts: testnet })
@@ -20,7 +20,6 @@ test.skip('basic', async t => {
 
   const server = alice.createServer(socket => {
     st.alike(socket.remotePublicKey, bob.defaultKeyPair.publicKey)
-    socket.destroy()
   })
   await server.listen()
 
@@ -29,11 +28,12 @@ test.skip('basic', async t => {
   t.ok(await socket.opened)
   await st
 
-  relay.close()
-  alice.destroy()
-  bob.destroy()
-  socket.destroy()
-  server.close()
+  await socket.destroy()
+  await relay.close()
+  await alice.destroy()
+  await bob.destroy()
+
+  await server.close()
 })
 
 /** @param {number} port */
