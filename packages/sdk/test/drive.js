@@ -109,7 +109,7 @@ test('drive - internal hyperdrive', async (t) => {
 
   const discovery = sdk.swarm.status(drive.discoveryKey)
   t.is(discovery?._sessions.length, 1)
-  t.is(discovery?._clientSessions, 0, "should not announce as a client!")
+  t.is(discovery?._clientSessions, 0, 'should not announce as a client!')
   t.is(discovery?._serverSessions, 1)
   t.absent(discovery?.isClient)
   t.ok(discovery?.isServer)

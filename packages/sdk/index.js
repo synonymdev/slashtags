@@ -135,7 +135,7 @@ export class SDK extends EventEmitter {
 
     // Announce the drive as a client
     const discovery = this.join(crypto.discoveryKey(key), { server: false, client: true })
-    drive.on('close', () => discovery?.destroy())
+    discovery && drive.once('close', () => discovery.destroy())
 
     // TODO read encrypted drives!
     return drive
@@ -149,9 +149,17 @@ export class SDK extends EventEmitter {
    * */
   join (topic, opts = {}) {
     if (this.destroyed) return
-    const discovery = this.swarm.join(topic, opts)
-    const done = this.corestore.findingPeers()
-    this.swarm.flush().then(done, done)
+    let discovery = this.swarm.status(topic)
+
+    if (
+      !discovery ||
+      // reannounce as a server if it wasn't already a server
+      (opts.server && !discovery.isServer)
+    ) {
+      discovery = this.swarm.join(topic, opts)
+      const done = this.corestore.findingPeers()
+      this.swarm.flush().then(done, done)
+    }
     return discovery
   }
 
