@@ -32,8 +32,6 @@ export class SDK extends EventEmitter {
     this.primaryKey = opts.primaryKey || randomBytes(32)
 
     this.corestore = new Corestore(this.storage)
-    // Disable _preready to avoid 'Stored core key does not match the provided name' error
-    this.corestore._preready = noop
 
     this._relaySocket = typeof opts.relay === 'string' ? new WebSocket(opts.relay) : opts.relay
 
@@ -121,7 +119,11 @@ export class SDK extends EventEmitter {
 
     // Temporary solution to handle encrypted hyperdrives!
     // TODO: remove this once Hyperdrive next accept encryption keys
-    const corestore = opts.encryptionKey ? this.corestore.session() : this.corestore
+    const corestore = this.corestore.session()
+
+    // Disable _preready to avoid 'Stored core key does not match the provided name' error
+    corestore._preready = noop
+
     if (opts.encryptionKey) {
       const preload = this.corestore._preload.bind(this.corestore)
       corestore._preload = _preload.bind(corestore)
@@ -135,7 +137,11 @@ export class SDK extends EventEmitter {
 
     // Announce the drive as a client
     const discovery = this.join(crypto.discoveryKey(key), { server: false, client: true })
-    discovery && drive.once('close', () => discovery.destroy())
+    if (discovery) {
+      drive.once('close', () => discovery.destroy())
+      const done = drive.findingPeers()
+      this.swarm.flush().then(done, done)
+    }
 
     // TODO read encrypted drives!
     return drive
@@ -158,8 +164,6 @@ export class SDK extends EventEmitter {
       discovery.isClient !== !!opts.client
     ) {
       discovery = this.swarm.join(topic, opts)
-      const done = this.corestore.findingPeers()
-      this.swarm.flush().then(done, done)
     }
     return discovery
   }
