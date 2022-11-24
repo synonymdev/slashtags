@@ -1,14 +1,14 @@
 # Slashtags derivation
 
-This document describes how Bitcoin wallets and other Slashtags-based applications can use standard BIP-39 mnemonic words to derive **slashtags** (that is, the main keypairs that are used within the Slashtags protocol). 
+This document describes how Bitcoin wallets and other Slashtags-powered applications can use standard BIP-39 mnemonic words to derive **slashtags** (that is, the main keypairs that are used within the Slashtags protocol). 
 
 
 ## Goals
 
-We had three main goals in our design for the derivation scheme. 
+We had three main goals in our design for the slashtag derivation scheme. 
 
-1. Every slashtag should be backed up via a set of BIP-39 mnemonic words. This is the dominant industry standard for backing up users' Bitcoin funds. So one set of BIP-39 mnemonic words can back up both a user's Bitcoin funds and their slashtags. 
-2. A public key that can be used to receive Bitcoin funds should never be the public key for a slashtag. 
+1. Every slashtag should be backed up via a set of BIP-39 mnemonic words. This is the dominant industry standard for backing up a user's Bitcoin funds. So one set of BIP-39 mnemonic words can back up both a user's Bitcoin funds and their slashtags (as well as any further keypairs derived from those slashtags). 
+2. A public key that can be used to receive Bitcoin funds should never be the public key for a slashtag (or a public key in a keypair derived from a slashtag). 
 3. A slashtag should be generated with a semantically relevant name instead of an index number (as with Bitcoin keypairs for receiving funds). 
 
 
@@ -24,15 +24,15 @@ Following BIP-39, this set of mnemonic words is used to produce a 512-bit master
 
 Following [BIP-32](https://en.bitcoin.it/wiki/BIP_0032), the master seed is turned into a master node. A hardened child node with index "123456" is, then, derived. The resulting private key is referred to as the **primary key** within the Slashtags protocol (identified by the **`primaryKey`** variable within the SDK). 
 
-The index of "123456" clearly distinguishes the derivation of a slashtag from the standard values in the purpose field that indicate various Bitcoin address formats (e.g., segwit at "84", P2PKH-P2WSH at "49", and P2PKH at "44").  
+The index of "123456" clearly distinguishes the derivation of a slashtag from the standard values in the purpose field which indicate various Bitcoin address formats (e.g., native segwit at "84", nested segwit at "49", and legacy at "44").  
 
 ### From primary key to slashtag seed
 
 The primary key can be used to create one or more slashtags. 
 
-To create a slashtag, the primary key is first used to produce a **slashtag seed**. It is produced by a keyed, Blake2b hash function, where the key is the primary key derived in the previous step. The output is a 32-byte uint8array. 
+To create a slashtag, the primary key is first used to produce a **slashtag seed**. It is produced by a keyed, Blake2b hash function, where the key is the primary key derived in the previous step. The output is a 32-byte Uint8Array. 
 
-The [implementation](https://sodium-friends.github.io/docs/docs/generichashing#crypto_generichash_batch) of the keyed hash function within the SDK is as follows:
+The JavaScript Sodium [implementation](https://sodium-friends.github.io/docs/docs/generichashing#crypto_generichash_batch) for this keyed hash function is as follows:
 
 ```js
 sodium.crypto_generichash_batch(seed, [NS, Buffer.from(name)], pk);
@@ -46,7 +46,7 @@ The slashtag seed is used to create a private-public keypair, known as a **slash
 
 To ensure that a Bitcoin keypair for receiving funds can never be equivalent to a slashtag, a different elliptic curve is used for generating it from the slashtag seed than secp256k1, namely **Curve25519**. This curve, like secp256k1, produces 32-byte public keys from 32-byte private keys. As secp256k1 public keys must be 64 bytes (uncompressed) or 33 bytes (compressed), Bitcoin funds can never be sent to a slashtag.     
 
-The [implementation](https://doc.libsodium.org/public-key_cryptography/public-key_signatures#key-pair-generation) of generating the slashtag from a slashtag seed within the SDK is as follows:
+The JavaScript Sodium [implementation](https://doc.libsodium.org/public-key_cryptography/public-key_signatures#key-pair-generation) for generating the slashtag from a slashtag seed is as follows:
 
 ```js
 sodium.crypto_sign_seed_keypair(keyPair.publicKey, keyPair.secretKey, seed);
@@ -54,14 +54,19 @@ sodium.crypto_sign_seed_keypair(keyPair.publicKey, keyPair.secretKey, seed);
 With the slashtag, one can generate and verify ed25519 signatures. 
 
 
-### Default slashtag
+### The default slashtag
 
-Some applications might want to utilize a slashtag without a name. In this case, the **`name`** variable can just be empty. The implementation would be as follows: 
+Some applications might want to utilize a slashtag without a name. In this case, the **`name`** variable can just be empty. The JavaScript Sodium implementation is as follows: 
 
 ```js
 sodium.crypto_generichash_batch(seed, [NS, Buffer.from('')], pk);
 ```
-Synonym's [Bitkit wallet](https://github.com/synonymdev/bitkit) currently leverages the default slashtag and associates it with a hyperdrive and also uses it within authentication.  
+
+## Slashtags in the SDK
+
+Any new instance of the SDK allows for specification of a primary key. From this primary key, you can then create one or more slashtags (**`const slashtag = new sdk.slashtag([name])`**). Without specifying the name, you will obtain the default slashtag. 
+
+The slashtag's private key can be set as the main key for a corestore. The main hyperdrive associated with the corestore will, then, have the same private and public key as the slashtag (to be exact, the index drive of the hyperdrive will have the same private and public key). You can, then, derive subsequent hyperdrives associated with different keypairs. Any of these hyperdrives are private, as long as you do not distribute the public key or the discovery key.  
 
 
 ## Test vectors
