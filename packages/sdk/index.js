@@ -104,7 +104,7 @@ export class SDK extends EventEmitter {
     this.slashtags.set(key, slashtag)
     slashtag.once('close', () => this.slashtags.delete(key))
 
-    this.join(discoveryKey(key), { server: true, client: false })
+    this.join(discoveryKey(key))
 
     return slashtag
   }

@@ -52,7 +52,7 @@ test('slashtag - announce public drive', async (t) => {
   await drive.ready()
 
   const discovery = sdk.swarm.topics().next().value
-  t.absent(discovery.isClient)
+  t.ok(discovery.isClient)
   t.ok(discovery.isServer)
   t.alike(discovery.topic, drive.discoveryKey)
 

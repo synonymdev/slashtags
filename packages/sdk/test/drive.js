@@ -109,9 +109,9 @@ test('drive - internal hyperdrive', async (t) => {
 
   const discovery = sdk.swarm.status(drive.discoveryKey)
   t.is(discovery?._sessions.length, 1)
-  t.is(discovery?._clientSessions, 0, 'should not announce as a client!')
+  t.is(discovery?._clientSessions, 1)
   t.is(discovery?._serverSessions, 1)
-  t.absent(discovery?.isClient)
+  t.ok(discovery?.isClient)
   t.ok(discovery?.isServer)
 
   await sdk.close()
@@ -140,7 +140,6 @@ test('drive - close discovery sessions on closing drive', async (t) => {
 
   const discovery = remote.swarm.status(drive.discoveryKey)
   t.is(discovery?._sessions.length, 1, 'closed all discovery sessions after closing drives sessions')
-  t.absent(discovery?.isServer)
 
   await remote.close()
   await sdk.close()
