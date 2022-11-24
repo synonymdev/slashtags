@@ -147,14 +147,15 @@ export class SDK extends EventEmitter {
    *
    * Returns discovery object or undefined if the swarm is destroyed
    * */
-  join (topic, opts = {}) {
+  join (topic, opts = { server: true, client: true }) {
     if (this.destroyed) return
     let discovery = this.swarm.status(topic)
 
     if (
       !discovery ||
-      // reannounce as a server if it wasn't already a server
-      (opts.server && !discovery.isServer)
+      // reannounce if options changed
+      discovery.isServer !== !!opts.server ||
+      discovery.isClient !== !!opts.client
     ) {
       discovery = this.swarm.join(topic, opts)
       const done = this.corestore.findingPeers()
