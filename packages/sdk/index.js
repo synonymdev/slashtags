@@ -11,6 +11,7 @@ import Slashtag from '@synonymdev/slashtag'
 import * as SlashURL from '@synonymdev/slashtags-url'
 import Hyperdrive from 'hyperdrive'
 import HashMap from 'turbo-hash-map'
+import b4a from 'b4a'
 
 import * as constants from './lib/constants.js'
 import { defaultStorage } from './lib/storage.js'
@@ -122,7 +123,10 @@ export class SDK extends EventEmitter {
     const corestore = this.corestore.session()
 
     // Disable _preready to avoid 'Stored core key does not match the provided name' error
-    corestore._preready = noop
+    // TODO: temporary hack to fix when slashtag public drive is opened as readonly first!
+    if (b4a.equals(this.slashtag().key, key)) {
+      return this.slashtag().drivestore.get()
+    }
 
     if (opts.encryptionKey) {
       const preload = this.corestore._preload.bind(this.corestore)
@@ -195,5 +199,3 @@ export {
   Slashtag,
   Hyperdrive
 }
-
-function noop () {}

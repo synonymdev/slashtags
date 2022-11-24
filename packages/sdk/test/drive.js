@@ -172,7 +172,10 @@ test('read only created first', async (t) => {
 
   const writable = sdk.slashtag().drivestore.get()
   await writable.ready()
-  t.ok(await writable.get('/profile.json'))
+  t.ok(writable.core.writable)
+  t.ok(writable.blobs?.core.writable)
+  await writable.put('/profile.json', b4a.from('new'))
+  t.alike(await writable.get('/profile.json'), b4a.from('new'))
 
   t.alike(writable.key, readable.key)
   t.alike(await readable.get('/profile.json'), await writable.get('/profile.json'))
