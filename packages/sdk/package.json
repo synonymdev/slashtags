@@ -1,6 +1,6 @@
 {
   "name": "@synonymdev/slashtags-sdk",
-  "version": "1.0.0-alpha.33",
+  "version": "1.0.0-alpha.34",
   "description": "slashtags development kit",
   "type": "module",
   "main": "index.js",
@@ -36,10 +36,10 @@
   "dependencies": {
     "@hyperswarm/dht": "^6.2.1",
     "@hyperswarm/dht-relay": "^0.3.0",
-    "@synonymdev/slashtag": "^1.0.0-alpha.18",
+    "@synonymdev/slashtag": "^1.0.0-alpha.24",
     "@synonymdev/slashtags-url": "^1.0.0-alpha.0",
     "b4a": "^1.6.0",
-    "corestore": "6.2.0",
+    "corestore": "^6.2.1",
     "graceful-goodbye": "^1.1.0",
     "hypercore-crypto": "^3.3.0",
     "hyperdrive": "^11.0.0-alpha.3",

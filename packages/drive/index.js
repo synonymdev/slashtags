@@ -91,15 +91,15 @@ export class Drivestore {
       return { from: session }
     }
 
+    this._drives.ready().then(async () => {
+      const saved = await this._drives.get(name)
+      if (!saved) await this._drives.put(name, b4a.from(''))
+      // TODO enable key rotation, where we overwrite keys, or use saved ones.
+      // TODO block closing drivestore before this update is flushed
+    })
+
     // Add encryption keys for non public drives
-    const encryptionKey = ns._namespace
-
-    await this._drives.ready()
-    const saved = await this._drives.get(name)
-    if (!saved) await this._drives.put(name, b4a.from(''))
-    // TODO enable key rotation, where we overwrite keys, or use saved ones.
-
-    return { from, encryptionKey }
+    return { from, encryptionKey: ns._namespace }
   }
 }
 
