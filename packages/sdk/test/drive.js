@@ -1,8 +1,10 @@
 import test from 'brittle'
 import createTestnet from '@hyperswarm/testnet'
 import b4a from 'b4a'
+import Corestore from 'corestore'
+import Hyperswarm from 'hyperswarm'
 
-import SDK from '../index.js'
+import SDK, { Hyperdrive } from '../index.js'
 import { tmpdir } from './helpers/index.js'
 
 test('drive - resolve public drive', async (t) => {
@@ -34,8 +36,6 @@ test('drive - blind seeder resolve private drive', async (t) => {
   const sdk = new SDK({ ...testnet, storage: tmpdir() })
 
   const alice = sdk.slashtag('alice')
-  const publicDrive = alice.drivestore.get()
-
   const drive = alice.drivestore.get('contacts')
   await sdk.swarm.flush()
 
@@ -43,17 +43,19 @@ test('drive - blind seeder resolve private drive', async (t) => {
   await drive.put('/foo', b4a.from(JSON.stringify(contact)))
 
   // other side
-  const seeder = new SDK({ ...testnet, storage: tmpdir() })
+  const seeder = new Hyperswarm(testnet)
 
-  const clone = seeder.drive(drive.key)
+  const clone = new Hyperdrive(new Corestore(tmpdir()), drive.key)
 
-  seeder.join(publicDrive.discoveryKey)
+  const s = clone.corestore.replicate(true)
+  s.pipe(drive.corestore.replicate(false)).pipe(s)
 
+  await clone.update()
   await t.exception(clone.get('/foo'), /.*/, "blind seeder can't reed private drive")
   t.is(clone.core.length, 2, 'still can replicate')
 
   await sdk.close()
-  await seeder.close()
+  await seeder.destroy()
 })
 
 test('drive - read encrypted drives', async (t) => {
@@ -108,8 +110,7 @@ test('drive - internal hyperdrive', async (t) => {
   await readonly.close()
 
   const discovery = sdk.swarm.status(drive.discoveryKey)
-  // @ts-ignore
-  t.is(discovery._sessions.length, 1)
+  t.is(discovery?._sessions.length, 1)
   t.is(discovery?._clientSessions, 1)
   t.is(discovery?._serverSessions, 1)
   t.ok(discovery?.isClient)
@@ -140,8 +141,7 @@ test('drive - close discovery sessions on closing drive', async (t) => {
   }
 
   const discovery = remote.swarm.status(drive.discoveryKey)
-  t.is(discovery._sessions.length, 1, 'closed all discovery sessions after closing drives sessions')
-  t.absent(discovery?.isServer)
+  t.is(discovery?._sessions.length, 1, 'closed all discovery sessions after closing drives sessions')
 
   await remote.close()
   await sdk.close()
@@ -172,7 +172,10 @@ test('read only created first', async (t) => {
 
   const writable = sdk.slashtag().drivestore.get()
   await writable.ready()
-  t.ok(await writable.get('/profile.json'))
+  t.ok(writable.core.writable)
+  t.ok(writable.blobs?.core.writable)
+  await writable.put('/profile.json', b4a.from('new'))
+  t.alike(await writable.get('/profile.json'), b4a.from('new'))
 
   t.alike(writable.key, readable.key)
   t.alike(await readable.get('/profile.json'), await writable.get('/profile.json'))
@@ -301,6 +304,18 @@ test('swarm destroying before reading local drive', async (t) => {
   t.pass('should not hang forever')
 
   await remote.close()
+})
+
+test('closing drive does not close corestore', async (t) => {
+  const sdk = new SDK({ storage: tmpdir() })
+
+  const drive = sdk.drive(b4a.alloc(32).fill('foo'))
+  await drive.ready()
+  await drive.close()
+
+  t.absent(sdk.corestore._closing)
+  await sdk.close()
+  t.ok(sdk.corestore._closing)
 })
 
 function noop () {}

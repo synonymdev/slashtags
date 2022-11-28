@@ -4,7 +4,7 @@ import createTestnet from '@hyperswarm/testnet'
 
 import { Slashtag } from '../index.js'
 
-test('server - listen',async t => {
+test('server - listen', async t => {
   const testnet = await createTestnet(3, t.teardown)
 
   const alice = new Slashtag(testnet)

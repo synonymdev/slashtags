@@ -11,10 +11,11 @@ import Slashtag from '@synonymdev/slashtag'
 import * as SlashURL from '@synonymdev/slashtags-url'
 import Hyperdrive from 'hyperdrive'
 import HashMap from 'turbo-hash-map'
+import b4a from 'b4a'
 
 import * as constants from './lib/constants.js'
 import { defaultStorage } from './lib/storage.js'
-import { generateSeed } from './lib/crypto.js'
+import { hash, generateSeed } from './lib/crypto.js'
 
 export class SDK extends EventEmitter {
   /**
@@ -32,8 +33,6 @@ export class SDK extends EventEmitter {
     this.primaryKey = opts.primaryKey || randomBytes(32)
 
     this.corestore = new Corestore(this.storage)
-    // Disable _preready to avoid 'Stored core key does not match the provided name' error
-    this.corestore._preready = noop
 
     this._relaySocket = typeof opts.relay === 'string' ? new WebSocket(opts.relay) : opts.relay
 
@@ -41,7 +40,7 @@ export class SDK extends EventEmitter {
       ? new Node(new Stream(true, this._relaySocket))
       : new DHT({ bootstrap: opts.bootstrap })
 
-    this.swarm = new Hyperswarm({ dht: this.dht })
+    this.swarm = new Hyperswarm({ dht: this.dht, seed: hash(this.primaryKey) })
     this.swarm.on('connection', (socket) => this.corestore.replicate(socket))
 
     /** Help skip swarm discovery if starting the DHT node failed */
@@ -121,7 +120,14 @@ export class SDK extends EventEmitter {
 
     // Temporary solution to handle encrypted hyperdrives!
     // TODO: remove this once Hyperdrive next accept encryption keys
-    const corestore = opts.encryptionKey ? this.corestore.session() : this.corestore
+    const corestore = this.corestore.session()
+
+    // Disable _preready to avoid 'Stored core key does not match the provided name' error
+    // TODO: temporary hack to fix when slashtag public drive is opened as readonly first!
+    if (b4a.equals(this.slashtag().key, key)) {
+      return this.slashtag().drivestore.get()
+    }
+
     if (opts.encryptionKey) {
       const preload = this.corestore._preload.bind(this.corestore)
       corestore._preload = _preload.bind(corestore)
@@ -135,7 +141,11 @@ export class SDK extends EventEmitter {
 
     // Announce the drive as a client
     const discovery = this.join(crypto.discoveryKey(key), { server: false, client: true })
-    drive.on('close', () => discovery?.destroy())
+    if (discovery) {
+      drive.once('close', () => discovery.destroy())
+      const done = drive.findingPeers()
+      this.swarm.flush().then(done, done)
+    }
 
     // TODO read encrypted drives!
     return drive
@@ -147,11 +157,18 @@ export class SDK extends EventEmitter {
    *
    * Returns discovery object or undefined if the swarm is destroyed
    * */
-  join (topic, opts = {}) {
+  join (topic, opts = { server: true, client: true }) {
     if (this.destroyed) return
-    const discovery = this.swarm.join(topic, opts)
-    const done = this.corestore.findingPeers()
-    this.swarm.flush().then(done, done)
+    let discovery = this.swarm.status(topic)
+
+    if (
+      !discovery ||
+      // reannounce if options changed
+      discovery.isServer !== !!opts.server ||
+      discovery.isClient !== !!opts.client
+    ) {
+      discovery = this.swarm.join(topic, opts)
+    }
     return discovery
   }
 
@@ -182,5 +199,3 @@ export {
   Slashtag,
   Hyperdrive
 }
-
-function noop () {}
