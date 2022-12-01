@@ -34,6 +34,8 @@ test('save metadata on ready', async (t) => {
 
   await Promise.all([foo.ready(), bar.ready()])
 
+  await new Promise(resolve => setImmediate(resolve))
+
   const list = []
   for await (const entry of drivestore) {
     list.push(entry?.name)
@@ -49,6 +51,7 @@ test('reopen', async (t) => {
   await drivestore.get().ready()
   await drivestore.get('foo').ready()
   await drivestore.get('bar').ready()
+  await new Promise(resolve => setTimeout(resolve, 10))
 
   await corestore.close()
   t.ok(drivestore.closed, 'drivestore.closed true after corestore is closing')
