@@ -2,11 +2,13 @@ import SDK from '@synonymdev/slashtags-sdk'
 import b4a from 'b4a'
 
 (async () => {
-  let key;
+
+  let key
+
   {
-    const sdk = new SDK({ relay: 'ws://localhost:45475'});
+    const sdk = new SDK({ relay: 'ws://localhost:45475' })
     const alice = sdk.slashtag()
-    console.log({alice: alice.url})
+    console.log({ alice: alice.url })
     const drive = alice.drivestore.get()
     await drive.put('/profile.json', b4a.from(JSON.stringify({ name: 'Alice' })))
 
@@ -17,13 +19,17 @@ import b4a from 'b4a'
   }
 
   {
-    const sdk = new SDK({ relay: 'ws://localhost:45475'});
+    const sdk = new SDK({ relay: 'ws://localhost:45475' })
     const bob = sdk.slashtag()
-    console.log({bob: bob.url})
+    console.log({ bob: bob.url })
     const drive = sdk.drive(key)
     console.log("Resolving Alice's public drive...")
-    const profile = await drive.get('/profile.json')
-      .then(buf => buf && JSON.parse(b4a.toString(buf)))
-    console.log("Profile:", profile)
+    try {
+      const buf = await drive.get('/profile.json')
+      const profile = JSON.parse(b4a.toString(buf))
+      console.log("Profile:", profile)
+    } catch (err) {
+      console.error("failed getting, parsing profile")
+    }
   }
 })()

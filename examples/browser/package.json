@@ -10,7 +10,7 @@
     "process": "^0.11.10"
   },
   "dependencies": {
-    "@synonymdev/slashtags-sdk": "^1.0.0-alpha.24",
-    "compact-encoding": "^2.11.0"
+    "@synonymdev/slashtags-sdk": "^1.0.0-alpha.31",
+    "b4a": "^1.6.1"
   }
 }
