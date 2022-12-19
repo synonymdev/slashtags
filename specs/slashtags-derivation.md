@@ -32,7 +32,7 @@ The index of "123456" is clearly distinct from the standard values in the purpos
 
 The primary key can be used to create one or more slashtags. 
 
-To create a slashtag, the primary key is first used to produce a **slashtag seed**. It is produced by a keyed, Blake2b hash function, where the key is the primary key derived in the previous step. The output is a 32-byte Uint8Array. 
+To create a slashtag, the primary key is first used to produce a **slashtag seed**. It is produced by a keyed Blake2b hash function, where the key is the primary key derived in the previous step. The output is a 32-byte Uint8Array. 
 
 The JavaScript Sodium [implementation](https://sodium-friends.github.io/docs/docs/generichashing#crypto_generichash_batch) for this keyed hash function is as follows:
 
@@ -40,24 +40,27 @@ The JavaScript Sodium [implementation](https://sodium-friends.github.io/docs/doc
 sodium.crypto_generichash_batch(seed, [NS, Buffer.from(name)], pk);
 ```
 
-The **`seed`** variable here refers to the slashtag seed and stores the output of the function in a 32-byte Uint8Array. 
+The components for this keyed hash function are as follows: 
 
-The input of the function is the array. Its first element is the 32-byte buffer of the Blake2b hash value of "slashtags" (stored in the **`NS`** variable as `<Buffer 15 8a 40 6f 1f 9b e5 89 9b 0a 7f 04 71 ad eb 39 2d 3e d6 0d 24 e6 47 c5 3c c5 06 d3 f2 0f ac b4>`). The second element is the buffer of the **`name`** variable. The value of the name variable would typically have semantic meaning (e.g., "Alice", "My social media profile"). 
-
-The key for the hash function is specified by the **`pk`** variable. This corresponds to the primary key derrived in the previous step. 
+* The **`seed`** variable here refers to the slashtag seed and stores the output of the function in a 32-byte Uint8Array. 
+* The input of the function is the array. 
+  * Its first element is the 32-byte buffer of the Blake2b hash value of "slashtags" (stored in the **`NS`** variable as `<Buffer 15 8a 40 6f 1f 9b e5 89 9b 0a 7f 04 71 ad eb 39 2d 3e d6 0d 24 e6 47 c5 3c c5 06 d3 f2 0f ac b4>`). 
+  * The second element is the buffer of the **`name`** variable. The value of the name variable would typically have semantic meaning (e.g., "Alice", "My social media profile"). 
+* The key for the hash function is specified by the **`pk`** variable. This corresponds to the primary key derrived in the previous step. 
 
 ### From slashtag seed to slashtag
 
 The slashtag seed is used to create a private-public keypair, known as a **slashtag**. 
 
-A different elliptic curve is used for generating a slashtag from the slashtag seed than secp256k1, namely **Curve25519**. This curve produces 32-byte public keys from 32-byte private keys. As secp256k1 public keys must be 64 bytes (uncompressed) or 33 bytes (compressed), Bitcoin funds can never be (accidentally) sent to a slashtag.  
+To create the private-public key pair, we leverage a digital signature scheme known as **Ed25519**. This is common implementation of the **Edwards-curve Digital Signature Algorithm** (**EdDSA**), which is based on the **Schnorr Digital Signature Algorithm**. See [RFC 8302](https://www.rfc-editor.org/rfc/rfc8032#section-5.1) for details.
+
+The Ed25519 scheme produces 32-byte public keys from 32-byte private keys.The signatures in the scheme are 64 bytes.   
 
 The JavaScript Sodium [implementation](https://doc.libsodium.org/public-key_cryptography/public-key_signatures#key-pair-generation) for generating the slashtag from a slashtag seed is as follows:
 
 ```js
 sodium.crypto_sign_seed_keypair(keyPair.publicKey, keyPair.secretKey, seed);
 ```
-With the slashtag, one can generate the **ed25519** signatures used in Slashtags-powered applications. 
 
 ### The default slashtag
 
