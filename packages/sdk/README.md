@@ -43,7 +43,7 @@ await drive.put('/profile.json', c.encode(c.json, {name: 'alice'}))
 
 await sdk.swarm.flush() // await for the public drive to be announced
 
-const sdk2 = new SDK()
+const sdk2 = new SDK({ storage: './reader' })
 
 const clone = sdk2.drive(drive.key) 
 
