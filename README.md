@@ -16,11 +16,11 @@
 
 Reboot the Web with Slashtags.
 
-Slashtags is an open-source protocol for creating scalable and secure P2P applications. What Bitcoin has done for money and payments, Slashtags seeks to achieve for the rest of our digital data and interactions. 
+Slashtags is an open-source protocol for creating scalable and secure P2P applications. What Bitcoin has done for money and payments, Slashtags seeks to achieve for the rest of our digital data and interactions.
 
-Slashtags enables you to build applications and websites that give users control over their social profiles, contacts, payment preferences, and other data; allow them to find your server in a p2p fashion and authenticate with just a key; stream account data from slashtag-enabled services; and more. 
+Slashtags enables you to build applications and websites that give users control over their social profiles, contacts, payment preferences, and other data; allow them to find your server in a p2p fashion and authenticate with just a key; stream account data from slashtag-enabled services; and more.
 
-All the [key pairs](./specs/slashtags-key-derivation.md) generated within Slashtags are based on a BIP-39 series of mnemonic words. 
+All the [key pairs](./specs/slashtags-key-derivation.md) generated within Slashtags are based on a BIP-39 series of mnemonic words.
 
 
 ### The problem
@@ -49,7 +49,7 @@ Members of the swarm are tracked within a [Kademlia-based](https://pdos.csail.mi
 
 Only the owner of the private key for a hyperdrive can make changes to it. Yet, other peers in the network can read and seed the data, as long as they have the discovery key. So in order to share a particular hyperdrive with a peer, one just has to hand over its public key. Schemas for particular data types help ensure efficient data retrieval and resolution, as well as interoperability between applications.
 
-Hyperdrive data can be retrieved from any peer within the swarm. Slashtags relies on a digital signature procedure to ensure that peers can always determine the latest state of a particular hyperdrive. Specifically, all data is added to hyperdrives via blocks. Adding a block, requires making a valid signature over the merkle root of all the hash values of the existing blocks and the new block. Only when a valid signature is given will the block be added to the hyperdrive.  
+Hyperdrive data can be retrieved from any peer within the swarm. Slashtags relies on a digital signature procedure to ensure that peers can always determine the latest state of a particular hyperdrive. Specifically, all data is added to hyperdrives via blocks. Adding a block, requires making a valid signature over the merkle root of all the hash values of the existing blocks and the new block. Only when a valid signature is given will the block be added to the hyperdrive.
 
 Hyperdrives are simple, yet powerful. For example, suppose that you created a profile with an e-mail address, website, twitter handle, and so on in a hyperdrive that you owned. Once you share the public key of the hyperdrive with a contact, they can always retrieve your latest contact information. No big tech company or authoritarian government can stop them. No company going out of business impacts easy data availability. This decentralized character can be extended to other types of data and features in applications.
 
@@ -58,18 +58,18 @@ While much of the power of Slashtags comes via these hyperdrives, the key pairs 
 
 ### Slashtags in action
 
-The first showcase for Slashtags is the Bitkit wallet. The following features are powered by Slashtags: profiles, contacts, payment preferences, authentication, private feeds, and public feeds. Please consult our [website](https://synonym.to/products/#bitkit) and our [Github repository](https://github.com/synonymdev/bitkit) for more information. The website includes a [Playground](https://www.slashtags.to/#playground) for you to experiment. 
+The first showcase for Slashtags is the Bitkit wallet. The following features are powered by Slashtags: profiles, contacts, payment preferences, authentication, private feeds, and public feeds. Please consult our [website](https://synonym.to/products/#bitkit) and our [Github repository](https://github.com/synonymdev/bitkit) for more information. The website includes a [Playground](https://www.slashtags.to/#playground) for you to experiment.
 
 We currently support three public data widgets that can be displayed within the wallet: a bitcoin [price feed](https://github.com/synonymdev/slashtags-widget-price-feed), a bitcoin [news feed](https://github.com/synonymdev/slashtags-widget-news-feed), a bitcoin [block data feed](https://github.com/synonymdev/slashtags-widget-bitcoin-feed).
 
 Finally, we also have an [authentication demo](https://github.com/synonymdev/slashtags-auth-demo).
 
-We are currently developing various other applications that implement Slashtags and are actively supporting others with their own Slashtags projects. 
+We are currently developing various other applications that implement Slashtags and are actively supporting others with their own Slashtags projects.
 
 
 ## Structure
 
-The SDK is offered as a single module in the [sdk package](./packages/sdk). The other packages contain components of the SDK. These include the following: 
+The SDK is offered as a single module in the [sdk package](./packages/sdk). The other packages contain components of the SDK. These include the following:
 
 - [`/packages/slashtag`](./packages/slashtag): Identity layer of Slashtags protocol.
 - [`/packages/drive`](./packages/drive): Hyperdrive manager for each Slashtag.
@@ -111,7 +111,7 @@ Look into the [examples](./examples/) to learn how to see Slashtags in action.
 ## Development
 
 Requires Node LTS (v16.5.0).
-[nvm](https://github.com/nvm-sh/nvm#intro) is suppported but not required
+[nvm](https://github.com/nvm-sh/nvm#intro) is supported but not required
 
 ```
 npm install

@@ -4,7 +4,7 @@ Demonstrates the SDK's usage in the browser.
 
 ## Usage
 
-First you need to run a realy: 
+First you need to run a relay:
 
 ```bash
 npm i -g @synonymdev/slashtags-cli
