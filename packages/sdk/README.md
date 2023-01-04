@@ -94,6 +94,14 @@ Creates a readonly Hyperdrive session, and internally joining its discovery key 
 
 Closes all Slahstags created by this SDK as well as any other resources managed by the SDK to enable graceful shutdown.
 
+#### `sdk.joinSeeders([server])`
+
+Helper function to join the seeders topic
+
+3rd party seeders are conventionally swarming around a well-known topic, this function helps willing clients to discover seeders through that topic, which helps to find hypercores even when their authors are not online, if they upload their cores to a highly available seeeder.
+
+- `server` set it to `true` to annouce your server as a seeder.
+
 #### `constants.PRIMARY_KEY_DERIVATION_PATH `
 
 Derivation path for generating a PrimaryKey from a Bitcoion seed.

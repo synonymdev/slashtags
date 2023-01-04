@@ -1,6 +1,6 @@
 {
   "name": "@synonymdev/slashtags-sdk",
-  "version": "1.0.0-alpha.34",
+  "version": "1.0.0-alpha.35",
   "description": "slashtags development kit",
   "type": "module",
   "main": "index.js",
@@ -43,7 +43,7 @@
     "graceful-goodbye": "^1.1.0",
     "hypercore-crypto": "^3.3.0",
     "hyperdrive": "^11.0.0-alpha.3",
-    "hyperswarm": "=4.3.3",
+    "hyperswarm": "^4.3.5",
     "random-access-memory": "^5.0.1",
     "sodium-universal": "^3.1.0",
     "turbo-hash-map": "^1.0.3",
