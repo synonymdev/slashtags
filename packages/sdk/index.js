@@ -17,6 +17,10 @@ import * as constants from './lib/constants.js'
 import { defaultStorage } from './lib/storage.js'
 import { hash, generateSeed } from './lib/crypto.js'
 
+// An ad-hoc topic that 3rd party seeders for many hypercores are supposed
+// to join, instead of announcing their IPs on 1000s of topics (for performance)
+const SEEDERS_TOPIC = b4a.from('3b9f8ccd062ca9fc0b7dd407b4cd287ca6e2d8b32f046d7958fa7bea4d78fd75', 'hex')
+
 export class SDK extends EventEmitter {
   /**
    *
@@ -177,6 +181,20 @@ export class SDK extends EventEmitter {
     if (this._closing) return this._closing
     this._closing = this._close()
     return this._closing
+  }
+
+  /**
+   * Helper function to join the seeders topic
+   *
+   * 3rd party seeders are conventionally swarming around a well-known topic
+   * this function help willing clients to discover seeders through that topic
+   * which helps to find hypercores even when their authors are not online,
+   * if they upload their cores to a highly available seeeder.
+   *
+   * @param {boolean} [server=false] If you want to join as a seeder yourself
+   */
+  joinSeeders (server = false) {
+    this.join(SEEDERS_TOPIC, { server, client: !server })
   }
 
   async _close () {
