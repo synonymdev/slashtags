@@ -37,6 +37,11 @@ declare module 'hyperswarm' {
     _serverSessions: number;
   }
 
+  export interface PeerInfo {
+    publicKey: Uint8Array,
+    topics: Uint8Array[]
+  }
+
   export = class hyperswarm extends EventEmitter {
     constructor(opts?: any);
     server: Server;
@@ -60,6 +65,8 @@ declare module 'hyperswarm' {
       options?: { server?: boolean; client?: boolean },
     ): Discovery;
     flush(): Promise<undefined>;
+
+    on(event:'connection', listener: (connection: any, peerInfo: PeerInfo) => any)
   };
 }
 
