@@ -51,6 +51,8 @@ export const format = (key, opts = {}) => {
  */
 export const parse = url => {
   if (typeof url !== 'string') throw new Error('URL must be a string')
+  // Ensure case insensitivity where relevant
+  url = url.split('/').map((part, i) => i === 0 ? part.toLowerCase() : part).join('/')
 
   const matched = url.match(PATTERN)
   if (!matched) throw new Error('Invalid url')
