@@ -14,6 +14,8 @@ npm install @synonymdev/slashtag
 
 Quick example showing how to create a Slashtag node and use it to create resolvable public profile.
 
+NOTE: you do NOT need to wait for ready as all internals await this themselves.
+
 ```js
 import Slashtag from '@synonymdev/slashtag';
 
@@ -25,12 +27,6 @@ await bob.connect(alice.key).opened
 ```
 
 ## API
-
-#### `await slashtag.ready()`
-
-Wait for the DHT node and Drivestore to be fully open.
-
-In general you do NOT need to wait for ready, unless checking a synchronous property, as all internals await this themselves.
 
 #### `slashtag.url`
 
