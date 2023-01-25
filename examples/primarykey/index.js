@@ -7,7 +7,7 @@ const mnemonic = constants.MNEMONIC_TO_PRIMARY_KEY_TEST_VECTORS[0].mnemonic
 console.log('Mnemonic:', mnemonic)
 
 const seed = await bip39.mnemonicToSeed(mnemonic)
-console.log('\nSeed:', seed)
+console.log('\nSeed:', seed.toString('hex'))
 
 const root = bip32(ecc).fromSeed(seed) // Network: bitcoin mainnet
 
@@ -15,7 +15,7 @@ const primaryKey = root.derivePath(constants.PRIMARY_KEY_DERIVATION_PATH).privat
 
 const sdk = new SDK({ primaryKey })
 
-console.log("\nAlice's publicKey:", sdk.createKeyPair('alice').publicKey)
-console.log("\nBob's publicKey:", sdk.createKeyPair('bob').publicKey)
+console.log("\nAlice's publicKey:", sdk.createKeyPair('alice').publicKey.toString('hex'))
+console.log("\nBob's publicKey:", sdk.createKeyPair('bob').publicKey.toString('hex'))
 
 sdk.close()

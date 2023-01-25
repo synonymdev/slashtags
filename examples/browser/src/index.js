@@ -6,7 +6,7 @@ import b4a from 'b4a'
   {
     const sdk = new SDK({ relay: 'ws://localhost:45475'});
     const alice = sdk.slashtag()
-    console.log({alice: alice.url})
+    console.log('Alice slashtag URL: ', alice.url)
     const drive = alice.drivestore.get()
     await drive.put('/profile.json', b4a.from(JSON.stringify({ name: 'Alice' })))
 
@@ -19,11 +19,11 @@ import b4a from 'b4a'
   {
     const sdk = new SDK({ relay: 'ws://localhost:45475'});
     const bob = sdk.slashtag()
-    console.log({bob: bob.url})
+    console.log('Bob slashtag url:', bob.url)
     const drive = sdk.drive(key)
     console.log("Resolving Alice's public drive...")
     const profile = await drive.get('/profile.json')
       .then(buf => buf && JSON.parse(b4a.toString(buf)))
-    console.log("Profile:", profile)
+    console.log("Alice's profile as seen by Bob:", profile)
   }
 })()

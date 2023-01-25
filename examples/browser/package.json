@@ -2,7 +2,7 @@
   "source": "src/index.html",
   "browserslist": "> 0.5%, last 2 versions, not dead",
   "scripts": {
-    "start": "parcel -p 8002",
+    "start": "open http://localhost:8002 ; parcel -p 8002",
     "build": "parcel build"
   },
   "devDependencies": {

@@ -11,6 +11,7 @@ npm install @synonymdev/slashtags-rpc
 ## Usage
 
 ```js
+import SlashtagsRPC from '@synonymdev/slashtags-rpc';
 import Slashtag from '@synonymdev/slashtag';
 import c from 'compact-encoding';
 
@@ -27,11 +28,11 @@ class Foo extends SlashtagsRPC {
     return c.string;
   }
 
-  handshake(stream) {
+  handshake(socket) {
     return this.id + '-handshake:for:' + socket.remotePublicKey.toString('hex');
   }
 
-  onopen(handshake, stream) {
+  onopen(handshake, socket) {
     this.emit('handshake', handshake, socket.reomtePublicKey);
   }
 
@@ -60,13 +61,12 @@ const alice = new Slashtag();
 await alice.listen();
 
 const aliceFoo = new Foo(alice);
-aliceFoo.on('echo', (req) => { // req should equal 'hello world' })
+aliceFoo.on('echo', (req) => { console.log(req) })
 
 const bob = new Slashtag();
 const bobFoo = new Foo(bob);
 
 const response = await bobFoo.echo(alice.key, 'hello world');
-// response should equal 'hello world'
 ```
 
 #### Use without Slashtag
@@ -74,14 +74,22 @@ const response = await bobFoo.echo(alice.key, 'hello world');
 If the RPC doesn't reuqire Slashtag for anything other than establish a connection, you can pass your own stream:
 
 ```js
+import DHT from '@hyperswarm/dht'
+import SlashtagsRPC from '@synonymdev/slashtags-rpc';
+import c from 'compact-encoding';
+
 const alice = new DHT();
 const server = alice.createServer()
 await server.listen();
 
+class Foo extends SlashtagsRPC {
+  //...
+}
+
 const aliceFoo = new Foo();
 server.on('connection', (stream) => aliceFoo.setup(stream))
 aliceFoo.on('echo', (req) => {
-  // req = 'hello world'
+  console.log(req) // req = 'hello world'
 })
 
 const bob = new DHT();
@@ -90,8 +98,7 @@ const stream = bob.connect(server.address().publicKey)
 await stream.opened
 
 const rpc = bobFoo.setup(stream)
-const response = await rpc?.request('echo', 'hello world')
-// response = 'hello world'
+const response = await rpc.request('echo', 'hello world')
 ```
 
 ## API
