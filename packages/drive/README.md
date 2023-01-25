@@ -1,6 +1,6 @@
 # slashdrive
 
-DriveStore is a Hyperdrive factory that makes it easier to manage large collections of named Hyperdrives.
+Drivestore is a Hyperdrive factory that makes it easier to manage large collections of named Hyperdrives.
 
 ## Features
 
@@ -16,16 +16,20 @@ npm install @synonymdev/slashdrive
 ## Usage
 
 ```js
-const store = new DriveStore(corestore, keyPair)
+import Corestore from 'corestore'
+import Drivestore from '@synonymdev/slashdrive'
 
-const publicDrive = store.get('public'); // or store.get()
+const corestore = new Corestore('./corestore_dir')
+const store = new Drivestore(corestore, keyPair)
 
-const privateDrive = store.get('foo'); // returns an encrypted Hyperdrive
+const publicDrive = store.get('public') // or store.get()
+
+const privateDrive = store.get('foo') // returns an encrypted Hyperdrive
 ```
 
 ## API
 
-#### `const drivestore = new DriveStore(corestore, keyPair)`
+#### `const drivestore = new Drivestore(corestore, keyPair)`
 
 Create new Drivestore. 
 
