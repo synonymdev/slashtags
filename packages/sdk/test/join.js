@@ -1,5 +1,6 @@
 import test from 'brittle'
 import createTestnet from '@hyperswarm/testnet'
+import Hyperswarm from 'hyperswarm'
 import b4a from 'b4a'
 
 import SDK from '../index.js'
@@ -38,5 +39,21 @@ test('join - reannounce if options are different', async (t) => {
   t.alike(sdk.swarm.topics().next().value.topic, topic)
   t.is(sdk.swarm.topics().next().value._sessions.length, 3)
 
+  await sdk.close()
+})
+
+test('join - seeders', async (t) => {
+  const testnet = await createTestnet(3, t.teardown)
+  const sdk = new SDK(testnet)
+
+  const seeder = new Hyperswarm(testnet)
+  const topic = b4a.from('3b9f8ccd062ca9fc0b7dd407b4cd287ca6e2d8b32f046d7958fa7bea4d78fd75', 'hex')
+  await seeder.join(topic).flushed()
+
+  const peer = await sdk.joinSeeders()
+
+  t.alike(peer.publicKey, seeder.keyPair.publicKey)
+
+  await seeder.destroy()
   await sdk.close()
 })

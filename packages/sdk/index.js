@@ -186,15 +186,32 @@ export class SDK extends EventEmitter {
   /**
    * Helper function to join the seeders topic
    *
+   * Returns a promise that resolves as soon as a seeder is discovered
+   *
    * 3rd party seeders are conventionally swarming around a well-known topic
    * this function help willing clients to discover seeders through that topic
    * which helps to find hypercores even when their authors are not online,
    * if they upload their cores to a highly available seeeder.
    *
    * @param {boolean} [server=false] If you want to join as a seeder yourself
+   * @returns {Promise<import('hyperswarm').PeerInfo>}
    */
   joinSeeders (server = false) {
     this.join(SEEDERS_TOPIC, { server, client: !server })
+    return new Promise(resolve => {
+      this.swarm.on('connection', (_, peerInfo) => {
+        if (SDK.isSeeder(peerInfo)) resolve(peerInfo)
+      })
+    })
+  }
+
+  /**
+   * Checks if a peer is announced as a server on the seeders topic
+   *
+   * @param {import('hyperswarm').PeerInfo} peerInfo
+   */
+  static isSeeder (peerInfo) {
+    return peerInfo.topics.some((topic) => b4a.equals(topic, SEEDERS_TOPIC))
   }
 
   async _close () {
