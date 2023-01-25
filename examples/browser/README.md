@@ -21,9 +21,10 @@ npm start
 Finally check console, you should see:
 
 ```js
-{alice: 'slash:9shucowxq7gikckzeij1qnpmazexzst5cg9x75fd9fmu6nc8t4gy'}
+Alice slashtag URL: slash:<Alice's public key>
 Announcing Alice's public drive...
-{bob: 'slash:c8yh4sd3afowb55onrbxfjg4aiadcr115xqjok54prc5urasor7y'}
+Bob slashtag url: slash:<Bob's public key>
 Resolving Alice's public drive...
-Profile: {name: 'Alice'}
+Alice's profile as seen by Bob: { name: "Alice" }
 ```
+
