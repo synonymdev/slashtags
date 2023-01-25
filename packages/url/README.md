@@ -11,7 +11,7 @@ npm install @synonymdev/slashtags-url
 ## Usage
 
 ```js
-import { format, parse } from '@synonymdev/slashtags-url';
+import { format, parse, encode } from '@synonymdev/slashtags-url';
 
 const url = format(key, {
   path: '/dir/file.json',
