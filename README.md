@@ -20,7 +20,7 @@ Slashtags is an open-source protocol for creating scalable and secure P2P applic
 
 Slashtags enables you to build applications and websites that give users control over their social profiles, contacts, payment preferences, and other data; allow them to find your server in a p2p fashion and authenticate with just a key; stream account data from slashtag-enabled services; and more.
 
-All the [key pairs](./specs/slashtags-key-derivation.md) generated within Slashtags are based on a BIP-39 series of mnemonic words.
+All the [key pairs](./specs/slashtags-derivation.md) generated within Slashtags are based on a BIP-39 series of mnemonic words.
 
 
 ### The problem
@@ -34,7 +34,7 @@ At the core of these problems is that regular Web users cannot easily identify t
 
 ### Slashtags' solution
 
-A [slashtag](./packages/slashtag/README.md) is a key pair [derived](./specs/slashtags-key-derivation.md) from a standard BIP-39 series of mnemonic words, which is also used to generate Bitcoin addresses in practically all modern hardware and software wallets. Typically slashtags are associated with [hyperdrives](./packages/drive/README.md), personal drives for storing data that can be shared within a peer to peer network.
+A [slashtag](./packages/slashtag/README.md) is a key pair [derived](./specs/slashtags-derivation.md) from a standard BIP-39 series of mnemonic words, which is also used to generate Bitcoin addresses in practically all modern hardware and software wallets. Typically slashtags are associated with [hyperdrives](./packages/drive/README.md), personal drives for storing data that can be shared within a peer to peer network.
 
 Just as Bitcoin was able to decentralize money and payments with the clever use of cryptographic keys, Slashtags can potentially decentralize much of the rest of our digital data and interactions. It's a simple, yet powerful idea.
 
