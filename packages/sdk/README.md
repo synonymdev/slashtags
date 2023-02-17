@@ -18,7 +18,7 @@ If you are building a webapp over Slashtags, or adding Slashtags support to your
 
 While deriving Slashtags from a mnemonic seed phrase is an important part of Slashtag's strategy for key management and decentralized identifier's long term success, it is important to note that this SDK _does not_ require access to the mnemonic seed phrase or the master private key that secures other assets.
 
-Rather your application needs to derive a `primaryKey` first as defined in the [Key Derivation](../../specs/slashtags-key-derivation.md) spec, then pass it in the `primaryKey` field of the `SDK.init()` static method.
+Rather your application needs to derive a `primaryKey` first as defined in the [Key Derivation](../../specs/slashtags-key-derivation.md) spec, then pass it in the `primaryKey` option at instantiation `new SDK({ primaryKey })`.
 
 See how to derive `primaryKey` from a mnemonic seed phrase in Javascript: [examples/primarykey/](../../examples/primarykey/).
 
