@@ -92,6 +92,8 @@ export class SDK extends EventEmitter {
    * @param {string} [name] utf8 encoded string
    * @param {object} [opts] slashtag instantiation options
    * @param {Corestore} [opts.corestore] corestore
+   * @param {DHT} [opts.dht] dht
+   * @param {import('hypercore').KeyPair} [opts.keyPair] keyPair
    *
    * @throws {Error} throws an error if the SDK or its corestore is closing
    */
@@ -102,8 +104,8 @@ export class SDK extends EventEmitter {
     if (existing) return existing
 
     const slashtag = new Slashtag({
-      keyPair: this.createKeyPair(name),
-      dht: this.dht,
+      keyPair: opts?.keyPair || this.createKeyPair(name),
+      dht: opts?.dht || this.dht,
       corestore: opts?.corestore || this.corestore
     })
 
