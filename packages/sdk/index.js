@@ -90,9 +90,12 @@ export class SDK extends EventEmitter {
   /**
    * Creates a Slashtag by name.
    * @param {string} [name] utf8 encoded string
+   * @param {object} [opts] slashtag instantiation options
+   * @param {Corestore} [opts.corestore] corestore
+   *
    * @throws {Error} throws an error if the SDK or its corestore is closing
    */
-  slashtag (name) {
+  slashtag (name, opts = {}) {
     if (this.closed) throw new Error('SDK is closed')
     const key = this.createKeyPair(name).publicKey
     const existing = this.slashtags.get(key)
@@ -100,8 +103,8 @@ export class SDK extends EventEmitter {
 
     const slashtag = new Slashtag({
       keyPair: this.createKeyPair(name),
-      corestore: this.corestore,
-      dht: this.dht
+      dht: this.dht,
+      corestore: opts?.corestore || this.corestore
     })
 
     this.slashtags.set(key, slashtag)
