@@ -21,8 +21,12 @@ const seeder = new Seeder(dht, seederDB)
  * @param {import('ws').MessageEvent} event
  */
 function onMessage (event) {
-  const request = tryParseJSON(event.data)
-  if (!request) return
+  let request
+  try {
+    request = JSON.parse(event.data.toString())
+  } catch (error) {
+    return
+  }
 
   switch (request.type) {
     case REQUESTS.SEEDER_ADD:
@@ -46,15 +50,6 @@ function onMessage (event) {
     default:
       break
   }
-}
-
-/**
- * @returns {object | undefined}
- */
-function tryParseJSON (string) {
-  try {
-    return JSON.parse(string)
-  } catch {}
 }
 
 /**

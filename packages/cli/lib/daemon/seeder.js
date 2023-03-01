@@ -47,7 +47,7 @@ export default class Seeder {
   async _seed (url) {
     if (this._drives.has(url)) return
 
-    const key = SlashURL.parse(url).key
+    const { key } = SlashURL.parse(url)
 
     const drive = new HyperDrive(this.corestore, key)
     await drive.ready()
@@ -108,7 +108,7 @@ export default class Seeder {
         promises.set(url, this._seed(url))
       } catch (error) {
         console.log('Invalid url', url)
-        return
+        continue
       }
     }
     await batch.write()
@@ -129,7 +129,7 @@ export default class Seeder {
         promises.set(url, this._unseed(url))
       } catch (error) {
         console.log('Invalid url', url)
-        return
+        continue
       }
     }
     await batch.write()
@@ -137,6 +137,11 @@ export default class Seeder {
   }
 }
 
+/**
+ * Decode z-base32 key instead of `slash:<z-base32 key>` url
+ * TODO: add to SlashURL.parse
+ * @param {string} keyString
+ */
 function handleKey (keyString) {
   try {
     SlashURL.decode(keyString)
