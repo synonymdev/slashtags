@@ -1,49 +1,52 @@
-import { WebSocketServer } from 'ws'
+// The one process that contains all networking resources, database, etc.
+import { Level } from 'level'
 
-import DHT from '@hyperswarm/dht'
-import { relay } from '@hyperswarm/dht-relay'
-import Stream from '@hyperswarm/dht-relay/ws'
+import { DEFAULT_PORT, MESSAGES, SEEDER_DATABASE_DIRECTORY } from '../constants.js'
+import Seeder from './seeder.js'
+import runRelay from './relay.js'
+
+const { dht, server } = runRelay({ port: DEFAULT_PORT })
+
+server.on('connection', (socket) => {
+  socket.onmessage = onMessage
+})
+
+const db = new Level(SEEDER_DATABASE_DIRECTORY, { valueEncoding: 'json' })
+
+const seederDB = db.sublevel('seeder')
+const seeder = new Seeder(dht, seederDB)
 
 /**
- * @param {object} opts
- * @param {DHTOpts} [opts.dhtOpts]
- * @param {number} [opts.port]
+ * @param {import('ws').MessageEvent} event
  */
-export default async function run (opts = {}) {
-  const server = setupServer(opts.port)
-  const destroyDHT = dhtRelay(server, opts.dhtOpts)
+function onMessage (event) {
+  const request = tryParseJSON(event.data)
+  if (!request) return
 
-  return {
-    /** @type {number} */ // @ts-ignore
-    port: server.address().port,
-    close: () => Promise.all([destroyDHT(), server.close()])
+  switch (request.type) {
+    case MESSAGES.SEEDER_ADD:
+      seeder.add(request.payload.urls)
+      break
+    case MESSAGES.SEEDER_REMOVE:
+      seeder.remove(request.payload.urls)
+      break
+    case MESSAGES.SEEDER_LIST:
+      seeder.list().then(urls => {
+        event.target.send(JSON.stringify(urls))
+      })
+      break
+    default:
+      break
   }
 }
 
-/** @param {number} [port] */
-function setupServer (port = 0) {
-  const server = new WebSocketServer({ port })
-
-  server.on('error', () => {})
-  server.on('connection', socket => {
-    socket.on('error', () => {})
-  })
-
-  return server
-}
-
 /**
- * @param {import('ws').Server} server
- * @param {DHTOpts} [opts]
+ * @returns {object | undefined}
  */
-function dhtRelay (server, opts) {
-  const dht = new DHT(opts)
-
-  server.on('connection', socket => {
-    relay(dht, new Stream(false, socket))
-  })
-
-  return () => dht.destroy()
+function tryParseJSON (string) {
+  try {
+    return JSON.parse(string)
+  } catch {}
 }
 
 /**

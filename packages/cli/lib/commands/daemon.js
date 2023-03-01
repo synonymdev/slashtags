@@ -12,7 +12,7 @@ const ADDRESS = 'ws://localhost:' + DEFAULT_PORT
 const RUNNING = `Daemon ${chalk.green(
   'is running'
 )} and listening on ${chalk.green(ADDRESS)}\n`
-const NOT_RUNNING = `Daemon is ${chalk.red('NOT running')}.\n`
+export const NOT_RUNNING = `Daemon is ${chalk.red('NOT running')}.\n`
 
 /** @param {string} type */
 export const daemon = type => {
@@ -49,7 +49,7 @@ async function start () {
     : pm2.start(
       {
         name: PROCESS_NAME,
-        script: path.join(ROOT_DIR, './lib/daemon/run.js')
+        script: path.join(ROOT_DIR, './lib/daemon/index.js')
       },
       async err => {
         err && console.error(err)
