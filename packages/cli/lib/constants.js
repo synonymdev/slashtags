@@ -11,7 +11,13 @@ export const VERSION = pjson.version
 export const SEEDER_STORE_DIRECTORY = path.join(os.homedir(), '.slashtags', 'daemon', 'seeder')
 export const SEEDER_DATABASE_DIRECTORY = path.join(os.homedir(), '.slashtags', 'daemon', 'database')
 
-export const MESSAGES = {
+export const REQUESTS = {
+  SEEDER_ADD: 'SEEDER.ADD',
+  SEEDER_REMOVE: 'SEEDER.REMOVE',
+  SEEDER_LIST: 'SEEDER_LIST'
+}
+
+export const RESPONSES = {
   SEEDER_ADD: 'SEEDER.ADD',
   SEEDER_REMOVE: 'SEEDER.REMOVE',
   SEEDER_LIST: 'SEEDER_LIST'

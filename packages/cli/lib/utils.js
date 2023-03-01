@@ -1,4 +1,4 @@
-import { MESSAGES } from './constants.js'
+import { REQUESTS, RESPONSES } from './constants.js'
 
 /**
  * Call done() as many times as neccessary until it returns truthy value
@@ -19,12 +19,24 @@ export async function retry (done, timeout = 1000) {
 
 /**
  * @param {import('ws').WebSocket} ws
- * @param {keyof import('./constants.js')['MESSAGES']} type
+ * @param {keyof import('./constants.js')['REQUESTS']} type
  * @param {object} payload
  */
 export function request (ws, type, payload) {
   return ws.send(JSON.stringify({
-    type: MESSAGES[type],
+    type: REQUESTS[type],
+    payload
+  }))
+}
+
+/**
+ * @param {import('ws').WebSocket} ws
+ * @param {keyof import('./constants.js')['RESPONSES']} type
+ * @param {object} payload
+ */
+export function respond (ws, type, payload) {
+  return ws.send(JSON.stringify({
+    type: RESPONSES[type],
     payload
   }))
 }

@@ -1,9 +1,10 @@
 // The one process that contains all networking resources, database, etc.
 import { Level } from 'level'
 
-import { DEFAULT_PORT, MESSAGES, SEEDER_DATABASE_DIRECTORY } from '../constants.js'
+import { DEFAULT_PORT, REQUESTS, SEEDER_DATABASE_DIRECTORY } from '../constants.js'
 import Seeder from './seeder.js'
 import runRelay from './relay.js'
+import { respond } from '../utils.js'
 
 const { dht, server } = runRelay({ port: DEFAULT_PORT })
 
@@ -24,16 +25,23 @@ function onMessage (event) {
   if (!request) return
 
   switch (request.type) {
-    case MESSAGES.SEEDER_ADD:
+    case REQUESTS.SEEDER_ADD:
       seeder.add(request.payload.urls)
+        .then(() => {
+          respond(event.target, 'SEEDER_ADD', { status: 'ok' })
+        })
       break
-    case MESSAGES.SEEDER_REMOVE:
+    case REQUESTS.SEEDER_REMOVE:
       seeder.remove(request.payload.urls)
+        .then(() => {
+          respond(event.target, 'SEEDER_REMOVE', { status: 'ok' })
+        })
       break
-    case MESSAGES.SEEDER_LIST:
-      seeder.list().then(urls => {
-        event.target.send(JSON.stringify(urls))
-      })
+    case REQUESTS.SEEDER_LIST:
+      seeder.list()
+        .then(urls => {
+          respond(event.target, 'SEEDER_LIST', { urls })
+        })
       break
     default:
       break

@@ -2,6 +2,7 @@ import Hyperswarm from 'hyperswarm'
 import Corestore from 'corestore'
 import * as SlashURL from '@synonymdev/slashtags-url'
 import HyperDrive from 'hyperdrive'
+import goodbye from 'graceful-goodbye'
 
 import { SEEDER_STORE_DIRECTORY } from '../constants.js'
 
@@ -27,6 +28,11 @@ export default class Seeder {
 
     /** Drives being seeded at the moment */
     this._drives = new Map()
+
+    goodbye(() => {
+      console.log('Gracefully closing Hyperswarm node')
+      this.swarm.destroy()
+    })
   }
 
   async _open () {
@@ -56,7 +62,7 @@ export default class Seeder {
 
     drive.core.download()
 
-    await drive.getBlobs().then(blobs => {
+    drive.getBlobs().then(blobs => {
       blobs.core.download()
     })
 
@@ -74,9 +80,9 @@ export default class Seeder {
       return
     }
 
-    await this.swarm.join(drive.discoveryKey, { server: false, client: false }).flushed()
-    await drive.close()
+    await this.swarm.leave(drive.discoveryKey)
 
+    this._drives.delete(url)
     console.log('Stopped seeding public drive for', url)
   }
 
@@ -93,18 +99,20 @@ export default class Seeder {
    */
   async add (urls) {
     const batch = this.db.batch()
+    const promises = new Map()
     for (let url of urls) {
       try {
         url = handleKey(url)
         SlashURL.parse(url)
         batch.put(url, {})
-        this._seed(url)
+        promises.set(url, this._seed(url))
       } catch (error) {
         console.log('Invalid url', url)
         return
       }
     }
     await batch.write()
+    return Promise.all([...promises.values()])
   }
 
   /**
@@ -112,18 +120,20 @@ export default class Seeder {
    */
   async remove (urls) {
     const batch = this.db.batch()
+    const promises = new Map()
     for (let url of urls) {
       try {
         url = handleKey(url)
         SlashURL.parse(url)
         batch.del(url)
-        this._unseed(url)
+        promises.set(url, this._unseed(url))
       } catch (error) {
         console.log('Invalid url', url)
         return
       }
     }
     await batch.write()
+    return Promise.all([...promises.values()])
   }
 }
 

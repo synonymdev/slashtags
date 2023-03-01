@@ -1,5 +1,5 @@
 import WebSocket from 'ws'
-import { DEFAULT_PORT } from '../constants.js'
+import { DEFAULT_PORT, RESPONSES } from '../constants.js'
 import { request } from '../utils.js'
 import { NOT_RUNNING } from './daemon.js'
 
@@ -20,54 +20,62 @@ export default function seeder (type, _, command) {
   const urls = command.args.slice(1)
   const socket = new WebSocket(ADDRESS)
 
-  const timeout = setTimeout(() => {
-    console.log('Timeout...')
-    socket.close()
-  }, 2000)
-
-  socket.onerror = onError
-
-  function close () {
-    clearTimeout(timeout)
-    socket.close()
-  }
-
   socket.onopen = () => {
     switch (type) {
       case 'add':
         request(socket, 'SEEDER_ADD', { urls })
-        close()
         break
       case 'remove':
         request(socket, 'SEEDER_REMOVE', { urls })
-        close()
         break
       case 'list':
-        socket.onmessage = (event) => {
-          try {
-            const urls = JSON.parse(event.data.toString())
-            console.log('Slashtags saved to be seed while demon is running:')
-            urls.forEach(url => {
-              console.log('-', url)
-            })
-
-            clearTimeout(timeout)
-            close()
-          } catch {}
-        }
         request(socket, 'SEEDER_LIST', { urls })
         break
       default:
         break
     }
   }
-}
 
-/**
- * @param {import('ws').ErrorEvent} err
- */
-function onError (err) {
-  if (err.error.code === 'ECONNREFUSED') {
-    console.log(NOT_RUNNING)
+  socket.onerror = function (err) {
+    if (err.error.code === 'ECONNREFUSED') {
+      console.log(NOT_RUNNING)
+    }
+    close()
+  }
+
+  socket.onmessage = (event) => {
+    try {
+      const response = JSON.parse(event.data.toString())
+      switch (response.type) {
+        case RESPONSES.SEEDER_ADD:
+          urls.length > 0 && console.log('Seeding...')
+          break
+        case RESPONSES.SEEDER_REMOVE:
+          urls.length > 0 && console.log('Stopped seeding')
+          break
+        case RESPONSES.SEEDER_LIST:
+          if (response.payload.urls.length > 0) {
+            console.log('Slashtags saved to be seed while demon is running:')
+            response.payload.urls.forEach(url => {
+              console.log('-', url)
+            })
+          } else {
+            console.log('Not seeding any slashtags.')
+          }
+          break
+      }
+
+      close()
+    } catch {}
+  }
+
+  const timeout = setTimeout(() => {
+    console.log('Timeout...')
+    socket.close()
+  }, 2000)
+
+  function close () {
+    clearTimeout(timeout)
+    socket.close()
   }
 }

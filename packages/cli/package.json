@@ -39,6 +39,7 @@
     "chalk": "^5.0.1",
     "commander": "^9.3.0",
     "corestore": "^6.5.1",
+    "graceful-goodbye": "^1.2.1",
     "hyperdrive": "^11.0.0-alpha.10",
     "hyperswarm": "^4.3.7",
     "level": "^8.0.0",
