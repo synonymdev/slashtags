@@ -1,5 +1,5 @@
 import WebSocket from 'ws'
-import { DEFAULT_PORT, RESPONSES } from '../constants.js'
+import { DEFAULT_PORT, REQUESTS, RESPONSES } from '../constants.js'
 import { request } from '../utils.js'
 import { NOT_RUNNING } from './daemon.js'
 
@@ -23,13 +23,13 @@ export default function seeder (type, _, command) {
   socket.onopen = () => {
     switch (type) {
       case 'add':
-        request(socket, 'SEEDER_ADD', { urls })
+        request(socket, REQUESTS.SEEDER_ADD, { urls })
         break
       case 'remove':
-        request(socket, 'SEEDER_REMOVE', { urls })
+        request(socket, REQUESTS.SEEDER_REMOVE, { urls })
         break
       case 'list':
-        request(socket, 'SEEDER_LIST', { urls })
+        request(socket, REQUESTS.SEEDER_LIST, { urls })
         break
       default:
         break
@@ -72,7 +72,7 @@ export default function seeder (type, _, command) {
   const timeout = setTimeout(() => {
     console.log('Timeout...')
     socket.close()
-  }, 2000)
+  }, 4000)
 
   function close () {
     clearTimeout(timeout)
