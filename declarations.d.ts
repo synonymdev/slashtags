@@ -60,6 +60,7 @@ declare module 'hyperswarm' {
     listen(): Promise<undefined>;
     destroy(): Promise<undefined>;
     joinPeer(key: Uint8Array): undefined;
+    leave(topic: Uint8Array): Promise<any>;
     join(
       discoveryKey: Uint8Array,
       options?: { server?: boolean; client?: boolean },

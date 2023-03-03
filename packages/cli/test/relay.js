@@ -5,7 +5,7 @@ import WebSocket from 'ws'
 import DHT from '@hyperswarm/dht-relay'
 import Stream from '@hyperswarm/dht-relay/ws'
 
-import run from '../lib/daemon/index.js'
+import run from '../lib/daemon/relay.js'
 
 test('basic', async t => {
   const testnet = await createTestnet(4, t.teardown)

@@ -1,49 +1,55 @@
-import { WebSocketServer } from 'ws'
+// The one process that contains all networking resources, database, etc.
+import { Level } from 'level'
 
-import DHT from '@hyperswarm/dht'
-import { relay } from '@hyperswarm/dht-relay'
-import Stream from '@hyperswarm/dht-relay/ws'
+import { DEFAULT_PORT, REQUESTS, RESPONSES, SEEDER_DATABASE_DIRECTORY } from '../constants.js'
+import Seeder from './seeder.js'
+import runRelay from './relay.js'
+import { respond } from '../utils.js'
+
+const { dht, server } = runRelay({ port: DEFAULT_PORT })
+
+server.on('connection', (socket) => {
+  socket.onmessage = onMessage
+})
+
+const db = new Level(SEEDER_DATABASE_DIRECTORY, { valueEncoding: 'json' })
+
+const seederDB = db.sublevel('seeder')
+const seeder = new Seeder(dht, seederDB)
 
 /**
- * @param {object} opts
- * @param {DHTOpts} [opts.dhtOpts]
- * @param {number} [opts.port]
+ * @param {import('ws').MessageEvent} event
  */
-export default async function run (opts = {}) {
-  const server = setupServer(opts.port)
-  const destroyDHT = dhtRelay(server, opts.dhtOpts)
-
-  return {
-    /** @type {number} */ // @ts-ignore
-    port: server.address().port,
-    close: () => Promise.all([destroyDHT(), server.close()])
+function onMessage (event) {
+  let request
+  try {
+    request = JSON.parse(event.data.toString())
+  } catch (error) {
+    return
   }
-}
 
-/** @param {number} [port] */
-function setupServer (port = 0) {
-  const server = new WebSocketServer({ port })
-
-  server.on('error', () => {})
-  server.on('connection', socket => {
-    socket.on('error', () => {})
-  })
-
-  return server
-}
-
-/**
- * @param {import('ws').Server} server
- * @param {DHTOpts} [opts]
- */
-function dhtRelay (server, opts) {
-  const dht = new DHT(opts)
-
-  server.on('connection', socket => {
-    relay(dht, new Stream(false, socket))
-  })
-
-  return () => dht.destroy()
+  switch (request.type) {
+    case REQUESTS.SEEDER_ADD:
+      seeder.add(request.payload.urls)
+        .then(() => {
+          respond(event.target, RESPONSES.SEEDER_ADD, { status: 'ok' })
+        })
+      break
+    case REQUESTS.SEEDER_REMOVE:
+      seeder.remove(request.payload.urls)
+        .then(() => {
+          respond(event.target, RESPONSES.SEEDER_REMOVE, { status: 'ok' })
+        })
+      break
+    case REQUESTS.SEEDER_LIST:
+      seeder.list()
+        .then(urls => {
+          respond(event.target, RESPONSES.SEEDER_LIST, { urls })
+        })
+      break
+    default:
+      break
+  }
 }
 
 /**
