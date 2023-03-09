@@ -1,6 +1,6 @@
 {
   "name": "@synonymdev/slashtags-sdk",
-  "version": "1.0.0-alpha.37",
+  "version": "1.0.0-alpha.38",
   "description": "slashtags development kit",
   "type": "module",
   "main": "index.js",
@@ -31,7 +31,7 @@
   ],
   "browser": {
     "./lib/storage.js": "./lib/storage.browser.js",
-    "ws": "./lib/ws.browser.js"
+    "./lib/ws.js": "./lib/ws.browser.js"
   },
   "dependencies": {
     "@hyperswarm/dht": "^6.2.1",
