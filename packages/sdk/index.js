@@ -5,7 +5,6 @@ import EventEmitter from 'events'
 import Hyperswarm from 'hyperswarm'
 import Stream from '@hyperswarm/dht-relay/ws'
 import Node from '@hyperswarm/dht-relay'
-import WebSocket from 'ws'
 import DHT from '@hyperswarm/dht'
 import Slashtag from '@synonymdev/slashtag'
 import * as SlashURL from '@synonymdev/slashtags-url'
@@ -15,6 +14,7 @@ import b4a from 'b4a'
 
 import * as constants from './lib/constants.js'
 import { defaultStorage } from './lib/storage.js'
+import WebSocket from './lib/ws.js'
 import { hash, generateSeed } from './lib/crypto.js'
 
 // An ad-hoc topic that 3rd party seeders for many hypercores are supposed
