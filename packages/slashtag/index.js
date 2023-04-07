@@ -5,6 +5,7 @@ import DHT from '@hyperswarm/dht'
 import HashMap from 'turbo-hash-map'
 import Drivestore from '@synonymdev/slashdrive'
 import { format, encode, parse, decode } from '@synonymdev/slashtags-url'
+import b4a from 'b4a'
 
 // @ts-ignore
 export class Slashtag extends EventEmitter {
@@ -108,13 +109,42 @@ export class Slashtag extends EventEmitter {
     // @ts-ignore
     return socket
   }
+
+  /**
+   * @param {Partial<Profile>} profile
+   */
+  putProfile (profile) {
+    const buffer = b4a.from(JSON.stringify(profile))
+    return this.drivestore.get().put('/profile.json', buffer)
+  }
+
+  /**
+   * @returns {Promise<Partial<Profile> | null>}
+   */
+  async getProfile () {
+    return this.drivestore.get().get('/profile.json')
+      .then(buf => b4a.toString(buf))
+      .then(JSON.parse)
+      .catch(() => null)
+  }
+
+  async deleteProfile () {
+    return this.drivestore.get().del('/profile.json')
+  }
 }
 
-function noop () {}
+function noop () { }
 
 /**
  * @typedef {import('./lib/interfaces').Emitter} Emitter
  * @typedef {import('@hyperswarm/secret-stream')} SecretStream
+ * @typedef {{url: string, title: string}} Link
+ * @typedef {{
+ *  name: string;
+ *  bio: string;
+ *  image: string;
+ *  links: Array<Link>;
+ * }} Profile
  */
 
 export default Slashtag

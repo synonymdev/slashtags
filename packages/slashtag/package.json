@@ -33,6 +33,7 @@
     "@hyperswarm/dht": "^6.2.1",
     "@synonymdev/slashdrive": "^1.0.0-alpha.20",
     "@synonymdev/slashtags-url": "^1.0.0-alpha.1",
+    "b4a": "^1.6.3",
     "corestore": "^6.2.1",
     "random-access-memory": "^5.0.1",
     "turbo-hash-map": "^1.0.3"

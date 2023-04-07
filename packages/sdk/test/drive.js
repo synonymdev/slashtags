@@ -12,18 +12,15 @@ test('drive - resolve public drive', async (t) => {
   const sdk = new SDK({ ...testnet, storage: tmpdir() })
 
   const alice = sdk.slashtag('alice')
-  const drive = alice.drivestore.get()
   await sdk.swarm.flush()
 
   const profile = { name: 'alice' }
-  await drive.put('/profile.json', b4a.from(JSON.stringify(profile)))
+  await alice.putProfile(profile)
 
   // other side
   const remote = new SDK({ ...testnet, storage: tmpdir() })
-  const clone = remote.drive(drive.key)
 
-  const resolved = await clone.get('/profile.json')
-    .then(b => b && JSON.parse(b4a.toString(b)))
+  const resolved = await remote.getProfile(alice.url)
 
   t.alike(resolved, profile)
 
@@ -318,4 +315,4 @@ test('closing drive does not close corestore', async (t) => {
   t.ok(sdk.corestore._closing)
 })
 
-function noop () {}
+function noop () { }

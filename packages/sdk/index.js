@@ -224,6 +224,20 @@ export class SDK extends EventEmitter {
 
     this.emit('close')
   }
+
+  /**
+   * @param {string} url remote Slashtag's url
+   * @returns {Promise<import('@synonymdev/slashtag').Profile | null>}
+   */
+  async getProfile (url) {
+    const key = SlashURL.parse(url).key
+    return this.drive(key)
+      .get('/profile.json')
+      // @ts-ignore
+      .then(buf => b4a.toString(buf))
+      .then(JSON.parse)
+      .catch(() => null)
+  }
 }
 
 export default SDK
