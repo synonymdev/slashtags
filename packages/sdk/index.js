@@ -53,6 +53,9 @@ export class SDK extends EventEmitter {
     /** @type {HashMap<Slashtag>} */
     this.slashtags = new HashMap()
 
+    /** @type {HashMap<Hyperdrive>} */
+    this._openedDrives = new HashMap()
+
     // Gracefully shutdown
     goodbye(this.close.bind(this))
   }
@@ -141,7 +144,11 @@ export class SDK extends EventEmitter {
       }
     }
 
+    const opened = this._openedDrives.get(key)
+    if (opened && !opened.core.closed) return opened
+
     const drive = new Hyperdrive(corestore, key)
+    this._openedDrives.set(key, drive)
 
     // Announce the drive as a client
     const discovery = this.join(crypto.discoveryKey(key), { server: false, client: true })

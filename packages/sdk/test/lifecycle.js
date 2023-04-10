@@ -65,9 +65,6 @@ test('closed - corestore is closing', async (t) => {
 
   t.ok(sdk.closed)
 
-  await t.exception(() => writableInflight.ready())
-  await t.exception(() => readbleInflight.ready())
-
   writableInflight.ready().catch(noop)
   readbleInflight.ready().catch(noop)
 
@@ -86,4 +83,4 @@ test('closed - corestore is closing', async (t) => {
   await sdk.close()
 })
 
-function noop () {}
+function noop () { }

@@ -7,6 +7,25 @@ import Hyperswarm from 'hyperswarm'
 import SDK, { Hyperdrive } from '../index.js'
 import { tmpdir } from './helpers/index.js'
 
+test('drive - deduplicate', async (t) => {
+  const testnet = await createTestnet(3, t.teardown)
+  const sdk = new SDK({ ...testnet, storage: tmpdir() })
+
+  const key = b4a.alloc(32).fill(0)
+
+  const a = sdk.drive(key)
+  const b = sdk.drive(key)
+
+  t.is(a, b)
+
+  a.core.closed = true
+
+  const c = sdk.drive(key)
+  t.not(c, a)
+
+  await sdk.close()
+})
+
 test('drive - resolve public drive', async (t) => {
   const testnet = await createTestnet(3, t.teardown)
   const sdk = new SDK({ ...testnet, storage: tmpdir() })
@@ -141,7 +160,7 @@ test('drive - close discovery sessions on closing drive', async (t) => {
   }
 
   const discovery = remote.swarm.status(drive.discoveryKey)
-  t.is(discovery?._sessions.length, 1, 'closed all discovery sessions after closing drives sessions')
+  t.absent(discovery, 'closed all discovery sessions after closing drives sessions')
 
   await remote.close()
   await sdk.close()
@@ -318,4 +337,4 @@ test('closing drive does not close corestore', async (t) => {
   t.ok(sdk.corestore._closing)
 })
 
-function noop () {}
+function noop () { }

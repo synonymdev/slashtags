@@ -18,7 +18,6 @@ test('get - public drive', async (t) => {
   await publicB.ready()
   t.alike(publicB.key, keyPair.publicKey)
 
-  t.not(publicA, publicB, 'should return a session')
   t.alike(publicA.key, publicB.key, 'same public key')
   t.absent(publicA.core.encryptionKey, 'do not encrypet public drive')
   t.absent(publicB.core.encryptionKey, 'do not encrypet public drive')

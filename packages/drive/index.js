@@ -24,6 +24,9 @@ export class Drivestore {
     this._drives = this._metadata.sub('drives')
 
     this._opening = this._open().catch(safetyCatch)
+
+    /** @type {Map<string, Hyperdrive>} */
+    this._openDrives = new Map()
   }
 
   /** @returns {import('hyperbee').Iterator<{name: string}>} */
@@ -61,11 +64,18 @@ export class Drivestore {
    * Get a Hyperdrive by its name.
    */
   get (name = 'public') {
+    const opened = this._openDrives.get(name)
+    if (opened && !opened.core.closed) return opened
+
     validateName(name)
     const ns = this.corestore.namespace(name).session({ primaryKey: this.keyPair.secretKey })
     const _preload = ns._preload.bind(ns)
     ns._preload = (opts) => this._preload.bind(this)(opts, _preload, ns, name)
-    return new Hyperdrive(ns)
+
+    const drive = new Hyperdrive(ns)
+    this._openDrives.set(name, drive)
+
+    return drive
   }
 
   /**
