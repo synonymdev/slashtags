@@ -1,7 +1,11 @@
-import RAM from 'random-access-memory'
+const RAM = require('random-access-memory')
 
 /**
  * Default storage in browser environment.
  */
 // TODO support browser storage OR storing to remote Slashtags desktop node.
-export const defaultStorage = () => new RAM()
+const defaultStorage = () => new RAM()
+
+module.exports = {
+  defaultStorage
+}

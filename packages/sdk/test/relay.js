@@ -1,12 +1,12 @@
-import test from 'brittle'
-import createTestnet from '@hyperswarm/testnet'
-import { relay } from '@hyperswarm/dht-relay'
-import Stream from '@hyperswarm/dht-relay/ws'
-import { WebSocketServer } from 'ws'
-import RAM from 'random-access-memory'
-import b4a from 'b4a'
+const test = require('brittle')
+const createTestnet = require('@hyperswarm/testnet')
+const { relay } = require('@hyperswarm/dht-relay')
+const Stream = require('@hyperswarm/dht-relay/ws')
+const { WebSocketServer } = require('ws')
+const RAM = require('random-access-memory')
+const b4a = require('b4a')
 
-import SDK from '../index.js'
+const SDK = require('../index.js')
 
 test('basic', async t => {
   const testnet = await createTestnet(3, t.teardown)
@@ -63,4 +63,4 @@ test('read and write to drives despite failing relay', async (t) => {
   await sdk.close()
 })
 
-function noop () {}
+function noop () { }

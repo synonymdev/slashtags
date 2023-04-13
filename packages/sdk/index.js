@@ -1,34 +1,36 @@
-import Corestore from 'corestore'
-import goodbye from 'graceful-goodbye'
-import crypto, { randomBytes, discoveryKey } from 'hypercore-crypto'
-import EventEmitter from 'events'
-import Hyperswarm from 'hyperswarm'
-import Stream from '@hyperswarm/dht-relay/ws'
-import Node from '@hyperswarm/dht-relay'
-import DHT from '@hyperswarm/dht'
-import Slashtag from '@synonymdev/slashtag'
-import * as SlashURL from '@synonymdev/slashtags-url'
-import Hyperdrive from 'hyperdrive'
-import HashMap from 'turbo-hash-map'
-import b4a from 'b4a'
+const Corestore = require('corestore')
+const goodbye = require('graceful-goodbye')
+const crypto = require('hypercore-crypto')
+const EventEmitter = require('events')
+const Hyperswarm = require('hyperswarm')
+const Stream = require('@hyperswarm/dht-relay/ws')
+const Node = require('@hyperswarm/dht-relay')
+const DHT = require('hyperdht')
+const Slashtag = require('@synonymdev/slashtag')
+const SlashURL = require('@synonymdev/slashtags-url')
+const Hyperdrive = require('hyperdrive')
+const HashMap = require('turbo-hash-map')
+const b4a = require('b4a')
 
-import * as constants from './lib/constants.js'
-import { defaultStorage } from './lib/storage.js'
-import WebSocket from './lib/ws.js'
-import { hash, generateSeed } from './lib/crypto.js'
+const constants = require('./lib/constants.js')
+const { defaultStorage } = require('./lib/storage.js')
+const WebSocket = require('./lib/ws.js')
+const { hash, generateSeed } = require('./lib/crypto.js')
+
+const { randomBytes, discoveryKey } = crypto
 
 // An ad-hoc topic that 3rd party seeders for many hypercores are supposed
 // to join, instead of announcing their IPs on 1000s of topics (for performance)
 const SEEDERS_TOPIC = b4a.from('3b9f8ccd062ca9fc0b7dd407b4cd287ca6e2d8b32f046d7958fa7bea4d78fd75', 'hex')
 
-export class SDK extends EventEmitter {
+class SDK extends EventEmitter {
   /**
    *
    * @param {object} opts
    * @param {any} [opts.storage]
    * @param {Uint8Array} [opts.primaryKey]
    * @param {string | WebSocket} [opts.relay]
-   * @param {import('@hyperswarm/dht').Node[]} [opts.bootstrap]
+   * @param {import('hyperdht').Node[]} [opts.bootstrap]
    */
   constructor (opts = {}) {
     super()
@@ -80,7 +82,7 @@ export class SDK extends EventEmitter {
   }
 
   /**
-   * Generates a Slashtag keypair from a `name`, and the internal `primaryKey`.
+   * Generates a Slashtag keypair = require(a `name`, and the internal `primaryKey`.
    * @param {string} [name]
    */
   createKeyPair (name) {
@@ -226,11 +228,8 @@ export class SDK extends EventEmitter {
   }
 }
 
-export default SDK
-
-export {
-  constants,
-  SlashURL,
-  Slashtag,
-  Hyperdrive
-}
+module.exports = SDK
+module.exports.constants = constants
+module.exports.SlashURL = SlashURL
+module.exports.Slashtag = Slashtag
+module.exports.Hyperdrive = Hyperdrive

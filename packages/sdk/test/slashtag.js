@@ -1,8 +1,8 @@
-import test from 'brittle'
-import createTestnet from '@hyperswarm/testnet'
-import RAM from 'random-access-memory'
+const test = require('brittle')
+const createTestnet = require('@hyperswarm/testnet')
+const RAM = require('random-access-memory')
 
-import SDK from '../index.js'
+const SDK = require('../index.js')
 
 test('slashtag - deduplicate', async (t) => {
   const sdk = new SDK({ storage: RAM })
