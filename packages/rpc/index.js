@@ -1,10 +1,10 @@
-import ProtomuxRPC from 'protomux-rpc'
-import EventEmitter from 'events'
-import b4a from 'b4a'
+const ProtomuxRPC = require('protomux-rpc')
+const EventEmitter = require('events')
+const b4a = require('b4a')
 
 const RPCS_SYMBOL = Symbol.for('slashtags-rpcs')
 
-export class SlashtagsRPC extends EventEmitter {
+class SlashtagsRPC extends EventEmitter {
   /** @param {Slashtag} [slashtag] */
   constructor (slashtag) {
     super()
@@ -93,7 +93,7 @@ export class SlashtagsRPC extends EventEmitter {
   }
 }
 
-export default SlashtagsRPC
+module.exports = SlashtagsRPC
 
 /**
  * @typedef {{
@@ -102,6 +102,6 @@ export default SlashtagsRPC
  *  handler: (req: any, socket: SecretStream) => any
  * }} RPCMethod
  *
- * @typedef {import('@synonymdev/slashtag').Slashtag}Slashtag
+ * @typedef {import('@synonymdev/slashtag')}Slashtag
  * @typedef {import('@hyperswarm/secret-stream')} SecretStream
  */
