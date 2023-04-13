@@ -1,10 +1,10 @@
-import pm2 from 'pm2'
-import path from 'path'
-import chalk from 'chalk'
-import WebSocket from 'ws'
+const pm2 = require('pm2')
+const path = require('path')
+const chalk = require('chalk')
+const WebSocket = require('ws')
 
-import { ROOT_DIR, DEFAULT_PORT } from '../constants.js'
-import { retry } from '../utils.js'
+const { ROOT_DIR, DEFAULT_PORT } = require('../constants.js')
+const { retry } = require('../utils.js')
 
 const PROCESS_NAME = 'slashtags-daemon'
 
@@ -12,10 +12,10 @@ const ADDRESS = 'ws://localhost:' + DEFAULT_PORT
 const RUNNING = `Daemon ${chalk.green(
   'is running'
 )} and listening on ${chalk.green(ADDRESS)}\n`
-export const NOT_RUNNING = `Daemon is ${chalk.red('NOT running')}.\n`
+const NOT_RUNNING = `Daemon is ${chalk.red('NOT running')}.\n`
 
 /** @param {string} type */
-export const daemon = type => {
+const daemon = type => {
   switch (type) {
     case 'start':
       start()
@@ -94,4 +94,5 @@ function check () {
   })
 }
 
-export default daemon
+module.exports = daemon
+module.exports.NOT_RUNNING = NOT_RUNNING

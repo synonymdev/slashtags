@@ -1,14 +1,14 @@
-import Hyperswarm from 'hyperswarm'
-import Corestore from 'corestore'
-import * as SlashURL from '@synonymdev/slashtags-url'
-import HyperDrive from 'hyperdrive'
-import goodbye from 'graceful-goodbye'
+const Hyperswarm = require('hyperswarm')
+const Corestore = require('corestore')
+const SlashURL = require('@synonymdev/slashtags-url')
+const HyperDrive = require('hyperdrive')
+const goodbye = require('graceful-goodbye')
 
-import { SEEDER_STORE_DIRECTORY } from '../constants.js'
+const { SEEDER_STORE_DIRECTORY } = require('../constants.js')
 
 const SEEDERS_TOPIC = Buffer.from('3b9f8ccd062ca9fc0b7dd407b4cd287ca6e2d8b32f046d7958fa7bea4d78fd75', 'hex')
 
-export default class Seeder {
+class Seeder {
   /**
    * @param {import('@hyperswarm/dht')} dht
    * @param {import('level').Level<string, object>} db
@@ -150,3 +150,5 @@ function handleKey (keyString) {
     return keyString
   }
 }
+
+module.exports = Seeder

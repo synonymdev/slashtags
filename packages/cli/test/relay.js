@@ -1,11 +1,11 @@
-import test from 'brittle'
-import createTestnet from '@hyperswarm/testnet'
-import WebSocket from 'ws'
+const test = require('brittle')
+const createTestnet = require('@hyperswarm/testnet')
+const WebSocket = require('ws')
 
-import DHT from '@hyperswarm/dht-relay'
-import Stream from '@hyperswarm/dht-relay/ws'
+const DHT = require('@hyperswarm/dht-relay')
+const Stream = require('@hyperswarm/dht-relay/ws')
 
-import run from '../lib/daemon/relay.js'
+const run = require('../lib/daemon/relay.js')
 
 test('basic', async t => {
   const testnet = await createTestnet(4, t.teardown)

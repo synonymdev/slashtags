@@ -1,8 +1,8 @@
-import { WebSocketServer } from 'ws'
+const { WebSocketServer } = require('ws')
 
-import DHT from '@hyperswarm/dht'
-import { relay } from '@hyperswarm/dht-relay'
-import Stream from '@hyperswarm/dht-relay/ws'
+const DHT = require('hyperdht')
+const { relay } = require('@hyperswarm/dht-relay')
+const Stream = require('@hyperswarm/dht-relay/ws')
 
 /**
  * @param {object} opts
@@ -10,13 +10,13 @@ import Stream from '@hyperswarm/dht-relay/ws'
  * @param {number} [opts.port]
  *
  * @returns {{
- *  dht: import('@hyperswarm/dht'),
+ *  dht: import('hyperdht'),
  *  server: import('ws').WebSocketServer,
  *  port: number,
  *  close: () => Promise<any>,
  * }}
  */
-export default function run (opts = {}) {
+function run (opts = {}) {
   const server = setupServer(opts.port)
   const dht = new DHT(opts.dhtOpts)
 
@@ -37,14 +37,16 @@ export default function run (opts = {}) {
 function setupServer (port = 0) {
   const server = new WebSocketServer({ port })
 
-  server.on('error', () => {})
+  server.on('error', () => { })
   server.on('connection', socket => {
-    socket.on('error', () => {})
+    socket.on('error', () => { })
   })
 
   return server
 }
 
+module.exports = run
+
 /**
- * @typedef {ConstructorParameters<typeof import('@hyperswarm/dht')>[0]} DHTOpts
+ * @typedef {ConstructorParameters<typeof import('hyperdht')>[0]} DHTOpts
  */
