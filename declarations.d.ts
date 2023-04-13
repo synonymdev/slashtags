@@ -1,18 +1,20 @@
 // file://./node_modules/@hyperswarm/testnet/index.js
 declare module '@hyperswarm/testnet' {
-  import DHT from '@hyperswarm/dht'
+  import DHT from 'hyperdht'
 
-  export default function createTestnet(
+  function createTestnet(
     nodes?: number,
     teardown?: Function,
-  ): Promise<{ bootstrap: Array<{ host: string; port: number }>, nodes:DHT[] }>
+  ): Promise<{ bootstrap: Array<{ host: string; port: number }>, nodes: DHT[] }>
+
+  export = createTestnet
 }
 
 // file://./node_modules/hyperswarm/index.js
 declare module 'hyperswarm' {
   import EventEmitter from 'events';
-  import type { KeyPair, keyPair, KeyPair } from '@hyperswarm/dht';
-  import type DHT from '@hyperswarm/dht';
+  import type { KeyPair, keyPair, KeyPair } from 'hyperdht';
+  import type DHT from 'hyperdht';
   import type SecretStream from '@hyperswarm/secret-stream';
 
   class Server extends EventEmitter {
@@ -67,7 +69,7 @@ declare module 'hyperswarm' {
     ): Discovery;
     flush(): Promise<undefined>;
 
-    on(event:'connection', listener: (connection: any, peerInfo: PeerInfo) => any)
+    on(event: 'connection', listener: (connection: any, peerInfo: PeerInfo) => any)
   };
 }
 
@@ -90,6 +92,17 @@ declare module 'b4a' {
   ): number;
   function concat(args: Array<Uint8Array>): Uint8Array;
   function equals(buf: Uint8Array, buf2: Uint8Array): boolean;
+
+  export = {
+    toString,
+    isBuffer,
+    alloc,
+    allocUnsafe,
+    from,
+    byteLength,
+    concat,
+    equals
+  }
 }
 
 // file://./node_modules/corestore/index.js
@@ -102,7 +115,7 @@ declare module 'corestore' {
       storage: any,
       opts?: {
         primaryKey?: Uint8Array;
-        [key:string]: any
+        [key: string]: any
       },
     );
 
@@ -110,9 +123,9 @@ declare module 'corestore' {
     _root: Corestore;
     _namespace: Uint8Array;
     _preready: (core?: Hypercore) => any
-    _preload: (opts: any) => Promise<{ 
-      from: Hypercore, 
-      keyPair?: KeyPair, 
+    _preload: (opts: any) => Promise<{
+      from: Hypercore,
+      keyPair?: KeyPair,
       encryptionKey?: Uint8Array | undefined
     }>
     _closing: null | Promise<any>;
@@ -123,7 +136,7 @@ declare module 'corestore' {
     replicate(socket: Duplex, opts?: any);
     namespace(name?: string | Uint8Array): Corestore;
     close(): Promise<void>;
-    session(opts?: { primaryKey?: Uint8Array, namespace?: string|null }): Corestore
+    session(opts?: { primaryKey?: Uint8Array, namespace?: string | null }): Corestore
 
     createKeyPair(name: string): Promise<KeyPair>;
     findingPeers(): () => void;
@@ -192,7 +205,7 @@ declare module 'safety-catch' {
 
 // file://./node_modules/random-access-memory/index.js
 declare module 'random-access-memory' {
-  export = class RAM {};
+  export = class RAM { };
 }
 
 // file://./node_modules/random-access-web/index.js
@@ -208,7 +221,7 @@ declare module 'hyperdrive' {
   import Corestore from 'corestore';
   import EventEmitter from 'events';
   import Hyperblobs from 'hyperblobs';
-  import {Readable} from 'stream'
+  import { Readable } from 'stream'
 
   export = class HyperDrive extends EventEmitter {
     constructor(
@@ -312,7 +325,7 @@ This allows drive.update to wait for either the findingPeers hook to finish or o
     put(
       path: string,
       buf: Uint8Array,
-      opts? = { executable?: boolean, metadata?: any },
+      opts?= { executable?: boolean, metadata?: any },
     ): ReturnType<Hyperbee['put']>;
     /**
      * Removes the entry at path from the drive. If a blob corresponding to the entry at path exists, it is not currently deleted.
@@ -334,7 +347,7 @@ This allows drive.update to wait for either the findingPeers hook to finish or o
     /**
      * Returns a stream of all entries in the drive at paths prefixed with folder. 
      */
-    list(folder:string, options?: {recursive: boolean}): ReturnType<Hyperbee['createReadStream']>
+    list(folder: string, options?: { recursive: boolean }): ReturnType<Hyperbee['createReadStream']>
     /**
      * Returns a stream of all subpaths of entries in drive stored at paths prefixed by folder.
     */
@@ -357,9 +370,9 @@ This allows drive.update to wait for either the findingPeers hook to finish or o
 // file://./node_modules/hypercore/index.js
 declare module 'hypercore' {
   import type { EventEmitter } from 'events';
-  import type { KeyPair as _KeyPair } from '@hyperswarm/dht';
+  import type { KeyPair as _KeyPair } from 'hyperdht';
 
-  export interface KeyPair extends _KeyPair{
+  export interface KeyPair extends _KeyPair {
     auth: Auth;
   }
 
@@ -406,7 +419,7 @@ Populated after ready has been emitted. Will be null before the event.
     /**
      * Wait for the core to try and find a signed update to it's length. Does not download any data from peers except for a proof of the new core length.
      */
-    update(opts?: {force?:boolean}): Promise<void>;
+    update(opts?: { force?: boolean }): Promise<void>;
     session(opts: Opts): Hypercore;
     close(): Promise<void>;
     get(seq: nubmer): Promise<any>;
@@ -460,28 +473,28 @@ declare module 'hyperbee' {
     seq: number;
     value: Uint8Array;
   }
-  
+
   export interface Operation extends Block {
     type: 'del' | 'put'
   }
 
   export interface Iterator<T> {
-      next() : {
-        value: T | null;
-        done: boolean;
-      } | Promise<{
-        value: T | null;
-        done: boolean;
-      }>;
+    next(): {
+      value: T | null;
+      done: boolean;
+    } | Promise<{
+      value: T | null;
+      done: boolean;
+    }>;
   }
   export interface IteratorStream<T> extends Readable {
-    [Symbol.asyncIterator]() : Iterator<T>
+    [Symbol.asyncIterator](): Iterator<T>
   }
 
   export interface AbstractEncoding {
-    encodingLength: (m:any)=> number,
-    encode: (m:any) => Uint8Array,
-    decode: (buf:Uint8Array)=> Any
+    encodingLength: (m: any) => number,
+    encode: (m: any) => Uint8Array,
+    decode: (buf: Uint8Array) => Any
   }
 
   export = class Hyperbee {
@@ -512,7 +525,7 @@ declare module 'hyperbee' {
       flush(): Promise<>;
     };
 
-    createRangeIterator(options?:any, active?: any): Iterator<Node>
+    createRangeIterator(options?: any, active?: any): Iterator<Node>
     createReadStream(options?: any): IteratorStream<Node>;
     createHistoryStream(options?: any): IteratorStream<Operation>;
 
@@ -540,7 +553,7 @@ declare module 'hyperbee' {
 
 // file://./node_modules/graceful-goodbye/index.js
 declare module 'graceful-goodbye' {
-  export = function (cb: (...args: any[]) => {}) {};
+  export = function(cb: (...args: any[]) => {}) { };
 }
 
 // file://./node_modules/compact-encoding/index.js
@@ -585,9 +598,9 @@ declare module '@hyperswarm/secret-stream' {
   }
 }
 
-// file://./node_modules/@hyperswarm/dht/index.js
-declare module '@hyperswarm/dht' {
-  import type EventEmitter  from 'events'
+// file://./node_modules/hyperdht/index.js
+declare module 'hyperdht' {
+  import type EventEmitter from 'events'
   import type SecretStream from '@hyperswarm/secret-stream';
   export interface KeyPair {
     publicKey: Uint8Array;
@@ -595,19 +608,19 @@ declare module '@hyperswarm/dht' {
   }
 
   export interface Server extends EventEmitter {
-    listen : (keyPair?: KeyPair) => Promise<void>
-    address(): {host:string, port:number, publicKey: Uint8Array}
+    listen: (keyPair?: KeyPair) => Promise<void>
+    address(): { host: string, port: number, publicKey: Uint8Array }
     close(): Promise<void>
     closed: boolean
   }
 
   export interface Node {
-    host:string,
-    port:number
+    host: string,
+    port: number
   }
 
   export = class DHT {
-    constructor(opts?:{ bootstrap?: Array<Node>, keyPair?: KeyPair })
+    constructor(opts?: { bootstrap?: Array<Node>, keyPair?: KeyPair })
     static keyPair(): KeyPair;
 
     defaultKeyPair: KeyPair
@@ -616,10 +629,10 @@ declare module '@hyperswarm/dht' {
 
     listening: Set<Server>
 
-    connect(publicKey: Uint8Array, opts?: {keyPair?:KeyPair}): SecretStream;
-    destroy():Promise<void>
-    ready():Promise<void>
-    createServer(onconnection?:(socket: SecretStream)=>void): Server
+    connect(publicKey: Uint8Array, opts?: { keyPair?: KeyPair }): SecretStream;
+    destroy(): Promise<void>
+    ready(): Promise<void>
+    createServer(onconnection?: (socket: SecretStream) => void): Server
   };
 }
 
@@ -634,9 +647,9 @@ declare module 'protomux-rpc' {
   export interface methodOpts {
     valueEncoding?: Encoding,
     // Optional encoding for requests
-    requestEncoding?: Encoding, 
+    requestEncoding?: Encoding,
     // Optional encoding for responses
-    responseEncoding?: Encoding 
+    responseEncoding?: Encoding
   }
 
   export = class ProtomuxRPC extends EventEmitter {
@@ -734,7 +747,7 @@ declare module 'protomux' {
 // file://./node_modules/brittle/index.js
 declare module 'brittle' {
   interface Test {
-    (name: string, fn?: (t: T)=> void) : T
+    (name: string, fn?: (t: T) => void): T
 
     solo: Test,
     skip: Test
@@ -743,15 +756,15 @@ declare module 'brittle' {
   interface T {
     test: PromsieLike<Test>
 
-    is: (a:any, b: any, message?: string)=>void
-    not: (a:any, b: any, message?: string)=>void
-    alike: (a:any, b: any, message?: string)=>void
-    unlike: (a:any, b: any, message?: string)=>void
-    exception: (a: Function | Promise, error?: RegExp, message?: string)=>void | Promise<void>
-    ok: (value: any, message?: string)=>void
-    absent: (value: any, message?: string)=>void
-    pass:(message?:string)=>void
-    plan:(number:Number)=>void
+    is: (a: any, b: any, message?: string) => void
+    not: (a: any, b: any, message?: string) => void
+    alike: (a: any, b: any, message?: string) => void
+    unlike: (a: any, b: any, message?: string) => void
+    exception: (a: Function | Promise, error?: RegExp, message?: string) => void | Promise<void>
+    ok: (value: any, message?: string) => void
+    absent: (value: any, message?: string) => void
+    pass: (message?: string) => void
+    plan: (number: Number) => void
 
     teardown: Function
   }
@@ -766,7 +779,7 @@ declare module 'safe-regex2' {
 
 declare module '@hyperswarm/dht-relay/lib/transport/ws.js'
 declare module '@hyperswarm/dht-relay/ws' {
-  import _DHT from '@hyperswarm/dht';
+  import _DHT from 'hyperdht';
   import ws from 'ws'
   import EventEmitter from 'events'
 
@@ -779,14 +792,14 @@ declare module '@hyperswarm/dht-relay/ws' {
 
 // file://./node_modules/@hyperswarm/dht-relay/index.js
 declare module '@hyperswarm/dht-relay' {
-  import _DHT from '@hyperswarm/dht';
+  import _DHT from 'hyperdht';
   import Stream from '@hyperswarm/dht-relay/ws'
 
   class Node extends _DHT {
-    constructor (stream: Stream)
+    constructor(stream: Stream)
   }
 
-  export const relay = (dht:DHT, stream: Stream) => any
+  export const relay = (dht: DHT, stream: Stream) => any
 
   export = Node
 }
@@ -802,10 +815,10 @@ declare module 'hypercore-crypto' {
 
 // file://./node_modules/turbo-hash-map/index.js
 declare module 'turbo-hash-map' {
-  export = class HashMap<T> extends Map<Uint8Array, T> {}
+  export = class HashMap<T> extends Map<Uint8Array, T> { }
 }
 
 // file://./node_modules/unix-path-resolve/index.js
 declare module 'unix-path-resolve' {
-  export = (...paths : string[]) => string
+  export = (...paths: string[]) => string
 }

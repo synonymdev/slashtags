@@ -1,13 +1,13 @@
-import z32 from 'z32'
-import b4a from 'b4a'
+const z32 = require('z32')
+const b4a = require('b4a')
 
-export const PATTERN = /^([a-z-]*:)([ybndrfg8ejkmcpqxot1uwisza345h769]+)(\/?[^#?\s]*)\??([^#\s]*)#?([^\s]*)$/
+const PATTERN = /^([a-z-]*:)([ybndrfg8ejkmcpqxot1uwisza345h769]+)(\/?[^#?\s]*)\??([^#\s]*)#?([^\s]*)$/
 
 /**
  * Encodes a 32-byte Slashtags key into a z-base32 id
  * @param {*} key
  */
-export const encode = key => {
+const encode = key => {
   if (!b4a.isBuffer(key)) throw new Error('Key must be a Buffer')
   if (key.byteLength !== 32) throw new Error('Key must be 32-bytes long')
   return z32.encode(key)
@@ -23,7 +23,7 @@ export const encode = key => {
  * @param {object | string} [opts.fragment]
  * @returns {string}
  */
-export const format = (key, opts = {}) => {
+const format = (key, opts = {}) => {
   const id = encode(key)
 
   const protocol = opts.protocol
@@ -49,7 +49,7 @@ export const format = (key, opts = {}) => {
  * @param {string} url
  * @returns
  */
-export const parse = url => {
+const parse = url => {
   if (typeof url !== 'string') throw new Error('URL must be a string')
 
   const matched = url.match(PATTERN)
@@ -75,7 +75,7 @@ export const parse = url => {
  * @param {string} id
  * @returns
  */
-export const decode = id => {
+const decode = id => {
   const key = z32.decode(id).subarray(0, 32)
   if (key.byteLength < 32) throw new Error('Invalid key bytelength, got:' + id)
   return key
@@ -108,4 +108,12 @@ function stringify (object, prefix) {
     return object.startsWith(prefix) ? object : prefix + object
   }
   return prefix + Object.entries(object).map(entry => entry[0] + '=' + entry[1])
+}
+
+module.exports = {
+  encode,
+  decode,
+  format,
+  parse,
+  PATTERN
 }

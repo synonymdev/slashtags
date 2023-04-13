@@ -1,6 +1,6 @@
-import b4a from 'b4a'
-import * as SlashURL from '../index.js'
-import test from 'brittle'
+const b4a = require('b4a')
+const SlashURL = require('../index.js')
+const test = require('brittle')
 
 test('basic', t => {
   const key = b4a.from(

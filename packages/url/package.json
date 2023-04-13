@@ -2,7 +2,6 @@
   "name": "@synonymdev/slashtags-url",
   "version": "1.0.0-alpha.2",
   "description": "Encodes and decodes Slashtags URLs",
-  "type": "module",
   "main": "index.js",
   "types": "types/index.d.ts",
   "repository": {
