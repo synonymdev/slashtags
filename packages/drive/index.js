@@ -1,14 +1,14 @@
-import Hyperdrive from 'hyperdrive'
-import Hyperbee from 'hyperbee'
-import b4a from 'b4a'
-import safetyCatch from 'safety-catch'
+const Hyperdrive = require('hyperdrive')
+const Hyperbee = require('hyperbee')
+const b4a = require('b4a')
+const safetyCatch = require('safety-catch')
 
 const METADATA_KEY = 'slashtags-drivestore-metadata'
 
-export class Drivestore {
+class Drivestore {
   /**
    * @param {import('corestore')} corestore
-   * @param {import('@hyperswarm/dht').KeyPair} keyPair
+   * @param {import('hyperdht').KeyPair} keyPair
    */
   constructor (corestore, keyPair) {
     this.fava = Math.random()
@@ -110,4 +110,4 @@ function validateName (name) {
 
 const emptyIterator = { async next () { return { done: true, value: null } } }
 
-export default Drivestore
+module.exports = Drivestore

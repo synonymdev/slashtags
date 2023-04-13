@@ -1,11 +1,11 @@
-import test from 'brittle'
-import Corestore from 'corestore'
-import RAM from 'random-access-memory'
-import crypto from 'hypercore-crypto'
-import b4a from 'b4a'
+const test = require('brittle')
+const Corestore = require('corestore')
+const RAM = require('random-access-memory')
+const crypto = require('hypercore-crypto')
+const b4a = require('b4a')
 
-import Drivestore from '../index.js'
-import { tmpdir } from './helpers/index.js'
+const Drivestore = require('../index.js')
+const { tmpdir } = require('./helpers/index.js')
 
 test('constructor', async (t) => {
   const keyPair = crypto.keyPair()
@@ -63,7 +63,7 @@ test('reopen', async (t) => {
   for await (const entry of reopened) {
     list.push(entry?.name)
   }
-  t.alike(list, ['bar', 'foo'], 'reopend metadata from storage')
+  t.alike(list, ['bar', 'foo'], 'reopend metadata require(storage')
 })
 
 test('multiple drivestores', async (t) => {

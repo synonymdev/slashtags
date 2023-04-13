@@ -1,11 +1,11 @@
-import test from 'brittle'
-import Corestore from 'corestore'
-import crypto from 'hypercore-crypto'
-import path from 'path'
-import fs from 'fs'
+const test = require('brittle')
+const Corestore = require('corestore')
+const crypto = require('hypercore-crypto')
+const path = require('path')
+const fs = require('fs')
 
-import Drivestore from '../index.js'
-import { tmpdir } from './helpers/index.js'
+const Drivestore = require('../index.js')
+const { tmpdir } = require('./helpers/index.js')
 
 test('dont store secretKey at rest', async (t) => {
   const dir = tmpdir()

@@ -1,10 +1,10 @@
-import test from 'brittle'
-import Corestore from 'corestore'
-import RAM from 'random-access-memory'
-import crypto from 'hypercore-crypto'
-import b4a from 'b4a'
+const test = require('brittle')
+const Corestore = require('corestore')
+const RAM = require('random-access-memory')
+const crypto = require('hypercore-crypto')
+const b4a = require('b4a')
 
-import Drivestore from '../index.js'
+const Drivestore = require('../index.js')
 
 test('replicate', async (t) => {
   const corestore = new Corestore(RAM)

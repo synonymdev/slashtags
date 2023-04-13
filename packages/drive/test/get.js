@@ -1,10 +1,10 @@
-import test from 'brittle'
-import Corestore from 'corestore'
-import crypto from 'hypercore-crypto'
-import b4a from 'b4a'
+const test = require('brittle')
+const Corestore = require('corestore')
+const crypto = require('hypercore-crypto')
+const b4a = require('b4a')
 
-import Drivestore from '../index.js'
-import { tmpdir } from './helpers/index.js'
+const Drivestore = require('../index.js')
+const { tmpdir } = require('./helpers/index.js')
 
 test('get - public drive', async (t) => {
   const keyPair = crypto.keyPair()

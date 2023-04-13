@@ -2,7 +2,6 @@
   "name": "@synonymdev/slashdrive",
   "version": "1.0.0-alpha.20",
   "description": "drive",
-  "type": "module",
   "main": "index.js",
   "types": "types/index.d.ts",
   "repository": {
