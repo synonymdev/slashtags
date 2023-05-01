@@ -2,7 +2,6 @@
   "name": "@synonymdev/slashtags-cli",
   "version": "1.0.0-alpha.5",
   "description": "CLI for slashtags",
-  "type": "module",
   "main": "index.js",
   "types": "types/index.d.ts",
   "bin": {
@@ -33,13 +32,13 @@
     "!**/*.tsbuildinfo"
   ],
   "dependencies": {
-    "@hyperswarm/dht": "^6.2.1",
     "@hyperswarm/dht-relay": "^0.3.0",
     "@synonymdev/slashtags-url": "^1.0.0-alpha.2",
-    "chalk": "^5.0.1",
+    "chalk": "^3.0.0",
     "commander": "^9.3.0",
     "corestore": "^6.5.1",
     "graceful-goodbye": "^1.2.1",
+    "hyperdht": "^6.5.2",
     "hyperdrive": "^11.0.0-alpha.10",
     "hyperswarm": "^4.3.7",
     "level": "^8.0.0",

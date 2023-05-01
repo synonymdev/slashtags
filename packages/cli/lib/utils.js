@@ -5,7 +5,7 @@
  * @param {number} timeout
  * @returns
  */
-export async function retry (done, timeout = 1000) {
+async function retry (done, timeout = 1000) {
   const start = Number(new Date())
   let _done = false
   let passed = 0
@@ -20,7 +20,7 @@ export async function retry (done, timeout = 1000) {
  * @param {REQUESTS[keyof REQUESTS]} type
  * @param {object} payload
  */
-export function request (ws, type, payload) {
+function request (ws, type, payload) {
   return ws.send(JSON.stringify({ type, payload }))
 }
 
@@ -29,8 +29,14 @@ export function request (ws, type, payload) {
  * @param {RESPONSES[keyof RESPONSES]} type
  * @param {object} payload
  */
-export function respond (ws, type, payload) {
+function respond (ws, type, payload) {
   return ws.send(JSON.stringify({ type, payload }))
+}
+
+module.exports = {
+  respond,
+  request,
+  retry
 }
 
 /**

@@ -1,7 +1,7 @@
-import WebSocket from 'ws'
-import { DEFAULT_PORT, REQUESTS, RESPONSES } from '../constants.js'
-import { request } from '../utils.js'
-import { NOT_RUNNING } from './daemon.js'
+const WebSocket = require('ws')
+const { DEFAULT_PORT, REQUESTS, RESPONSES } = require('../constants.js')
+const { request } = require('../utils.js')
+const { NOT_RUNNING } = require('./daemon.js')
 
 const ADDRESS = 'ws://localhost:' + DEFAULT_PORT
 
@@ -16,7 +16,7 @@ seeder.description = 'Add, remove, or list seeded slashtags'
 
 seeder.summary = 'seeder commands'
 
-export default function seeder (type, _, command) {
+function seeder (type, _, command) {
   const urls = command.args.slice(1)
   const socket = new WebSocket(ADDRESS)
 
@@ -66,7 +66,7 @@ export default function seeder (type, _, command) {
       }
 
       close()
-    } catch {}
+    } catch { }
   }
 
   const timeout = setTimeout(() => {
@@ -79,3 +79,5 @@ export default function seeder (type, _, command) {
     socket.close()
   }
 }
+
+module.exports = seeder

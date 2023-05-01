@@ -1,8 +1,8 @@
-import test from 'brittle'
-import DHT from '@hyperswarm/dht'
-import createTestnet from '@hyperswarm/testnet'
+const test = require('brittle')
+const DHT = require('hyperdht')
+const createTestnet = require('@hyperswarm/testnet')
 
-import Slashtag from '../index.js'
+const Slashtag = require('../index.js')
 
 test('options - empty options', async t => {
   const alice = new Slashtag()

@@ -1,11 +1,13 @@
-import test from 'brittle'
-import createTestnet from '@hyperswarm/testnet'
-import b4a from 'b4a'
-import Corestore from 'corestore'
-import Hyperswarm from 'hyperswarm'
+const test = require('brittle')
+const createTestnet = require('@hyperswarm/testnet')
+const b4a = require('b4a')
+const Corestore = require('corestore')
+const Hyperswarm = require('hyperswarm')
 
-import SDK, { Hyperdrive } from '../index.js'
-import { tmpdir } from './helpers/index.js'
+const SDK = require('../index.js')
+const { tmpdir } = require('./helpers/index.js')
+
+const { Hyperdrive } = SDK
 
 test('drive - resolve public drive', async (t) => {
   const testnet = await createTestnet(3, t.teardown)
@@ -23,7 +25,7 @@ test('drive - resolve public drive', async (t) => {
   const clone = remote.drive(drive.key)
 
   const resolved = await clone.get('/profile.json')
-    .then(b => b && JSON.parse(b4a.toString(b)))
+    .then(/** @param{*}b */(b) => b && JSON.parse(b4a.toString(b)))
 
   t.alike(resolved, profile)
 
@@ -82,7 +84,11 @@ test('drive - read encrypted drives', async (t) => {
 
   await clone.update()
 
-  t.alike(await clone.get('/foo').then(buf => buf && JSON.parse(buf.toString())), contact)
+  t.alike(
+    await clone.get('/foo')
+      .then(/** @param{*}b */(b) => b && JSON.parse(b4a.toString(b))),
+    contact
+  )
 
   await sdk.close()
   await reader.close()
@@ -102,7 +108,7 @@ test('drive - internal hyperdrive', async (t) => {
 
   t.alike(
     await readonly.get('/profile.json')
-      .then(b => b && JSON.parse(b4a.toString(b))),
+      .then(/** @param{*}b */(b) => b && JSON.parse(b4a.toString(b))),
     profile,
     'correctly open a readonly drive session of local drive'
   )
@@ -252,7 +258,7 @@ test('swarm destroying before reading saved remote drive', async (t) => {
     await clone.ready()
 
     const resolved = await clone.get('/profile.json')
-      .then(b => b && JSON.parse(b4a.toString(b)))
+      .then(/** @param{*}b */(b) => b && JSON.parse(b4a.toString(b)))
 
     t.alike(resolved, profile)
     await remote.close()
@@ -265,7 +271,7 @@ test('swarm destroying before reading saved remote drive', async (t) => {
   await clone.ready()
 
   const resolved = await clone.get('/profile.json')
-    .then(b => b && JSON.parse(b4a.toString(b)))
+    .then(/** @param{*}b */(b) => b && JSON.parse(b4a.toString(b)))
 
   t.alike(resolved, profile)
 
@@ -318,4 +324,4 @@ test('closing drive does not close corestore', async (t) => {
   t.ok(sdk.corestore._closing)
 })
 
-function noop () {}
+function noop () { }

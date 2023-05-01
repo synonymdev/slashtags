@@ -2,7 +2,6 @@
   "name": "@synonymdev/slashtags-rpc",
   "version": "1.0.0-alpha.2",
   "description": "helper module for creating RPCs using Slashtags nodes",
-  "type": "module",
   "main": "index.js",
   "types": "types/index.d.ts",
   "repository": {
@@ -34,12 +33,12 @@
     "protomux-rpc": "^1.3.0"
   },
   "devDependencies": {
-    "@hyperswarm/dht": "^6.2.3",
     "@hyperswarm/testnet": "^3.1.0",
     "@synonymdev/slashtag": "^1.0.0-alpha.10",
     "brittle": "^3.0.2",
     "compact-encoding": "^2.11.0",
     "depcheck": "^1.4.3",
+    "hyperdht": "^6.5.2",
     "standard": "^17.0.0",
     "typescript": "^4.8.2",
     "z32": "^1.0.0"

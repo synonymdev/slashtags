@@ -1,9 +1,9 @@
-import createTestnet from '@hyperswarm/testnet'
-import test from 'brittle'
-import { homedir } from 'os'
-import RAM from 'random-access-memory'
+const createTestnet = require('@hyperswarm/testnet')
+const test = require('brittle')
+const { homedir } = require('os')
+const RAM = require('random-access-memory')
 
-import SDK from '../index.js'
+const SDK = require('../index.js')
 
 test('empty options', t => {
   const sdk = new SDK()

@@ -1,10 +1,10 @@
 // The one process that contains all networking resources, database, etc.
-import { Level } from 'level'
+const { Level } = require('level')
 
-import { DEFAULT_PORT, REQUESTS, RESPONSES, SEEDER_DATABASE_DIRECTORY } from '../constants.js'
-import Seeder from './seeder.js'
-import runRelay from './relay.js'
-import { respond } from '../utils.js'
+const { DEFAULT_PORT, REQUESTS, RESPONSES, SEEDER_DATABASE_DIRECTORY } = require('../constants.js')
+const Seeder = require('./seeder.js')
+const runRelay = require('./relay.js')
+const { respond } = require('../utils.js')
 
 const { dht, server } = runRelay({ port: DEFAULT_PORT })
 
@@ -53,5 +53,5 @@ function onMessage (event) {
 }
 
 /**
- * @typedef {ConstructorParameters<typeof import('@hyperswarm/dht')>[0]} DHTOpts
+ * @typedef {ConstructorParameters<typeof import('hyperdht')>[0]} DHTOpts
  */

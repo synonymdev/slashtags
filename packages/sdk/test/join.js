@@ -1,9 +1,9 @@
-import test from 'brittle'
-import createTestnet from '@hyperswarm/testnet'
-import Hyperswarm from 'hyperswarm'
-import b4a from 'b4a'
+const test = require('brittle')
+const createTestnet = require('@hyperswarm/testnet')
+const Hyperswarm = require('hyperswarm')
+const b4a = require('b4a')
 
-import SDK from '../index.js'
+const SDK = require('../index.js')
 
 test('join - deduplicate discovery', async (t) => {
   const testnet = await createTestnet(3, t.teardown)

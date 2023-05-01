@@ -1,8 +1,8 @@
-import b4a from 'b4a'
-import safe from 'safe-regex2'
-import test from 'brittle'
+const b4a = require('b4a')
+const safe = require('safe-regex2')
+const test = require('brittle')
 
-import * as SlashURL from '../index.js'
+const SlashURL = require('../index.js')
 
 const baseResult = {
   id: '3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswhy',

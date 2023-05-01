@@ -1,5 +1,5 @@
-import sodium from 'sodium-universal'
-import b4a from 'b4a'
+const sodium = require('sodium-universal')
+const b4a = require('b4a')
 
 const NS = hash('slashtags')
 
@@ -10,7 +10,7 @@ const NS = hash('slashtags')
  * @param {string} [name]
  * @returns
  */
-export function generateSeed (pk, name = '') {
+function generateSeed (pk, name = '') {
   const seed = b4a.allocUnsafe(32)
   sodium.crypto_generichash_batch(seed, [NS, b4a.from(name)], pk)
   return seed
@@ -21,9 +21,14 @@ export function generateSeed (pk, name = '') {
  *
  * @param {Uint8Array | string} input
  */
-export function hash (input) {
+function hash (input) {
   if (!b4a.isBuffer(input)) input = b4a.from(input)
   const output = b4a.allocUnsafe(32)
   sodium.crypto_generichash(output, input)
   return output
+}
+
+module.exports = {
+  generateSeed,
+  hash
 }

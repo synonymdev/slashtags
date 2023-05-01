@@ -1,6 +1,10 @@
-import path from 'path'
-import os from 'os'
+const path = require('path')
+const os = require('os')
 
-export function tmpdir () {
+function tmpdir () {
   return path.join(os.tmpdir(), 'drivestore-' + Math.random().toString(16).slice(2))
+}
+
+module.exports = {
+  tmpdir
 }

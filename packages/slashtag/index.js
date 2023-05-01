@@ -1,19 +1,19 @@
-import Corestore from 'corestore'
-import RAM from 'random-access-memory'
-import EventEmitter from 'events'
-import DHT from '@hyperswarm/dht'
-import HashMap from 'turbo-hash-map'
-import Drivestore from '@synonymdev/slashdrive'
-import { format, encode, parse, decode } from '@synonymdev/slashtags-url'
+const Corestore = require('corestore')
+const RAM = require('random-access-memory')
+const EventEmitter = require('events')
+const DHT = require('hyperdht')
+const HashMap = require('turbo-hash-map')
+const Drivestore = require('@synonymdev/slashdrive')
+const { format, encode, parse, decode } = require('@synonymdev/slashtags-url')
 
 // @ts-ignore
-export class Slashtag extends EventEmitter {
+class Slashtag extends EventEmitter {
   /**
    * @param {object} [opts]
    * @param {import('corestore')} [opts.corestore]
-   * @param {import('@hyperswarm/dht')} [opts.dht]
-   * @param {import('@hyperswarm/dht').KeyPair} [opts.keyPair]
-   * @param {import('@hyperswarm/dht').Node[]} [opts.bootstrap]
+   * @param {import('hyperdht')} [opts.dht]
+   * @param {import('hyperdht').KeyPair} [opts.keyPair]
+   * @param {import('hyperdht').Node[]} [opts.bootstrap]
    */
   constructor (opts = {}) {
     super()
@@ -110,11 +110,11 @@ export class Slashtag extends EventEmitter {
   }
 }
 
-function noop () {}
+function noop () { }
 
 /**
  * @typedef {import('./lib/interfaces').Emitter} Emitter
  * @typedef {import('@hyperswarm/secret-stream')} SecretStream
  */
 
-export default Slashtag
+module.exports = Slashtag

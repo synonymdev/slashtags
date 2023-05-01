@@ -1,8 +1,9 @@
-import test from 'brittle'
-import b4a from 'b4a'
-import RAM from 'random-access-memory'
+const test = require('brittle')
+const b4a = require('b4a')
+const RAM = require('random-access-memory')
 
-import SDK, { constants } from '../index.js'
+const SDK = require('../index.js')
+const { constants } = SDK
 
 /**
  * Tests vectors for generating Slashtags keys from PrimaryKey,

@@ -1,8 +1,8 @@
 #! /usr/bin/env node
-import { Argument, Command } from 'commander'
-import { VERSION } from './lib/constants.js'
-import daemon from './lib/commands/daemon.js'
-import seeder from './lib/commands/seeder.js'
+const { Argument, Command } = require('commander')
+const { VERSION } = require('./lib/constants.js')
+const daemon = require('./lib/commands/daemon.js')
+const seeder = require('./lib/commands/seeder.js')
 
 const program = new Command('slash')
 

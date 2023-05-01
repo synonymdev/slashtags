@@ -1,12 +1,12 @@
-import test from 'brittle'
-import Slashtag from '@synonymdev/slashtag'
-import createTestnet from '@hyperswarm/testnet'
-import c from 'compact-encoding'
-import z32 from 'z32'
-import DHT from '@hyperswarm/dht'
-import b4a from 'b4a'
+const test = require('brittle')
+const Slashtag = require('@synonymdev/slashtag')
+const createTestnet = require('@hyperswarm/testnet')
+const c = require('compact-encoding')
+const z32 = require('z32')
+const DHT = require('hyperdht')
+const b4a = require('b4a')
 
-import SlashtagsRPC from '../index.js'
+const SlashtagsRPC = require('../index.js')
 
 class Foo extends SlashtagsRPC {
   get id () {
@@ -72,7 +72,7 @@ test('missing id', async t => {
   const testnet = await createTestnet(1, t.teardown)
   const alice = new Slashtag(testnet)
 
-  class MissingID extends SlashtagsRPC {}
+  class MissingID extends SlashtagsRPC { }
 
   const instance = new MissingID(alice)
   // @ts-ignore
@@ -88,7 +88,7 @@ test('basic', async t => {
   const bob = new Slashtag(testnet)
 
   const aliceFoo = new Foo(alice)
-  ;(() => {
+    ; (() => {
     // Multiple instances shouldn't create any issues
     return new Foo(alice)
   })()
@@ -168,7 +168,7 @@ test('use without slashtags', async t => {
 
   const aliceFoo = new Foo()
 
-  server.on('connection', (stream) => {
+  server.on('connection', (/** @type {*} */ stream) => {
     aliceFoo.setup(stream)
   })
 
