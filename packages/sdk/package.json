@@ -1,6 +1,6 @@
 {
   "name": "@synonymdev/slashtags-sdk",
-  "version": "1.0.0-alpha.38",
+  "version": "1.0.0-alpha.39",
   "description": "slashtags development kit",
   "main": "index.js",
   "types": "types/index.d.ts",
@@ -34,8 +34,8 @@
   },
   "dependencies": {
     "@hyperswarm/dht-relay": "^0.3.0",
-    "@synonymdev/slashtag": "^1.0.0-alpha.24",
-    "@synonymdev/slashtags-url": "^1.0.0-alpha.0",
+    "@synonymdev/slashtag": "^1.0.0-alpha.25",
+    "@synonymdev/slashtags-url": "^1.0.0-alpha.3",
     "b4a": "^1.6.0",
     "corestore": "^6.2.1",
     "graceful-goodbye": "^1.1.0",
