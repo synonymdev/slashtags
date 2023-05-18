@@ -1,5 +1,4 @@
 const test = require('brittle')
-const DHT = require('hyperdht')
 const createTestnet = require('@hyperswarm/testnet')
 
 const Slashtag = require('../index.js')
@@ -8,10 +7,10 @@ test('open', async t => {
   const testnet = await createTestnet(3, t.teardown)
 
   const alice = new Slashtag(testnet)
-  await alice.dht.ready()
-  await alice.drivestore.ready()
+  await alice.ready()
 
-  t.is(alice.dht.listening.size, 0, 'it should not listen automatically')
+  t.is(alice.dht.listening.size, 1)
+  t.unlike(alice.dht.listening.values().next().value._keyPair.publicKey, alice.key, 'it should not listen automatically on slashtag key')
 
   await alice.close()
 })
@@ -32,13 +31,12 @@ test('close - basic', async t => {
   t.ok(alice.dht.destroyed)
   t.ok(alice.closed)
   t.ok(alice.server.closed)
-  t.absent(alice.listening)
   t.is(alice.dht.listening.size, 0)
 
   t.ok(alice.closed)
 })
 
-test.skip('close - close all sockets', async t => {
+test('close - close all sockets', async t => {
   const testnet = await createTestnet(3, t.teardown)
 
   const alice = new Slashtag(testnet)
@@ -48,8 +46,8 @@ test.skip('close - close all sockets', async t => {
   st.plan(1)
   alice.on('connection', () => st.pass('got connection'))
 
-  const dht = new DHT(testnet)
-  const socket = dht.connect(alice.key)
+  const bob = new Slashtag(testnet)
+  const socket = bob.connect(alice.key)
   t.ok(await socket.opened)
 
   await st
@@ -60,6 +58,5 @@ test.skip('close - close all sockets', async t => {
 
   t.is(alice.sockets.size, 0)
 
-  await socket.destroy()
-  await dht.destroy()
+  await bob.close()
 })

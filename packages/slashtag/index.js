@@ -25,9 +25,9 @@ class Slashtag extends EventEmitter {
     this.id = encode(this.key)
     this.url = format(this.key)
 
-    this.dht = new DHT({ bootstrap: opts?.bootstrap, keyPair: this.keyPair })
-
-    this.server = this.dht.createServer(this._handleConnection.bind(this))
+    this.swarm = new Hyperswarm({ bootstrap: opts.bootstrap })
+    this.dht = this.swarm.dht
+    this.server = this.swarm.dht.createServer(this._handleConnection.bind(this))
     /** @type {HashMap<SecretStream>} */
     this.sockets = new HashMap()
 
@@ -37,7 +37,7 @@ class Slashtag extends EventEmitter {
     this.coreData = new SlashtagsCoreData({
       keyPair: this.keyPair,
       corestore: opts.corestore,
-      swarm: new Hyperswarm({ dht: this.dht })
+      swarm: this.swarm
     })
     this.profile = new SlashtagsProfile(this.coreData)
 
@@ -95,14 +95,14 @@ class Slashtag extends EventEmitter {
   }
 
   async _close () {
-    await this.unlisten()
     for (const socket of this.sockets.values()) {
       await socket.destroy()
     }
 
     await this.coreData.close()
+    await this.swarm.destroy()
 
-    this.dht.defaultKeyPair === this.keyPair && (await this.dht.destroy())
+    this.listening = false
 
     this.closed = true
     this.emit('close')

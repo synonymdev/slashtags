@@ -4,38 +4,6 @@ const createTestnet = require('@hyperswarm/testnet')
 
 const Slashtag = require('../index.js')
 
-test.skip('connect to a DHT server', async t => {
-  const testnet = await createTestnet(3, t.teardown)
-
-  const s = t.test('server')
-  s.plan(2)
-
-  const alice = new Slashtag(testnet)
-
-  const dht = new DHT(testnet)
-  const server = dht.createServer()
-  /** @type {import('@hyperswarm/secret-stream')[]} */
-  const serverSockets = []
-  server.on('connection', socket => {
-    s.pass('server connection opened')
-    s.alike(socket.remotePublicKey, alice.key)
-    serverSockets.push(socket)
-  })
-  await server.listen()
-
-  const key = server.address().publicKey
-
-  const socket = alice.connect(key)
-  t.alike(socket.remotePublicKey, key)
-  t.ok(await socket.opened)
-
-  await s
-
-  await alice.close()
-  await serverSockets[0].destroy()
-  await dht.destroy()
-})
-
 test('listen - connect', async t => {
   const testnet = await createTestnet(3, t.teardown)
 
