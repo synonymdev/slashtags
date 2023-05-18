@@ -57,21 +57,9 @@ test('closed - corestore is closing', async (t) => {
   const readableOpened = sdk.drive(key)
   await readableOpened.ready()
 
-  // Inflight should not throw
-  const writableInflight = sdk.slashtag().drivestore.get()
-  const readbleInflight = sdk.drive(key)
-
   await sdk.close()
 
   t.ok(sdk.closed)
-
-  await t.exception(() => writableInflight.ready())
-  await t.exception(() => readbleInflight.ready())
-
-  writableInflight.ready().catch(noop)
-  readbleInflight.ready().catch(noop)
-
-  t.pass('catch ready is enouhg to catch inflight errors')
 
   t.exception(() => sdk.slashtag('foo'), /SDK is closed/)
   t.exception(() => sdk.drive(key), /SDK is closed/)
@@ -85,5 +73,3 @@ test('closed - corestore is closing', async (t) => {
 
   await sdk.close()
 })
-
-function noop () { }

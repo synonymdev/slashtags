@@ -4,7 +4,7 @@ const crypto = require('hypercore-crypto')
 const EventEmitter = require('events')
 const Hyperswarm = require('hyperswarm')
 const Stream = require('@hyperswarm/dht-relay/ws')
-const Node = require('@hyperswarm/dht-relay')
+const RelayedDHT = require('@hyperswarm/dht-relay')
 const DHT = require('hyperdht')
 const Slashtag = require('@synonymdev/slashtag')
 const SlashURL = require('@synonymdev/slashtags-url')
@@ -43,14 +43,23 @@ class SDK extends EventEmitter {
     this._relaySocket = typeof opts.relay === 'string' ? new WebSocket(opts.relay) : opts.relay
 
     this.dht = this._relaySocket
-      ? new Node(new Stream(true, this._relaySocket))
+      ? new RelayedDHT(new Stream(true, this._relaySocket))
       : new DHT({ bootstrap: opts.bootstrap })
 
+    // Disable this.dht.destroy inside Slashtag instance to avoid destroying the DHT node when calling slashtag.close()
+    // as the DHT node is shared between all slashtag instances.
+    // TODO: remove this once hyperswarm sessions is merged https://github.com/holepunchto/hyperswarm/pull/130
+    this._destroyDHT = this.dht.destroy.bind(this.dht)
+    // @ts-ignore
+    this.dht.destroy = noop
+
+    // @deprecated
     this.swarm = new Hyperswarm({ dht: this.dht, seed: hash(this.primaryKey) })
     this.swarm.on('connection', (socket) => this.corestore.replicate(socket))
 
     /** Help skip swarm discovery if starting the DHT node failed */
     this.swarm.dht.ready().catch(() => { this.swarm.destroyed = true })
+    // TODO: remove this.swarm once everywhere is using slashtag.coreData instead
 
     /** @type {HashMap<Slashtag>} */
     this.slashtags = new HashMap()
@@ -64,6 +73,7 @@ class SDK extends EventEmitter {
     return this.swarm.dht.ready()
   }
 
+  // TODO: check if Bitkit still needs closed and destroyed getters
   /**
    * Corestore is closed
    * cannot create new writable or readable drives
@@ -116,6 +126,9 @@ class SDK extends EventEmitter {
 
   /**
    * Creates a Hyperdrive and announce the SDK's swarm as a client looking up for peers for it.
+   *
+   * @deprecated use `slashtag.coreData` or `slashtag.profile` instead
+   *
    * @param {Uint8Array} key
    * @param {object} [opts]
    * @param {Uint8Array} [opts.encryptionKey]
@@ -158,10 +171,12 @@ class SDK extends EventEmitter {
   }
 
   /**
+   * Returns discovery object or undefined if the swarm is destroyed
+   *
+   * @deprecated use `slashtag.coreData` which will join the right topics automatically
+   *
    * @type {import("hyperswarm")['join']}
    * @returns {import('hyperswarm').Discovery | undefined}
-   *
-   * Returns discovery object or undefined if the swarm is destroyed
    * */
   join (topic, opts = { server: true, client: true }) {
     if (this.destroyed) return
@@ -195,6 +210,8 @@ class SDK extends EventEmitter {
    * which helps to find hypercores even when their authors are not online,
    * if they upload their cores to a highly available seeeder.
    *
+   * @deprecated use `slashtag.coreData` which will join the seeders topic on your behalf.
+   *
    * @param {boolean} [server=false] If you want to join as a seeder yourself
    * @returns {Promise<import('hyperswarm').PeerInfo>}
    */
@@ -210,6 +227,8 @@ class SDK extends EventEmitter {
   /**
    * Checks if a peer is announced as a server on the seeders topic
    *
+   * @deprecated no need to use isSeeder anymore, use `slashtag.coreData` which will manage seeeders on your behalf
+   *
    * @param {import('hyperswarm').PeerInfo} peerInfo
    */
   static isSeeder (peerInfo) {
@@ -224,9 +243,14 @@ class SDK extends EventEmitter {
       this.swarm.destroy()
     ])
 
+    // @ts-ignore
+    await this._destroyDHT()
+
     this.emit('close')
   }
 }
+
+function noop () { }
 
 module.exports = SDK
 module.exports.constants = constants

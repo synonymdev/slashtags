@@ -14,6 +14,7 @@ class Slashtag extends EventEmitter {
   /**
    * @param {object} [opts]
    * @param {import('corestore')} [opts.corestore]
+   * @param {import('hyperdht')} [opts.dht]
    * @param {import('hyperdht').KeyPair} [opts.keyPair]
    * @param {import('hyperdht').Node[]} [opts.bootstrap]
    */
@@ -25,7 +26,7 @@ class Slashtag extends EventEmitter {
     this.id = encode(this.key)
     this.url = format(this.key)
 
-    this.swarm = new Hyperswarm({ bootstrap: opts.bootstrap })
+    this.swarm = new Hyperswarm({ dht: opts.dht, bootstrap: opts.bootstrap })
     this.dht = this.swarm.dht
     this.server = this.swarm.dht.createServer(this._handleConnection.bind(this))
     /** @type {HashMap<SecretStream>} */

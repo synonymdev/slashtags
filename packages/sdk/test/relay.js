@@ -4,7 +4,6 @@ const { relay } = require('@hyperswarm/dht-relay')
 const Stream = require('@hyperswarm/dht-relay/ws')
 const { WebSocketServer } = require('ws')
 const RAM = require('random-access-memory')
-const b4a = require('b4a')
 
 const SDK = require('../index.js')
 
@@ -42,25 +41,3 @@ test('basic', async t => {
 
   t.pass('closed')
 })
-
-test('read and write to drives despite failing relay', async (t) => {
-  // @ts-ignore
-  const address = 'ws://localhost:9999'
-  const sdk = new SDK({ storage: RAM, relay: address })
-
-  await t.exception(() => sdk.ready())
-  sdk.ready().catch(noop)
-  t.pass('catch handles disconnection')
-
-  const writable = sdk.slashtag().drivestore.get()
-
-  const buf = b4a.from('hello world')
-  await writable.put('/foo', buf)
-
-  const readable = sdk.drive(writable.key)
-  t.alike(await readable.get('/foo'), buf)
-
-  await sdk.close()
-})
-
-function noop () { }

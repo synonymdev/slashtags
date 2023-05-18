@@ -53,7 +53,7 @@ test('drive - blind seeder resolve private drive', async (t) => {
   s.pipe(drive.corestore.replicate(false)).pipe(s)
 
   await clone.update()
-  await t.exception(clone.get('/foo'), /.*/, "blind seeder can't reed private drive")
+  await t.exception(clone.getBlobs(), /.*/, "blind seeder can't reed private drive")
   t.is(clone.core.length, 2, 'still can replicate')
 
   await sdk.close()
@@ -204,9 +204,9 @@ test('replicate on closed corestore', async (t) => {
   const remote = new SDK({ ...testnet, storage: tmpdir() })
   const clone = remote.drive(drive.key)
 
-  remote.close()
+  await remote.close()
 
-  await t.exception(() => clone.get('/profile.json'), /The corestore is closed/)
+  await t.exception(() => clone.get('/profile.json'), /SESSION_CLOSED/)
   await clone.get('/profile.json').catch(noop)
   t.pass('catch caught error on clone.get()')
 
@@ -231,7 +231,7 @@ test('replicate after swarm destroyed', async (t) => {
 
   await remote.close()
 
-  await t.exception(() => clone.get('/profile.json'))
+  await t.exception(() => clone.get('/profile.json'), /SESSION_CLOSED/)
   await clone.get('/profile.json').catch(noop)
   t.pass('catch caught error on clone.get()')
 
