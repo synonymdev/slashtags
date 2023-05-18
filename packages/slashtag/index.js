@@ -5,13 +5,15 @@ const DHT = require('hyperdht')
 const HashMap = require('turbo-hash-map')
 const Drivestore = require('@synonymdev/slashdrive')
 const { format, encode, parse, decode } = require('@synonymdev/slashtags-url')
+const Hyperswarm = require('hyperswarm')
+const SlashtagsProfile = require('@synonymdev/slashtags-profile')
+const SlashtagsCoreData = require('@synonymdev/slashtags-core-data')
 
 // @ts-ignore
 class Slashtag extends EventEmitter {
   /**
    * @param {object} [opts]
    * @param {import('corestore')} [opts.corestore]
-   * @param {import('hyperdht')} [opts.dht]
    * @param {import('hyperdht').KeyPair} [opts.keyPair]
    * @param {import('hyperdht').Node[]} [opts.bootstrap]
    */
@@ -23,18 +25,34 @@ class Slashtag extends EventEmitter {
     this.id = encode(this.key)
     this.url = format(this.key)
 
-    this.dht =
-      opts.dht || new DHT({ bootstrap: opts?.bootstrap, keyPair: this.keyPair })
+    this.dht = new DHT({ bootstrap: opts?.bootstrap, keyPair: this.keyPair })
 
     this.server = this.dht.createServer(this._handleConnection.bind(this))
     /** @type {HashMap<SecretStream>} */
     this.sockets = new HashMap()
 
+    // @deprecated use `slashtag.coreData` instead.
     this.drivestore = new Drivestore(opts?.corestore || new Corestore(RAM), this.keyPair)
+
+    this.coreData = new SlashtagsCoreData({
+      keyPair: this.keyPair,
+      corestore: opts.corestore,
+      swarm: new Hyperswarm({ dht: this.dht })
+    })
+    this.profile = new SlashtagsProfile(this.coreData)
 
     /** @type {Emitter['on']} */ this.on = super.on
     /** @type {Emitter['on']} */ this.once = super.once
     /** @type {Emitter['on']} */ this.off = super.off
+  }
+
+  /**
+   * Await for internal resourcest to be ready.
+   *
+   * @returns {Promise<void>}
+   */
+  ready () {
+    return this.coreData.ready()
   }
 
   /** Listen for incoming connections on Slashtag's KeyPair */
@@ -82,6 +100,8 @@ class Slashtag extends EventEmitter {
       await socket.destroy()
     }
 
+    await this.coreData.close()
+
     this.dht.defaultKeyPair === this.keyPair && (await this.dht.destroy())
 
     this.closed = true
@@ -89,10 +109,15 @@ class Slashtag extends EventEmitter {
   }
 
   /**
+   * Handle direct connections to a server listening on this slashtag keypair
+   *
    * @param {SecretStream} socket
    */
   _handleConnection (socket) {
+    // TODO: remove drivestore after coreData is used everywhere instead
     this.drivestore.replicate(socket)
+
+    this.coreData._corestoreSession.replicate(socket)
 
     socket.on('error', noop)
     socket.on('close', () => {

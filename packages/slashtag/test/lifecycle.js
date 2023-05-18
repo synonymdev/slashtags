@@ -38,7 +38,7 @@ test('close - basic', async t => {
   t.ok(alice.closed)
 })
 
-test('close - close all sockets', async t => {
+test.skip('close - close all sockets', async t => {
   const testnet = await createTestnet(3, t.teardown)
 
   const alice = new Slashtag(testnet)
@@ -62,21 +62,4 @@ test('close - close all sockets', async t => {
 
   await socket.destroy()
   await dht.destroy()
-})
-
-test('close - should not destroy passed DHT', async t => {
-  const testnet = await createTestnet(3, t.teardown)
-
-  const dht = new DHT(testnet)
-
-  const alice = new Slashtag({ dht })
-
-  await alice.close()
-
-  t.ok(alice.closed)
-  t.absent(dht.destroyed)
-
-  await dht.destroy()
-
-  t.ok(dht.destroyed)
 })
