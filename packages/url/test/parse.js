@@ -127,6 +127,17 @@ const testVectors = [
     desc: 'Extra characters (possible checksum)',
     url: 'slash:3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswhny7',
     result: baseResult
+  },
+  {
+    desc: 'Case sensitivity',
+    url: 'slash:3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswhny7'.toUpperCase() + '/First/secOND/?foO=bAr#booL&Foo=Bar',
+    result: {
+      ...baseResult,
+      path: '/First/secOND/',
+      query: { foO: 'bAr' },
+      fragment: '#booL&Foo=Bar',
+      privateQuery: { Foo: 'Bar', booL: true }
+    }
   }
 ]
 
