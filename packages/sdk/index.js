@@ -31,6 +31,7 @@ class SDK extends EventEmitter {
    * @param {Uint8Array} [opts.primaryKey]
    * @param {string | WebSocket} [opts.relay]
    * @param {import('hyperdht').Node[]} [opts.bootstrap]
+   * @param {Uint8Array[]} [opts.seeders]
    */
   constructor (opts = {}) {
     super()
@@ -64,6 +65,8 @@ class SDK extends EventEmitter {
     /** @type {HashMap<Slashtag>} */
     this.slashtags = new HashMap()
 
+    this._seeders = opts.seeders
+
     // Gracefully shutdown
     goodbye(this.close.bind(this))
   }
@@ -79,7 +82,7 @@ class SDK extends EventEmitter {
    * cannot create new writable or readable drives
    */
   get closed () {
-    return this.corestore._closing || this._closing
+    return this.corestore.closing || this._closing
   }
 
   /**
@@ -113,7 +116,8 @@ class SDK extends EventEmitter {
     const slashtag = new Slashtag({
       keyPair: this.createKeyPair(name),
       corestore: this.corestore,
-      dht: this.dht
+      dht: this.dht,
+      seeders: this._seeders
     })
 
     this.slashtags.set(key, slashtag)

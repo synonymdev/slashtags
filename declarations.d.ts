@@ -129,7 +129,7 @@ declare module 'corestore' {
       keyPair?: KeyPair,
       encryptionKey?: Uint8Array | undefined
     }>
-    _closing: null | Promise<any>;
+    closing: null | Promise<any>;
     _preready: (core: Hypercore) => Promise<void>
     storage: any;
 

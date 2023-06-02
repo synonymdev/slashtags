@@ -17,6 +17,7 @@ class Slashtag extends EventEmitter {
    * @param {import('hyperdht')} [opts.dht]
    * @param {import('hyperdht').KeyPair} [opts.keyPair]
    * @param {import('hyperdht').Node[]} [opts.bootstrap]
+   * @param {Uint8Array[]} [opts.seeders]
    */
   constructor (opts = {}) {
     super()
@@ -38,7 +39,8 @@ class Slashtag extends EventEmitter {
     this.coreData = new SlashtagsCoreData({
       keyPair: this.keyPair,
       corestore: opts.corestore,
-      swarm: this.swarm
+      swarm: this.swarm,
+      seeders: opts.seeders
     })
     this.profile = new SlashtagsProfile(this.coreData)
 
@@ -100,7 +102,7 @@ class Slashtag extends EventEmitter {
       await socket.destroy()
     }
 
-    await this.coreData.close()
+    await this.coreData.close({ force: true })
     await this.swarm.destroy()
 
     this.listening = false

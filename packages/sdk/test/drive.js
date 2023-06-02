@@ -319,9 +319,9 @@ test('closing drive does not close corestore', async (t) => {
   await drive.ready()
   await drive.close()
 
-  t.absent(sdk.corestore._closing)
+  t.absent(sdk.corestore.closing)
   await sdk.close()
-  t.ok(sdk.corestore._closing)
+  t.ok(sdk.corestore.closing)
 })
 
 function noop () { }

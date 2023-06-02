@@ -28,7 +28,7 @@ test('close - close all opened resources', async t => {
   t.ok(alice.closed)
   t.ok(bob.closed)
   t.ok(sdk.swarm.destroyed)
-  t.ok(sdk.corestore._closing)
+  t.ok(sdk.corestore.closing)
 })
 
 test('not store primary key in rest', async t => {
