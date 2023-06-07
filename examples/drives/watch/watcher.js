@@ -3,23 +3,17 @@ import logUpdate from 'log-update';
 import SDK from '@synonymdev/slashtags-sdk';
 import RAM from 'random-access-memory'
 
-const driveOpts = {
-  key: b4a.from(
-    '69b04ea6e3b62245048a8efe8c17c6affb91e07ea1e28c911c2acdfd4d851f5c',
-    'hex',
-  )
-};
+const url = `slash:pgar7jzdsatrkbrkt59eaf6gi973dad6w8te3rehfmg94ucfd7qy/trades-feed/latest-trade#driveKey=gcrnqop9u8h9yy7qqrmrm5ae47xdwoqya431crp1snz3m8h3mwpo&encryptionKey=n9ukimccktfppduqs3eenh8np1yt8ykn4px56h1wnqe8mianbrhy`;
 
 console.log('Setting up slashtag...');
-const sdk = new SDK({
-  storage: RAM,
-  primaryKey: b4a.from('b'.repeat(64), 'hex'),
-});
-const watcher = sdk.drive(driveOpts.key)
-await watcher.update()
+const sdk = new SDK({ storage: RAM });
+const slashtag = sdk.slashtag();
 
-watcher.core.on('append', async () => {
-  const trade = await watcher.get('/feeds/bitfinex/latest-trade')
-  const tradeString = b4a.toString(trade);
-  logUpdate('Latest trade:', tradeString);
-});
+slashtag.coreData.subscribe(
+  url,
+  (trade) => {
+    if (!trade) return
+    const tradeString = b4a.toString(trade);
+    logUpdate('Latest trade:', tradeString);
+  }
+)

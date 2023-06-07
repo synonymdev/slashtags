@@ -1,5 +1,7 @@
 # slashdrive
 
+[DEPRECATED] use `@synonymdev/slashtags-core-data` instead.
+
 Drivestore is a Hyperdrive factory that makes it easier to manage large collections of named Hyperdrives.
 
 ## Features

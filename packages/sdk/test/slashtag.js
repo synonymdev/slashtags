@@ -4,6 +4,17 @@ const RAM = require('random-access-memory')
 
 const SDK = require('../index.js')
 
+test('pass sdk options', async (t) => {
+  const seeders = [Buffer.alloc(32).fill(255)]
+
+  const sdk = new SDK({ storage: RAM, seeders })
+  const alice = sdk.slashtag('alice')
+
+  t.alike(alice.coreData._seeders, seeders)
+
+  await sdk.close()
+})
+
 test('slashtag - deduplicate', async (t) => {
   const sdk = new SDK({ storage: RAM })
 

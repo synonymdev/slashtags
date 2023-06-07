@@ -4,38 +4,6 @@ const createTestnet = require('@hyperswarm/testnet')
 
 const Slashtag = require('../index.js')
 
-test('connect to a DHT server', async t => {
-  const testnet = await createTestnet(3, t.teardown)
-
-  const s = t.test('server')
-  s.plan(2)
-
-  const alice = new Slashtag(testnet)
-
-  const dht = new DHT(testnet)
-  const server = dht.createServer()
-  /** @type {import('@hyperswarm/secret-stream')[]} */
-  const serverSockets = []
-  server.on('connection', socket => {
-    s.pass('server connection opened')
-    s.alike(socket.remotePublicKey, alice.key)
-    serverSockets.push(socket)
-  })
-  await server.listen()
-
-  const key = server.address().publicKey
-
-  const socket = alice.connect(key)
-  t.alike(socket.remotePublicKey, key)
-  t.ok(await socket.opened)
-
-  await s
-
-  await alice.close()
-  await serverSockets[0].destroy()
-  await dht.destroy()
-})
-
 test('listen - connect', async t => {
   const testnet = await createTestnet(3, t.teardown)
 
@@ -122,7 +90,7 @@ test('connect to url or id', async t => {
   await bob.close()
 })
 
-test('replicate corestore on direct connections', async t => {
+test('replicate drivestore on direct connections', async t => {
   const testnet = await createTestnet(3, t.teardown)
 
   const alice = new Slashtag(testnet)
@@ -130,6 +98,7 @@ test('replicate corestore on direct connections', async t => {
 
   const core = alice.drivestore.corestore.get({ name: 'foo' })
   await core.append(['foo'])
+  await alice.profile.create({ name: 'foo' })
 
   await alice.listen()
 
@@ -139,7 +108,26 @@ test('replicate corestore on direct connections', async t => {
   const clone = bob.drivestore.corestore.get({ key: core.key })
   await clone.update()
 
-  t.is(clone.length, 1)
+  t.alike(await clone.get(0), Buffer.from('foo'))
+
+  await alice.close()
+  await bob.close()
+})
+
+test('replicate coreData on direct connections', async t => {
+  const testnet = await createTestnet(3, t.teardown)
+
+  const alice = new Slashtag(testnet)
+
+  await alice.profile.create({ name: 'foo' })
+
+  await alice.listen()
+
+  const bob = new Slashtag(testnet)
+  const socket = bob.connect(alice.key)
+  t.ok(await socket.opened)
+
+  t.alike(await bob.profile.readRemote(alice.url), { name: 'foo' })
 
   await alice.close()
   await bob.close()

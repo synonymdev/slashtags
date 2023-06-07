@@ -19,6 +19,7 @@ declare module 'hyperswarm' {
 
   class Server extends EventEmitter {
     listen: (keyPair: KeyPair) => Promise<void>;
+    close: () => Promise<void>;
     address: () => {
       publicKey: Uint8Array;
       host: string;
@@ -60,7 +61,7 @@ declare module 'hyperswarm' {
     status(topic: Uint8Array): Discovery | undefined;
     topics(): IterableIterator<Discovery>;
     listen(): Promise<undefined>;
-    destroy(): Promise<undefined>;
+    destroy(): Promise<void>;
     joinPeer(key: Uint8Array): undefined;
     leave(topic: Uint8Array): Promise<any>;
     join(
@@ -130,7 +131,7 @@ declare module 'corestore' {
       keyPair?: KeyPair,
       encryptionKey?: Uint8Array | undefined
     }>
-    _closing: null | Promise<any>;
+    closing: null | Promise<any>;
     _preready: (core: Hypercore) => Promise<void>
     storage: any;
 
