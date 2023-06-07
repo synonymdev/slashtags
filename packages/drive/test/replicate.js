@@ -11,14 +11,15 @@ test('replicate', async (t) => {
   const drivestore = new Drivestore(corestore, crypto.keyPair())
   const remote = new Corestore(RAM)
 
-  const s3 = remote.replicate(true)
-  s3.pipe(drivestore.replicate(false)).pipe(s3)
+  const s1 = remote.replicate(true)
+  s1.pipe(drivestore.replicate(false)).pipe(s1)
 
   {
     const drive = drivestore.get('private')
     await drive.put('/foo', b4a.from('bar'))
 
     const clone = remote.get({ key: drive.key })
+    clone.findingPeers()
     await clone.update()
     t.is(clone.length, 2)
   }
@@ -28,6 +29,7 @@ test('replicate', async (t) => {
     await drive.put('/foo', b4a.from('bar'))
 
     const clone = remote.get({ key: drive.key })
+    clone.findingPeers()
     await clone.update()
     t.is(clone.length, 2)
   }
@@ -46,6 +48,7 @@ test('replicate through passed corestore', async (t) => {
     await drive.put('/foo', b4a.from('bar'))
 
     const clone = remote.get({ key: drive.key })
+    clone.findingPeers()
     await clone.update()
     t.is(clone.length, 2)
   }
@@ -55,6 +58,7 @@ test('replicate through passed corestore', async (t) => {
     await drive.put('/foo', b4a.from('bar'))
 
     const clone = remote.get({ key: drive.key })
+    clone.findingPeers()
     await clone.update()
     t.is(clone.length, 2)
   }

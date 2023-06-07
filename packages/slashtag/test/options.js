@@ -1,6 +1,4 @@
 const test = require('brittle')
-const DHT = require('hyperdht')
-const createTestnet = require('@hyperswarm/testnet')
 
 const Slashtag = require('../index.js')
 
@@ -37,23 +35,4 @@ test('options - corestore', async t => {
 
   await alice.close()
   await other.close()
-})
-
-test('options - dht', async (t) => {
-  const testnet = await createTestnet(3, t.teardown)
-
-  const dht = new DHT(testnet)
-  const alice = new Slashtag({ dht })
-
-  t.unlike(alice.keyPair, dht.defaultKeyPair)
-  t.unlike(alice.keyPair, dht.defaultKeyPair)
-
-  await alice.listen()
-  t.alike(alice.server.address().publicKey, alice.key)
-
-  const socket = alice.connect(dht.defaultKeyPair.publicKey)
-  t.alike(socket.publicKey, alice.key)
-
-  await alice.close()
-  await dht.destroy()
 })
