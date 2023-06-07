@@ -44,7 +44,7 @@ declare module 'hyperswarm' {
     topics: Uint8Array[]
   }
 
-  export = class hyperswarm extends EventEmitter {
+  class Hyperswarm extends EventEmitter {
     constructor(opts?: any);
     server: Server;
     connections: Iterable;
@@ -71,6 +71,8 @@ declare module 'hyperswarm' {
 
     on(event: 'connection', listener: (connection: any, peerInfo: PeerInfo) => any)
   };
+
+  export = Hyperswarm
 }
 
 // file://./node_modules/b4a/index.js
