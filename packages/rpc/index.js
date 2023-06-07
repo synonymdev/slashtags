@@ -5,7 +5,7 @@ const HashMap = require('turbo-hash-map')
 const SlashURL = require('@synonymdev/slashtags-url')
 
 const RPCS_SYMBOL = Symbol.for('slashtags-rpcs')
-const CONNECT_TO_SEEDER_TIMEOUT = 10000
+const CONNECT_TIMEOUT = 10000
 
 class SlashtagsRPC extends EventEmitter {
   /**
@@ -81,6 +81,11 @@ class SlashtagsRPC extends EventEmitter {
     const existing = map.get(this.id)
     if (existing) return existing
 
+    // Set connections inside setup, so any connections that come from
+    // this._swarm.on('conneciton') in the constructor will be cached too.
+    this._allConnections.set(stream.remotePublicKey, stream)
+    stream.once('close', () => this._allConnections.delete(stream.remotePublicKey))
+
     const options = {
       id: b4a.from(this.id),
       valueEncoding: this.valueEncoding,
@@ -105,12 +110,15 @@ class SlashtagsRPC extends EventEmitter {
    */
   async _rpcFromSwarm (key) {
     /** @type {Uint8Array} */
-    const publicKey =
-      typeof key === 'string'
-        ? key.startsWith('slash')
-          ? SlashURL.parse(key).key
-          : SlashURL.decode(key)
-        : key
+    let publicKey
+    if (typeof key === 'string') {
+      if (key.startsWith('slash:')) {
+        publicKey = SlashURL.parse(key).key
+      }
+      publicKey = SlashURL.decode(key)
+    } else {
+      publicKey = key
+    }
 
     // duplicate logic from Hyperswarm's internal connections management, but swarm._allConnections is not a public API, so we can't rely on it.
     const existingConnection = this._allConnections.get(publicKey)
@@ -132,18 +140,12 @@ class SlashtagsRPC extends EventEmitter {
       /** @param {SecretStream} connection */
       const onConnection = (connection) => {
         if (b4a.equals(connection.remotePublicKey, publicKey)) {
-          this._allConnections.set(publicKey, connection)
-          connection.once('close', () => {
-            this._allConnections.delete(publicKey)
-          })
-
-          const rpc = this.setup(connection)
-          cleanupAndResolve(rpc)
+          cleanupAndResolve(this.setup(connection))
         }
       }
 
       // Timeout to avoid blocking this.ready()
-      setTimeout(cleanupAndResolve, CONNECT_TO_SEEDER_TIMEOUT)
+      setTimeout(cleanupAndResolve, CONNECT_TIMEOUT)
 
       this._swarm.on('connection', onConnection.bind(this))
     })

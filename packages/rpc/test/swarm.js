@@ -1,5 +1,4 @@
 const test = require('brittle')
-const Slashtag = require('@synonymdev/slashtag')
 const createTestnet = require('@hyperswarm/testnet')
 const c = require('compact-encoding')
 const b4a = require('b4a')
@@ -46,7 +45,7 @@ class Foo extends SlashtagsRPC {
   /** @param {string} req */
   _onEcho (req) {
     this.emit('echo', req)
-    return req
+    return req + '-echoed'
   }
 
   /**
@@ -96,10 +95,10 @@ test('hyperswarm - basic', async t => {
   })
 
   aliceFoo.once('echo', req => t.is(req, 'foobar'))
-  t.is(await bobFoo.echo(alice.keyPair.publicKey, 'foobar'), 'foobar')
+  t.is(await bobFoo.echo(alice.keyPair.publicKey, 'foobar'), 'foobar-echoed')
 
   aliceFoo.once('echo', req => t.is(req, 'foobar 2'))
-  t.is(await bobFoo.echo(alice.keyPair.publicKey, 'foobar 2'), 'foobar 2')
+  t.is(await bobFoo.echo(alice.keyPair.publicKey, 'foobar 2'), 'foobar 2-echoed')
 
   await ht
 
@@ -112,13 +111,13 @@ test('hyperswarm - multiple rpcs', async t => {
 
   t.plan(6)
 
-  const alice = new Slashtag(testnet)
-  const aliceFoo = new Foo(alice)
-  const aliceBar = new Bar(alice)
+  const alice = new Hyperswarm(testnet)
+  const aliceFoo = new Foo({ swarm: alice })
+  const aliceBar = new Bar({ swarm: alice })
 
-  const bob = new Slashtag(testnet)
-  const bobFoo = new Foo(bob)
-  const bobBar = new Bar(bob)
+  const bob = new Hyperswarm(testnet)
+  const bobFoo = new Foo({ swarm: bob })
+  const bobBar = new Bar({ swarm: bob })
 
   await alice.listen()
 
@@ -131,11 +130,11 @@ test('hyperswarm - multiple rpcs', async t => {
   )
 
   aliceFoo.once('echo', req => t.is(req, 'foo'))
-  t.is(await bobFoo.echo(alice.key, 'foo'), 'foo')
+  t.is(await bobFoo.echo(alice.keyPair.publicKey, 'foo'), 'foo-echoed')
 
   aliceBar.once('echo', req => t.is(req, 'bar'))
-  t.is(await bobBar.echo(alice.key, 'bar'), 'bar')
+  t.is(await bobBar.echo(alice.keyPair.publicKey, 'bar'), 'bar-echoed')
 
-  await alice.close()
-  await bob.close()
+  await alice.destroy()
+  await bob.destroy()
 })
