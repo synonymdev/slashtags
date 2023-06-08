@@ -1,15 +1,35 @@
 const ProtomuxRPC = require('protomux-rpc')
 const EventEmitter = require('events')
 const b4a = require('b4a')
+const HashMap = require('turbo-hash-map')
+const SlashURL = require('@synonymdev/slashtags-url')
 
 const RPCS_SYMBOL = Symbol.for('slashtags-rpcs')
+const CONNECT_TIMEOUT = 10000
 
 class SlashtagsRPC extends EventEmitter {
-  /** @param {Slashtag} [slashtag] */
-  constructor (slashtag) {
+  /**
+   * @param {object} opts
+   * @param {import('hyperswarm')} opts.swarm
+   **/
+  constructor (opts) {
     super()
-    this.slashtag = slashtag
-    this.slashtag?.on('connection', this.setup.bind(this))
+
+    /**
+     * @type {import('@synonymdev/slashtag')}
+     * @deprecated use new SlashtagsRPC({swarm}) instead
+     */
+    // @ts-ignore
+    this.slashtag = opts
+
+    this._allConnections = new HashMap()
+    this._swarm = opts.swarm
+
+    if (this._swarm) {
+      this._swarm.on('connection', this.setup.bind(this))
+    } else {
+      this.slashtag.on('connection', this.setup.bind(this))
+    }
   }
 
   /**
@@ -61,6 +81,11 @@ class SlashtagsRPC extends EventEmitter {
     const existing = map.get(this.id)
     if (existing) return existing
 
+    // Set connections inside setup, so any connections that come from
+    // this._swarm.on('conneciton') in the constructor will be cached too.
+    this._allConnections.set(stream.remotePublicKey, stream)
+    stream.once('close', () => this._allConnections.delete(stream.remotePublicKey))
+
     const options = {
       id: b4a.from(this.id),
       valueEncoding: this.valueEncoding,
@@ -81,15 +106,71 @@ class SlashtagsRPC extends EventEmitter {
   }
 
   /**
+   * @param {Uint8Array | string} key
+   */
+  async _rpcFromSwarm (key) {
+    /** @type {Uint8Array} */
+    let publicKey
+    if (typeof key === 'string') {
+      if (key.startsWith('slash:')) {
+        publicKey = SlashURL.parse(key).key
+      }
+      publicKey = SlashURL.decode(key)
+    } else {
+      publicKey = key
+    }
+
+    // duplicate logic from Hyperswarm's internal connections management, but swarm._allConnections is not a public API, so we can't rely on it.
+    const existingConnection = this._allConnections.get(publicKey)
+    if (existingConnection) {
+      // this.setup() is idempotent
+      return this.setup(existingConnection)
+    }
+
+    this._swarm.joinPeer(publicKey)
+
+    // Await for connecting to every seeder for unit testing convenience
+    return new Promise((resolve) => {
+      /** @param {import('protomux-rpc')} rpc */
+      const cleanupAndResolve = (rpc) => {
+        this._swarm.removeListener('connection', onConnection)
+        resolve(rpc)
+      }
+
+      /** @param {SecretStream} connection */
+      const onConnection = (connection) => {
+        if (b4a.equals(connection.remotePublicKey, publicKey)) {
+          cleanupAndResolve(this.setup(connection))
+        }
+      }
+
+      // Timeout to avoid blocking this.ready()
+      setTimeout(cleanupAndResolve, CONNECT_TIMEOUT)
+
+      this._swarm.on('connection', onConnection.bind(this))
+    })
+  }
+
+  /**
+   * For backward compatibility.
+   *
+   * @param {Uint8Array | string} key
+   *
+   * @deprecated use new SlashtagsRPC({swarm}) instead
+   */
+  async _rpcFromSlashtag (key) {
+    const socket = this.slashtag.connect(key)
+    await socket.opened
+    return this.setup(socket)
+  }
+
+  /**
    * Connect to a peer if not already connected, and return Protomux RPC instance.
    * @param {Parameters<Slashtag['connect']>[0]} key
    * @returns {Promise<ProtomuxRPC | undefined>}
    */
   async rpc (key) {
-    if (!this.slashtag) throw new Error('Can not call rpc() if not initialized with a Slashtag instance')
-    const socket = this.slashtag.connect(key)
-    await socket.opened
-    return this.setup(socket)
+    return this._swarm ? this._rpcFromSwarm(key) : this._rpcFromSlashtag(key)
   }
 }
 

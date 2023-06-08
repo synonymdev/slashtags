@@ -69,39 +69,11 @@ const bobFoo = new Foo(bob);
 const response = await bobFoo.echo(alice.key, 'hello world');
 ```
 
-#### Use without Slashtag
-
-If the RPC doesn't reuqire Slashtag for anything other than establish a connection, you can pass your own stream:
-
-```js
-import DHT from '@hyperswarm/dht'
-import SlashtagsRPC from '@synonymdev/slashtags-rpc';
-import c from 'compact-encoding';
-
-const alice = new DHT();
-const server = alice.createServer()
-await server.listen();
-
-class Foo extends SlashtagsRPC {
-  //...
-}
-
-const aliceFoo = new Foo();
-server.on('connection', (stream) => aliceFoo.setup(stream))
-aliceFoo.on('echo', (req) => {
-  console.log(req) // req = 'hello world'
-})
-
-const bob = new DHT();
-const bobFoo = new Foo();
-const stream = bob.connect(server.address().publicKey)
-await stream.opened
-
-const rpc = bobFoo.setup(stream)
-const response = await rpc.request('echo', 'hello world')
-```
-
 ## API
+
+#### const rpc = new SlashtagsRPC({swarm})
+
+Create a new instance of SlashtagsRPC using a [Hyperswarm](https://github.com/holepunchto/hyperswarm) instance.
 
 #### `id`
 
@@ -147,8 +119,4 @@ An array of methods objects that should be as following:
 
 Returns a [ProtomuxRPC](https://www.npmjs.com/package/protomux-rpc) instance after connecting to a Slashtag by its key, id or url. If connection is already opened, the same RPC instance is returned.
 
-Internally, it uses `Slashtags.connect(key)` then sets up the RPC instance using `setup(stream)`
-
-#### `setup(stream)`
-
-Create a new [ProtomuxRPC](https://www.npmjs.com/package/protomux-rpc) instance on any stream if doesn't already exist, otherwise it will return the existing RPC.
+this is an idempotent operation, meaning if there is already an existing opened connection, it won't create new ones.
