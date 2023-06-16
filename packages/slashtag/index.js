@@ -70,6 +70,9 @@ class Slashtag extends EventEmitter {
 
   /**
    * Connect to a remote Slashtag by its key, z-base-32 id, or `slash:` url.
+   *
+   * @deprecated use `slashtags.swarm` with `slashtags-rpc` instead.
+   *
    * @param {Uint8Array | string} key
    * @returns {SecretStream}
    */
