@@ -392,7 +392,7 @@ declare module 'hypercore' {
     sign?: (message: Uint8Array) => Uint8Array;
     verify: (message: Uint8Array, signature: Uint8Array) => boolean;
   }
-  export = class Hypercore extends EventEmitter<'close'> {
+  class Hypercore extends EventEmitter<'close'> {
     constructor(storage: any, key?: Opts | Uint8Array, opts?: Opts);
 
     length: number;
@@ -443,6 +443,8 @@ Populated after ready has been emitted. Will be null before the event.
 
     sessions: Hypercore[];
   };
+
+  export = Hypercore
 }
 
 // file://./node_modules/hyperblobs/index.js

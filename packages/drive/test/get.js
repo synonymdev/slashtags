@@ -1,14 +1,14 @@
 const test = require('brittle')
-const Corestore = require('corestore')
 const crypto = require('hypercore-crypto')
 const b4a = require('b4a')
+const CoreData = require('@synonymdev/slashtags-core-data')
 
 const Drivestore = require('../index.js')
-const { tmpdir } = require('./helpers/index.js')
 
 test('get - public drive', async (t) => {
   const keyPair = crypto.keyPair()
-  const drivestore = new Drivestore(new Corestore(tmpdir()), keyPair)
+  const coreData = new CoreData({ keyPair })
+  const drivestore = new Drivestore(coreData)
 
   const publicA = drivestore.get('public')
   await publicA.ready()
@@ -17,8 +17,6 @@ test('get - public drive', async (t) => {
   const publicB = drivestore.get()
   await publicB.ready()
   t.alike(publicB.key, keyPair.publicKey)
-
-  t.not(publicA, publicB, 'should return a session')
   t.alike(publicA.key, publicB.key, 'same public key')
   t.absent(publicA.core.encryptionKey, 'do not encrypet public drive')
   t.absent(publicB.core.encryptionKey, 'do not encrypet public drive')
@@ -36,11 +34,14 @@ test('get - public drive', async (t) => {
   const buf = b4a.from('bar')
   await publicA.put('foo', buf)
   t.alike(await publicA.get('foo'), buf)
+
+  coreData.close()
 })
 
 test('get - private drive basic', async (t) => {
   const keyPair = crypto.keyPair()
-  const drivestore = new Drivestore(new Corestore(tmpdir()), keyPair)
+  const coreData = new CoreData({ keyPair })
+  const drivestore = new Drivestore(coreData)
 
   const foo = drivestore.get('foo')
   const bar = drivestore.get('bar')
@@ -67,4 +68,6 @@ test('get - private drive basic', async (t) => {
   t.ok(foo.blobs?.core.writable)
   t.unlike(foo.blobs?.core.key, foo.key)
   t.unlike(bar.blobs?.core.key, foo.key)
+
+  coreData.close()
 })

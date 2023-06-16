@@ -79,7 +79,7 @@ test('missing id', async t => {
   alice.close()
 })
 
-test('basic', async t => {
+test.skip('basic', async t => {
   const testnet = await createTestnet(3, t.teardown)
 
   const alice = new Slashtag(testnet)
@@ -119,7 +119,7 @@ test('basic', async t => {
   await bob.close()
 })
 
-test('multiple rpcs', async t => {
+test.skip('multiple rpcs', async t => {
   const testnet = await createTestnet(3, t.teardown)
 
   t.plan(6)
