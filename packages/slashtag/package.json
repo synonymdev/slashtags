@@ -1,6 +1,6 @@
 {
   "name": "@synonymdev/slashtag",
-  "version": "1.0.0-alpha.27",
+  "version": "1.0.0-alpha.28",
   "description": "Identity, discovery, and p2p communication for Slashtags protocol.",
   "main": "index.js",
   "types": "types/index.d.ts",
