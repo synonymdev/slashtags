@@ -8,7 +8,7 @@ test('options - empty options', async t => {
   await alice.close()
 })
 
-test.skip('options - keyPair', async t => {
+test('options - keyPair', async t => {
   const alice = new Slashtag()
 
   const other = new Slashtag({ keyPair: alice.keyPair })
@@ -23,7 +23,7 @@ test.skip('options - keyPair', async t => {
   await other.close()
 })
 
-test.skip('options - corestore', async t => {
+test('options - corestore', async t => {
   const alice = new Slashtag()
   const other = new Slashtag({ corestore: alice.drivestore.corestore.namespace('foo') })
 

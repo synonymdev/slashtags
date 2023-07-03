@@ -140,38 +140,24 @@ class SDK extends EventEmitter {
    */
   drive (key, opts = {}) {
     if (this.closed) throw new Error('SDK is closed')
+    // Temporary hack to use CoreData until this API is removed
 
-    // Temporary solution to handle encrypted hyperdrives!
-    // TODO: remove this once Hyperdrive next accept encryption keys
-    const corestore = this.corestore.session()
-
-    // Disable _preready to avoid 'Stored core key does not match the provided name' error
-    // TODO: temporary hack to fix when slashtag public drive is opened as readonly first!
-    if (b4a.equals(this.slashtag().key, key)) {
-      return this.slashtag().drivestore.get()
+    if (b4a.equals(key, this.slashtag().key)) {
+      return this.slashtag().coreData._publicDrive
     }
 
-    if (opts.encryptionKey) {
-      const preload = this.corestore._preload.bind(this.corestore)
-      corestore._preload = _preload.bind(corestore)
-      async function _preload (/** @type {any} */ _opts) {
-        const { from } = await preload(_opts)
-        return { from, encryptionKey: opts.encryptionKey }
-      }
-    }
+    const coreData = this.slashtag().coreData
 
-    const drive = new Hyperdrive(corestore, key)
+    const id = SlashURL.encode(key)
 
-    // Announce the drive as a client
-    const discovery = this.join(crypto.discoveryKey(key), { server: false, client: true })
-    if (discovery) {
-      drive.once('close', () => discovery.destroy())
-      const done = drive.findingPeers()
-      this.swarm.flush().then(done, done)
-    }
+    const url =
+      `slash:${id}/#driveKey=${id}` + (opts.encryptionKey ? `&encryptionKey=${SlashURL.encode(opts.encryptionKey)}` : '')
 
-    // TODO read encrypted drives!
-    return drive
+    const parsed = SlashURL.parse(url)
+
+    const name = opts.encryptionKey ? id : 'public'
+
+    return coreData._getRemoteDrive(parsed, name)
   }
 
   /**

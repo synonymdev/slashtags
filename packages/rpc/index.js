@@ -25,15 +25,12 @@ class SlashtagsRPC extends EventEmitter {
     this._allConnections = new HashMap()
     this._swarm = opts?.swarm
 
-    if (this._swarm) {
-      this._swarm.on('connection', (connection) => {
-        // Setup a new RPC instance on every connection
-        // waiting for next tick fixes an obscure bug when using @hyperswarm/dht-relay
-        setTimeout(() => this.setup(connection), 0)
-      })
-    } else {
-      this.slashtag.on('connection', this.setup.bind(this))
-    }
+    this._swarm.on('connection', this.setup.bind(this))
+    this._swarm.on('connection', (connection) => {
+      // Setup a new RPC instance on every connection
+      // waiting for next tick fixes an obscure bug when using @hyperswarm/dht-relay
+      setTimeout(() => this.setup(connection), 0)
+    })
   }
 
   /**
@@ -110,17 +107,22 @@ class SlashtagsRPC extends EventEmitter {
   }
 
   /**
-   * @param {Uint8Array | string} key
+   * Connect to a peer if not already connected, and return Protomux RPC instance.
+   * @param {Parameters<Slashtag['connect']>[0]} key
+   * @returns {Promise<ProtomuxRPC | undefined>}
    */
-  async _rpcFromSwarm (key) {
+  async rpc (key) {
     /** @type {Uint8Array} */
     let publicKey
+
     if (typeof key === 'string') {
-      if (key.startsWith('slash:')) {
+      if (key.startsWith('slash')) {
         publicKey = SlashURL.parse(key).key
+      } else {
+        publicKey = SlashURL.decode(key)
       }
-      publicKey = SlashURL.decode(key)
     } else {
+      // @ts-ignore
       publicKey = key
     }
 
@@ -153,28 +155,6 @@ class SlashtagsRPC extends EventEmitter {
 
       this._swarm.on('connection', onConnection.bind(this))
     })
-  }
-
-  /**
-   * For backward compatibility.
-   *
-   * @param {Uint8Array | string} key
-   *
-   * @deprecated use new SlashtagsRPC({swarm}) instead
-   */
-  async _rpcFromSlashtag (key) {
-    const socket = this.slashtag.connect(key)
-    await socket.opened
-    return this.setup(socket)
-  }
-
-  /**
-   * Connect to a peer if not already connected, and return Protomux RPC instance.
-   * @param {Parameters<Slashtag['connect']>[0]} key
-   * @returns {Promise<ProtomuxRPC | undefined>}
-   */
-  async rpc (key) {
-    return this._swarm ? this._rpcFromSwarm(key) : this._rpcFromSlashtag(key)
   }
 }
 
