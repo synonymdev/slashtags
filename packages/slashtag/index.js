@@ -1,5 +1,3 @@
-const Corestore = require('corestore')
-const RAM = require('random-access-memory')
 const EventEmitter = require('events')
 const DHT = require('hyperdht')
 const HashMap = require('turbo-hash-map')
@@ -33,9 +31,6 @@ class Slashtag extends EventEmitter {
     /** @type {HashMap<SecretStream>} */
     this.sockets = new HashMap()
 
-    // @deprecated use `slashtag.coreData` instead.
-    this.drivestore = new Drivestore(opts?.corestore || new Corestore(RAM), this.keyPair)
-
     this.coreData = new SlashtagsCoreData({
       keyPair: this.keyPair,
       corestore: opts.corestore,
@@ -43,6 +38,9 @@ class Slashtag extends EventEmitter {
       seeders: opts.seeders
     })
     this.profile = new SlashtagsProfile(this.coreData)
+
+    // @deprecated use `slashtag.coreData` instead.
+    this.drivestore = new Drivestore(this.coreData)
 
     /** @type {Emitter['on']} */ this.on = super.on
     /** @type {Emitter['on']} */ this.once = super.once
@@ -72,6 +70,9 @@ class Slashtag extends EventEmitter {
 
   /**
    * Connect to a remote Slashtag by its key, z-base-32 id, or `slash:` url.
+   *
+   * @deprecated use `slashtags.swarm` with `slashtags-rpc` instead.
+   *
    * @param {Uint8Array | string} key
    * @returns {SecretStream}
    */

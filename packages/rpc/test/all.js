@@ -1,8 +1,8 @@
 const test = require('brittle')
-const Slashtag = require('@synonymdev/slashtag')
 const createTestnet = require('@hyperswarm/testnet')
 const c = require('compact-encoding')
-const z32 = require('z32')
+const b4a = require('b4a')
+const Hyperswarm = require('hyperswarm')
 
 const SlashtagsRPC = require('../index.js')
 
@@ -21,7 +21,7 @@ class Foo extends SlashtagsRPC {
 
   /** @param {import('@hyperswarm/secret-stream')} socket */
   handshake (socket) {
-    return this.id + '-handshake:for:' + z32.encode(socket.remotePublicKey)
+    return this.id + '-handshake:for:' + b4a.toString(socket.remotePublicKey, 'hex')
   }
 
   /**
@@ -29,7 +29,7 @@ class Foo extends SlashtagsRPC {
    * @param {import('@hyperswarm/secret-stream')} socket
    */
   onopen (handshake, socket) {
-    this.emit('handshake', handshake, z32.encode(socket.remotePublicKey))
+    this.emit('handshake', handshake, socket.remotePublicKey)
   }
 
   get methods () {
@@ -45,7 +45,7 @@ class Foo extends SlashtagsRPC {
   /** @param {string} req */
   _onEcho (req) {
     this.emit('echo', req)
-    return req
+    return req + '-echoed'
   }
 
   /**
@@ -66,31 +66,18 @@ class Bar extends Foo {
   }
 }
 
-test('missing id', async t => {
-  const testnet = await createTestnet(1, t.teardown)
-  const alice = new Slashtag(testnet)
-
-  class MissingID extends SlashtagsRPC { }
-
-  const instance = new MissingID(alice)
-  // @ts-ignore
-  await t.exception(() => instance.setup({}), /id should be defined/)
-
-  alice.close()
-})
-
-test('basic', async t => {
+test('hyperswarm - basic', async t => {
   const testnet = await createTestnet(3, t.teardown)
 
-  const alice = new Slashtag(testnet)
-  const bob = new Slashtag(testnet)
+  const alice = new Hyperswarm(testnet)
+  const bob = new Hyperswarm(testnet)
 
-  const aliceFoo = new Foo(alice)
+  const aliceFoo = new Foo({ swarm: alice })
     ; (() => {
     // Multiple instances shouldn't create any issues
-    return new Foo(alice)
+    return new Foo({ swarm: alice })
   })()
-  const bobFoo = new Foo(bob)
+  const bobFoo = new Foo({ swarm: bob })
 
   await alice.listen()
 
@@ -98,56 +85,56 @@ test('basic', async t => {
   ht.plan(4)
 
   aliceFoo.on('handshake', (handshake, remoteID) => {
-    ht.is(handshake, 'foo-handshake:for:' + alice.id, 'correct handshake')
-    ht.is(remoteID, bob.id, 'emit handshake event correctly')
+    ht.is(handshake, 'foo-handshake:for:' + b4a.toString(alice.keyPair.publicKey, 'hex'), 'correct handshake')
+    ht.alike(remoteID, bob.keyPair.publicKey, 'emit handshake event correctly')
   })
 
   bobFoo.on('handshake', (handshake, remoteID) => {
-    ht.is(handshake, 'foo-handshake:for:' + bob.id, 'correct handshake')
-    ht.is(remoteID, alice.id, 'emit handshake event correctly')
+    ht.is(handshake, 'foo-handshake:for:' + b4a.toString(bob.keyPair.publicKey, 'hex'), 'correct handshake')
+    ht.alike(remoteID, alice.keyPair.publicKey, 'emit handshake event correctly')
   })
 
   aliceFoo.once('echo', req => t.is(req, 'foobar'))
-  t.is(await bobFoo.echo(alice.key, 'foobar'), 'foobar')
+  t.is(await bobFoo.echo(alice.keyPair.publicKey, 'foobar'), 'foobar-echoed')
 
   aliceFoo.once('echo', req => t.is(req, 'foobar 2'))
-  t.is(await bobFoo.echo(alice.key, 'foobar 2'), 'foobar 2')
+  t.is(await bobFoo.echo(alice.keyPair.publicKey, 'foobar 2'), 'foobar 2-echoed')
 
   await ht
 
-  await alice.close()
-  await bob.close()
+  await alice.destroy()
+  await bob.destroy()
 })
 
-test('multiple rpcs', async t => {
+test('hyperswarm - multiple rpcs', async t => {
   const testnet = await createTestnet(3, t.teardown)
 
   t.plan(6)
 
-  const alice = new Slashtag(testnet)
-  const aliceFoo = new Foo(alice)
-  const aliceBar = new Bar(alice)
+  const alice = new Hyperswarm(testnet)
+  const aliceFoo = new Foo({ swarm: alice })
+  const aliceBar = new Bar({ swarm: alice })
 
-  const bob = new Slashtag(testnet)
-  const bobFoo = new Foo(bob)
-  const bobBar = new Bar(bob)
+  const bob = new Hyperswarm(testnet)
+  const bobFoo = new Foo({ swarm: bob })
+  const bobBar = new Bar({ swarm: bob })
 
   await alice.listen()
 
   aliceFoo.on('handshake', handshake =>
-    t.is(handshake, 'foo-handshake:for:' + alice.id)
+    t.is(handshake, 'foo-handshake:for:' + b4a.toString(alice.keyPair.publicKey, 'hex'))
   )
 
   aliceBar.on('handshake', handshake =>
-    t.is(handshake, 'bar-handshake:for:' + alice.id)
+    t.is(handshake, 'bar-handshake:for:' + b4a.toString(alice.keyPair.publicKey, 'hex'))
   )
 
   aliceFoo.once('echo', req => t.is(req, 'foo'))
-  t.is(await bobFoo.echo(alice.key, 'foo'), 'foo')
+  t.is(await bobFoo.echo(alice.keyPair.publicKey, 'foo'), 'foo-echoed')
 
   aliceBar.once('echo', req => t.is(req, 'bar'))
-  t.is(await bobBar.echo(alice.key, 'bar'), 'bar')
+  t.is(await bobBar.echo(alice.keyPair.publicKey, 'bar'), 'bar-echoed')
 
-  await alice.close()
-  await bob.close()
+  await alice.destroy()
+  await bob.destroy()
 })

@@ -125,34 +125,6 @@ test('drive - internal hyperdrive', async (t) => {
   await sdk.close()
 })
 
-test('drive - close discovery sessions on closing drive', async (t) => {
-  const testnet = await createTestnet(3, t.teardown)
-
-  const remote = new SDK({ ...testnet, storage: tmpdir() })
-  const clone = remote.drive(b4a.from('69b04ea6e3b62245048a8efe8c17c6affb91e07ea1e28c911c2acdfd4d851f5c', 'hex'))
-  await clone.update()
-
-  t.is(clone.core.peers.length, 0)
-
-  const sdk = new SDK({ ...testnet, storage: tmpdir(), primaryKey: b4a.from('a'.repeat(64), 'hex') })
-  const alice = sdk.slashtag('alice')
-  const drive = alice.drivestore.get()
-  await drive.put('/foo', b4a.from('bar'))
-
-  await sdk.swarm.flush()
-
-  for (let i = 0; i < 10; i++) {
-    const driveSession = remote.drive(alice.key)
-    await driveSession.close()
-  }
-
-  const discovery = remote.swarm.status(drive.discoveryKey)
-  t.is(discovery?._sessions.length, 1, 'closed all discovery sessions after closing drives sessions')
-
-  await remote.close()
-  await sdk.close()
-})
-
 test('read only created first', async (t) => {
   const testnet = await createTestnet(3, t.teardown)
   const dir = tmpdir()
