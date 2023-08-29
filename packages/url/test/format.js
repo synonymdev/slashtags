@@ -49,6 +49,16 @@ test('protocol - path - query - fragment', t => {
 
   t.is(
     SlashURL.format(key, {
+      protocol: 'slashfoo', // tolerate missing :
+      path: 'dir/file.json', // tolerate missing leading slash
+      query: { foo: 'bar', baz: 'zar' },
+      fragment: { foo: 'zar' }
+    }),
+    'slashfoo:3uoa7iytyfejicmtwnw5k1ixc6ztijbbmf7b881993xro39uswhy/dir/file.json?foo=bar&baz=zar#foo=zar'
+  )
+
+  t.is(
+    SlashURL.format(key, {
       query: '?foo=bar',
       fragment: '#foo=zar'
     }),

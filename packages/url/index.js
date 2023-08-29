@@ -109,7 +109,7 @@ function stringify (object, prefix) {
   if (typeof object === 'string') {
     return object.startsWith(prefix) ? object : prefix + object
   }
-  return prefix + Object.entries(object).map(entry => entry[0] + '=' + entry[1])
+  return prefix + Object.entries(object).map(entry => entry[0] + '=' + entry[1]).join('&')
 }
 
 module.exports = {
