@@ -57,7 +57,7 @@ Browsers don't allow for raw sockets, so you will need to run a [DHT Relay](http
 Easiest way to run a local relay is through the [CLI](../cli/) module:
 
 ```bash
-npm i -g @synonymdev/slasthags-cli
+npm i -g @synonymdev/slashtags-cli
 
 slash daemon start
 ```
