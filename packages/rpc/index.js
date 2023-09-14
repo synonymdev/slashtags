@@ -23,9 +23,14 @@ class SlashtagsRPC extends EventEmitter {
     this.slashtag = opts
 
     this._allConnections = new HashMap()
-    this._swarm = opts.swarm
+    this._swarm = opts?.swarm
 
     this._swarm.on('connection', this.setup.bind(this))
+    this._swarm.on('connection', (connection) => {
+      // Setup a new RPC instance on every connection
+      // waiting for next tick fixes an obscure bug when using @hyperswarm/dht-relay
+      setTimeout(() => this.setup(connection), 0)
+    })
   }
 
   /**
